@@ -5,10 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cloud & SRE Exam Arena · Simulador Multi-Provider</title>
 <meta name="description" content="Plataforma unificada de simulación de exámenes e incidentes SRE: SRE Incident Commander, Google Cloud (GenAI Leader), Microsoft Azure (AZ-104) y AWS (SAA-C03) con seguimiento de progreso mediante @fabianimv/study-tracker.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap">
 <!-- @fabianimv/study-tracker: versión fija y verificada con SRI. -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fabianimv/study-tracker@0.1.0/study-tracker.css" integrity="sha384-pn41h0OpD3PaahUNFlxbY6bU7ZKNNnrKA8sCYM36bCJnLpsynvzlQRfdw+G9BCew" crossorigin="anonymous">
 <link rel="stylesheet" href="assets/css/styles.css">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚨</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
 </head>
 <body>
 <header class="top">
@@ -16,18 +19,19 @@
     <a href="#examenes" class="brand" id="brand-link">⚡ Exam Arena</a>
     <select id="exam-picker" aria-label="Seleccionar examen o proveedor"></select>
   </div>
-  <nav id="tabs">
+  <nav id="tabs" aria-label="Navegación principal">
     <button data-tab="examenes">Exámenes</button>
     <button data-tab="temas">Temas</button>
     <button data-tab="prueba">Prueba</button>
     <button data-tab="progreso">Progreso</button>
     <button data-tab="glosario">Glosario</button>
   </nav>
+  <button id="theme-toggle" class="icon-btn" type="button" title="Cambiar tema claro/oscuro" aria-label="Cambiar tema claro/oscuro">🌓</button>
 </header>
 
 <main id="view"></main>
 
-<footer>Simulador de estudio y entrenamiento de incidentes SRE · Progreso impulsado por <a href="https://github.com/fabianimv/study-tracker" target="_blank" rel="noopener">@fabianimv/study-tracker</a>.</footer>
+<footer>Simulador de estudio y entrenamiento de incidentes SRE · Código en <a href="https://github.com/fabianimv/exam-arena" target="_blank" rel="noopener">GitHub</a> · Progreso impulsado por <a href="https://github.com/fabianimv/study-tracker" target="_blank" rel="noopener">@fabianimv/study-tracker</a>.</footer>
 
 <script src="data/sre/exam.js"></script>
 <script src="data/gcp/exam.js"></script>

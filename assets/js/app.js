@@ -1,6 +1,6 @@
 /* =========================================================================
    assets/js/app.js — Motor Multi-Provider (SRE, GCP, Azure, AWS)
-   Basado en el flujo de corrección inmediata y por opción de gcp-ai-leader-quiz
+   Look & Feel moderno, atajos de teclado, filtro de glosario y métricas globales
    e integrado con @fabianimv/study-tracker.
    ========================================================================= */
 (function (w, d) {
@@ -13,6 +13,61 @@
 
   var currentExamId = 'sre-incidents';
   var currentTab = 'examenes';
+
+  /* Inyección de ajuste tipográfico para tarjetas KPI */
+  (function () {
+    if (d.getElementById('arena-kpi-fix')) return;
+    var st = d.createElement('style');
+    st.id = 'arena-kpi-fix';
+    st.textContent = '.kpi-card b { font-size: 1.5rem; font-weight: 800; color: var(--txt); letter-spacing: -0.02em; line-height: 1.2; } .kpi-card span { font-size: 0.74rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }';
+    var headEl = d.head || d.documentElement;
+    if (headEl && headEl.appendChild) headEl.appendChild(st);
+  })();
+
+  /* ---------- Tema Claro / Oscuro ---------- */
+  function getSavedTheme() {
+    var theme = null;
+    try {
+      theme = localStorage.getItem('exam-arena-theme');
+    } catch (e) {}
+    if (theme === 'dark' || theme === 'light') return theme;
+    return (w.matchMedia && w.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+  }
+
+  function applyTheme(theme) {
+    d.documentElement.setAttribute('data-theme', theme);
+    var toggleBtn = d.getElementById('theme-toggle');
+    if (toggleBtn) {
+      toggleBtn.textContent = theme === 'dark' ? '☀️' : '🌙';
+      toggleBtn.setAttribute('aria-label', theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
+      toggleBtn.title = theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro';
+    }
+  }
+
+  function toggleTheme() {
+    var current = d.documentElement.getAttribute('data-theme') || getSavedTheme();
+    var next = current === 'dark' ? 'light' : 'dark';
+    try {
+      localStorage.setItem('exam-arena-theme', next);
+    } catch (e) {}
+    applyTheme(next);
+  }
+
+  function initTheme() {
+    var theme = getSavedTheme();
+    applyTheme(theme);
+    var toggleBtn = d.getElementById('theme-toggle');
+    if (toggleBtn) {
+      toggleBtn.onclick = toggleTheme;
+    }
+  }
+
+  d.addEventListener('click', function (e) {
+    var btn = e.target && e.target.closest && e.target.closest('#theme-toggle');
+    if (btn) {
+      toggleTheme();
+    }
+  });
 
   // Instancias de StudyTracker cacheadas por appId
   var trackers = {};
@@ -55,6 +110,7 @@
   }
 
   function initPicker() {
+    if (!picker) return;
     picker.innerHTML = EXAM_ORDER.filter(function (id) { return w.EXAMS && w.EXAMS[id]; }).map(function (id) {
       var ex = w.EXAMS[id];
       return '<option value="' + esc(id) + '">' + ex.icon + ' ' + esc(ex.badge) + ' (' + ex.questions.length + ')</option>';
@@ -91,23 +147,48 @@
   function showHub() {
     var totalQ = 0;
     var totalSeen = 0;
+    var totalMastered = 0;
+    var totalSessions = 0;
+
+    EXAM_ORDER.forEach(function (id) {
+      if (!w.EXAMS || !w.EXAMS[id]) return;
+      var ex = w.EXAMS[id];
+      var tr = getTracker(ex.appId);
+      var m = tr.mastery ? tr.mastery() : { seen: 0, mastered: 0 };
+      totalQ += ex.questions.length;
+      totalSeen += (m.seen || 0);
+      var mastered = (m.mastered != null) ? m.mastered : (m.mastery != null ? Math.round((m.seen || 0) * m.mastery / 100) : 0);
+      totalMastered += (mastered || 0);
+      if (tr.getSessions) {
+        totalSessions += tr.getSessions().length;
+      }
+    });
+
+    var globalMastery = totalSeen ? Math.round(totalMastered / totalSeen * 100) + ' %' : '—';
+
     var cards = EXAM_ORDER.filter(function (id) { return w.EXAMS && w.EXAMS[id]; }).map(function (id) {
       var ex = w.EXAMS[id];
       var tr = getTracker(ex.appId);
-      var m = tr.mastery ? tr.mastery() : { seen: 0, mastery: null };
+      var m = tr.mastery ? tr.mastery() : { seen: 0, mastered: 0, mastery: null };
       var sessions = tr.getSessions ? tr.getSessions().length : 0;
-      totalQ += ex.questions.length;
-      totalSeen += (m.seen || 0);
       var masteryTxt = m.mastery != null ? m.mastery + ' %' : '—';
       var isCurrent = id === currentExamId;
+      var covPct = Math.round(((m.seen || 0) / ex.questions.length) * 100);
 
-      return '<div class="hub-card' + (isCurrent ? ' current' : '') + '">' +
+      var domainChips = domainKeys(ex).map(function (k) {
+        var name = (ex.shortDomains && ex.shortDomains[k]) || ex.domains[k] || ('Dominio ' + k);
+        return '<span class="domain-chip">' + esc(name) + '</span>';
+      }).join('');
+
+      return '<div class="hub-card' + (isCurrent ? ' current' : '') + '" data-provider="' + esc(id) + '">' +
         '<div>' +
           '<span class="badge">' + ex.icon + ' ' + esc(ex.provider) + '</span>' +
           '<h3>' + esc(ex.title) + '</h3>' +
           '<p class="muted small">' + esc(ex.subtitle) + '</p>' +
+          '<div class="hub-domains">' + domainChips + '</div>' +
         '</div>' +
         '<div>' +
+          '<div class="hub-cov" style="background:var(--surface-2);border-radius:var(--radius-pill);overflow:hidden"><div class="hub-cov-bar" style="width:' + covPct + '%;background:var(--accent-grad,var(--blue))"><div class="hub-cov-fill" style="width:100%"></div></div></div>' +
           '<div class="hub-stats">' +
             '<div class="hub-stat"><b>' + ex.questions.length + '</b><span>Preguntas (' + domainKeys(ex).length + ' dom.)</span></div>' +
             '<div class="hub-stat"><b>' + (m.seen || 0) + ' / ' + ex.questions.length + '</b><span>Vistas</span></div>' +
@@ -123,9 +204,15 @@
     }).join('');
 
     view.innerHTML =
-      '<div class="card">' +
-        '<h1>Simulador General de Exámenes e Incidentes SRE</h1>' +
-        '<p class="muted" style="margin:.25rem 0 0">Elige un proveedor o certificación. Cada pregunta se corrige al instante explicando <b>por qué tu opción elegida es incorrecta</b> y <b>por qué la respuesta correcta es la adecuada</b>. Todo tu avance se guarda por separado en este navegador con <code>@fabianimv/study-tracker</code> (' + totalSeen + ' de ' + totalQ + ' preguntas practicadas en total).</p>' +
+      '<div class="card hub-hero">' +
+        '<h1>Simulador General de Exámenes Cloud & SRE</h1>' +
+        '<p class="muted">Elige un proveedor o certificación. Cada pregunta se corrige al instante explicando <b>por qué tu opción elegida es incorrecta</b> y <b>por qué la respuesta correcta es la adecuada</b>. Todo tu avance se guarda localmente en este navegador con <code>@fabianimv/study-tracker</code>.</p>' +
+        '<div class="hub-kpis">' +
+          '<div class="kpi-card"><b>434</b><span>Preguntas en 4 simuladores</span></div>' +
+          '<div class="kpi-card"><b>' + totalSeen + ' / ' + totalQ + '</b><span>Preguntas vistas</span></div>' +
+          '<div class="kpi-card"><b>' + globalMastery + '</b><span>Dominio global estimado</span></div>' +
+          '<div class="kpi-card"><b>' + totalSessions + '</b><span>Sesiones completadas</span></div>' +
+        '</div>' +
       '</div>' +
       '<div class="hub-grid">' + cards + '</div>';
 
@@ -141,16 +228,47 @@
   function showTopics() {
     var ex = exam();
     var html = examBannerHtml(ex) +
-      '<p class="muted">Lee el resumen de cada dominio y luego ponlo a prueba en la pestaña <b>Prueba</b>.</p>';
+      '<div class="topics-toolbar" style="display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:1rem; flex-wrap:wrap">' +
+        '<p class="muted" style="margin:0">Lee el resumen de cada dominio y luego ponlo a prueba en la pestaña <b>Prueba</b>.</p>' +
+        '<button type="button" id="toggle-topics">Expandir todos los temas</button>' +
+      '</div>';
+
     domainKeys(ex).forEach(function (k) {
       var topics = ex.topics.filter(function (t) { return t.d === k && t.id.indexOf('t-5') !== 0; });
       if (topics.length) {
         html += '<h2>Dominio ' + k + ' · ' + esc(ex.domains[k]) + '</h2>' + topics.map(topicHtml).join('');
       }
     });
+
     var extra = ex.topics.filter(function (t) { return t.id.indexOf('t-5') === 0; });
     if (extra.length) html += '<h2>Extra</h2>' + extra.map(topicHtml).join('');
+
     view.innerHTML = html;
+
+    var toggleBtn = d.getElementById('toggle-topics');
+    if (toggleBtn) {
+      function updateToggleText() {
+        var topics = view.querySelectorAll('details.topic');
+        if (!topics.length) return;
+        var allOpen = Array.prototype.every.call(topics, function (det) { return det.open; });
+        toggleBtn.textContent = allOpen ? 'Contraer todos los temas' : 'Expandir todos los temas';
+      }
+
+      toggleBtn.onclick = function () {
+        var topics = view.querySelectorAll('details.topic');
+        if (!topics.length) return;
+        var allOpen = Array.prototype.every.call(topics, function (det) { return det.open; });
+        var targetState = !allOpen;
+        Array.prototype.forEach.call(topics, function (det) {
+          det.open = targetState;
+        });
+        toggleBtn.textContent = targetState ? 'Contraer todos los temas' : 'Expandir todos los temas';
+      };
+
+      Array.prototype.forEach.call(view.querySelectorAll('details.topic'), function (det) {
+        det.addEventListener('toggle', updateToggleText);
+      });
+    }
   }
 
   function topicHtml(t) {
@@ -200,10 +318,14 @@
       '<p class="muted small">Hay <b>' + pool + '</b> preguntas disponibles en esta selección. Nota de aprobación de referencia: <b>' + (ex.passingScore || 70) + ' %</b>. Tus respuestas se guardan en tiempo real con <code>@fabianimv/study-tracker</code>.</p>' +
       '<button class="primary" id="tstart"' + (pool ? '' : ' disabled') + '>Comenzar prueba</button></div>';
 
-    d.getElementById('tdomain').onchange = function () { T.domain = parseInt(this.value, 10); showSetup(); };
-    d.getElementById('tsize').onchange = function () { T.size = parseInt(this.value, 10); };
-    d.getElementById('twhich').onchange = function () { T.which = this.value; showSetup(); };
-    d.getElementById('tstart').onclick = function () {
+    var tdom = d.getElementById('tdomain');
+    if (tdom) tdom.onchange = function () { T.domain = parseInt(this.value, 10); showSetup(); };
+    var tsz = d.getElementById('tsize');
+    if (tsz) tsz.onchange = function () { T.size = parseInt(this.value, 10); };
+    var twh = d.getElementById('twhich');
+    if (twh) twh.onchange = function () { T.which = this.value; showSetup(); };
+    var tst = d.getElementById('tstart');
+    if (tst) tst.onclick = function () {
       var list = shuffle(setupPool());
       startTest(T.size ? list.slice(0, T.size) : list, { domain: T.domain, which: T.which });
     };
@@ -253,13 +375,15 @@
       '<div class="muted small">Dominio ' + q.d + ' · ' + esc(q.t) + '</div>' +
       '<p class="qtext">' + esc(q.q) + '</p>' +
       '<p class="muted small">' + (multi ? 'Elige ' + correct.length + ' respuestas.' : 'Elige una respuesta.') + '</p>' +
+      '<div class="kb-hint muted small">Atajos: teclas <kbd>A</kbd>–<kbd>D</kbd> o <kbd>1</kbd>–<kbd>4</kbd> para marcar · <kbd>Enter</kbd> para responder / avanzar</div>' +
       '<div class="opts">' + order.map(function (idx, pos) {
         return '<button class="opt" data-i="' + idx + '"><span class="letter">' + LETTERS[pos] + '</span><span>' + esc(q.o[idx]) + '</span></button>';
       }).join('') + '</div>' +
       '<div id="feedback"><button class="primary" id="answer" disabled>Responder</button></div>' +
       '</div>';
 
-    d.getElementById('tquit').onclick = showResults;
+    var tquit = d.getElementById('tquit');
+    if (tquit) tquit.onclick = showResults;
     var answerBtn = d.getElementById('answer');
     Array.prototype.forEach.call(view.querySelectorAll('.opt'), function (b) {
       b.onclick = function () {
@@ -274,10 +398,10 @@
           else if (at !== -1) picked.splice(at, 1);
           b.classList.toggle('sel', picked.indexOf(idx) !== -1);
         }
-        answerBtn.disabled = picked.length !== correct.length;
+        if (answerBtn) answerBtn.disabled = picked.length !== correct.length;
       };
     });
-    answerBtn.onclick = function () { reveal(ex, q, order, correct, picked); };
+    if (answerBtn) answerBtn.onclick = function () { reveal(ex, q, order, correct, picked); };
   }
 
   function reveal(ex, q, order, correct, picked) {
@@ -288,20 +412,29 @@
     T.results.push({ q: q, order: order, picked: picked, ok: ok });
     getTracker(ex.appId).recordAnswer(T.session, { question: q.id, topic: q.d, correct: ok, response: picked });
 
-    view.querySelector('.opts').classList.add('locked');
+    var optsContainer = view.querySelector('.opts');
+    if (optsContainer) optsContainer.classList.add('locked');
+
     Array.prototype.forEach.call(view.querySelectorAll('.opt'), function (b) {
       var idx = parseInt(b.getAttribute('data-i'), 10);
       if (correct.indexOf(idx) !== -1) b.classList.add('right');
       else if (picked.indexOf(idx) !== -1) b.classList.add('wrong');
     });
 
-    d.getElementById('feedback').innerHTML = feedbackHtml(q, order, correct, wrongPicked, why, ok) +
-      '<button class="primary" id="next">' + (T.i + 1 < T.list.length ? 'Siguiente pregunta →' : 'Ver resultado') + '</button>';
-    d.getElementById('tok').textContent = T.ok;
-    d.getElementById('next').onclick = function () {
-      T.i++;
-      if (T.i < T.list.length) { showQuestion(); w.scrollTo(0, 0); } else showResults();
-    };
+    var fbEl = d.getElementById('feedback');
+    if (fbEl) {
+      fbEl.innerHTML = feedbackHtml(q, order, correct, wrongPicked, why, ok) +
+        '<button class="primary" id="next">' + (T.i + 1 < T.list.length ? 'Siguiente pregunta →' : 'Ver resultado') + '</button>';
+    }
+    var tok = d.getElementById('tok');
+    if (tok) tok.textContent = T.ok;
+    var nextBtn = d.getElementById('next');
+    if (nextBtn) {
+      nextBtn.onclick = function () {
+        T.i++;
+        if (T.i < T.list.length) { showQuestion(); w.scrollTo(0, 0); } else showResults();
+      };
+    }
   }
 
   function feedbackHtml(q, order, correct, wrongPicked, why, ok) {
@@ -346,9 +479,55 @@
       }).join('') : '');
     var rt = d.getElementById('retry');
     if (rt) rt.onclick = function () { startTest(wrong.map(function (r) { return r.q; }), { retry: true }); };
-    d.getElementById('newtest').onclick = showSetup;
+    var nt = d.getElementById('newtest');
+    if (nt) nt.onclick = showSetup;
     w.scrollTo(0, 0);
   }
+
+  /* ---------- Atajos de Teclado (Prueba) ---------- */
+  w.addEventListener('keydown', function (e) {
+    if (currentTab !== 'prueba') return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+    var tag = d.activeElement ? d.activeElement.tagName.toLowerCase() : '';
+    if (tag === 'input' || tag === 'select' || tag === 'textarea' || (d.activeElement && d.activeElement.isContentEditable)) {
+      return;
+    }
+
+    var nextBtn = d.getElementById('next');
+    if (nextBtn) {
+      if (e.key === 'Enter' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        nextBtn.click();
+      }
+      return;
+    }
+
+    var unlockedOpts = view.querySelectorAll('.opts:not(.locked) .opt');
+    if (unlockedOpts && unlockedOpts.length) {
+      var k = e.key;
+      var idx = -1;
+      if (/^[1-6]$/.test(k)) {
+        idx = parseInt(k, 10) - 1;
+      } else if (/^[a-fA-F]$/.test(k)) {
+        idx = k.toLowerCase().charCodeAt(0) - 97;
+      }
+
+      if (idx >= 0 && idx < unlockedOpts.length) {
+        e.preventDefault();
+        unlockedOpts[idx].click();
+        return;
+      }
+
+      if (k === 'Enter') {
+        var answerBtn = d.getElementById('answer');
+        if (answerBtn && !answerBtn.disabled) {
+          e.preventDefault();
+          answerBtn.click();
+        }
+      }
+    }
+  });
 
   /* ---------- Progreso ---------- */
   var progressView = null;
@@ -419,23 +598,63 @@
   /* ---------- Glosario ---------- */
   function showGlossary() {
     var ex = exam();
-    view.innerHTML = examBannerHtml(ex) +
-      '<input id="gsearch" type="search" placeholder="Buscar término o categoría en ' + esc(ex.badge) + '…"><div id="glist"></div>';
-    var input = d.getElementById('gsearch');
     var all = (ex.glossary || []).slice().sort(function (a, b) { return a.term.localeCompare(b.term, 'es'); });
+
+    // Extraer categorías únicas con conteo
+    var catCounts = {};
+    all.forEach(function (g) {
+      if (g.cat) {
+        catCounts[g.cat] = (catCounts[g.cat] || 0) + 1;
+      }
+    });
+    var cats = Object.keys(catCounts).sort(function (a, b) { return a.localeCompare(b, 'es'); });
+    var activeCat = '';
+
+    var catButtonsHtml = '<button type="button" class="cat-pill active" data-cat="">Todas (' + all.length + ')</button>' +
+      cats.map(function (c) {
+        return '<button type="button" class="cat-pill" data-cat="' + esc(c) + '">' + esc(c) + ' (' + catCounts[c] + ')</button>';
+      }).join('');
+
+    view.innerHTML = examBannerHtml(ex) +
+      '<input id="gsearch" type="search" placeholder="Buscar término o categoría en ' + esc(ex.badge) + '…">' +
+      '<div class="glossary-cats">' + catButtonsHtml + '</div>' +
+      '<div id="glist"></div>';
+
+    var input = d.getElementById('gsearch');
+
     function paint() {
-      var s = input.value.trim().toLowerCase();
-      d.getElementById('glist').innerHTML = all.filter(function (g) {
-        return !s || (g.term + ' ' + (g.cat || '') + ' ' + g.def + ' ' + (g.tip || '')).toLowerCase().indexOf(s) !== -1;
-      }).map(function (g) {
+      var s = input ? input.value.trim().toLowerCase() : '';
+      var listEl = d.getElementById('glist');
+      var filtered = all.filter(function (g) {
+        var matchesText = !s || (g.term + ' ' + (g.cat || '') + ' ' + g.def + ' ' + (g.tip || '')).toLowerCase().indexOf(s) !== -1;
+        var matchesCat = !activeCat || g.cat === activeCat;
+        return matchesText && matchesCat;
+      });
+
+      var html = filtered.map(function (g) {
         return '<div class="gitem"><b>' + esc(g.term) + '</b>' +
           (g.cat ? ' <span class="muted small">· ' + esc(g.cat) + '</span>' : '') +
           '<p>' + esc(g.def) + '</p>' +
           (g.tip ? '<div class="gtip">💡 <b>Tip:</b> ' + esc(g.tip) + '</div>' : '') +
           '</div>';
       }).join('') || '<p class="muted">Sin resultados.</p>';
+
+      if (listEl) {
+        listEl.innerHTML = html;
+      }
     }
-    input.oninput = paint;
+
+    Array.prototype.forEach.call(view.querySelectorAll('.cat-pill'), function (btn) {
+      btn.onclick = function () {
+        activeCat = btn.getAttribute('data-cat') || '';
+        Array.prototype.forEach.call(view.querySelectorAll('.cat-pill'), function (b) {
+          b.classList.toggle('active', (b.getAttribute('data-cat') || '') === activeCat);
+        });
+        paint();
+      };
+    });
+
+    if (input) input.oninput = paint;
     paint();
   }
 
@@ -457,7 +676,7 @@
   }
 
   function syncFromHash() {
-    var raw = location.hash.slice(1);
+    var raw = (location.hash || '').replace(/^#/, '');
     var nextExam = currentExamId;
     var nextTab = 'examenes';
 
@@ -479,7 +698,8 @@
 
     currentExamId = nextExam;
     currentTab = nextTab;
-    picker.value = currentExamId;
+    if (picker) picker.value = currentExamId;
+    d.body.setAttribute('data-provider', currentExamId);
 
     Array.prototype.forEach.call(d.querySelectorAll('#tabs button'), function (b) {
       b.classList.toggle('active', b.getAttribute('data-tab') === currentTab);
@@ -496,6 +716,7 @@
     };
   });
 
+  initTheme();
   initPicker();
   w.addEventListener('hashchange', syncFromHash);
   syncFromHash();
