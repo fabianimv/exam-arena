@@ -26,7 +26,11 @@
     <button data-tab="progreso">Progreso</button>
     <button data-tab="glosario">Glosario</button>
   </nav>
-  <button id="theme-toggle" class="icon-btn" type="button" title="Cambiar tema claro/oscuro" aria-label="Cambiar tema claro/oscuro">🌓</button>
+  <div class="top-actions" style="display:flex;align-items:center;gap:0.45rem">
+    <button id="cloud-sync-btn" class="sync-pill" type="button" title="Sincronizar progreso en la nube" aria-label="Sincronizar progreso en la nube">☁️ <span id="cloud-sync-label">Sync</span></button>
+    <button id="lang-toggle" class="icon-btn lang-btn" type="button" title="Cambiar idioma (ES/EN)" aria-label="Cambiar idioma (ES/EN)">ES</button>
+    <button id="theme-toggle" class="icon-btn" type="button" title="Cambiar tema claro/oscuro" aria-label="Cambiar tema claro/oscuro">🌓</button>
+  </div>
 </header>
 
 <main id="view"></main>
@@ -34,11 +38,14 @@
 <footer>Simulador de estudio y entrenamiento de incidentes SRE · Código en <a href="https://github.com/fabianimv/exam-arena" target="_blank" rel="noopener">GitHub</a> · Progreso impulsado por <a href="https://github.com/fabianimv/study-tracker" target="_blank" rel="noopener">@fabianimv/study-tracker</a>.</footer>
 
 <script src="data/sre/exam.js"></script>
+<script src="data/kafka/exam.js"></script>
 <script src="data/gcp/exam.js"></script>
 <script src="data/azure/exam.js"></script>
 <script src="data/aws/exam.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@fabianimv/study-tracker@0.1.0/study-tracker.js" integrity="sha384-YOS+LNubOsNkFJhvNOCkBe2mA6AnpuzuQQna98dVxMQWfQ3OZv/ZTMtC0i0ovGwJ" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/@fabianimv/study-tracker@0.1.0/study-tracker-view.js" integrity="sha384-fVoiA9JM/IF/GoK2JAZszv0dif5EGY5JJymtYk9uI9oWP/H/kxr303vUpbcHDCjN" crossorigin="anonymous"></script>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/cloud-sync.js"></script>
 <script src="assets/js/app.js"></script>
 </body>
 </html>

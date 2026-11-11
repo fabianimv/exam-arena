@@ -1,12 +1,12 @@
 /* =========================================================================
    assets/js/app.js — Motor Multi-Provider (SRE, GCP, Azure, AWS)
    Look & Feel moderno, atajos de teclado, filtro de glosario y métricas globales
-   e integrado con @fabianimv/study-tracker.
+   e integrado con @fabianimv/study-tracker, ExamI18n y ExamCloudSync.
    ========================================================================= */
 (function (w, d) {
   'use strict';
 
-  var EXAM_ORDER = ['sre-incidents', 'gcp-genai-leader', 'az-104', 'aws-saa-c03'];
+  var EXAM_ORDER = ['sre-incidents', 'kafka-confluent', 'gcp-genai-leader', 'az-104', 'aws-saa-c03'];
   var LETTERS = 'ABCDEF';
   var view = d.getElementById('view');
   var picker = d.getElementById('exam-picker');
@@ -24,6 +24,51 @@
     if (headEl && headEl.appendChild) headEl.appendChild(st);
   })();
 
+  /* ---------- Formateo de Texto y Helpers de i18n ---------- */
+  function esc(s) {
+    if (s == null) return '';
+    if (w.ExamI18n && w.ExamI18n.esc) return w.ExamI18n.esc(s);
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function fmt(s) {
+    if (s == null) return '';
+    if (w.ExamI18n && w.ExamI18n.fmt) return w.ExamI18n.fmt(s);
+    return esc(s)
+      .replace(/`([^`]+)`/g, '<strong>$1</strong>')
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  }
+
+  function stripTicks(s) {
+    if (s == null) return '';
+    if (w.ExamI18n && w.ExamI18n.stripTicks) return w.ExamI18n.stripTicks(s);
+    return String(s)
+      .replace(/`([^`]+)`/g, '$1')
+      .replace(/\*\*([^*]+)\*\*/g, '$1');
+  }
+
+  function getLang() {
+    if (w.ExamI18n && w.ExamI18n.getLang) return w.ExamI18n.getLang();
+    return 'es';
+  }
+
+  function t(key, varsOrFallback, fallback) {
+    var vars = (varsOrFallback && typeof varsOrFallback === 'object') ? varsOrFallback : null;
+    var fb = typeof varsOrFallback === 'string' ? varsOrFallback : fallback;
+    if (w.ExamI18n && w.ExamI18n.t) {
+      var val = w.ExamI18n.t(key, vars);
+      if (val !== key) return val;
+    }
+    if (vars && fb) {
+      return fb.replace(/\{([a-zA-Z0-9_]+)\}/g, function (m, n) {
+        return (n in vars && vars[n] != null) ? vars[n] : m;
+      });
+    }
+    return fb || key;
+  }
+
   /* ---------- Tema Claro / Oscuro ---------- */
   function getSavedTheme() {
     var theme = null;
@@ -39,8 +84,9 @@
     var toggleBtn = d.getElementById('theme-toggle');
     if (toggleBtn) {
       toggleBtn.textContent = theme === 'dark' ? '☀️' : '🌙';
-      toggleBtn.setAttribute('aria-label', theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
-      toggleBtn.title = theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro';
+      var title = theme === 'dark' ? t('theme_to_light', 'Cambiar a modo claro') : t('theme_to_dark', 'Cambiar a modo oscuro');
+      toggleBtn.setAttribute('aria-label', title);
+      toggleBtn.title = title;
     }
   }
 
@@ -95,12 +141,6 @@
     return (w.EXAMS || {})[currentExamId] || (w.EXAMS || {})[EXAM_ORDER[0]];
   }
 
-  function esc(s) {
-    return String(s).replace(/[&<>"']/g, function (c) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-    });
-  }
-
   function shuffle(arr) {
     var a = arr.slice();
     for (var i = a.length - 1; i > 0; i--) {
@@ -136,11 +176,68 @@
   }
 
   function domainSelect(ex, id, value) {
-    return '<select id="' + id + '"><option value="0">Todos los dominios (' + ex.questions.length + ' preguntas)</option>' +
+    var allLabel = t('all_domains', { n: ex.questions.length }, 'Todos los dominios (' + ex.questions.length + ' preguntas)');
+    return '<select id="' + id + '"><option value="0">' + allLabel + '</option>' +
       domainKeys(ex).map(function (k) {
         var count = ex.questions.filter(function (q) { return q.d === k; }).length;
-        return '<option value="' + k + '"' + (value === k ? ' selected' : '') + '>Dominio ' + k + ' · ' + esc(ex.domains[k]) + ' — ' + count + ' preg.</option>';
+        var dName = (ex.domains && ex.domains[k]) || '';
+        var optLabelText = t('domain_opt', { k: k, name: dName, n: count }, 'Dominio ' + k + ' · ' + dName + ' — ' + count + ' preg.');
+        return '<option value="' + k + '"' + (value === k ? ' selected' : '') + '>' + esc(optLabelText) + '</option>';
       }).join('') + '</select>';
+  }
+
+  /* ---------- Actualización de Textos de Navegación e Idioma ---------- */
+  function updateNavLabels() {
+    var lang = getLang();
+    var tabMap = {
+      examenes: t('tab_examenes', 'Exámenes'),
+      temas: t('tab_temas', 'Temas'),
+      prueba: t('tab_prueba', 'Prueba'),
+      progreso: t('tab_progreso', 'Progreso'),
+      glosario: t('tab_glosario', 'Glosario')
+    };
+
+    Array.prototype.forEach.call(d.querySelectorAll('#tabs button'), function (b) {
+      var tabKey = b.getAttribute('data-tab');
+      if (tabMap[tabKey]) {
+        b.textContent = tabMap[tabKey];
+      }
+    });
+
+    var langBtn = d.getElementById('lang-toggle');
+    if (langBtn) {
+      langBtn.textContent = lang.toUpperCase();
+      var langTitle = t('lang_toggle_title', 'Cambiar idioma (ES/EN)');
+      langBtn.title = langTitle;
+      langBtn.setAttribute('aria-label', langTitle);
+    }
+
+    var theme = d.documentElement.getAttribute('data-theme') || 'light';
+    applyTheme(theme);
+  }
+
+  function initLang() {
+    var langBtn = d.getElementById('lang-toggle');
+    if (langBtn) {
+      langBtn.onclick = function () {
+        if (w.ExamI18n && w.ExamI18n.toggleLang) {
+          w.ExamI18n.toggleLang();
+        }
+      };
+    }
+
+    w.addEventListener('exam-arena-lang-change', function () {
+      updateNavLabels();
+      // Re-renderizar la vista activa. Si está en mitad de una prueba activa,
+      // actualiza la pregunta sin resetear el objeto T ni perder la sesión.
+      if (currentTab === 'prueba' && T.list && T.list.length && T.session) {
+        showQuestion();
+      } else if (TABS[currentTab]) {
+        TABS[currentTab]();
+      }
+    });
+
+    updateNavLabels();
   }
 
   /* ---------- Catálogo de Exámenes (Hub) ---------- */
@@ -176,7 +273,7 @@
       var covPct = Math.round(((m.seen || 0) / ex.questions.length) * 100);
 
       var domainChips = domainKeys(ex).map(function (k) {
-        var name = (ex.shortDomains && ex.shortDomains[k]) || ex.domains[k] || ('Dominio ' + k);
+        var name = (ex.shortDomains && ex.shortDomains[k]) || ex.domains[k] || (t('domain_label', 'Dominio') + ' ' + k);
         return '<span class="domain-chip">' + esc(name) + '</span>';
       }).join('');
 
@@ -190,14 +287,14 @@
         '<div>' +
           '<div class="hub-cov" style="background:var(--surface-2);border-radius:var(--radius-pill);overflow:hidden"><div class="hub-cov-bar" style="width:' + covPct + '%;background:var(--accent-grad,var(--blue))"><div class="hub-cov-fill" style="width:100%"></div></div></div>' +
           '<div class="hub-stats">' +
-            '<div class="hub-stat"><b>' + ex.questions.length + '</b><span>Preguntas (' + domainKeys(ex).length + ' dom.)</span></div>' +
-            '<div class="hub-stat"><b>' + (m.seen || 0) + ' / ' + ex.questions.length + '</b><span>Vistas</span></div>' +
-            '<div class="hub-stat"><b>' + masteryTxt + '</b><span>Dominio (' + sessions + ' ses.)</span></div>' +
+            '<div class="hub-stat"><b>' + ex.questions.length + '</b><span>' + t('stat_questions', { n: domainKeys(ex).length }, 'Preguntas (' + domainKeys(ex).length + ' dom.)') + '</span></div>' +
+            '<div class="hub-stat"><b>' + (m.seen || 0) + ' / ' + ex.questions.length + '</b><span>' + t('stat_seen', 'Vistas') + '</span></div>' +
+            '<div class="hub-stat"><b>' + masteryTxt + '</b><span>' + t('stat_mastery', { n: sessions }, 'Dominio (' + sessions + ' ses.)') + '</span></div>' +
           '</div>' +
           '<div class="hub-actions">' +
-            '<button class="primary" data-go="' + esc(id) + '/prueba">Practicar prueba</button>' +
-            '<button data-go="' + esc(id) + '/temas">Temas (' + ex.topics.length + ')</button>' +
-            '<button data-go="' + esc(id) + '/progreso">Progreso</button>' +
+            '<button class="primary" data-go="' + esc(id) + '/prueba">' + t('btn_practice', 'Practicar prueba') + '</button>' +
+            '<button data-go="' + esc(id) + '/temas">' + t('btn_topics', { n: ex.topics.length }, 'Temas (' + ex.topics.length + ')') + '</button>' +
+            '<button data-go="' + esc(id) + '/progreso">' + t('btn_progress', 'Progreso') + '</button>' +
           '</div>' +
         '</div>' +
       '</div>';
@@ -205,13 +302,13 @@
 
     view.innerHTML =
       '<div class="card hub-hero">' +
-        '<h1>Simulador General de Exámenes Cloud & SRE</h1>' +
-        '<p class="muted">Elige un proveedor o certificación. Cada pregunta se corrige al instante explicando <b>por qué tu opción elegida es incorrecta</b> y <b>por qué la respuesta correcta es la adecuada</b>. Todo tu avance se guarda localmente en este navegador con <code>@fabianimv/study-tracker</code>.</p>' +
+        '<h1>' + t('hub_title', 'Simulador General de Exámenes Cloud & SRE') + '</h1>' +
+        '<p class="muted">' + t('hub_desc', 'Elige un proveedor o certificación. Cada pregunta se corrige al instante explicando <b>por qué tu opción elegida es incorrecta</b> y <b>por qué la respuesta correcta es la adecuada</b>. Todo tu avance se guarda localmente en este navegador con <code>@fabianimv/study-tracker</code> y puede sincronizarse en la nube.') + '</p>' +
         '<div class="hub-kpis">' +
-          '<div class="kpi-card"><b>434</b><span>Preguntas en 4 simuladores</span></div>' +
-          '<div class="kpi-card"><b>' + totalSeen + ' / ' + totalQ + '</b><span>Preguntas vistas</span></div>' +
-          '<div class="kpi-card"><b>' + globalMastery + '</b><span>Dominio global estimado</span></div>' +
-          '<div class="kpi-card"><b>' + totalSessions + '</b><span>Sesiones completadas</span></div>' +
+          '<div class="kpi-card"><b>' + totalQ + '</b><span>' + t('kpi_total_q', 'Preguntas en 5 simuladores') + '</span></div>' +
+          '<div class="kpi-card"><b>' + totalSeen + ' / ' + totalQ + '</b><span>' + t('kpi_seen', 'Preguntas vistas') + '</span></div>' +
+          '<div class="kpi-card"><b>' + globalMastery + '</b><span>' + t('kpi_mastery', 'Dominio global estimado') + '</span></div>' +
+          '<div class="kpi-card"><b>' + totalSessions + '</b><span>' + t('kpi_sessions', 'Sesiones completadas') + '</span></div>' +
         '</div>' +
       '</div>' +
       '<div class="hub-grid">' + cards + '</div>';
@@ -227,21 +324,22 @@
   /* ---------- Temas ---------- */
   function showTopics() {
     var ex = exam();
+    var isEn = getLang() === 'en';
     var html = examBannerHtml(ex) +
       '<div class="topics-toolbar" style="display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:1rem; flex-wrap:wrap">' +
-        '<p class="muted" style="margin:0">Lee el resumen de cada dominio y luego ponlo a prueba en la pestaña <b>Prueba</b>.</p>' +
-        '<button type="button" id="toggle-topics">Expandir todos los temas</button>' +
+        '<p class="muted" style="margin:0">' + t('topics_intro', 'Lee el resumen de cada dominio y luego ponlo a prueba en la pestaña <b>Prueba</b>.') + '</p>' +
+        '<button type="button" id="toggle-topics">' + t('btn_expand_all', 'Expandir todos los temas') + '</button>' +
       '</div>';
 
     domainKeys(ex).forEach(function (k) {
       var topics = ex.topics.filter(function (t) { return t.d === k && t.id.indexOf('t-5') !== 0; });
       if (topics.length) {
-        html += '<h2>Dominio ' + k + ' · ' + esc(ex.domains[k]) + '</h2>' + topics.map(topicHtml).join('');
+        html += '<h2 class="dom-header" data-d="' + k + '">' + t('domain_label', 'Dominio') + ' ' + k + ' · ' + esc(ex.domains[k]) + '</h2>' + topics.map(topicHtml).join('');
       }
     });
 
     var extra = ex.topics.filter(function (t) { return t.id.indexOf('t-5') === 0; });
-    if (extra.length) html += '<h2>Extra</h2>' + extra.map(topicHtml).join('');
+    if (extra.length) html += '<h2>' + t('extra_label', 'Extra') + '</h2>' + extra.map(topicHtml).join('');
 
     view.innerHTML = html;
 
@@ -251,7 +349,7 @@
         var topics = view.querySelectorAll('details.topic');
         if (!topics.length) return;
         var allOpen = Array.prototype.every.call(topics, function (det) { return det.open; });
-        toggleBtn.textContent = allOpen ? 'Contraer todos los temas' : 'Expandir todos los temas';
+        toggleBtn.textContent = allOpen ? t('btn_collapse_all', 'Contraer todos los temas') : t('btn_expand_all', 'Expandir todos los temas');
       }
 
       toggleBtn.onclick = function () {
@@ -262,17 +360,35 @@
         Array.prototype.forEach.call(topics, function (det) {
           det.open = targetState;
         });
-        toggleBtn.textContent = targetState ? 'Contraer todos los temas' : 'Expandir todos los temas';
+        toggleBtn.textContent = targetState ? t('btn_collapse_all', 'Contraer todos los temas') : t('btn_expand_all', 'Expandir todos los temas');
       };
 
       Array.prototype.forEach.call(view.querySelectorAll('details.topic'), function (det) {
         det.addEventListener('toggle', updateToggleText);
       });
     }
+
+    // Traducción dinámica suave al inglés de títulos de dominios y temas visibles
+    if (isEn && w.ExamI18n && w.ExamI18n.translateBatch) {
+      var summaries = view.querySelectorAll('details.topic > summary');
+      var toTranslate = [];
+      Array.prototype.forEach.call(summaries, function (s) {
+        toTranslate.push(s.textContent);
+      });
+      if (toTranslate.length) {
+        w.ExamI18n.translateBatch(toTranslate, function (translated) {
+          Array.prototype.forEach.call(summaries, function (s, idx) {
+            if (translated && translated[idx]) {
+              s.innerHTML = fmt(translated[idx]);
+            }
+          });
+        });
+      }
+    }
   }
 
-  function topicHtml(t) {
-    return '<details class="topic"><summary>' + esc(t.title) + '</summary><div class="body">' + t.html + '</div></details>';
+  function topicHtml(tItem) {
+    return '<details class="topic"><summary>' + fmt(tItem.title) + '</summary><div class="body">' + tItem.html + '</div></details>';
   }
 
   /* ---------- Prueba ---------- */
@@ -283,6 +399,15 @@
     'new': 'Solo las que nunca he respondido',
     failed: 'Solo las que fallé la última vez'
   };
+
+  function getWhichLabel(key) {
+    var map = {
+      all: t('which_all', 'Todas las preguntas'),
+      'new': t('which_new', 'Solo las que nunca he respondido'),
+      failed: t('which_failed', 'Solo las que fallé la última vez')
+    };
+    return map[key] || WHICH[key] || key;
+  }
 
   function setupPool() {
     var ex = exam();
@@ -303,20 +428,22 @@
       T.domain = 0;
     }
     var pool = setupPool().length;
+    var pass = ex.passingScore || 70;
+
     view.innerHTML =
       examBannerHtml(ex) +
-      '<div class="card setup"><h2>Nueva prueba · ' + esc(ex.badge) + '</h2>' +
-      '<p class="muted">Responde cada escenario. Al confirmar tu respuesta verás al instante si acertaste; si te equivocas, se mostrará por qué tu opción está mal y cuál es la opción correcta con su fundamento.</p>' +
-      '<label>Dominio<br>' + domainSelect(ex, 'tdomain', T.domain) + '</label>' +
-      '<label>Número de preguntas<br><select id="tsize">' +
+      '<div class="card setup"><h2>' + t('setup_title', { badge: esc(ex.badge) }, 'Nueva prueba · ' + esc(ex.badge)) + '</h2>' +
+      '<p class="muted">' + t('setup_desc', 'Responde cada escenario. Al confirmar tu respuesta verás al instante si acertaste; si te equivocas, se mostrará por qué tu opción está mal y cuál es la opción correcta con su fundamento.') + '</p>' +
+      '<label>' + t('label_domain', 'Dominio') + '<br>' + domainSelect(ex, 'tdomain', T.domain) + '</label>' +
+      '<label>' + t('label_size', 'Número de preguntas') + '<br><select id="tsize">' +
         SIZES.map(function (n) { return '<option value="' + n + '"' + (T.size === n ? ' selected' : '') + '>' + n + '</option>'; }).join('') +
-        '<option value="0"' + (T.size === 0 ? ' selected' : '') + '>Todas (' + pool + ')</option>' +
+        '<option value="0"' + (T.size === 0 ? ' selected' : '') + '>' + t('size_all', { n: pool }, 'Todas (' + pool + ')') + '</option>' +
       '</select></label>' +
-      '<label>Qué preguntas<br><select id="twhich">' +
-        Object.keys(WHICH).map(function (k) { return '<option value="' + k + '"' + (T.which === k ? ' selected' : '') + '>' + WHICH[k] + '</option>'; }).join('') +
+      '<label>' + t('label_which', 'Qué preguntas') + '<br><select id="twhich">' +
+        Object.keys(WHICH).map(function (k) { return '<option value="' + k + '"' + (T.which === k ? ' selected' : '') + '>' + getWhichLabel(k) + '</option>'; }).join('') +
       '</select></label>' +
-      '<p class="muted small">Hay <b>' + pool + '</b> preguntas disponibles en esta selección. Nota de aprobación de referencia: <b>' + (ex.passingScore || 70) + ' %</b>. Tus respuestas se guardan en tiempo real con <code>@fabianimv/study-tracker</code>.</p>' +
-      '<button class="primary" id="tstart"' + (pool ? '' : ' disabled') + '>Comenzar prueba</button></div>';
+      '<p class="muted small">' + t('setup_meta', { pool: pool, pass: pass }, 'Hay <b>' + pool + '</b> preguntas disponibles en esta selección. Nota de aprobación de referencia: <b>' + pass + ' %</b>. Tus respuestas se guardan en tiempo real con <code>@fabianimv/study-tracker</code>.') + '</p>' +
+      '<button class="primary" id="tstart"' + (pool ? '' : ' disabled') + '>' + t('btn_start', 'Comenzar prueba') + '</button></div>';
 
     var tdom = d.getElementById('tdomain');
     if (tdom) tdom.onchange = function () { T.domain = parseInt(this.value, 10); showSetup(); };
@@ -365,25 +492,34 @@
     var multi = correct.length > 1;
     var picked = [];
     var pct = Math.round(T.i / T.list.length * 100);
+    var isEn = getLang() === 'en';
+
+    var qOfText = t('q_of', { i: T.i + 1, n: T.list.length }, 'Pregunta <b>' + (T.i + 1) + '</b> de ' + T.list.length);
+    var correctCountText = t('correct_count', 'Correctas:');
+    var quitText = t('btn_quit', 'Terminar');
+    var pickText = multi ? t('pick_multi', { n: correct.length }, 'Elige ' + correct.length + ' respuestas.') : t('pick_one', 'Elige una respuesta.');
+    var kbHint = t('kb_hint', 'Atajos: teclas <kbd>A</kbd>–<kbd>D</kbd> o <kbd>1</kbd>–<kbd>4</kbd> para marcar · <kbd>Enter</kbd> para responder / avanzar');
+    var answerBtnText = t('btn_answer', 'Responder');
 
     view.innerHTML =
-      '<div class="testbar"><span>' + ex.icon + ' <b>' + esc(ex.badge) + '</b> · Pregunta <b>' + (T.i + 1) + '</b> de ' + T.list.length + '</span>' +
-      '<span>Correctas: <b id="tok">' + T.ok + '</b></span>' +
-      '<button id="tquit" class="link">Terminar</button></div>' +
+      '<div class="testbar"><span>' + ex.icon + ' <b>' + esc(ex.badge) + '</b> · ' + qOfText + '</span>' +
+      '<span>' + correctCountText + ' <b id="tok">' + T.ok + '</b></span>' +
+      '<button id="tquit" class="link">' + quitText + '</button></div>' +
       '<div class="progress"><div style="width:' + pct + '%"></div></div>' +
       '<div class="card">' +
-      '<div class="muted small">Dominio ' + q.d + ' · ' + esc(q.t) + '</div>' +
-      '<p class="qtext">' + esc(q.q) + '</p>' +
-      '<p class="muted small">' + (multi ? 'Elige ' + correct.length + ' respuestas.' : 'Elige una respuesta.') + '</p>' +
-      '<div class="kb-hint muted small">Atajos: teclas <kbd>A</kbd>–<kbd>D</kbd> o <kbd>1</kbd>–<kbd>4</kbd> para marcar · <kbd>Enter</kbd> para responder / avanzar</div>' +
+      '<div class="muted small">' + t('domain_label', 'Dominio') + ' ' + q.d + ' · ' + esc(q.t) + '</div>' +
+      '<p class="qtext">' + fmt(q.q) + '</p>' +
+      '<p class="muted small pick-guide">' + pickText + '</p>' +
+      '<div class="kb-hint muted small">' + kbHint + '</div>' +
       '<div class="opts">' + order.map(function (idx, pos) {
-        return '<button class="opt" data-i="' + idx + '"><span class="letter">' + LETTERS[pos] + '</span><span>' + esc(q.o[idx]) + '</span></button>';
+        return '<button class="opt" data-i="' + idx + '"><span class="letter">' + LETTERS[pos] + '</span><span>' + fmt(q.o[idx]) + '</span></button>';
       }).join('') + '</div>' +
-      '<div id="feedback"><button class="primary" id="answer" disabled>Responder</button></div>' +
+      '<div id="feedback"><button class="primary" id="answer" disabled>' + answerBtnText + '</button></div>' +
       '</div>';
 
     var tquit = d.getElementById('tquit');
     if (tquit) tquit.onclick = showResults;
+
     var answerBtn = d.getElementById('answer');
     Array.prototype.forEach.call(view.querySelectorAll('.opt'), function (b) {
       b.onclick = function () {
@@ -401,7 +537,33 @@
         if (answerBtn) answerBtn.disabled = picked.length !== correct.length;
       };
     });
-    if (answerBtn) answerBtn.onclick = function () { reveal(ex, q, order, correct, picked); };
+
+    if (answerBtn) {
+      answerBtn.onclick = function () {
+        reveal(ex, q, order, correct, picked);
+      };
+    }
+
+    // Traducción automática suave al inglés si el idioma seleccionado es 'en'
+    if (isEn && w.ExamI18n && w.ExamI18n.translateQuestion) {
+      w.ExamI18n.translateQuestion(q, function (trQ) {
+        if (!T.list || T.list[T.i] !== q) return; // Si la sesión cambió de pregunta, no sobreescribir
+        var qtextEl = view.querySelector('.qtext');
+        if (qtextEl && trQ.q) qtextEl.innerHTML = fmt(trQ.q);
+
+        var metaEl = view.querySelector('.card > .muted.small');
+        if (metaEl && trQ.t) metaEl.innerHTML = (t('domain_label', 'Dominio') + ' ' + trQ.d + ' · ' + esc(trQ.t));
+
+        var optBtns = view.querySelectorAll('.opt');
+        Array.prototype.forEach.call(optBtns, function (btn) {
+          var idx = parseInt(btn.getAttribute('data-i'), 10);
+          var textSpan = btn.querySelector('span:last-child');
+          if (textSpan && trQ.o && trQ.o[idx]) {
+            textSpan.innerHTML = fmt(trQ.o[idx]);
+          }
+        });
+      });
+    }
   }
 
   function reveal(ex, q, order, correct, picked) {
@@ -422,36 +584,50 @@
     });
 
     var fbEl = d.getElementById('feedback');
-    if (fbEl) {
-      fbEl.innerHTML = feedbackHtml(q, order, correct, wrongPicked, why, ok) +
-        '<button class="primary" id="next">' + (T.i + 1 < T.list.length ? 'Siguiente pregunta →' : 'Ver resultado') + '</button>';
+    var nextText = (T.i + 1 < T.list.length) ? t('btn_next', 'Siguiente pregunta →') : t('btn_see_result', 'Ver resultado');
+
+    function renderFeedbackWith(renderQ, renderWhy) {
+      if (!fbEl) return;
+      fbEl.innerHTML = feedbackHtml(renderQ, order, correct, wrongPicked, renderWhy, ok) +
+        '<button class="primary" id="next">' + nextText + '</button>';
+      var nextBtn = d.getElementById('next');
+      if (nextBtn) {
+        nextBtn.onclick = function () {
+          T.i++;
+          if (T.i < T.list.length) { showQuestion(); w.scrollTo(0, 0); } else showResults();
+        };
+      }
     }
+
+    renderFeedbackWith(q, why);
+
     var tok = d.getElementById('tok');
     if (tok) tok.textContent = T.ok;
-    var nextBtn = d.getElementById('next');
-    if (nextBtn) {
-      nextBtn.onclick = function () {
-        T.i++;
-        if (T.i < T.list.length) { showQuestion(); w.scrollTo(0, 0); } else showResults();
-      };
+
+    // Si está en inglés, traducir automáticamente la explicación y respuestas en el feedback
+    if (getLang() === 'en' && w.ExamI18n && w.ExamI18n.translateQuestion) {
+      w.ExamI18n.translateQuestion(q, why, function (trQ, trWhy) {
+        renderFeedbackWith(trQ, trWhy || why);
+      });
     }
   }
 
   function feedbackHtml(q, order, correct, wrongPicked, why, ok) {
     if (ok) {
-      return '<div class="fb good"><div class="fb-title">✔ Correcto</div><p>' + esc(q.e) + '</p></div>';
+      return '<div class="fb good"><div class="fb-title">' + t('fb_correct', '✔ Correcto') + '</div><p>' + fmt(q.e) + '</p></div>';
     }
-    return '<div class="fb bad"><div class="fb-title">✘ Incorrecto</div>' +
+    return '<div class="fb bad"><div class="fb-title">' + t('fb_incorrect', '✘ Incorrecto') + '</div>' +
       wrongPicked.map(function (p) {
-        return '<div class="fb-block"><div class="fb-label">Tu respuesta</div><p class="fb-opt">' + esc(optLabel(q, order, p)) + '</p>' +
-          '<div class="fb-label">Por qué está mal</div><p>' + esc(why[p] || 'No es la opción que resuelve el escenario planteado.') + '</p></div>';
+        var whyText = (why && why[p]) || t('fb_default_wrong', 'No es la opción que resuelve el escenario planteado.');
+        return '<div class="fb-block"><div class="fb-label">' + t('fb_your_answer', 'Tu respuesta') + '</div><p class="fb-opt">' + fmt(optLabel(q, order, p)) + '</p>' +
+          '<div class="fb-label">' + t('fb_why_wrong', 'Por qué está mal') + '</div><p>' + fmt(whyText) + '</p></div>';
       }).join('') +
       '</div>' +
-      '<div class="fb good"><div class="fb-label">Respuesta correcta</div>' +
+      '<div class="fb good"><div class="fb-label">' + t('fb_right_answer', 'Respuesta correcta') + '</div>' +
       correct.slice().sort(function (a, b) { return order.indexOf(a) - order.indexOf(b); }).map(function (c) {
-        return '<p class="fb-opt">' + esc(optLabel(q, order, c)) + '</p>';
+        return '<p class="fb-opt">' + fmt(optLabel(q, order, c)) + '</p>';
       }).join('') +
-      '<div class="fb-label">Por qué</div><p>' + esc(q.e) + '</p></div>';
+      '<div class="fb-label">' + t('fb_why_right', 'Por qué') + '</div><p>' + fmt(q.e) + '</p></div>';
   }
 
   function showResults() {
@@ -461,27 +637,54 @@
     var pct = done ? Math.round(T.ok / done * 100) : 0;
     var pass = ex.passingScore || 70;
     var wrong = T.results.filter(function (r) { return !r.ok; });
+    var isEn = getLang() === 'en';
+
+    var resTitle = t('res_title', { badge: esc(ex.badge) }, 'Resultado · ' + esc(ex.badge));
+    var resSummary = t('res_summary', { ok: T.ok, done: done, pass: pass }, T.ok + ' correctas de ' + done + ' respondidas (umbral de referencia: ' + pass + ' %).');
+    var retryText = t('btn_retry_wrong', { n: wrong.length }, 'Repetir las ' + wrong.length + ' falladas');
+    var newTestText = t('btn_new_test', 'Nueva prueba');
+    var resSavedText = t('res_saved', { appId: esc(ex.appId) }, 'Resultado guardado en <code>' + esc(ex.appId) + '</code>.');
+    var resViewProgText = t('res_view_progress', 'Ver tu progreso');
+    var reviewTitle = t('res_review_title', 'Repaso de lo que fallaste');
+
     view.innerHTML =
       examBannerHtml(ex) +
-      '<div class="card result"><h2>Resultado · ' + esc(ex.badge) + '</h2>' +
+      '<div class="card result"><h2>' + resTitle + '</h2>' +
       '<div class="score ' + (pct >= pass ? 'good' : 'bad') + '">' + pct + ' %</div>' +
-      '<p>' + T.ok + ' correctas de ' + done + ' respondidas (umbral de referencia: ' + pass + ' %).</p>' +
-      (wrong.length ? '<button class="primary" id="retry">Repetir las ' + wrong.length + ' falladas</button> ' : '') +
-      '<button id="newtest">Nueva prueba</button>' +
-      '<p class="muted small">Resultado guardado en <code>' + esc(ex.appId) + '</code>. <a href="#' + esc(ex.id) + '/progreso">Ver tu progreso</a></p></div>' +
-      (wrong.length ? '<h2>Repaso de lo que fallaste</h2>' + wrong.map(function (r) {
+      '<p>' + resSummary + '</p>' +
+      (wrong.length ? '<button class="primary" id="retry">' + retryText + '</button> ' : '') +
+      '<button id="newtest">' + newTestText + '</button>' +
+      '<p class="muted small">' + resSavedText + ' <a href="#' + esc(ex.id) + '/progreso">' + resViewProgText + '</a></p></div>' +
+      (wrong.length ? '<h2>' + reviewTitle + '</h2><div id="wrong-review-list">' + wrong.map(function (r) {
         var correct = [].concat(r.q.a);
         var why = (ex.why || {})[r.q.id] || [];
-        return '<div class="card review"><div class="muted small">Dominio ' + r.q.d + ' · ' + esc(r.q.t) + '</div>' +
-          '<p class="qtext">' + esc(r.q.q) + '</p>' +
+        return '<div class="card review" data-qid="' + esc(r.q.id) + '"><div class="muted small">' + t('domain_label', 'Dominio') + ' ' + r.q.d + ' · ' + esc(r.q.t) + '</div>' +
+          '<p class="qtext">' + fmt(r.q.q) + '</p>' +
           feedbackHtml(r.q, r.order, correct, r.picked.filter(function (p) { return correct.indexOf(p) === -1; }), why, false) +
           '</div>';
-      }).join('') : '');
+      }).join('') + '</div>' : '');
+
     var rt = d.getElementById('retry');
     if (rt) rt.onclick = function () { startTest(wrong.map(function (r) { return r.q; }), { retry: true }); };
     var nt = d.getElementById('newtest');
     if (nt) nt.onclick = showSetup;
     w.scrollTo(0, 0);
+
+    // Traducción dinámica de la revisión de preguntas falladas al inglés
+    if (isEn && wrong.length && w.ExamI18n && w.ExamI18n.translateQuestion) {
+      wrong.forEach(function (r) {
+        var why = (ex.why || {})[r.q.id] || [];
+        w.ExamI18n.translateQuestion(r.q, why, function (trQ, trWhy) {
+          var cardEl = view.querySelector('.card.review[data-qid="' + r.q.id + '"]');
+          if (cardEl) {
+            var correct = [].concat(trQ.a);
+            cardEl.innerHTML = '<div class="muted small">' + t('domain_label', 'Dominio') + ' ' + trQ.d + ' · ' + esc(trQ.t) + '</div>' +
+              '<p class="qtext">' + fmt(trQ.q) + '</p>' +
+              feedbackHtml(trQ, r.order, correct, r.picked.filter(function (p) { return correct.indexOf(p) === -1; }), trWhy || why, false);
+          }
+        });
+      });
+    }
   }
 
   /* ---------- Atajos de Teclado (Prueba) ---------- */
@@ -568,14 +771,18 @@
     var tr = getTracker(ex.appId);
     if (tr.unavailable || !w.StudyTrackerView) {
       view.innerHTML = examBannerHtml(ex) +
-        '<div class="card"><h2>Progreso no disponible</h2><p class="muted">No se pudo cargar <code>@fabianimv/study-tracker</code> desde el CDN. ' +
-        'Revisa tu conexión a internet y recarga la página.</p></div>';
+        '<div class="card"><h2>' + t('progress_not_available', 'Progreso no disponible') + '</h2><p class="muted">' +
+        t('progress_not_available_desc', 'No se pudo cargar <code>@fabianimv/study-tracker</code> desde el CDN. Revisa tu conexión a internet y recarga la página.') + '</p></div>';
       return;
     }
     view.innerHTML = examBannerHtml(ex) + '<div id="st-mount"></div>';
     var mount = d.getElementById('st-mount');
     var qById = {};
     ex.questions.forEach(function (q) { qById[q.id] = q; });
+
+    var localizedTexts = (w.ExamI18n && w.ExamI18n.progressTexts)
+      ? w.ExamI18n.progressTexts(ex.badge)
+      : Object.assign({}, PROGRESS_TEXTS, { title: 'Progreso · ' + ex.badge });
 
     progressView = w.StudyTrackerView.render(mount, tr, {
       topics: domainKeys(ex).map(function (k) {
@@ -587,10 +794,14 @@
       }),
       getQuestion: function (id) {
         var q = qById[id];
-        return q && { text: q.q, options: q.o, correct: [].concat(q.a) };
+        return q && {
+          text: stripTicks(q.q),
+          options: q.o.map(stripTicks),
+          correct: [].concat(q.a)
+        };
       },
-      locale: 'es',
-      texts: Object.assign({}, PROGRESS_TEXTS, { title: 'Progreso · ' + ex.badge }),
+      locale: getLang(),
+      texts: localizedTexts,
       fileName: 'progreso-' + ex.appId + '-' + new Date().toISOString().slice(0, 10) + '.json'
     });
   }
@@ -598,6 +809,7 @@
   /* ---------- Glosario ---------- */
   function showGlossary() {
     var ex = exam();
+    var isEn = getLang() === 'en';
     var all = (ex.glossary || []).slice().sort(function (a, b) { return a.term.localeCompare(b.term, 'es'); });
 
     // Extraer categorías únicas con conteo
@@ -610,13 +822,15 @@
     var cats = Object.keys(catCounts).sort(function (a, b) { return a.localeCompare(b, 'es'); });
     var activeCat = '';
 
-    var catButtonsHtml = '<button type="button" class="cat-pill active" data-cat="">Todas (' + all.length + ')</button>' +
+    var catButtonsHtml = '<button type="button" class="cat-pill active" data-cat="">' + t('glossary_all', { n: all.length }, 'Todas (' + all.length + ')') + '</button>' +
       cats.map(function (c) {
         return '<button type="button" class="cat-pill" data-cat="' + esc(c) + '">' + esc(c) + ' (' + catCounts[c] + ')</button>';
       }).join('');
 
+    var searchPlaceholder = t('glossary_search', { badge: esc(ex.badge) }, 'Buscar término o categoría en ' + esc(ex.badge) + '…');
+
     view.innerHTML = examBannerHtml(ex) +
-      '<input id="gsearch" type="search" placeholder="Buscar término o categoría en ' + esc(ex.badge) + '…">' +
+      '<input id="gsearch" type="search" placeholder="' + esc(searchPlaceholder) + '">' +
       '<div class="glossary-cats">' + catButtonsHtml + '</div>' +
       '<div id="glist"></div>';
 
@@ -632,12 +846,12 @@
       });
 
       var html = filtered.map(function (g) {
-        return '<div class="gitem"><b>' + esc(g.term) + '</b>' +
+        return '<div class="gitem" data-term="' + esc(g.term) + '"><b>' + fmt(g.term) + '</b>' +
           (g.cat ? ' <span class="muted small">· ' + esc(g.cat) + '</span>' : '') +
-          '<p>' + esc(g.def) + '</p>' +
-          (g.tip ? '<div class="gtip">💡 <b>Tip:</b> ' + esc(g.tip) + '</div>' : '') +
+          '<p class="gdef">' + fmt(g.def) + '</p>' +
+          (g.tip ? '<div class="gtip">💡 <b>' + t('glossary_tip', 'Tip:') + '</b> <span class="gtip-text">' + fmt(g.tip) + '</span></div>' : '') +
           '</div>';
-      }).join('') || '<p class="muted">Sin resultados.</p>';
+      }).join('') || '<p class="muted">' + t('glossary_empty', 'Sin resultados.') + '</p>';
 
       if (listEl) {
         listEl.innerHTML = html;
@@ -656,6 +870,24 @@
 
     if (input) input.oninput = paint;
     paint();
+
+    // Traducción dinámica al inglés para términos y definiciones del glosario
+    if (isEn && w.ExamI18n && w.ExamI18n.translateBatch) {
+      var defEls = view.querySelectorAll('.gitem .gdef');
+      var defTexts = [];
+      Array.prototype.forEach.call(defEls, function (el) {
+        defTexts.push(el.textContent);
+      });
+      if (defTexts.length) {
+        w.ExamI18n.translateBatch(defTexts, function (translated) {
+          Array.prototype.forEach.call(defEls, function (el, idx) {
+            if (translated && translated[idx]) {
+              el.innerHTML = fmt(translated[idx]);
+            }
+          });
+        });
+      }
+    }
   }
 
   /* ---------- Enrutador (Hash) y Pestañas ---------- */
@@ -716,8 +948,53 @@
     };
   });
 
+  /* ---------- Integración con ExamCloudSync ---------- */
+  function initCloudSync() {
+    // Inicializar los 4 trackers para que estén registrados en memoria
+    EXAM_ORDER.forEach(function (id) {
+      if (w.EXAMS && w.EXAMS[id]) {
+        getTracker(w.EXAMS[id].appId);
+      }
+    });
+
+    var onSyncMerge = function () {
+      if (currentTab === 'examenes') {
+        showHub();
+      } else if (currentTab === 'progreso') {
+        showProgress();
+      }
+    };
+
+    if (w.ExamCloudSync) {
+      if (typeof w.ExamCloudSync.registerTrackers === 'function') {
+        w.ExamCloudSync.registerTrackers(trackers, onSyncMerge);
+      }
+      if (typeof w.ExamCloudSync.init === 'function') {
+        try {
+          w.ExamCloudSync.init({
+            trackers: trackers,
+            onSyncMerge: onSyncMerge
+          });
+        } catch (e) {}
+      }
+    }
+
+    var syncBtn = d.getElementById('cloud-sync-btn');
+    if (syncBtn) {
+      syncBtn.onclick = function () {
+        if (w.ExamCloudSync && typeof w.ExamCloudSync.openModal === 'function') {
+          w.ExamCloudSync.openModal();
+        }
+      };
+    }
+  }
+
+  /* ---------- Inicialización General ---------- */
   initTheme();
+  initLang();
   initPicker();
+  initCloudSync();
   w.addEventListener('hashchange', syncFromHash);
   syncFromHash();
+
 })(window, document);
