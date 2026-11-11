@@ -91,1209 +91,1209 @@
   }
 ],
     questions: [
-  {
-    "id": "q-1",
-    "d": 1,
-    "t": "KRaft y Quórum de Metadatos",
-    "q": "Tu organización está migrando un clúster de Apache Kafka de 100 brokers desde ZooKeeper hacia KRaft (Kafka Raft Metadata Mode). Durante la fase de diseño para producción, el equipo de arquitectura debate la topología de los nodos y los roles a configurar mediante **process.roles**. ¿Cuál es la recomendación oficial de arquitectura para un clúster de este tamaño?",
-    "o": [
-      "Desplegar un quórum dedicado e independiente de 3 o 5 nodos configurados con **process.roles=controller** y configurar los 100 brokers con **process.roles=broker**, evitando mezclar roles en los mismos nodos.",
-      "Configurar los 100 nodos en modo combinado con **process.roles=broker,controller** para distribuir la carga del log de metadatos entre todos los servidores del clúster de forma homogénea.",
-      "Configurar un único nodo con **process.roles=controller** y 99 nodos con **process.roles=broker**, ya que KRaft no requiere consenso distribuido para gestionar la partición de metadatos interna.",
-      "Desplegar un número par de controladores (exactamente 4 nodos) con **process.roles=controller** para optimizar la paridad de votos en caso de partición de red entre dos centros de datos."
+      {
+        "id": "q-1",
+        "d": 1,
+        "t": "KRaft y Quórum de Metadatos",
+        "q": "Tu organización está migrando un clúster de Apache Kafka de 100 brokers desde ZooKeeper hacia KRaft (Kafka Raft Metadata Mode). Durante la fase de diseño para producción, el equipo de arquitectura debate la topología de los nodos y los roles a configurar mediante **process.roles**. ¿Cuál es la recomendación oficial de arquitectura para un clúster de este tamaño?",
+        "o": [
+          "Desplegar un quórum dedicado e independiente de 3 o 5 nodos con `process.roles=controller` y configurar los 100 brokers con `process.roles=broker`, aislando roles.",
+          "Configurar los 100 nodos en modo combinado con `process.roles=broker,controller` para distribuir el consenso del log `@metadata` entre todos los servidores del clúster de forma homogénea.",
+          "Configurar un único nodo con `process.roles=controller` y 99 nodos con `process.roles=broker`, asumiendo que KRaft delega la tolerancia a fallos de metadatos en el almacenamiento local.",
+          "Desplegar un número par de 4 controladores dedicados con `process.roles=controller` y 100 brokers, para equilibrar la votación del quórum equitativamente entre dos zonas de disponibilidad."
+        ],
+        "a": 0,
+        "e": "En entornos de producción de mediana y gran escala, mezclar los roles de broker y controller en los mismos nodos (**process.roles=broker,controller**) expone al quórum de metadatos a interferencias severas de I/O de disco, saturación de ancho de banda y pausas de Garbage Collection provocadas por el tráfico de datos de los clientes. La recomendación oficial es aislar 3 o 5 nodos dedicados con **process.roles=controller** ejecutando el consenso Raft sobre el tópico interno **@metadata**, mientras el resto opera como brokers puros."
+      },
+      {
+        "id": "q-2",
+        "d": 1,
+        "t": "High Watermark y LEO",
+        "q": "Un productor envía un mensaje a la partición 0 de un tópico con **replication.factor=3** y **min.insync.replicas=2**. El broker líder de la partición escribe el mensaje en su log local, actualizando su Log End Offset (LEO) de 104 a 105. Sin embargo, las dos réplicas follower que forman parte del ISR aún no han enviado su siguiente petición de fetch para copiar este registro. Un consumidor configurado con **isolation.level=read_uncommitted** realiza una llamada a **poll()**. ¿Podrá este consumidor leer el mensaje con offset 104?",
+        "o": [
+          "No, porque ningún consumidor puede leer por encima del High Watermark (HW), y el HW solo avanza cuando las réplicas del ISR confirman la replicación del registro.",
+          "Sí, porque con `isolation.level=read_uncommitted` el consumidor lee directamente hasta el Log End Offset (LEO) del líder sin esperar la replicación de los followers.",
+          "Sí, siempre que el productor haya configurado `acks=1` o `acks=0`, lo cual autoriza al broker líder a exponer el mensaje de inmediato en la llamada a `poll()` del cliente.",
+          "No, porque con `min.insync.replicas=2` las lecturas se redirigen obligatoriamente a una réplica follower del ISR hasta que el líder complete la sincronización local."
+        ],
+        "a": 0,
+        "e": "El High Watermark (HW) representa el offset del último registro que ha sido replicado en todas las réplicas pertenecientes al ISR. En Apache Kafka, ningún consumidor (incluso configurado con **isolation.level=read_uncommitted**) puede leer más allá del HW. Esto previene lecturas sucias (dirty reads): si el líder fallara antes de que los followers repliquen el offset 104, el nuevo líder elegido no contendría dicho offset, por lo que ningún cliente debe haberlo visto jamás."
+      },
+      {
+        "id": "q-3",
+        "d": 1,
+        "t": "In-Sync Replicas y replica.lag.time.max.ms",
+        "q": "En un clúster de Kafka con **replica.lag.time.max.ms=30000** (30 segundos), un broker follower que aloja una réplica de una partición crítica sufre una pausa prolongada de Garbage Collection (Stop-The-World) provocada por un heap mal dimensionado. La pausa dura 42 segundos, tiempo durante el cual el follower no envía ninguna petición FetchRequest al líder. ¿Qué acción ejecuta el broker líder transcurridos los 30 segundos?",
+        "o": [
+          "El líder expulsa a la réplica follower del conjunto de réplicas en sincronía (ISR), notificando al controlador para actualizar los metadatos de la partición.",
+          "El líder marca la partición como degradada y rechaza escrituras con `NotEnoughReplicasException`, aunque el resto de réplicas en el ISR sigan respondiendo a las peticiones.",
+          "El líder declara la partición en estado `Offline` y rechaza peticiones tanto de productores como de consumidores hasta completar la reconexión del broker y restaurar el quórum.",
+          "El líder transfiere de forma preventiva el liderazgo de la partición al siguiente follower para intentar restablecer la comunicación con el quórum KRaft."
+        ],
+        "a": 0,
+        "e": "El parámetro **replica.lag.time.max.ms** define el tiempo máximo que una réplica follower puede tardar en enviar una petición de fetch y mantenerse al día con el LEO del líder. Si transcurre ese tiempo sin actividad de sincronización, el líder detecta la anomalía y remueve al follower del ISR actualizando el estado de la partición en el quórum de metadatos (KRaft o ZK), permitiendo que las escrituras continúen normalmente si se cumple **min.insync.replicas**."
+      },
+      {
+        "id": "q-4",
+        "d": 1,
+        "t": "min.insync.replicas y Disponibilidad",
+        "q": "Un tópico de pagos críticos en producción está configurado con **replication.factor=3** y **min.insync.replicas=2**. Todos los productores envían transacciones con **acks=all** (-1). Durante una caída de red en un centro de datos, se desconectan simultáneamente 2 de los 3 brokers que alojan las réplicas de la partición 0, quedando únicamente el broker líder en el ISR (tamaño del ISR = 1). ¿Qué comportamiento observarán los productores y los consumidores sobre la partición 0?",
+        "o": [
+          "Los productores recibirán una excepción `NotEnoughReplicasException` y sus escrituras se rechazarán; los consumidores podrán seguir leyendo los mensajes confirmados hasta el High Watermark.",
+          "Tanto las operaciones de escritura de los productores como las operaciones de lectura de los consumidores fallarán de inmediato con `NotEnoughReplicasException` hasta restaurar el ISR.",
+          "Los productores continuarán escribiendo con éxito porque el líder degrada de forma transparente el nivel a `acks=1`, pero las lecturas de los consumidores quedarán pausadas.",
+          "Los productores quedarán bloqueados en el cliente hasta que expire `delivery.timeout.ms`, mientras que los consumidores recibirán un error `OffsetOutOfRangeException` continuo."
+        ],
+        "a": 0,
+        "e": "Cuando un productor envía con **acks=all** y el tamaño del ISR actual es menor que **min.insync.replicas** (en este caso 1 < 2), el broker líder rechaza la escritura con **NotEnoughReplicasException** (o **NotEnoughReplicasAfterAppendException**) para evitar comprometer la durabilidad pactada. Sin embargo, los consumidores no se ven bloqueados: pueden continuar leyendo todos los datos históricos que ya habían alcanzado el High Watermark antes del incidente."
+      },
+      {
+        "id": "q-5",
+        "d": 1,
+        "t": "Unclean Leader Election",
+        "q": "Un clúster de Kafka tiene configurado a nivel global **unclean.leader.election.enable=false**. Para una partición con **replication.factor=3**, el broker líder cae repentinamente y, al mismo tiempo, el único follower que formaba parte del ISR sufre una avería de hardware irreparable. El tercer broker del clúster aloja una réplica que estaba fuera del ISR debido a un desfase de 5.000 offsets. ¿Qué ocurre con la partición en este escenario?",
+        "o": [
+          "La partición se declara en estado `Offline` y rechaza lecturas y escrituras hasta que vuelva a estar en línea al menos una de las réplicas que formaban parte del ISR original.",
+          "El controlador promueve a la réplica fuera del ISR como nuevo líder para garantizar disponibilidad, truncando permanentemente los 5.000 offsets que no fueron replicados.",
+          "El controlador reasigna dinámicamente la partición a otro broker disponible del clúster y solicita a los productores retransmitir los últimos 5.000 registros mediante idempotencia.",
+          "La partición continúa operativa en modo de solo lectura atendida por la réplica rezagada, bloqueando únicamente nuevas escrituras de los productores hasta recuperar el ISR."
+        ],
+        "a": 0,
+        "e": "Con **unclean.leader.election.enable=false**, Kafka prioriza estrictamente la consistencia y la durabilidad de los datos sobre la disponibilidad. Si no queda ninguna réplica viva dentro del ISR, ninguna réplica rezagada (fuera del ISR) puede ser elegida como nuevo líder. Como consecuencia, la partición entra en estado **Offline** (rechazando lecturas y escrituras) hasta que al menos un miembro del ISR original se recupere, garantizando que jamás se pierdan datos confirmados."
+      },
+      {
+        "id": "q-6",
+        "d": 1,
+        "t": "Impacto de Unclean Leader Election forzada",
+        "q": "En el escenario anterior, la dirección del negocio exige que el servicio vuelva a operar de inmediato cueste lo que cueste y ordena al administrador ejecutar un comando dinámico para establecer **unclean.leader.election.enable=true** en el tópico. La réplica rezagada (con 5.000 offsets de retraso) es elegida como nuevo líder. ¿Qué consecuencia irreversible de integridad de datos se produce inmediatamente?",
+        "o": [
+          "Se pierden de forma permanente los 5.000 registros no replicados y, si el líder previo se recupera, truncará su log a la época del nuevo líder, descartando esos datos.",
+          "Los 5.000 registros faltantes se mueven al tópico de Dead Letter Queue (`__dead_letter`) del clúster para que los consumidores los reprocesen manualmente tras el incidente.",
+          "El nuevo líder entra en modo de solo lectura para preservar la consistencia hasta que un administrador ejecute `kafka-leader-election.sh` para forzar la resincronización.",
+          "Los consumidores conectados recibirán inmediatamente un error fatal `OffsetOutOfRangeException` y se desconectarán del grupo al detectar saltos en la numeración del log de la partición."
+        ],
+        "a": 0,
+        "e": "Activar **unclean.leader.election.enable=true** permite que una réplica fuera del ISR se convierta en líder para restaurar la disponibilidad. Sin embargo, todos los registros confirmados que residían en el líder original y que nunca llegaron a esta réplica rezagada se pierden de forma permanente. Cuando el antiguo líder se reinicia, detecta que el nuevo líder tiene una época de líder superior y trunca su propio log para igualar al nuevo líder, destruyendo los datos que previamente habían sido confirmados como exitosos."
+      },
+      {
+        "id": "q-7",
+        "d": 1,
+        "t": "Segmentos de Log y Ficheros de Índice",
+        "q": "Un broker de Kafka almacena 2 TB de registros en el directorio de datos de una partición de alto volumen. Un consumidor solicita leer a partir del offset lógico 450.210. ¿Cómo localiza el broker la posición física exacta del registro en el disco sin verse obligado a escanear linealmente gigabytes de datos en el archivo **.log**?",
+        "o": [
+          "Consulta el archivo de índice disperso `.index` en memoria mediante búsqueda binaria para ubicar la posición física en bytes más cercana y avanza secuencialmente en el archivo.",
+          "Consulta el archivo `.timeindex` para resolver el offset a través del timestamp y salta al desplazamiento físico indicado en el encabezado de compresión del segmento de datos.",
+          "Recorre el archivo de metadatos `leader-epoch-checkpoint` de la partición para determinar el byte offset exacto correspondiente al inicio del lote de registros.",
+          "Usa un filtro de Bloom cargado en el PageCache para verificar la existencia del offset y recupera el puntero de archivo desde el registro de control de la partición."
+        ],
+        "a": 0,
+        "e": "Kafka divide las particiones en segmentos y asocia a cada archivo de datos **.log** un archivo de índice disperso **.index**. Este archivo mapea offsets relativos a posiciones físicas en bytes (file pointers) dentro del archivo **.log**. Gracias a que el índice está ordenado y reside en el PageCache de Linux, el broker ejecuta una búsqueda binaria O(log N) para saltar al byte más próximo y luego recorre secuencialmente apenas unos pocos registros hasta el offset exacto, logrando lecturas ultra-eficientes."
+      },
+      {
+        "id": "q-8",
+        "d": 1,
+        "t": "Segment Roll y Políticas de Retención",
+        "q": "Un tópico de auditoría tiene configurada una retención por tiempo de 7 días (**retention.ms=604800000**). Sin embargo, al inspeccionar el almacenamiento del broker, el equipo de SRE descubre mensajes que tienen más de 16 días de antigüedad en el disco. Al revisar la configuración de segmentos, observan que **segment.bytes=1073741824** (1 GB) y **segment.ms=1814400000** (21 días), y el archivo **.log** actual apenas pesa 250 MB. ¿Por qué no se han eliminado los mensajes antiguos?",
+        "o": [
+          "Porque la retención solo evalúa segmentos cerrados; mientras el segmento activo no alcance `segment.bytes` ni `segment.ms`, no se rota y ningún mensaje dentro de él puede ser purgado.",
+          "Porque el parámetro `retention.check.interval.ms` del broker tiene precedencia sobre `retention.ms`, retrasando la limpieza hasta que el log alcance el límite global de tamaño en disco.",
+          "Porque la purga por tiempo requiere que los consumidores del grupo confirmen todos los offsets del segmento antes de que el hilo `LogCleaner` proceda a su eliminación física de disco.",
+          "Porque cuando coexisten políticas de retención, `segment.ms` actúa como valor mínimo obligatorio de permanencia en disco antes de habilitar el borrado por `retention.ms`."
+        ],
+        "a": 0,
+        "e": "En Kafka, el segmento activo (aquel en el que se están escribiendo los nuevos mensajes) nunca se elimina ni se compacta, independientemente de la antigüedad de los registros que contenga. Las políticas de retención (tanto por tiempo con **retention.ms** como por tamaño con **retention.bytes**) solo se evalúan y aplican sobre segmentos cerrados (inactivos). Para tópicos con bajo ritmo de publicación, es crucial ajustar **segment.ms** a un valor menor o igual a **retention.ms** para forzar el roll del segmento y permitir la purga oportuna."
+      },
+      {
+        "id": "q-9",
+        "d": 1,
+        "t": "Quórum de Controladores KRaft y Tolerancia a Fallos",
+        "q": "En una arquitectura KRaft para un entorno financiero regulado, se despliegan **5 nodos dedicados** con el rol de controladores (**process.roles=controller**). Basándote en el algoritmo de consenso Raft utilizado por KRaft, ¿cuál es el número mínimo de controladores que deben permanecer en línea y operativos para que el quórum pueda elegir un líder de metadatos y procesar cambios en el clúster (como creación de tópicos o reasignación de particiones)?",
+        "o": [
+          "Al menos 3 controladores (mayoría simple de (5/2) + 1), permitiendo tolerar la caída simultánea de hasta 2 nodos sin perder disponibilidad de metadatos.",
+          "Al menos 4 controladores, ya que el protocolo Raft de KRaft exige una supermayoría de dos tercios de votos para autorizar cambios en el log `@metadata`.",
+          "Al menos 2 controladores, siempre que el líder actual permanezca activo y se mantenga sincronizada la réplica observadora en la misma zona de red.",
+          "Los 5 controladores de forma estricta, debido a que cualquier partición de red en el quórum bloquea preventivamente las escrituras en el clúster."
+        ],
+        "a": 0,
+        "e": "KRaft se basa en el algoritmo de consenso distribuido Raft. Para un quórum de N nodos, el número de nodos activos requeridos para formar mayoría (quórum) es **floor(N/2) + 1**. Para N = 5, se requiere que al menos 3 controladores estén en línea y comunicados entre sí. Por lo tanto, el sistema puede tolerar la caída simultánea de hasta **(N - 1) / 2 = 2** controladores sin perder la capacidad de realizar cambios en los metadatos del clúster."
+      },
+      {
+        "id": "q-10",
+        "d": 1,
+        "t": "Rack Awareness y Distribución de Réplicas",
+        "q": "Estás desplegando un clúster de Kafka en AWS a través de 3 Zonas de Disponibilidad (us-east-1a, us-east-1b, us-east-1c). Quieres asegurarte de que para cualquier tópico con **replication.factor=3**, ninguna partición tenga más de una réplica ubicada en la misma Zona de Disponibilidad, garantizando que la caída total de una AZ no provoque pérdida de datos ni indisponibilidad. ¿Qué configuración debe definirse en cada broker?",
+        "o": [
+          "Configurar `broker.rack` en cada broker con el identificador de su zona, permitiendo que el asignador de réplicas distribuya las particiones entre zonas distintas.",
+          "Configurar `replica.selector.class` con `RackAwareReplicaSelector` en cada broker para que las réplicas se repartan dinámicamente según la topología de red de las zonas.",
+          "Definir `advertised.listeners` con el sufijo DNS de cada zona de disponibilidad y habilitar `zookeeper.rack.enable=true` en la configuración global de todos los brokers del clúster.",
+          "Establecer `min.insync.replicas=3` a nivel global para forzar que el quórum de réplicas requiera la confirmación obligatoria de brokers en distintas zonas."
+        ],
+        "a": 0,
+        "e": "La propiedad **broker.rack** habilita el mecanismo de Rack Awareness en Apache Kafka. Al indicar a qué rack o zona de disponibilidad pertenece cada broker, el algoritmo de asignación de réplicas distribuye automáticamente las réplicas de cada partición entre distintos racks lógicos. De este modo, para **replication.factor=3** repartido en 3 AZs distintas, se garantiza que cada réplica resida en una AZ diferente, protegiendo al clúster contra caídas completas de un datacenter o AZ."
+      },
+      {
+        "id": "q-11",
+        "d": 1,
+        "t": "Particionado y Capacidad de Paralelismo",
+        "q": "Una plataforma de streaming de video necesita procesar una tasa sostenida de **60.000 eventos por segundo**. Se ha medido rigurosamente que cada instancia de microservicio consumidor puede procesar de forma estable un máximo de **3.000 eventos por segundo**. El tópico fue creado originalmente con **8 particiones**. El equipo de operaciones despliega un deployment en Kubernetes con **20 pods** del mismo Consumer Group. ¿Cuál será el throughput real alcanzado y cómo debe resolverse el cuello de botella?",
+        "o": [
+          "Solo 8 pods procesarán datos (24.000 eps en total) quedando 12 pods ociosos; se deben ampliar las particiones del tópico al menos a 20 para permitir el consumo simultáneo en paralelo.",
+          "Los 20 pods consumirán en paralelo alcanzando 60.000 eps, ya que Kafka asigna múltiples consumidores a cada partición si pertenecen al mismo grupo de despliegue en el clúster.",
+          "El Consumer Group fallará con una excepción `IllegalStateException` en el broker, ya que Kafka prohíbe tener más miembros activos que particiones en el tópico.",
+          "Se alcanzarán 60.000 eps pero con duplicación masiva de eventos, ya que los 12 pods sobrantes leerán en modo concurrente las particiones ya asignadas."
+        ],
+        "a": 0,
+        "e": "Una regla fundamental del protocolo de Consumer Groups en Apache Kafka es que cada partición de un tópico es asignada a **a lo sumo un consumidor** dentro de un mismo grupo. Por tanto, con 8 particiones, como máximo 8 instancias pueden procesar datos en paralelo (8 × 3.000 = 24.000 eps); las 12 instancias restantes permanecen ociosas en espera pasiva. Para alcanzar los 60.000 eps, el tópico debe escalarse a al menos 20 particiones (20 × 3.000 = 60.000 eps)."
+      },
+      {
+        "id": "q-12",
+        "d": 1,
+        "t": "Zero-Copy y Rendimiento de I/O en Linux",
+        "q": "Una de las razones primordiales por las cuales un broker de Apache Kafka puede entregar millones de mensajes por segundo con un consumo de CPU excepcionalmente bajo es el uso de la técnica **Zero-Copy**. ¿Cómo opera esta optimización a nivel del sistema operativo y qué llamada al sistema de Linux utiliza el broker para transferir datos desde los segmentos de log hacia los sockets de red de los consumidores?",
+        "o": [
+          "Utiliza la syscall `sendfile()`, que transfiere datos del PageCache del kernel al socket de red mediante DMA, sin copiarlos al espacio de usuario de la JVM.",
+          "Utiliza `mmap()` junto con buffers off-heap de Java NIO, permitiendo que la JVM transfiera bloques de datos desde el disco a la interfaz de red sin cambios de contexto.",
+          "Utiliza la syscall `splice()` para conectar descriptores de archivo a través de pipes del kernel, obligando a descomprimir los lotes en memoria intermedia antes de transmitirlos por el socket.",
+          "Utiliza `epoll()` con llamadas `readv()` y `writev()` vectorizadas, delegando la serialización directa de bytes en el hardware de la controladora de red."
+        ],
+        "a": 0,
+        "e": "En arquitecturas tradicionales, leer de disco y enviar por red requiere 4 cambios de contexto y 4 copias de datos (disco -> kernel buffer -> user space JVM -> socket buffer -> NIC). Con la llamada al sistema **sendfile()** de Linux (Zero-Copy), los datos se transfieren por DMA directamente desde el PageCache del kernel al socket de red de la interfaz física, sin cruzar jamás la frontera al espacio de usuario de la JVM. Esto elimina el uso innecesario de memoria en el heap y libera ciclos de CPU."
+      },
+      {
+        "id": "q-13",
+        "d": 2,
+        "t": "Garantías de Durabilidad en Productores",
+        "q": "Una plataforma bancaria procesa transferencias monetarias de alto valor y simultáneamente recopila métricas de clics de navegación web. El equipo de desarrollo debe configurar dos productores de Kafka independientes. Para las transferencias bancarias no se tolera la pérdida de un solo evento bajo ninguna circunstancia; para las métricas web se busca la mínima latencia posible y se tolera pérdida ocasional. ¿Cuáles son las configuraciones de **acks** recomendadas para cada caso?",
+        "o": [
+          "Transferencias: `acks=all` (-1) con reintentos activos; Métricas web: `acks=0` en modo fire-and-forget.",
+          "Transferencias: `acks=1` con reintentos infinitos; Métricas web: `acks=all` con `delivery.timeout.ms=0`.",
+          "Transferencias: `acks=all` con `retries=0`; Métricas web: `acks=1` con compresión `snappy` obligatoria.",
+          "Transferencias: `acks=2` con quórum de réplicas; Métricas web: `acks=-1` con buffer de envío deshabilitado."
+        ],
+        "a": 0,
+        "e": "Para transacciones bancarias críticas donde la pérdida de datos es inaceptable, la configuración mandatoria es **acks=all** (o -1), obligando al broker líder a esperar la confirmación de todas las réplicas en el ISR antes de responder ACK al productor, combinada con reintentos prácticamente infinitos (**retries=Integer.MAX_VALUE** o **delivery.timeout.ms** alto). Para métricas descartables donde prima la mínima latencia y el máximo throughput, **acks=0** envía los paquetes en modo fire-and-forget sin esperar confirmación alguna."
+      },
+      {
+        "id": "q-14",
+        "d": 2,
+        "t": "Idempotencia de Productor (KIP-98)",
+        "q": "Un productor envía un mensaje crítico al broker. El broker persiste el mensaje en disco exitosamente, pero una micro-interrupción de red impide que la respuesta de ACK llegue de regreso al productor. Al expirar el timeout, el productor reintenta automáticamente el envío del mismo mensaje. Si el productor tiene configurado **enable.idempotence=true**, ¿cómo evita el broker registrar un mensaje duplicado?",
+        "o": [
+          "El broker valida el Producer ID (PID) y el Sequence Number asignado por el productor; si ya fueron persistidos, confirma el ACK sin duplicar el registro en el log local de la partición.",
+          "El broker calcula una suma de verificación CRC32 del payload y descarta el mensaje entrante si coincide con algún registro almacenado en el índice de la partición.",
+          "El broker rechaza el mensaje duplicado comparando el offset asignado por el cliente con el High Watermark actual de la partición antes de escribirlo en disco.",
+          "El broker delega la detección en el quórum KRaft, que mantiene una tabla temporal en memoria con los hashes de las transacciones procesadas en los últimos 60 segundos."
+        ],
+        "a": 0,
+        "e": "Con **enable.idempotence=true**, el broker asigna a cada productor un Producer ID (PID) único durante el inicio. Por cada partición, el productor mantiene un número de secuencia entero monotónico por mensaje o lote. El broker guarda en memoria los últimos números de secuencia procesados: si recibe un mensaje con un PID y Sequence Number que ya tiene registrado, reconoce que se trata de un reintento por fallo de red, devuelve ACK al productor y descarta escribir el duplicado en el commit log."
+      },
+      {
+        "id": "q-15",
+        "d": 2,
+        "t": "Ordenamiento y max.in.flight.requests con Idempotencia",
+        "q": "Tradicionalmente, para garantizar que los mensajes no se desordenen en caso de reintentos por fallo de red, los ingenieros de Kafka debían configurar **max.in.flight.requests.per.connection=1**, lo que penalizaba severamente el throughput. ¿Por qué en versiones modernas de Apache Kafka con **enable.idempotence=true** es posible configurar **max.in.flight.requests.per.connection** hasta **5** manteniendo una estricta garantía de orden?",
+        "o": [
+          "Porque el broker rastrea hasta 5 números de secuencia por PID y partición; si un lote se desordena por reintentos, lo rechaza con `OutOfOrderSequenceException` preservando el orden.",
+          "Porque el cliente suspende la transmisión en el socket TCP y almacena en buffer las peticiones siguientes hasta recibir la confirmación de la petición más antigua enviada en el pipeline.",
+          "Porque el broker bufferiza las peticiones entrantes en una cola de prioridad basada en el timestamp de creación del registro antes de persistirlas secuencialmente en el log de la partición.",
+          "Porque el protocolo de red de KRaft intercepta los lotes en tránsito y reasigna dinámicamente los offsets lógicos en el quórum de controladores antes del guardado físico."
+        ],
+        "a": 0,
+        "e": "Con idempotencia habilitada, el broker rastrea hasta 5 peticiones en vuelo por partición validando los números de secuencia. Si el lote 0 sufre un fallo transitorio de red y se reintenta mientras el lote 1 ya está en tránsito, el broker no aceptará el lote 1 hasta que el lote 0 haya sido persistido secuencialmente (o arrojará **OutOfOrderSequenceException** si se produce un salto inesperado), garantizando el orden perfecto de llegada sin reducir el paralelismo de red a 1."
+      },
+      {
+        "id": "q-16",
+        "d": 2,
+        "t": "Transacciones EOS y transactional.id",
+        "q": "Una aplicación de procesamiento financiero implementa el patrón **consume-transform-produce** para transferir saldo entre dos cuentas representadas en diferentes tópicos. Para garantizar semántica Exactly-Once (EOS), el desarrollador inicializa el productor con un **transactional.id** estático y delimita el procesamiento con **beginTransaction()** y **commitTransaction()**. ¿Cuál es el rol del componente **Transaction Coordinator** en el broker durante este flujo?",
+        "o": [
+          "Ejecuta un Two-Phase Commit registrando el estado en `__transaction_state` y escribiendo marcadores de control atómicos (COMMIT/ABORT) en las particiones de datos.",
+          "Bloquea temporalmente el acceso de lectura en las particiones participantes para evitar que otros consumidores lean registros incompletos durante el procesamiento.",
+          "Retiene los mensajes transaccionales en un buffer off-heap en el broker hasta recibir el commit final, evitando escrituras previas en los segmentos de disco.",
+          "Supervisa los números de secuencia del productor y descarta automáticamente duplicados en el log `@metadata` sin intervenir en las particiones de usuario."
+        ],
+        "a": 0,
+        "e": "El Transaction Coordinator (un broker asignado en función del hash del **transactional.id**) lidera una partición del tópico interno **__transaction_state**. Gestiona el ciclo de vida de la transacción mediante un protocolo Two-Phase Commit distribuido: registra las particiones involucradas, anota el estado inicial (Ongoing), y al recibir el commit, escribe marcadores de control atómicos (**Control Markers: COMMIT/ABORT**) en las particiones de destino antes de marcar la transacción como Complete."
+      },
+      {
+        "id": "q-17",
+        "d": 2,
+        "t": "Nivel de Aislamiento en Consumidores (read_committed)",
+        "q": "Una transacción en un productor incluye 100 mensajes en el tópico **transactions**. A mitad del proceso, una llamada a un servicio externo falla y la aplicación ejecuta **abortTransaction()**, lo que provoca que el Transaction Coordinator escriba un marcador de control **ABORT** en la partición. Un consumidor que está leyendo de este tópico tiene configurado **isolation.level=read_uncommitted**. ¿Qué observará este consumidor?",
+        "o": [
+          "Leerá los 100 mensajes de la transacción abortada con normalidad, ya que `read_uncommitted` entrega todos los registros hasta el High Watermark sin filtrar transacciones.",
+          "Omitirá de forma transparente los 100 mensajes abortados, ya que el broker los elimina físicamente del segmento de log tan pronto como procesa el marcador ABORT recibido.",
+          "Recibirá una excepción `TransactionAbortedException` en la llamada a `poll()` y deberá restablecer su offset manualmente al inicio de la transacción.",
+          "Recibirá los 100 registros con su clave original pero con el payload sustituido por un valor nulo (`tombstone`), requiriendo validación en la aplicación."
+        ],
+        "a": 0,
+        "e": "Por defecto, los consumidores operan con **isolation.level=read_uncommitted**, lo que significa que leen todos los mensajes que han alcanzado el High Watermark, ignorando si pertenecen a transacciones abiertas, committeadas o abortadas. Para ignorar mensajes abortados y procesar únicamente datos de transacciones exitosamente finalizadas, los consumidores deben configurarse estrictamente con **isolation.level=read_committed**."
+      },
+      {
+        "id": "q-18",
+        "d": 2,
+        "t": "Mecánica de Batching: linger.ms y batch.size",
+        "q": "Un microservicio productor publica eventos con una configuración de **batch.size=32768** (32 KB) y **linger.ms=10**. La aplicación envía un primer mensaje de 500 bytes hacia la partición 2 y luego se queda inactiva sin producir ningún otro evento. ¿En qué momento se transmitirá físicamente ese mensaje a través de la red hacia el broker?",
+        "o": [
+          "Se transmitirá al expirar el temporizador de 10 ms de `linger.ms`, ya que el mensaje no llena el buffer de 32 KB y el productor espera por más eventos.",
+          "Inmediatamente en 0 ms, porque el primer registro enviado hacia una partición vacía ignora `linger.ms` para minimizar la latencia de arranque del cliente.",
+          "Quedará retenido indefinidamente en el acumulador del cliente hasta que la aplicación publique suficientes eventos para completar el umbral de `batch.size`.",
+          "Se transmitirá cuando transcurra el tiempo de `delivery.timeout.ms` (por defecto 120 segundos), momento en el cual el lote se descarga por timeout de entrega."
+        ],
+        "a": 0,
+        "e": "El productor de Kafka envía un lote de registros por partición cuando se cumple cualquiera de dos condiciones (lo que ocurra primero): el tamaño acumulado alcanza **batch.size**, o transcurre el tiempo especificado en **linger.ms**. Como el mensaje de 500 bytes no alcanza los 32 KB, el productor retiene el mensaje esperando acumular más datos hasta que el temporizador de **linger.ms** (10 ms) expira, disparando el envío inmediato del lote."
+      },
+      {
+        "id": "q-19",
+        "d": 2,
+        "t": "Compresión de Mensajes en el Productor",
+        "q": "Una arquitectura de ingesta de logs en la nube genera mensajes JSON con un tamaño promedio de 80 KB. Se configura en el productor **compression.type=lz4**. Al monitorear la infraestructura, ¿en qué componente se ejecuta el cómputo de compresión y descompresión de los datos, y qué impacto tiene en los brokers?",
+        "o": [
+          "La compresión ocurre en el productor y la descompresión en el consumidor; los brokers almacenan y reenvían los lotes sin descomprimir, minimizando el consumo de CPU y red en el clúster.",
+          "El productor envía los datos en texto plano y el broker líder realiza la compresión LZ4 al escribir en disco, mientras que los followers replican sin volver a comprimir.",
+          "El productor comprime el mensaje, pero el broker líder debe descomprimir cada lote para validar las claves y recalcular el offset relativo en el archivo `.index`.",
+          "La compresión se ejecuta en la controladora de red del broker mediante aceleración TCP Offload, transmitiendo los bloques comprimidos sin intervención de la JVM."
+        ],
+        "a": 0,
+        "e": "En Kafka, la compresión es de extremo a extremo: el cliente productor comprime el lote de registros completo en memoria antes de transmitirlo por el socket de red, y el cliente consumidor lo descomprime al leerlo. El broker simplemente almacena los bytes comprimidos directamente en el log de disco y los transmite a los consumidores usando **sendfile()** sin descomprimirlos, preservando la CPU del broker (salvo que se configuren esquemas o transformaciones incompatibles entre tópicos)."
+      },
+      {
+        "id": "q-20",
+        "d": 2,
+        "t": "Sticky Partitioner (KIP-480)",
+        "q": "Una aplicación publica eventos de sensores que no tienen una clave de negocio definida, por lo que todos los mensajes se envían con **key=null** hacia un tópico con 16 particiones. En versiones anteriores de Kafka, el particionador por defecto distribuía los mensajes uno a uno en round-robin registro a registro, produciendo micro-lotes ineficientes. ¿Cómo resuelve este problema el **Sticky Partitioner**?",
+        "o": [
+          "Agrupa mensajes sucesivos sin clave en una misma partición hasta llenar `batch.size` o cumplir `linger.ms`, rotando luego a otra partición para maximizar el batching.",
+          "Asigna de forma fija todos los mensajes con clave nula a la primera partición del tópico para evitar fragmentación en el almacenamiento PageCache de los diferentes brokers.",
+          "Genera un UUID v4 sintético en memoria para cada registro sin clave y aplica el hash Murmur2, garantizando una dispersión estadística homogénea e instantánea.",
+          "Distribuye los mensajes en round-robin a nivel de conexión TCP, enviando un único registro por paquete de red hacia el broker que tenga menor latencia observada en las peticiones previas."
+        ],
+        "a": 0,
+        "e": "El Sticky Partitioner (introducido en KIP-480) mejora radicalmente el rendimiento de mensajes sin clave (**key=null**). En lugar de dispersar cada mensaje individual a una partición distinta en round-robin puro (lo que creaba batches diminutos de 1 mensaje con alta sobrecarga de red), el Sticky Partitioner se adhiere (sticks) a una partición específica hasta que el lote se llena o vence **linger.ms**, logrando lotes más densos y reduciendo sustancialmente la latencia de extremo a extremo."
+      },
+      {
+        "id": "q-21",
+        "d": 2,
+        "t": "Confluent Schema Registry Wire Format",
+        "q": "Un servicio legacy intenta consumir mensajes de un tópico gobernado por Confluent Schema Registry utilizando un deserializador genérico de texto plano (**StringDeserializer**). La aplicación falla inmediatamente con caracteres extraños al inicio de cada mensaje. Al examinar el payload binario crudo con un visor hexadecimal, los ingenieros ven los primeros bytes: **[0x00, 0x00, 0x00, 0x00, 0x2A]**. ¿Qué representan exactamente estos 5 bytes según el Confluent Wire Format?",
+        "o": [
+          "El primer byte es el Magic Byte (0x00) de Confluent y los 4 bytes siguientes corresponden al Schema ID (el entero 42 en formato Big-Endian) registrado en Schema Registry.",
+          "Los 5 bytes representan un checksum CRC32 extendido utilizado por el cliente para verificar la integridad de la cabecera del mensaje ante posibles fallos de red en el socket.",
+          "Corresponden al identificador numérico del broker líder seguido del índice relativo de partición física asignado durante el envío por el particionador del cliente en el protocolo de red.",
+          "Indican una marca temporal UNIX truncada a 40 bits que define el instante exacto de creación del registro antes de aplicarle la compresión configurada en el cliente."
+        ],
+        "a": 0,
+        "e": "El estándar de serialización de Confluent Schema Registry (para Avro, Protobuf y JSON Schema) antepone exactamente 5 bytes de metadatos al payload serializado: el Byte 0 es el **Magic Byte (0x00)** que identifica el protocolo de Schema Registry, y los Bytes 1 al 4 corresponden al **Schema ID** expresado como un entero de 4 bytes en orden Big-Endian. Cualquier deserializador estándar que ignore esta cabecera fallará al interpretar los primeros 5 bytes como parte de los datos."
+      },
+      {
+        "id": "q-22",
+        "d": 2,
+        "t": "Compatibilidad BACKWARD en Schema Registry",
+        "q": "En una arquitectura orientada a eventos, un tópico utiliza un esquema Avro con la política de compatibilidad por defecto: **BACKWARD**. El equipo del servicio de pedidos desea actualizar el esquema agregando un nuevo campo opcional con un valor por defecto (**default**). Siguiendo las reglas estrictas de compatibilidad BACKWARD, ¿cuál debe ser el orden de despliegue en producción para evitar fallos?",
+        "o": [
+          "Se deben actualizar y desplegar primero todos los consumidores con el nuevo esquema, y posteriormente actualizar y desplegar los productores.",
+          "Se deben desplegar primero los productores para que emitan el nuevo campo, y posteriormente actualizar los consumidores cuando el esquema esté activo.",
+          "Deben desplegarse productores y consumidores simultáneamente en una ventana de mantenimiento, purgando previamente los datos pendientes del tópico.",
+          "Debe cambiarse primero el modo a `FORWARD` en Schema Registry, ya que `BACKWARD` prohíbe añadir nuevos campos aunque definan valores por defecto."
+        ],
+        "a": 0,
+        "e": "La compatibilidad **BACKWARD** garantiza que los consumidores que utilizan el nuevo esquema puedan procesar correctamente los datos generados con esquemas anteriores. Por lo tanto, el orden mandatorio de despliegue exige **actualizar primero a los consumidores** (estos podrán seguir leyendo los mensajes viejos que los productores aún emiten, aplicando el valor por defecto al campo nuevo) y, una vez que todos los consumidores soporten el nuevo esquema, **actualizar a los productores**."
+      },
+      {
+        "id": "q-23",
+        "d": 2,
+        "t": "Compatibilidad FULL en Schema Registry",
+        "q": "Una organización global cuenta con decenas de equipos autónomos que despliegan microservicios de forma continua e independiente (CI/CD). La gerencia de arquitectura exige una política en Confluent Schema Registry que garantice que cualquier equipo pueda desplegar productores o consumidores en **cualquier orden**, asegurando que los consumidores nuevos lean mensajes de productores viejos y los consumidores viejos lean mensajes de productores nuevos. ¿Qué modo de compatibilidad debe configurarse?",
+        "o": [
+          "Configurar el modo de compatibilidad `FULL` (o `FULL_TRANSITIVE`), que garantiza simultáneamente compatibilidad hacia atrás (`BACKWARD`) y hacia adelante (`FORWARD`) en las versiones.",
+          "Configurar el modo `FORWARD_TRANSITIVE`, ya que permite que los consumidores antiguos procesen sin interrupciones los eventos generados por nuevos esquemas futuros.",
+          "Configurar el modo `BACKWARD_TRANSITIVE` y habilitar la propiedad `allow.schema.evolution=true` en el archivo de configuración de Confluent Schema Registry.",
+          "Configurar el modo de validación `NONE` a nivel de subject, delegando la compatibilidad en la capacidad de los deserializadores Avro para ignorar campos desconocidos."
+        ],
+        "a": 0,
+        "e": "El modo de compatibilidad **FULL** (y su variante **FULL_TRANSITIVE**) combina las garantías de BACKWARD y FORWARD. Esto significa que un consumidor con un esquema nuevo puede leer datos producidos con esquemas antiguos, y un consumidor con un esquema antiguo puede leer datos producidos con el esquema nuevo. Esta simetría total desacopla por completo el ciclo de despliegue, permitiendo actualizar productores o consumidores en cualquier orden sin riesgo de incompatibilidad."
+      },
+      {
+        "id": "q-24",
+        "d": 2,
+        "t": "Ruptura de Enrutamiento al Modificar Particiones",
+        "q": "Un tópico de pagos está particionado por la clave **user_id** utilizando el particionador por defecto de Kafka (**murmur2**). Originalmente el tópico tenía **12 particiones**. Debido a un aumento del tráfico, un operador ejecuta el comando **kafka-topics.sh --alter** para incrementar las particiones a **24**. ¿Qué consecuencia inmediata sufre la aplicación respecto al orden de procesamiento por usuario?",
+        "o": [
+          "Los mensajes futuros para un mismo `user_id` pueden asignarse a una partición distinta (al cambiar la fórmula `hash(key) % N`), rompiendo el orden estricto por usuario.",
+          "Kafka redistribuirá de forma automática los mensajes históricos de las 12 particiones originales entre las 24 particiones para rebalancear el almacenamiento local.",
+          "Los productores fallarán con una excepción fatal `TopicAuthorizationException` al detectar que los metadatos locales de particiones no coinciden con los del clúster.",
+          "El orden por usuario se preserva porque Kafka mantiene un mapa histórico de claves en el archivo `meta.properties` para enrutar los mismos usuarios a las particiones previas."
+        ],
+        "a": 0,
+        "e": "El particionador por defecto asigna las particiones calculando **murmur2(key) % total_partitions**. Si el número total de particiones cambia (de 12 a 24), el resultado del módulo matemático cambia para la gran mayoría de las claves. A partir de ese instante, nuevos eventos para el usuario 'user-123' se escribirán en una partición distinta a donde están sus eventos históricos, rompiendo la garantía de orden secuencial por clave. Por ello, nunca se debe alterar el número de particiones de un tópico con clave sin planificar una migración."
+      },
+      {
+        "id": "q-25",
+        "d": 3,
+        "t": "Topología de Consumer Groups y Particionamiento",
+        "q": "Un tópico de eventos de facturación tiene **12 particiones**. Existen dos sistemas downstream independientes que consumen de este tópico: el servicio de facturación (**group.id=billing-app**) que cuenta con **4 instancias** activas, y el servicio de fraude en tiempo real (**group.id=fraud-app**) que cuenta con **12 instancias** activas. ¿Cómo asigna Kafka las particiones a los miembros de cada grupo?",
+        "o": [
+          "En `billing-app` cada instancia recibe 3 particiones y en `fraud-app` cada instancia recibe 1 partición; ambos grupos procesan de forma independiente todos los eventos.",
+          "Las 12 particiones se dividen entre las 16 instancias totales de ambos grupos mediante round-robin global, procesando cada mensaje una sola instancia en el clúster.",
+          "En `billing-app` 8 particiones quedan huérfanas sin procesar debido a que Kafka exige que el número de consumidores del grupo iguale el número de particiones del tópico.",
+          "En `fraud-app` solo 4 instancias reciben particiones para mantener sincronía con el grupo de facturación y evitar asimetrías de consumo en los brokers líderes."
+        ],
+        "a": 0,
+        "e": "El modelo de Consumer Groups de Apache Kafka desacopla completamente los grupos entre sí: cada grupo con un **group.id** diferente actúa como un suscriptor pub/sub independiente y recibe la totalidad de los datos del tópico. Dentro de cada grupo, el coordinador reparte las particiones equitativamente: en **billing-app** 12 particiones / 4 consumidores = 3 particiones por consumidor; en **fraud-app** 12 particiones / 12 consumidores = 1 partición por consumidor."
+      },
+      {
+        "id": "q-26",
+        "d": 3,
+        "t": "Comportamiento de auto.offset.reset",
+        "q": "Un equipo de ciencia de datos despliega una nueva aplicación analítica con un identificador de grupo nunca antes utilizado (**group.id=analytics-v1**) para consumir de un tópico con 10 millones de eventos acumulados durante el último año. El cliente se inicializa con la configuración **auto.offset.reset=earliest**. ¿Desde qué posición comenzará a leer la aplicación en su primer arranque?",
+        "o": [
+          "Desde el offset más antiguo disponible en cada partición (el inicio del log conservado según las reglas de retención), procesando todo el historial acumulado.",
+          "Desde el High Watermark actual de cada partición, consumiendo únicamente los nuevos mensajes producidos con posterioridad al inicio de la sesión del cliente en el clúster.",
+          "Fallará de inmediato con una excepción `NoOffsetForPartitionException` al no encontrar offsets confirmados previamente en el tópico `__consumer_offsets`.",
+          "Desde la marca temporal correspondiente a hace 24 horas en cada partición, aplicando la ventana de desplazamiento por defecto para grupos analíticos nuevos configurada en el broker líder."
+        ],
+        "a": 0,
+        "e": "La propiedad **auto.offset.reset** define la política a seguir cuando no existe un offset previamente comprometido en el tópico **__consumer_offsets** para ese grupo (o cuando el offset guardado ha sido eliminado por expirar la retención). Con **auto.offset.reset=earliest**, el consumidor se posiciona en el offset más bajo disponible en cada partición (el inicio del commit log), permitiendo procesar todo el historial existente de datos."
+      },
+      {
+        "id": "q-27",
+        "d": 3,
+        "t": "Riesgos del Commit Automático (enable.auto.commit)",
+        "q": "Un consumidor procesa pedidos en una base de datos relacional con **enable.auto.commit=true** y **auto.commit.interval.ms=5000** (5 segundos). Durante una ejecución, el consumidor extrae 100 mensajes en una llamada a **poll()**. Logra persistir 40 pedidos en la base de datos tras 3 segundos de procesamiento, pero en ese instante se produce un fallo catastrófico en el nodo (Kernel Panic) que apaga el proceso sin ejecutar ningún bloque finally. ¿Qué ocurrirá cuando el pod se reinicie y vuelva a unirse al grupo?",
+        "o": [
+          "Reprocesará los 40 pedidos ya insertados además de los 60 restantes, ya que el fallo ocurrió antes de vencer los 5 segundos de auto-commit y ningún offset fue confirmado.",
+          "Perderá de forma permanente los 60 pedidos no procesados, dado que el consumidor confirma de manera inmediata el lote completo en el broker al retornar del método `poll()`.",
+          "Retomará el procesamiento exactamente a partir del pedido 41, debido a que el broker monitoriza el flujo TCP del cliente e infiere qué registros fueron extraídos por la JVM.",
+          "El grupo entrará en bloqueo por `CommitFailedException` continuo, debido a que Kafka detecta transacciones inconsistentes entre la base de datos externa y el broker."
+        ],
+        "a": 0,
+        "e": "Con **enable.auto.commit=true**, los offsets solo se comprometen periódicamente durante las llamadas a **poll()** si ha transcurrido el intervalo de 5 segundos. Como el crash ocurrió a los 3 segundos, ningún commit fue enviado por los 100 registros leídos. Al reiniciarse, el consumidor recupera el último offset confirmado en el broker y vuelve a solicitar los mismos 100 mensajes, provocando el reprocesamiento duplicado de los 40 pedidos ya guardados (semántica At-Least-Once no idempotente)."
+      },
+      {
+        "id": "q-28",
+        "d": 3,
+        "t": "commitSync vs. commitAsync y Reintentos",
+        "q": "Un desarrollador de Kafka busca maximizar el throughput reemplazando **commitSync()** por **commitAsync()**. Para evitar pérdida de datos, decide implementar un callback en **commitAsync()** que, en caso de recibir un error transitorio de red, ejecuta inmediatamente un nuevo reintento del commit con ese mismo offset fallido. ¿Por qué este patrón de reintentos en **commitAsync()** se considera un grave antipatrón en producción?",
+        "o": [
+          "Si el commit del offset 200 falla pero uno posterior confirma el 300, un reintento tardío del 200 sobrescribiría el 300 en `__consumer_offsets`, provocando un retroceso y reprocesamiento masivo.",
+          "Porque los reintentos ejecutados dentro del callback de `commitAsync()` bloquean el hilo principal de la aplicación cliente, anulando las ventajas de concurrencia asíncrona.",
+          "Porque el broker rechaza peticiones asíncronas de commit si provienen del mismo hilo cliente sin haber recibido antes una confirmación previa de sincronización.",
+          "Porque el protocolo de Kafka prohíbe el uso de callbacks en operaciones de consumidor cuando la propiedad `enable.auto.commit` se encuentra configurada en falso."
+        ],
+        "a": 0,
+        "e": "**commitAsync()** no reintenta deliberadamente por diseño arquitectónico. Considera la secuencia: la petición para confirmar el offset 200 falla por un parpadeo de red, pero 50 ms después una nueva petición para confirmar el offset 300 tiene éxito. Si el callback reintenta el commit del offset 200 después de que el offset 300 ya fue persistido, el broker sobrescribirá el progreso con 200, provocando que si el consumidor se reinicia vuelva a reprocesar todo desde 200 en adelante."
+      },
+      {
+        "id": "q-29",
+        "d": 3,
+        "t": "max.poll.interval.ms y Rebalance Storms",
+        "q": "Un consumidor extrae lotes con la configuración por defecto de **max.poll.records=500**. Cada mensaje requiere una llamada HTTP a un servicio legacy de calificación crediticia que tarda en promedio 200 ms por registro (un total de 100 segundos para el lote completo). El parámetro **max.poll.interval.ms** está configurado en su valor por defecto de 300.000 ms (5 minutos). En una campaña de marketing, el servicio legacy se degrada y pasa a tardar 800 ms por registro (400 segundos para procesar el lote). ¿Qué síntoma crítico observará el equipo en el consumidor?",
+        "o": [
+          "El consumidor excede `max.poll.interval.ms` sin llamar a `poll()`, por lo que el coordinador lo declara muerto y lanza un rebalanceo continuo (Rebalance Storm).",
+          "El hilo de heartbeat mantendrá la sesión activa en el broker sin inconvenientes, esperando pacientemente los 400 segundos hasta la siguiente invocación de `poll()`.",
+          "El broker cerrará la conexión TCP del cliente tras 60 segundos arrojando un error no recuperable `DisconnectException` y forzará la expulsión del pod en Kubernetes.",
+          "El coordinador del grupo reducirá dinámicamente el valor de `max.poll.records` a la mitad y continuará asignando lotes reducidos para evitar caídas de latencia."
+        ],
+        "a": 0,
+        "e": "El parámetro **max.poll.interval.ms** define el tiempo máximo que el hilo principal de procesamiento puede tardar entre dos invocaciones sucesivas de **poll()**. Aunque el hilo de fondo (Heartbeat Thread) continúe enviando latidos al broker, si el procesamiento del lote supera este límite, el cliente asume que está bloqueado o en deadlock y abandona el grupo deliberadamente. El coordinador inicia un rebalanceo asignando las particiones a otro consumidor, que también se bloqueará, generando una tormenta de rebalanceos continua."
+      },
+      {
+        "id": "q-30",
+        "d": 3,
+        "t": "session.timeout.ms vs. heartbeat.interval.ms",
+        "q": "En la configuración de un cliente consumidor de Kafka, ¿cuál es la diferencia de responsabilidades y la relación matemática recomendada entre **session.timeout.ms** y **heartbeat.interval.ms**?",
+        "o": [
+          "`session.timeout.ms` marca el tiempo sin latidos para declarar muerto al cliente; `heartbeat.interval.ms` es la cadencia de latidos y debe fijarse en `≤ 1/3` del timeout.",
+          "El parámetro `session.timeout.ms` controla el tiempo máximo de procesamiento de un lote en el hilo principal y debe ser siempre el triple de `heartbeat.interval.ms`.",
+          "El intervalo `heartbeat.interval.ms` fija la frecuencia con que el broker envía sondeos al cliente y debe coincidir exactamente con el valor de `session.timeout.ms`.",
+          "Ambos parámetros definen el intervalo de expiración de las credenciales SASL y deben configurarse con una relación matemática de paridad estricta de uno a uno en el cliente."
+        ],
+        "a": 0,
+        "e": "**session.timeout.ms** es el umbral de detección de fallos de nodo o pérdida de red en el Group Coordinator. Por su parte, **heartbeat.interval.ms** determina con qué frecuencia el hilo de heartbeat de fondo envía señales de vida al coordinador. La recomendación oficial es configurar **heartbeat.interval.ms** en como máximo **un tercio (1/3)** de **session.timeout.ms** (por ejemplo, 3 s frente a 10 s o 45 s) para tolerar pérdidas transitorias de paquetes de red sin disparar rebalanceos prematuros."
+      },
+      {
+        "id": "q-31",
+        "d": 3,
+        "t": "Rebalanceo Cooperativo Incremental (KIP-429)",
+        "q": "Una empresa experimenta caídas periódicas de rendimiento en sus consumidores cada vez que un nuevo pod se suma al Consumer Group debido a la política tradicional de rebalanceo Eager (Stop-The-World). El equipo decide actualizar su asignador a **CooperativeStickyAssignor**. ¿Cómo transforma este protocolo el comportamiento del rebalanceo?",
+        "o": [
+          "En lugar de revocar todas las particiones en masa paralizando el grupo, solo revoca y transfiere en una segunda fase las particiones que deban cambiar de dueño sin pausar el resto.",
+          "Mantiene las asignaciones activas indefinidamente y traslada la resolución de conflictos al quórum KRaft, eliminando las pausas de rebalanceo mediante réplicas provisionales del grupo.",
+          "Permite que múltiples consumidores compartan en paralelo la misma partición física mientras dura la asignación, sincronizando el avance de offsets mediante un bloqueo distribuido en el clúster.",
+          "Delega la asignación de particiones exclusivamente en el consumidor líder, quien redistribuye dinámicamente las particiones sin consultar ni notificar al Group Coordinator."
+        ],
+        "a": 0,
+        "e": "El protocolo tradicional Eager requería que todos los miembros del grupo renunciaran a todas sus particiones asignadas (pausa Stop-The-World) mientras el líder del grupo calculaba el nuevo reparto. Con **CooperativeStickyAssignor** (KIP-429), el rebalanceo es incremental: los consumidores conservan sus particiones actuales y continúan procesando datos; únicamente se revocan y migran aquellas particiones específicas que deben reasignarse para equilibrar la carga, eliminando los picos de latencia en despliegues."
+      },
+      {
+        "id": "q-32",
+        "d": 3,
+        "t": "Static Membership con group.instance.id (KIP-345)",
+        "q": "Un conjunto de 20 consumidores de Kafka se ejecuta en Kubernetes. Cada vez que se realiza un despliegue por Rolling Update, los pods se destruyen y recrean uno por uno, provocando 40 rebalanceos globales sucesivos que saturan el clúster. ¿Cómo permite la función de **Static Membership** mediante la propiedad **group.instance.id** mitigar este problema?",
+        "o": [
+          "Asigna un identificador estático a cada pod; si el pod se reinicia antes de expirar `session.timeout.ms`, el coordinador conserva sus particiones sin lanzar un rebalanceo.",
+          "Guarda el estado de asignación en un volumen persistente compartido (PVC), permitiendo que el pod nuevo monte las particiones locales sin registrarse nuevamente en el clúster Kafka.",
+          "Indica al Group Coordinator que ignore la desconexión y retenga los mensajes de esas particiones en un buffer temporal del broker hasta vencer `max.poll.interval.ms`.",
+          "Permite al pod sucesor usurpar inmediatamente las credenciales del pod previo mediante un token efímero SASL, manteniendo abierta la conexión TCP a través del Ingress del clúster de Kubernetes."
+        ],
+        "a": 0,
+        "e": "Con Static Membership (KIP-345), cada consumidor define un **group.instance.id** persistente (por ejemplo, el nombre del StatefulSet de Kubernetes: **consumer-pod-0**). Cuando un pod se reinicia, el coordinador no lanza un rebalanceo inmediato al perder el socket TCP; en su lugar, espera pacientemente durante **session.timeout.ms**. Si el pod vuelve a conectarse con el mismo **group.instance.id** antes de que expire dicho tiempo, retoma exactamente sus mismas particiones asignadas sin que ningún otro consumidor sufra interrupción alguna."
+      },
+      {
+        "id": "q-33",
+        "d": 3,
+        "t": "Commit Manual por Partición con OffsetAndMetadata",
+        "q": "Un microservicio procesa eventos complejos y desea asegurar semántica At-Least-Once estricta a nivel de registro sin esperar a terminar un lote completo de 500 mensajes devuelto por **poll()**. Si ocurre un fallo en el registro 150 de la partición 2, la aplicación desea que los offsets de los registros ya procesados en la partición 1 y en los primeros 149 de la partición 2 queden asegurados en el broker. ¿Qué técnica de la API del consumidor debe utilizarse?",
+        "o": [
+          "Invocar `commitSync(Map<TopicPartition, OffsetAndMetadata>)` indicando la partición y el siguiente offset (`offsetActual + 1`) tras completar cada unidad de trabajo procesada con éxito.",
+          "Invocar `seek(TopicPartition, offset)` tras procesar cada mensaje para actualizar de forma síncrona el offset confirmado en el tópico interno `__consumer_offsets` del broker.",
+          "Configurar `enable.auto.commit=true` con `auto.commit.interval.ms=1`, delegando en el hilo secundario la persistencia en tiempo real de cada mensaje confirmado.",
+          "Llamar al método `pause()` sobre la partición activa y ejecutar `commitAsync()` sin argumentos para forzar al broker a deducir el progreso granular del consumidor."
+        ],
+        "a": 0,
+        "e": "Para un control granular de offsets, Kafka permite invocar **commitSync(offsetsMap)** o **commitAsync(offsetsMap)** pasando un mapa que vincula cada **TopicPartition** con un objeto **OffsetAndMetadata**. Es una regla crítica recordar que el offset comprometido debe ser siempre el **siguiente offset que se espera leer** (es decir, el offset del último registro procesado con éxito + 1). De este modo, ante un fallo o rebalanceo, el consumidor retomará exactamente en el registro no procesado."
+      },
+      {
+        "id": "q-34",
+        "d": 3,
+        "t": "ConsumerRebalanceListener y Gestión de Estado",
+        "q": "Una aplicación utiliza un buffer en memoria para acumular agregaciones de métricas por partición antes de volcarlas a una base de datos Time-Series. Para evitar pérdida de datos o duplicados cuando se produce un rebalanceo del Consumer Group, ¿qué implementación del **ConsumerRebalanceListener** debe programarse?",
+        "o": [
+          "En `onPartitionsRevoked()`, volcar los datos pendientes del buffer hacia la base de datos y confirmar de forma síncrona los offsets con `commitSync()` antes de ceder las particiones.",
+          "En `onPartitionsAssigned()`, purgar el buffer local y ejecutar `seekToEnd()` en las particiones recibidas para sincronizar la lectura con los datos más recientes generados en el broker.",
+          "En `onPartitionsLost()`, forzar un volcado de emergencia del buffer a la base de datos y ejecutar `commitSync()` para garantizar la persistencia antes de reiniciar el cliente en el grupo.",
+          "En `onPartitionsRevoked()`, transmitir el buffer en memoria al nuevo consumidor asignado mediante una llamada gRPC directa antes de completar el rebalanceo en el clúster."
+        ],
+        "a": 0,
+        "e": "La interfaz **ConsumerRebalanceListener** expone los métodos **onPartitionsRevoked** y **onPartitionsAssigned**. El método **onPartitionsRevoked()** se invoca justo antes de que el consumidor pierda la propiedad de sus particiones asignadas. Es el momento crítico obligatorio para volcar cualquier estado o acumulador en memoria a un almacenamiento persistente y comprometer de forma síncrona (**commitSync**) los offsets procesados, asegurando que el nuevo dueño de la partición comience desde el punto exacto."
+      },
+      {
+        "id": "q-35",
+        "d": 3,
+        "t": "Asignación Manual con assign() vs. subscribe()",
+        "q": "Un proceso de auditoría forense debe leer periódicamente y de forma exclusiva los datos contenidos en la partición 3 del tópico **security-logs**, sin participar en el protocolo dinámico de Consumer Groups, sin registrarse en **__consumer_offsets** y sin disparar jamás rebalanceos a otras instancias. ¿Cómo debe configurarse el consumidor?",
+        "o": [
+          "Invocar el método `assign()` indicando manualmente el objeto `TopicPartition(\"security-logs\", 3)` en lugar de emplear el método de suscripción dinámica `subscribe()`.",
+          "Invocar `subscribe()` con una expresión regular que coincida con la partición 3 y omitir la propiedad obligatoria `group.id` en la configuración de inicialización del cliente.",
+          "Configurar `group.id=\"\"` (cadena vacía) y deshabilitar `enable.auto.commit`, utilizando el método ordinario `subscribe()` para recibir únicamente la partición 3.",
+          "Denegar mediante ACLs los permisos de `JoinGroup` y `SyncGroup` al usuario de auditoría, forzando al broker a entregar la partición 3 en modo de lectura directa sin registrar offsets en el clúster."
+        ],
+        "a": 0,
+        "e": "En la API de Kafka Consumer existen dos modos de suscripción mutuamente excluyentes: **subscribe()** (suscripción dinámica con Consumer Groups, balanceo automático de particiones y detección de fallos) y **assign()** (asignación estática y manual de particiones específicas). Al utilizar **assign()**, el consumidor no utiliza el Group Coordinator, no participa en rebalanceos y procesa exclusivamente las particiones indicadas de forma manual."
+      },
+      {
+        "id": "q-36",
+        "d": 3,
+        "t": "Tópico Interno __consumer_offsets y Group Coordinator",
+        "q": "Un ingeniero de soporte necesita diagnosticar un problema de coordinación de un Consumer Group con **group.id=\"payment-processor\"**. Para identificar exactamente cuál de los 30 brokers del clúster está actuando como el **Group Coordinator** de ese grupo, ¿qué cálculo interno realiza el protocolo de Kafka?",
+        "o": [
+          "Calcula `Math.abs(group.id.hashCode()) % partitions` en el tópico `__consumer_offsets`; el broker líder de dicha partición actúa formalmente como su Group Coordinator en el clúster.",
+          "Consulta el quórum KRaft, el cual selecciona dinámicamente un broker disponible y registra la afinidad de ese grupo en la partición interna `@metadata` compartida del clúster.",
+          "Asigna siempre de forma estática al broker con el identificador numérico más bajo (`broker.id=0`), concentrando todas las funciones de coordinación en el nodo raíz.",
+          "El cliente consumidor evalúa la latencia de red contra todos los brokers y selecciona como coordinador al nodo que responda con menor tiempo en el handshake TCP."
+        ],
+        "a": 0,
+        "e": "En Kafka, el tópico interno **__consumer_offsets** tiene por defecto **50 particiones** con política de compactación. Para determinar qué partición aloja los commits de un determinado grupo, se calcula el hash del **group.id** en módulo con el total de particiones (**abs(hashCode) % 50**). El broker líder de esa partición de **__consumer_offsets** asume automáticamente el rol de **Group Coordinator** para todos los miembros de ese grupo."
+      },
+      {
+        "id": "q-37",
+        "d": 4,
+        "t": "Kafka Connect: Standalone vs. Distributed",
+        "q": "Un equipo de ingeniería de datos diseña un pipeline de producción para capturar cambios (CDC con Debezium) desde 15 bases de datos PostgreSQL hacia Apache Kafka. Un ingeniero propone desplegar Kafka Connect en modo **Standalone** para simplificar la configuración inicial sin crear tópicos internos. ¿Por qué el modo Standalone es inaceptable para este entorno empresarial?",
+        "o": [
+          "Se ejecuta en un único proceso sin tolerancia a fallos ni escalabilidad horizontal; ante una caída, todas las tareas se detienen sin mecanismo de auto-recuperación.",
+          "El modo Standalone no admite conectores de tipo Source como Debezium, quedando restringido exclusivamente a la ingesta inversa mediante conectores de tipo Sink.",
+          "No admite integración con Confluent Schema Registry ni formatos binarios como Avro o Protobuf, forzando la conversión obligatoria de los eventos a texto plano sin tipar.",
+          "Exige que las bases de datos externas compartan el mismo segmento de red local con el worker y prohíbe el uso de autenticación de clientes mediante protocolos SASL."
+        ],
+        "a": 0,
+        "e": "El modo Standalone de Kafka Connect está pensado únicamente para pruebas locales y desarrollo. Se ejecuta en un proceso único, guarda los offsets y configuraciones en archivos planos locales en disco y no ofrece alta disponibilidad ni escalabilidad. En cambio, el modo **Distributed** forma un clúster de múltiples workers coordinados por el protocolo de grupos de Kafka, distribuye las tareas (Tasks) de forma balanceada y, si un worker cae, reasigna automáticamente sus tareas a los nodos supervivientes."
+      },
+      {
+        "id": "q-38",
+        "d": 4,
+        "t": "Tópicos Internos de Kafka Connect",
+        "q": "Al inicializar un clúster de Kafka Connect en modo distribuido, un administrador crea manualmente los tópicos internos. Por error, crea el tópico **config.storage.topic** con **3 particiones** en lugar de **1 partición**. Al arrancar los workers de Connect, el clúster falla y se niega a iniciar. ¿Por qué el tópico de configuraciones de Connect exige estrictamente tener **exactamente 1 partición**?",
+        "o": [
+          "Exige una única partición compactada para garantizar una vista coherente con orden lineal total y cronológico estricto de las configuraciones en todos los workers del clúster.",
+          "Porque los workers de Connect utilizan internamente un consumidor no concurrente que arroja `IllegalArgumentException` si el tópico interno tiene más de un segmento físico activo.",
+          "Porque el protocolo de rebalanceo de Connect exige que todas las tareas lean el log de configuración mediante `seekToBeginning()` en la partición 0 exclusivamente.",
+          "Porque distribuir configuraciones en múltiples particiones deshabilitaría automáticamente la compactación de logs (`cleanup.policy=compact`) en el broker líder de cada una de las particiones."
+        ],
+        "a": 0,
+        "e": "El tópico **config.storage.topic** almacena las configuraciones de todos los conectores y tareas del clúster de Connect con política de compactación (**cleanup.policy=compact**). Exige estrictamente **1 sola partición** para que todos los workers lean exactamente la misma secuencia ordenada de eventos de configuración. Si tuviera múltiples particiones, diferentes workers podrían observar actualizaciones de configuración en distinto orden relativo, rompiendo la coherencia distribuida del clúster."
+      },
+      {
+        "id": "q-39",
+        "d": 4,
+        "t": "Single Message Transforms (SMTs)",
+        "q": "Un conector Source JDBC extrae registros de una tabla de clientes que contiene una columna con datos personales sensibles denominada **credit_card_number**. La normativa de cumplimiento (PCI-DSS) prohíbe que los números de tarjeta sin enmascarar toquen los tópicos de Kafka. ¿Qué componente nativo y declarativo de Kafka Connect debe configurarse en el conector sin necesidad de programar un microservicio intermedio?",
+        "o": [
+          "Una Single Message Transform (SMT) con `MaskField$Value` en el conector para enmascarar o anular los dígitos sensibles antes de que el mensaje sea publicado en el broker.",
+          "Un convertidor de payload configurado con cifrado AES-256 en el worker de Connect para proteger el cuerpo del registro mediante claves gestionadas dinámicamente en un KMS externo.",
+          "Una regla de compatibilidad en Schema Registry que valide el esquema y descarte automáticamente cualquier registro que contenga números de tarjeta en texto plano.",
+          "Un Consumer Interceptor downstream que identifique el patrón numérico de la tarjeta de crédito y enmascare los dígitos antes de entregarlo a la capa de aplicación."
+        ],
+        "a": 0,
+        "e": "Las Single Message Transforms (SMTs) son transformaciones ligeras en memoria que se ejecutan directamente en los workers de Kafka Connect sobre cada registro individual. Para conectores Source, la transformación se aplica después de leer del sistema de origen y antes de escribir en Kafka. Utilizando la transformación estándar **MaskField$Value**, el conector enmascara el campo confidencial en vuelo, garantizando que el dato sensible jamás se persista en el commit log de Kafka."
+      },
+      {
+        "id": "q-40",
+        "d": 4,
+        "t": "Dead Letter Queue (DLQ) en Sink Connectors",
+        "q": "Un conector Sink de Kafka Connect transfiere eventos desde un tópico hacia un clúster de OpenSearch. De forma imprevista, una aplicación publica un mensaje con un JSON corrupto y malformado (Poison Pill). La tarea del conector falla inmediatamente y pasa a estado **FAILED**, deteniendo el consumo de la partición. ¿Cómo debe configurarse el conector para enviar automáticamente los registros inválidos a un tópico de aislamiento sin detener el flujo de datos?",
+        "o": [
+          "Configurar `errors.tolerance=all`, definir `errors.deadletterqueue.topic.name=opensearch-dlq` y habilitar cabeceras de contexto para registrar el motivo del error.",
+          "Establecer `errors.tolerance=none` y configurar `errors.retry.timeout=-1` para forzar al conector a reintentar indefinidamente sin arrojar excepciones fatales.",
+          "Configurar `errors.deadletterqueue.topic.name=opensearch-dlq` manteniendo el valor por defecto de `errors.tolerance=none` para no perder ningún registro corrupto.",
+          "Cambiar el convertidor a `ByteArrayConverter` en el worker y activar `auto.offset.reset=latest` para omitir de forma automática los lotes de registros no conformes."
+        ],
+        "a": 0,
+        "e": "Por defecto, Kafka Connect detiene las tareas ante el primer error (**errors.tolerance=none**). Al configurar **errors.tolerance=all**, el conector tolera registros defectuosos y continúa procesando el resto. Combinado con **errors.deadletterqueue.topic.name**, cualquier registro que falle en la deserialización o transformación se desvía de forma automática al tópico de DLQ indicado. Activar las cabeceras de contexto (**context.headers.enable=true**) añade metadata invaluable sobre el error, el tópico y el offset original."
+      },
+      {
+        "id": "q-41",
+        "d": 4,
+        "t": "Converters vs. Transforms en Kafka Connect",
+        "q": "En la arquitectura de Kafka Connect, ¿cuál es la diferencia fundamental de propósito entre un **Converter** (como **AvroConverter** o **JsonConverter**) y una **Single Message Transform (SMT)**?",
+        "o": [
+          "El Converter traduce entre el formato de bytes en Kafka y la Connect Data API en memoria; la SMT modifica campos, cabeceras o la estructura del registro en tránsito de forma síncrona.",
+          "El Converter solo puede utilizarse en tareas Source para serializar eventos, mientras que las SMTs operan exclusivamente en tareas Sink para filtrar registros corruptos.",
+          "El Converter gestiona la compresión y descompresión de red de los lotes, mientras que la SMT determina a qué broker físico se transmiten las peticiones de replicación.",
+          "El Converter valida la compatibilidad de esquemas en Schema Registry, mientras que la SMT es responsable de confirmar los offsets leídos en el tópico interno de estado."
+        ],
+        "a": 0,
+        "e": "Kafka almacena únicamente arrays de bytes planos (byte[]). El **Converter** tiene la misión exclusiva de serializar y deserializar: convierte bytes de Kafka en el modelo de objetos tipado de Kafka Connect (**ConnectRecord**) o viceversa. Por otro lado, las **SMTs** operan en memoria sobre ese **ConnectRecord** ya deserializado, permitiendo modificar campos, filtrar datos, cambiar claves o renombrar tópicos de destino de forma dinámica."
+      },
+      {
+        "id": "q-42",
+        "d": 4,
+        "t": "Kafka Streams: KStream vs. KTable",
+        "q": "Una plataforma de comercio electrónico construye un sistema analítico con la librería Kafka Streams. Tienen dos fuentes de datos: una cola ininterrumpida de clics de usuarios en la web (cada clic es un evento independiente) y un flujo de actualizaciones de perfiles de usuario (donde cada mensaje representa la dirección y país actualizados de un usuario identificado por su ID). ¿Qué abstracción de Kafka Streams debe utilizarse para modelar cada caso?",
+        "o": [
+          "Los clics se modelan como un `KStream` (flujo de hechos independientes); las actualizaciones de perfil como una `KTable` (vista del estado más reciente por clave).",
+          "Los clics se modelan como una `KTable` con retención por tiempo; las actualizaciones de perfil como un `GlobalKTable` sin clave para optimizar el consumo de memoria local.",
+          "Ambas fuentes deben modelarse obligatoriamente como `KStream`, delegando en una llamada a `transformValues()` la actualización manual del estado en memoria.",
+          "Los clics se modelan como un `SessionWindow` de 1 minuto y los perfiles como un `TimeWindows` de 24 horas, ya que Kafka Streams no soporta tablas sin ventana en topologías de agregación."
+        ],
+        "a": 0,
+        "e": "La dualidad Stream-Table es el núcleo conceptual de Kafka Streams. Un **KStream** representa un flujo inmutable de inserciones (hechos o eventos históricos como clics, transacciones o lecturas de sensores), donde cada registro se añade sin sobreescribir los anteriores. Una **KTable** representa un changelog o tabla materializada: cada registro es un UPSERT sobre la clave primaria, donde un nuevo valor reemplaza al anterior (y un valor nulo representa un DELETE)."
+      },
+      {
+        "id": "q-43",
+        "d": 4,
+        "t": "Requisito de Co-partitioning en Joins de Kafka Streams",
+        "q": "Una aplicación de Kafka Streams realiza un join interno entre un KStream (**orders**) y una KTable (**customers**). Ambos flujos utilizan el **customer_id** como clave y el mismo serializador. Sin embargo, el tópico **orders** tiene **12 particiones** y el tópico **customers** tiene **4 particiones**. Al iniciar la topología, ¿qué problema ocurrirá y cuál es la solución técnica requerida?",
+        "o": [
+          "Falta de co-particionado (co-partitioning), lo que causa una `TopologyException`; la solución es recrear o re-particionar ambos tópicos con el mismo número de particiones.",
+          "Kafka Streams multiplexará en memoria las 4 particiones de la tabla sobre las 12 particiones del stream de pedidos sin requerir cambios de infraestructura física ni re-particionado.",
+          "El join fallará con `SerializationException` al diferir la época del log de metadatos, requiriendo activar `auto.offset.reset=earliest` en la configuración de Streams.",
+          "El clúster reducirá automáticamente las particiones de orders a 4 mediante rebalanceo del grupo de streams para igualar la cardinalidad de la tabla de clientes."
+        ],
+        "a": 0,
+        "e": "Para que un join entre streams y tables funcione correctamente de forma local y paralela en Kafka Streams, ambos tópicos deben estar **co-particionados**: deben tener estrictamente el **mismo número de particiones** y la **misma función de particionamiento por clave**. Si tienen diferente número de particiones (12 frente a 4), los registros con la misma clave terminarán en tareas de procesamiento asignadas a diferentes instancias físicas, impidiendo que el join encuentre las coincidencias locales."
+      },
+      {
+        "id": "q-44",
+        "d": 4,
+        "t": "GlobalKTable y Joins sin Co-partitioning",
+        "q": "Necesitas enriquecer un KStream masivo de transacciones bancarias (50 particiones) con una tabla de referencia pequeña de códigos postales y sucursales (5 particiones). Deseas evitar el coste y la complejidad de re-particionar el stream masivo de transacciones. ¿Qué abstracción de Kafka Streams permite realizar este join directamente sin requerir que ambos tópicos estén co-particionados?",
+        "o": [
+          "Modelar la tabla de referencia como una `GlobalKTable`, la cual replica todas sus particiones en cada instancia local de la aplicación permitiendo joins sin co-particionado.",
+          "Modelar la tabla como un `KTable` estándar habilitando el parámetro `streams.join.broadcast=true` en la configuración de la topología para omitir el requisito de co-particionado.",
+          "Agrupar el stream mediante `repartition(Repartitioner.with(...))` delegando en RocksDB la distribución dinámica de las claves secundarias en tiempo de ejecución.",
+          "Utilizar una ventana deslizante (`SlidingWindows`) sobre el `KStream` para almacenar los códigos postales en un búfer circular en memoria compartida por los hilos."
+        ],
+        "a": 0,
+        "e": "Una **GlobalKTable** lee y almacena **la totalidad de las particiones** del tópico de referencia en el State Store local de **todas las instancias** de la aplicación. Gracias a esto, cualquier tarea que procese un registro del KStream puede buscar información en la GlobalKTable de forma local e instantánea, sin importar cómo esté particionado el stream de entrada y sin exigir co-particionado. El trade-off es que el dataset de la GlobalKTable debe ser lo suficientemente pequeño para caber en el disco de cada nodo."
+      },
+      {
+        "id": "q-45",
+        "d": 4,
+        "t": "State Stores de RocksDB y Changelog Topics",
+        "q": "Una topología de Kafka Streams calcula una ventana de agregación con estado (Stateful Processing). El equipo necesita garantizar alta resiliencia y un tiempo de recuperación mínimo (RTO) ante la caída de una de las instancias de la aplicación en producción. ¿Cómo persiste Kafka Streams el estado local y qué configuración acelera drásticamente el failover?",
+        "o": [
+          "Persiste localmente en `RocksDB` respaldado por un `changelog topic` compactado en Kafka; configurar `num.standby.replicas ≥ 1` mantiene réplicas en caliente listas para failover.",
+          "Almacena el estado en la memoria Heap de Java con checkpoints periódicos a un bucket S3; configurar `state.cleanup.delay.ms=0` fuerza la reconstrucción instantánea del State Store.",
+          "Escribe cada actualización de estado directamente en una base de datos externa como Cassandra, configurando `processing.guarantee=exactly_once_v2` para la sincronización.",
+          "Utiliza tablas volátiles en memoria con `state.store.type=in_memory`, configurando `replication.factor=3` en el broker para transferir el estado por Zero-Copy al fallar."
+        ],
+        "a": 0,
+        "e": "Kafka Streams utiliza por defecto **RocksDB** como almacenamiento local persistente off-heap para sus State Stores. Para tolerar fallos, cada mutación de estado se envía en paralelo a un **Changelog Topic interno** en Kafka con política de compactación. Si una instancia cae, otra instancia puede reconstruir el estado leyendo este changelog. Para lograr failover casi instantáneo (RTO de segundos), se configura **num.standby.replicas**, lo que hace que réplicas standby mantengan su RocksDB local sincronizado en caliente."
+      },
+      {
+        "id": "q-46",
+        "d": 4,
+        "t": "Ventanas Temporales: Tumbling vs. Hopping vs. Sliding",
+        "q": "Un sistema de monitorización industrial debe calcular el consumo energético promedio de una fábrica **cada 15 minutos en bloques independientes y no solapados** (ej. de 08:00 a 08:15, de 08:15 a 08:30). Ningún evento debe pertenecer a más de una ventana temporal. ¿Qué tipo de ventana de Kafka Streams debe seleccionarse?",
+        "o": [
+          "Una ventana temporal fija contigua sin solapamiento (`Tumbling Window`) de 15 minutos definida mediante `TimeWindows.ofSizeWithNoGrace(Duration.ofMinutes(15))`. ",
+          "Una ventana temporal con solapamiento periódico (`Hopping Window`) de 15 minutos de duración con un intervalo de avance o salto configurado en 1 minuto continuo.",
+          "Una ventana basada en periodos variables de inactividad (`Session Window`) configurando un intervalo de corte o gap de inactividad de 15 minutos exactos.",
+          "Una ventana deslizante continua (`Sliding Window`) calculada en base a la distancia temporal máxima de 15 minutos entre registros consecutivos en el log."
+        ],
+        "a": 0,
+        "e": "Las **Tumbling Windows** son ventanas de tiempo de tamaño fijo, contiguas y que **no se solapan** jamás. Cada registro individual pertenece a una única ventana en función de su marca de tiempo (timestamp). Por el contrario, las Hopping Windows se solapan periódicamente según su intervalo de avance, y las Session Windows dependen de periodos variables de inactividad de los usuarios."
+      },
+      {
+        "id": "q-47",
+        "d": 4,
+        "t": "ksqlDB: Push Queries vs. Pull Queries",
+        "q": "Un equipo de desarrollo implementa una solución de monitorización de fraude con **ksqlDB**. En un dashboard web en tiempo real necesitan mostrar alertas instantáneas a medida que ocurren nuevas transacciones sospechosas, mientras que en un servicio de atención telefónica necesitan consultar el saldo actual de un usuario bajo demanda cuando el cliente llama. ¿Qué tipo de consultas ksqlDB corresponden a cada necesidad?",
+        "o": [
+          "El dashboard requiere una `Push Query` (con `EMIT CHANGES` para emitir eventos continuos); el servicio telefónico requiere una `Pull Query` (consulta puntual síncrona a la tabla).",
+          "El dashboard requiere una `Pull Query` con polling HTTP cada segundo sobre la tabla; el servicio telefónico requiere una `Push Query` con suscripción persistente en websocket.",
+          "Ambas necesidades deben resolverse exclusivamente mediante `Pull Queries` síncronas contra la KTable materializada para evitar saturación de memoria en el servidor ksqlDB.",
+          "Ambas necesidades deben resolverse mediante `Push Queries` continuas en streaming, delegando en el frontend telefónico el filtrado del saldo del cliente en memoria local."
+        ],
+        "a": 0,
+        "e": "ksqlDB define dos paradigmas de consulta: las **Push Queries** (definidas con la cláusula **EMIT CHANGES**) son suscripciones reactivas de streaming que se mantienen permanentemente abiertas, enviando cada nuevo evento a medida que llega; son ideales para dashboards en tiempo real y alertas. Las **Pull Queries** funcionan como las consultas SQL tradicionales: son puntuales, síncronas y leen el estado actual materializado en una tabla de ksqlDB para una clave dada."
+      },
+      {
+        "id": "q-48",
+        "d": 4,
+        "t": "ksqlDB: Definición de Claves y Agregaciones",
+        "q": "Al crear un STREAM en ksqlDB a partir de un tópico de Kafka existente utilizando la sentencia **CREATE STREAM orders_stream (...) WITH (KAFKA_TOPIC='orders', VALUE_FORMAT='AVRO');**, ¿por qué es fundamental definir explícitamente la propiedad **KEY = 'order_id'** si se planea ejecutar posteriormente una cláusula **GROUP BY order_id** o realizar joins con otras tablas?",
+        "o": [
+          "Para indicar que el tópico ya está particionado por ese campo en Kafka, evitando generar un paso intermedio de re-particionado por red al hacer joins o agrupaciones en la topología.",
+          "Porque ksqlDB rechaza sentencias `CREATE STREAM` si no se define una clave primaria explícita que coincida con el nombre del schema en Confluent Schema Registry corporativo.",
+          "Porque de no definir la clave, ksqlDB trunca los registros en el broker y sobreescribe el payload del tópico original durante la primera ejecución de la consulta.",
+          "Porque los formatos de serialización binaria como Avro exigen que la clave y el valor compartan el mismo Subject en Schema Registry para autorizar agrupaciones."
+        ],
+        "a": 0,
+        "e": "En ksqlDB y Kafka Streams, las operaciones de agregación (**GROUP BY**) y los joins requieren que los mensajes estén particionados por la clave correspondiente. Al especificar **KEY = 'campo'**, ksqlDB reconoce que el tópico ya está particionado por esa clave en Kafka. Si no se define o si se agrupa por un campo distinto a la clave actual, ksqlDB se verá forzado a generar internamente un tópico intermedio de re-particionado (**repartition topic**), duplicando el tráfico de red y el uso de almacenamiento."
+      },
+      {
+        "id": "q-49",
+        "d": 5,
+        "t": "Autenticación: mTLS vs. SASL/SCRAM",
+        "q": "Un banco digital debe autenticar a miles de microservicios clientes y usuarios administradores contra su clúster de Kafka. Para las aplicaciones que residen en nubes públicas prefieren gestión de credenciales con rotación dinámica de contraseñas almacenadas de forma nativa en Kafka sin depender de certificados emitidos para cada cliente. ¿Qué mecanismo de autenticación de Kafka cumple con este requerimiento?",
+        "o": [
+          "`SASL/SCRAM` (SCRAM-SHA-256 o SCRAM-SHA-512), que almacena hashes salados en metadatos de Kafka y permite crear y rotar credenciales en caliente con `kafka-configs.sh`.",
+          "`mTLS` (Mutual TLS), ya que gestiona los pares de claves públicas directamente en los metadatos del quórum KRaft sin requerir renovación periódica de certificados de cliente.",
+          "`SASL/PLAIN` sobre un canal no cifrado, ya que almacena las contraseñas en memoria de los brokers y delega la rotación en el comando administrativo `kafka-acls.sh`.",
+          "`Kerberos (SASL/GSSAPI)`, porque almacena los tickets de usuario de forma descentralizada en el almacenamiento local de cada broker evitando servidores externos como Active Directory o KDC."
+        ],
+        "a": 0,
+        "e": "**SASL/SCRAM** (Salted Challenge Response Authentication Mechanism) es el estándar nativo para autenticación segura basada en credenciales en Kafka. Permite definir usuarios y contraseñas salteadas/hasheadas (SHA-256 / SHA-512) que se almacenan directamente en los metadatos de Kafka. Permite crear, modificar y revocar usuarios en tiempo de ejecución sin reiniciar brokers (**kafka-configs.sh**), evitando la complejidad de gestionar PKI y certificados X.509 individuales para cada cliente."
+      },
+      {
+        "id": "q-50",
+        "d": 5,
+        "t": "Configuración de Keystore y Truststore en mTLS",
+        "q": "Al configurar la autenticación mutua TLS (**mTLS**) en un cliente de Kafka en Java, el desarrollador especifica dos almacenes de certificados: **ssl.keystore.location** y **ssl.truststore.location**. ¿Cuál es la función técnica exacta de cada uno de estos almacenes?",
+        "o": [
+          "El `Keystore` contiene la clave privada y el certificado del cliente para autenticarse ante el broker; el `Truststore` contiene los certificados CA para validar al broker.",
+          "El `Keystore` contiene los certificados públicos de los brokers del clúster; el `Truststore` almacena las credenciales SASL y las listas de control de acceso (ACLs) del sistema.",
+          "El `Truststore` cifra los registros en el almacenamiento en disco del broker; el `Keystore` se encarga de descifrar el tráfico de red en los sockets de los clientes.",
+          "Ambos archivos contienen exactamente la misma estructura de certificados X.509 y pueden apuntar al mismo archivo sin comprometer la seguridad de las claves privadas."
+        ],
+        "a": 0,
+        "e": "En la infraestructura de clave pública (PKI) utilizada por Java y Kafka para mTLS: el **Keystore** aloja la identidad propia del cliente (su clave privada secreta y el certificado público correspondiente firmado por una CA). El **Truststore** almacena exclusivamente los certificados públicos de las CAs en las que el cliente confía. Cuando el broker le entrega su certificado TLS durante el handshake, el cliente usa el Truststore para validar la firma de la CA del broker."
+      },
+      {
+        "id": "q-51",
+        "d": 5,
+        "t": "Autorización con ACLs y Principio de Menor Privilegio",
+        "q": "Un nuevo microservicio productor (**Principal: User:order-service**) debe publicar mensajes de forma transaccional (utilizando transacciones EOS y **transactional.id=\"tx-order-01\"**) en el tópico **orders**. ¿Cuáles son los permisos mínimos indispensables que un administrador debe otorgar mediante **kafka-acls.sh** siguiendo el principio de menor privilegio?",
+        "o": [
+          "Permisos de operación `Write` y `Describe` sobre el recurso `Topic:orders`, junto con permisos de `Write` y `Describe` sobre el recurso `TransactionalId:tx-order-01` en el clúster.",
+          "Permisos de operación `All` sobre el recurso `Cluster`, acompañados de permisos de operación `Read` y `Write` sobre el recurso `Topic:orders` en las particiones de datos del clúster.",
+          "Permisos de operación `Write` exclusivamente sobre el recurso `Cluster`, ya que los privilegios sobre tópicos y transacciones se heredan automáticamente en el broker para productores.",
+          "Permisos de operación `Read` y `Write` sobre el tópico interno `__transaction_state`, complementados con permisos de operación `Describe` sobre el recurso `Topic:orders`."
+        ],
+        "a": 0,
+        "e": "Para que un productor transaccional pueda operar bajo el principio de menor privilegio, requiere permisos de **Write** y **Describe** sobre el tópico de datos (**Topic:orders**) para enviar mensajes y consultar sus metadatos de partición. Adicionalmente, al usar transacciones, el Transaction Coordinator valida que el Principal tenga permisos de **Write** y **Describe** sobre el recurso **TransactionalId** configurado (**tx-order-01**). Nunca se deben conceder permisos directos a clientes sobre los tópicos internos como **__transaction_state**."
+      },
+      {
+        "id": "q-52",
+        "d": 5,
+        "t": "Precedencia de Deny y allow.everyone.if.no.acl.found",
+        "q": "En un clúster con ACLs habilitadas y **allow.everyone.if.no.acl.found=false**, el administrador configura las siguientes dos reglas para el usuario **User:analyst** sobre el tópico **reports**:\n1. ALLOW Operation Read from Host 192.168.1.50\n2. DENY Operation Read from Host *\nEl usuario intenta leer del tópico desde la máquina con IP 192.168.1.50. ¿Qué resultado obtendrá y por qué?",
+        "o": [
+          "El acceso será denegado con `TopicAuthorizationException`, ya que en las políticas de seguridad de Kafka las reglas `DENY` tienen precedencia estricta sobre cualquier `ALLOW`.",
+          "El acceso será concedido con éxito debido a que la regla `ALLOW` define una dirección IP de host más específica que el comodín genérico (`*`) presente en la regla `DENY` evaluada.",
+          "El acceso será permitido porque las reglas de autorización se evalúan en orden cronológico de inserción y la regla 1 fue registrada con anterioridad en los metadatos.",
+          "La conexión TCP quedará suspendida en el broker hasta que un administrador elimine la ambigüedad en las reglas mediante la herramienta de línea de comandos `kafka-acls.sh` ejecutada en el quórum."
+        ],
+        "a": 0,
+        "e": "El algoritmo de evaluación de ACLs en Apache Kafka sigue una jerarquía estricta: si existe **cualquier regla explícita de DENY** que coincida con el usuario, host y operación, **el acceso es bloqueado de inmediato** (Deny Precedence), sin importar que existan reglas de ALLOW específicas. Si no hay un DENY coincidente, se evalúan las reglas de ALLOW. Si no coincide ninguna regla de ALLOW y **allow.everyone.if.no.acl.found=false**, el acceso se deniega por defecto."
+      },
+      {
+        "id": "q-53",
+        "d": 5,
+        "t": "Mecánica de Log Compaction: Head vs. Tail",
+        "q": "Un tópico de configuraciones globales tiene configurada la política de limpieza **cleanup.policy=compact**. ¿Cómo opera internamente el proceso de compactación de logs (**Log Cleaner**) en el broker y cuál es el tratamiento del segmento de log activo?",
+        "o": [
+          "Evalúa los segmentos cerrados purgando registros antiguos con claves repetidas mediante un mapa de offsets en memoria; el segmento activo se mantiene intacto sin compactar para no degradar I/O.",
+          "Compacta en tiempo real tanto los segmentos cerrados como el segmento activo de escritura a medida que cada mensaje individual es persistido en el buffer del PageCache del kernel.",
+          "Detiene periódicamente las escrituras de los productores para fusionar todos los segmentos de la partición en un único archivo comprimido en caliente mediante zstandard.",
+          "Requiere deshabilitar el tráfico y ejecutar una tarea administrativa offline mediante `kafka-log-dirs.sh` para reconstruir los índices de clave en el directorio local."
+        ],
+        "a": 0,
+        "e": "Durante la compactación de logs, la partición se divide lógicamente en el **Tail** (segmentos cerrados donde ya se purgaron versiones previas de claves) y el **Head** (segmentos cerrados con registros nuevos aún no procesados por el limpiador). Los hilos de Log Cleaner construyen una tabla de hash en memoria (SkimpyOffsetMap) con las últimas claves del Head y reescriben los segmentos del Tail eliminando registros obsoletos. Es una regla universal que **el segmento activo nunca se compacta** para no interferir con las escrituras en curso."
+      },
+      {
+        "id": "q-54",
+        "d": 5,
+        "t": "Tombstones y delete.retention.ms",
+        "q": "En una tabla de usuarios respaldada por un tópico compactado (**cleanup.policy=compact**), un servicio elimina un usuario publicando un registro con la clave **user-884** y el **payload=null** (un registro de eliminación denominado **Tombstone**). ¿Por qué Kafka no elimina físicamente este registro de inmediato durante la siguiente ronda de compactación y espera el tiempo configurado en **delete.retention.ms** (por defecto 24 horas)?",
+        "o": [
+          "Para garantizar que los consumidores más lentos o temporalmente fuera de línea lean el Tombstone y propaguen la eliminación en sus sistemas locales antes de ser purgado.",
+          "Porque los sistemas de archivos Linux bloquean el truncado físico de bloques de disco que contengan valores nulos hasta ejecutar una verificación síncrona con `fsck` en el servidor.",
+          "Porque el quórum KRaft requiere 24 horas para propagar la anulación de la clave entre los controladores de metadatos antes de confirmar el borrado físico del bloque.",
+          "Porque el broker líder intenta recuperar el payload original comunicándose con los productores registrados por si el borrado de la clave fue una acción accidental durante el mantenimiento."
+        ],
+        "a": 0,
+        "e": "Un Tombstone es un marcador explícito que indica a los consumidores que la clave ha sido eliminada. Si Kafka eliminara el Tombstone inmediatamente durante una ronda de compactación antes de que un consumidor rezagado o caído alcance ese offset, dicho consumidor nunca se enteraría de la eliminación y conservaría el registro antiguo en su base de datos para siempre. El parámetro **delete.retention.ms** garantiza una ventana de tiempo suficiente para que todos los consumidores downstream procesen el borrado."
+      },
+      {
+        "id": "q-55",
+        "d": 5,
+        "t": "Métrica JMX: UnderReplicatedPartitions",
+        "q": "Durante una guardia de soporte en producción, una alerta de Prometheus notifica que la métrica de JMX **kafka.server:type=ReplicaManager,name=UnderReplicatedPartitions** ha aumentado de 0 a **18** en el clúster. ¿Cuál es el significado técnico de esta alerta y cuáles son sus causas operativas más habituales?",
+        "o": [
+          "Indica 18 particiones con réplicas fuera del ISR debido a retraso frente al líder; ocurre típicamente por caídas de brokers, saturación de ancho de banda o I/O en discos.",
+          "Indica que 18 particiones fueron eliminadas del sistema de archivos local del broker y requieren restauración manual desde copias de seguridad en almacenamiento de objetos.",
+          "Indica que 18 consumidores del grupo excedieron el valor de `max.poll.interval.ms`, provocando que el broker marque sus particiones asignadas como sub-replicadas.",
+          "Indica que 18 productores están publicando lotes con `acks=0` a una tasa superior al ancho de banda del socket de red, descartando mensajes en el RecordAccumulator."
+        ],
+        "a": 0,
+        "e": "**UnderReplicatedPartitions** es la métrica de salud más crítica de un clúster de Kafka. Un valor mayor que 0 indica que para una o más particiones, el número de réplicas en el ISR actual es inferior al **replication.factor** configurado. Esto ocurre comúnmente cuando un broker se apaga, pierde conectividad de red, sufre pausas masivas de Garbage Collection o experimenta cuellos de botella de I/O en disco que le impiden seguir el ritmo del líder."
+      },
+      {
+        "id": "q-56",
+        "d": 5,
+        "t": "Métrica JMX: ActiveControllerCount",
+        "q": "En un panel de observabilidad de un clúster de Apache Kafka, un ingeniero de SRE revisa la métrica **kafka.controller:type=KafkaController,name=ActiveControllerCount**. ¿Cuál es el único valor saludable que debe exhibir esta métrica a nivel global en el clúster, y qué indican valores anómalos de 0 o mayores a 1?",
+        "o": [
+          "Debe ser exactamente 1 a nivel global; un valor de 0 indica ausencia de controlador activo bloqueando metadatos, mientras que un valor > 1 señala una condición de Split-Brain.",
+          "Debe igualar el número total de brokers en el clúster para asegurar que todos los nodos participen activamente como controladores en un esquema de metadatos multimaestro del quórum.",
+          "Debe permanecer en 0 de manera continua durante operación normal, elevándose a 1 solo de forma transitoria cuando se ejecuta una reelección planificada de particiones.",
+          "Debe coincidir estrictamente con el número de réplicas del tópico interno `@metadata` (típicamente 3 o 5) para reflejar la totalidad de miembros votantes del quórum de controladores de KRaft."
+        ],
+        "a": 0,
+        "e": "En todo clúster de Apache Kafka, debe existir en todo momento **exactamente un único controlador activo** (**ActiveControllerCount = 1** agregado en todo el clúster; cada broker reporta 0, excepto el líder que reporta 1). Si la suma da 0, significa que no hay controlador elegido (los metadatos están congelados). Si da mayor que 1 en entornos ZooKeeper heredados, denota un estado de Split-Brain donde dos brokers creen ser el controlador simultáneamente, amenazando la integridad del clúster."
+      },
+      {
+        "id": "q-57",
+        "d": 5,
+        "t": "Métrica JMX: RequestHandlerAvgIdlePercent",
+        "q": "El dashboard de Grafana de un broker muestra que la métrica **kafka.server:type=KafkaRequestHandlerPool,name=RequestHandlerAvgIdlePercent** ha caído sostenidamente al **0.06** (6 % de tiempo ocioso). Al mismo tiempo, los productores reportan incrementos masivos en la latencia de confirmación. ¿Qué diagnóstico técnico representa esta métrica?",
+        "o": [
+          "Los hilos de procesamiento de peticiones (`num.io.threads`) están saturados al 94 % de su capacidad en I/O o cálculo, dejando al broker al borde del colapso operativo.",
+          "El broker detecta una carga inferior al 6 % y suspende temporalmente los hilos de red (`num.network.threads`) para reducir el uso de CPU en el nodo del centro de datos.",
+          "Los clientes consumidores están sufriendo fallos de autenticación SASL en el 94 % de las conexiones entrantes, saturando la cola de sockets de red del broker del clúster.",
+          "El recolector de basura (Garbage Collector) de la JVM está reteniendo el 94 % del heap disponible, provocando pausas Stop-The-World continuas en los hilos de la aplicación."
+        ],
+        "a": 0,
+        "e": "**RequestHandlerAvgIdlePercent** mide el porcentaje promedio de tiempo que los hilos de atención de peticiones (configurados con **num.io.threads**) permanecen ociosos esperando trabajo. Un valor saludable se sitúa por encima del 30 % - 40 % (0.3 - 0.4). Una caída al 6 % (0.06) significa que los hilos pasan el 94 % del tiempo ocupados, lo que indica saturación crítica de disco o CPU en el broker, provocando que las peticiones entrantes se encolen en la cola de red y disparando la latencia."
+      },
+      {
+        "id": "q-58",
+        "d": 5,
+        "t": "Tiered Storage en Confluent Platform (KIP-405)",
+        "q": "Una multinacional retiene datos de eventos financieros durante 5 años por motivos regulatorios. Tradicionalmente, esto requería añadir continuamente discos SSD/NVMe a los brokers, encareciendo los costos y provocando que la reasignación de particiones durara semanas. ¿Cómo resuelve **Tiered Storage** (Almacenamiento por Niveles) este cuello de botella arquitectónico?",
+        "o": [
+          "Mueve los segmentos cerrados antiguos a almacenamiento de objetos económico (S3/GCS) y conserva solo datos calientes en disco local; la reasignación solo transfiere datos locales calientes.",
+          "Aplica deduplicación en memoria RAM y comprime segmentos históricos en volúmenes EBS fríos, transfiriendo los bloques en segundo plano mediante `kafka-reassign-partitions.sh` en red.",
+          "Convierte los segmentos antiguos en tablas Iceberg en almacenamiento de objetos, delegando las lecturas históricas de los consumidores en un motor de consulta Presto externo.",
+          "Archiva los logs históricos en un clúster secundario mediante MirrorMaker 2 en modo asíncrono, eliminando las particiones locales una vez replicadas en el data lake corporativo."
+        ],
+        "a": 0,
+        "e": "Tiered Storage (KIP-405) desacopla el cómputo del almacenamiento en Kafka. Los datos recientes (\"calientes\") se retienen en almacenamiento local NVMe/SSD en el broker para lecturas en tiempo real de bajísima latencia. Los segmentos cerrados se envían de forma asíncrona a almacenamiento en la nube de objetos (S3, GCS), ofreciendo retención prácticamente infinita a bajo coste. Además, cuando una partición se migra de broker, solo se copian los pocos datos locales calientes, haciendo los rebalanceos casi instantáneos."
+      },
+      {
+        "id": "q-59",
+        "d": 5,
+        "t": "Dimensionamiento del Heap de JVM y Linux PageCache",
+        "q": "Un ingeniero junior propone configurar el Heap de la JVM de un broker de Kafka en **60 GB** en un servidor que cuenta con 64 GB de RAM física, argumentando que \"más memoria para Java siempre mejora el rendimiento\". ¿Por qué un arquitecto senior de Kafka rechaza enfáticamente esta propuesta?",
+        "o": [
+          "Kafka delega el almacenamiento en el `PageCache` de Linux para ejecutar Zero-Copy; un heap de 60 GB priva de RAM al kernel y provoca pausas masivas de Garbage Collection en la JVM.",
+          "Porque la JVM en sistemas de 64 bits deshabilita la compresión de punteros (Compressed OOPs) por encima de 32 GB, lo que penaliza la memoria y bloquea la asignación de buffers off-heap.",
+          "Porque la arquitectura de Kafka almacena todos los archivos de índices dispersos en el espacio de intercambio Swap de Linux, requiriendo dejar libre al menos el 80 % de la RAM física.",
+          "Porque el protocolo de KRaft exige normativamente que el tamaño del heap en cada broker sea estrictamente proporcional al número de hilos de procesamiento (`num.network.threads`)."
+        ],
+        "a": 0,
+        "e": "A diferencia de otros sistemas de datos en Java, Apache Kafka fue diseñado para no almacenar datos de mensajes en el heap de la JVM. Un heap modesto (típicamente de 6 a 10 GB) es más que suficiente para los objetos internos del broker, evitando pausas de Stop-The-World de Garbage Collection. Toda la memoria RAM restante del servidor debe dejarse libre para que el kernel de Linux la utilice automáticamente como **PageCache**, lo que permite atender peticiones de fetch de los consumidores a velocidad de RAM sin lecturas a disco físico."
+      },
+      {
+        "id": "q-60",
+        "d": 5,
+        "t": "Integración de Seguridad con SASL/OAUTHBEARER",
+        "q": "Una empresa adopta una arquitectura Zero-Trust y decide integrar la autenticación de todos sus clientes de Kafka con su proveedor de identidad corporativo (Okta / Azure AD / Keycloak) utilizando tokens JWT. ¿Qué protocolo nativo de Kafka se utiliza y cómo se garantiza que los clientes con tokens expirados sean desconectados?",
+        "o": [
+          "Se utiliza `SASL/OAUTHBEARER`; el broker valida la firma JWT del IdP mediante claves JWKS y monitoriza el atributo de expiración `exp` para forzar la re-autenticación del cliente.",
+          "Se utiliza `SASL/SCRAM` federado; el broker consulta en tiempo real el endpoint Introspect de Okta mediante webhooks y revoca la sesión TCP en el instante en que caduca el token.",
+          "Se utiliza `SASL/GSSAPI` con un módulo PAM personalizado que traduce tokens JWT a tickets Kerberos, delegando en el demonio del sistema operativo el cierre de los sockets inactivos.",
+          "Se configuran ACLs dinámicas con el prefijo Bearer en `kafka-acls.sh`, delegando la validación de la vigencia del token en un conector interceptor de Confluent Schema Registry."
+        ],
+        "a": 0,
+        "e": "**SASL/OAUTHBEARER** es el estándar de Kafka para federación de identidades mediante OAuth 2.0 y OpenID Connect. El cliente solicita un token firmado (JWT) a su Authorization Server / IdP y se autentica contra el broker presentando dicho token. El broker valida el token contra el endpoint JWKS del IdP. Además, el broker rastrea el tiempo de expiración (**exp**) del JWT: al vencer el token, Kafka exige una re-autenticación automática o desconecta al cliente si este no renueva su credencial."
+      }
     ],
-    "a": 0,
-    "e": "En entornos de producción de mediana y gran escala, mezclar los roles de broker y controller en los mismos nodos (**process.roles=broker,controller**) expone al quórum de metadatos a interferencias severas de I/O de disco, saturación de ancho de banda y pausas de Garbage Collection provocadas por el tráfico de datos de los clientes. La recomendación oficial es aislar 3 o 5 nodos dedicados con **process.roles=controller** ejecutando el consenso Raft sobre el tópico interno **@metadata**, mientras el resto opera como brokers puros."
-  },
-  {
-    "id": "q-2",
-    "d": 1,
-    "t": "High Watermark y LEO",
-    "q": "Un productor envía un mensaje a la partición 0 de un tópico con **replication.factor=3** y **min.insync.replicas=2**. El broker líder de la partición escribe el mensaje en su log local, actualizando su Log End Offset (LEO) de 104 a 105. Sin embargo, las dos réplicas follower que forman parte del ISR aún no han enviado su siguiente petición de fetch para copiar este registro. Un consumidor configurado con **isolation.level=read_uncommitted** realiza una llamada a **poll()**. ¿Podrá este consumidor leer el mensaje con offset 104?",
-    "o": [
-      "No, porque los consumidores solo pueden leer mensajes con offset estrictamente inferior al High Watermark (HW), y el HW no avanza hasta que todas las réplicas del ISR hayan confirmado la replicación del mensaje.",
-      "Sí, porque al tener **isolation.level=read_uncommitted**, el consumidor ignora el High Watermark y lee directamente hasta el Log End Offset (LEO) del líder.",
-      "Sí, siempre que el productor haya enviado el mensaje con **acks=0** o **acks=1** en su configuración de cliente.",
-      "No, porque en Kafka los consumidores únicamente leen de las réplicas follower que se encuentren en la misma zona de disponibilidad (AZ)."
-    ],
-    "a": 0,
-    "e": "El High Watermark (HW) representa el offset del último registro que ha sido replicado en todas las réplicas pertenecientes al ISR. En Apache Kafka, ningún consumidor (incluso configurado con **isolation.level=read_uncommitted**) puede leer más allá del HW. Esto previene lecturas sucias (dirty reads): si el líder fallara antes de que los followers repliquen el offset 104, el nuevo líder elegido no contendría dicho offset, por lo que ningún cliente debe haberlo visto jamás."
-  },
-  {
-    "id": "q-3",
-    "d": 1,
-    "t": "In-Sync Replicas y replica.lag.time.max.ms",
-    "q": "En un clúster de Kafka con **replica.lag.time.max.ms=30000** (30 segundos), un broker follower que aloja una réplica de una partición crítica sufre una pausa prolongada de Garbage Collection (Stop-The-World) provocada por un heap mal dimensionado. La pausa dura 42 segundos, tiempo durante el cual el follower no envía ninguna petición FetchRequest al líder. ¿Qué acción ejecuta el broker líder transcurridos los 30 segundos?",
-    "o": [
-      "El líder expulsa a la réplica follower del conjunto de réplicas en sincronía (ISR) notificando al controlador para actualizar los metadatos de la partición.",
-      "El líder frena inmediatamente todas las escrituras entrantes de los productores y entra en modo de solo lectura hasta que el follower termine la pausa de GC.",
-      "El líder marca la partición completa como **Offline** y rechaza peticiones tanto de productores como de consumidores.",
-      "El líder transfiere automáticamente el liderazgo de la partición al follower rezagado para permitirle sincronizar su log local."
-    ],
-    "a": 0,
-    "e": "El parámetro **replica.lag.time.max.ms** define el tiempo máximo que una réplica follower puede tardar en enviar una petición de fetch y mantenerse al día con el LEO del líder. Si transcurre ese tiempo sin actividad de sincronización, el líder detecta la anomalía y remueve al follower del ISR actualizando el estado de la partición en el quórum de metadatos (KRaft o ZK), permitiendo que las escrituras continúen normalmente si se cumple **min.insync.replicas**."
-  },
-  {
-    "id": "q-4",
-    "d": 1,
-    "t": "min.insync.replicas y Disponibilidad",
-    "q": "Un tópico de pagos críticos en producción está configurado con **replication.factor=3** y **min.insync.replicas=2**. Todos los productores envían transacciones con **acks=all** (-1). Durante una caída de red en un centro de datos, se desconectan simultáneamente 2 de los 3 brokers que alojan las réplicas de la partición 0, quedando únicamente el broker líder en el ISR (tamaño del ISR = 1). ¿Qué comportamiento observarán los productores y los consumidores sobre la partición 0?",
-    "o": [
-      "Los productores recibirán una excepción **NotEnoughReplicasException** y sus escrituras serán rechazadas; los consumidores podrán seguir leyendo los mensajes previamente confirmados hasta el High Watermark.",
-      "Tanto las operaciones de escritura de los productores como las operaciones de lectura de los consumidores fallarán con **NotEnoughReplicasException**.",
-      "Los productores podrán continuar escribiendo con normalidad porque el líder sigue vivo y operativo, pero el líder degradará automáticamente su nivel de confirmación a **acks=1**.",
-      "El líder activará automáticamente un nuevo broker provisional para clonar la réplica en menos de 5 segundos sin arrojar excepciones a las aplicaciones."
-    ],
-    "a": 0,
-    "e": "Cuando un productor envía con **acks=all** y el tamaño del ISR actual es menor que **min.insync.replicas** (en este caso 1 < 2), el broker líder rechaza la escritura con **NotEnoughReplicasException** (o **NotEnoughReplicasAfterAppendException**) para evitar comprometer la durabilidad pactada. Sin embargo, los consumidores no se ven bloqueados: pueden continuar leyendo todos los datos históricos que ya habían alcanzado el High Watermark antes del incidente."
-  },
-  {
-    "id": "q-5",
-    "d": 1,
-    "t": "Unclean Leader Election",
-    "q": "Un clúster de Kafka tiene configurado a nivel global **unclean.leader.election.enable=false**. Para una partición con **replication.factor=3**, el broker líder cae repentinamente y, al mismo tiempo, el único follower que formaba parte del ISR sufre una avería de hardware irreparable. El tercer broker del clúster aloja una réplica que estaba fuera del ISR debido a un desfase de 5.000 offsets. ¿Qué ocurre con la partición en este escenario?",
-    "o": [
-      "La partición se declara en estado **Offline** y no atiende lecturas ni escrituras hasta que vuelva a estar en línea al menos una de las réplicas que pertenecían al ISR original.",
-      "El controlador promueve automáticamente a la réplica fuera del ISR a líder para restaurar el servicio, truncando los 5.000 offsets faltantes.",
-      "El controlador crea inmediatamente una nueva partición vacía con el mismo identificador y redirige el tráfico de productores a ella.",
-      "Kafka transfiere el liderazgo de la partición a un nodo controller de KRaft para que actúe como réplica provisional."
-    ],
-    "a": 0,
-    "e": "Con **unclean.leader.election.enable=false**, Kafka prioriza estrictamente la consistencia y la durabilidad de los datos sobre la disponibilidad. Si no queda ninguna réplica viva dentro del ISR, ninguna réplica rezagada (fuera del ISR) puede ser elegida como nuevo líder. Como consecuencia, la partición entra en estado **Offline** (rechazando lecturas y escrituras) hasta que al menos un miembro del ISR original se recupere, garantizando que jamás se pierdan datos confirmados."
-  },
-  {
-    "id": "q-6",
-    "d": 1,
-    "t": "Impacto de Unclean Leader Election forzada",
-    "q": "En el escenario anterior, la dirección del negocio exige que el servicio vuelva a operar de inmediato cueste lo que cueste y ordena al administrador ejecutar un comando dinámico para establecer **unclean.leader.election.enable=true** en el tópico. La réplica rezagada (con 5.000 offsets de retraso) es elegida como nuevo líder. ¿Qué consecuencia irreversible de integridad de datos se produce inmediatamente?",
-    "o": [
-      "Se pierden permanentemente los 5.000 mensajes que estaban confirmados en el antiguo líder y, si el antiguo líder vuelve a encenderse, truncará su log al High Watermark del nuevo líder, desincronizando los offsets históricos.",
-      "Los mensajes se conservan intactos en una partición oculta de backup de KRaft y se reinsertan automáticamente cuando el antiguo líder vuelva a operar.",
-      "Los consumidores recibirán una excepción **CorruptRecordException** irrecuperable y deberán borrar sus bases de datos locales.",
-      "El nuevo líder rechaza procesar escrituras con clave (key != null) hasta que se ejecute manualmente una compactación forzada con **kafka-log-dirs.sh**."
-    ],
-    "a": 0,
-    "e": "Activar **unclean.leader.election.enable=true** permite que una réplica fuera del ISR se convierta en líder para restaurar la disponibilidad. Sin embargo, todos los registros confirmados que residían en el líder original y que nunca llegaron a esta réplica rezagada se pierden de forma permanente. Cuando el antiguo líder se reinicia, detecta que el nuevo líder tiene una época de líder superior y trunca su propio log para igualar al nuevo líder, destruyendo los datos que previamente habían sido confirmados como exitosos."
-  },
-  {
-    "id": "q-7",
-    "d": 1,
-    "t": "Segmentos de Log y Ficheros de Índice",
-    "q": "Un broker de Kafka almacena 2 TB de registros en el directorio de datos de una partición de alto volumen. Un consumidor solicita leer a partir del offset lógico 450.210. ¿Cómo localiza el broker la posición física exacta del registro en el disco sin verse obligado a escanear linealmente gigabytes de datos en el archivo **.log**?",
-    "o": [
-      "Consulta el archivo de índice disperso **.index** mediante búsqueda binaria en memoria (PageCache) para encontrar la posición física en bytes más cercana al offset y luego lee secuencialmente una mínima cantidad de registros.",
-      "Ejecuta una consulta SQL en una base de datos SQLite interna embebida en cada broker que indexa el hash MD5 de cada mensaje.",
-      "Lee el archivo **.timeindex** completo desde el inicio para calcular matemáticamente la posición mediante una regla de tres con el timestamp del mensaje.",
-      "Descomprime todos los bloques del archivo **.log** en el heap de la JVM y busca el offset mediante un árbol balanceado B-Tree en memoria."
-    ],
-    "a": 0,
-    "e": "Kafka divide las particiones en segmentos y asocia a cada archivo de datos **.log** un archivo de índice disperso **.index**. Este archivo mapea offsets relativos a posiciones físicas en bytes (file pointers) dentro del archivo **.log**. Gracias a que el índice está ordenado y reside en el PageCache de Linux, el broker ejecuta una búsqueda binaria O(log N) para saltar al byte más próximo y luego recorre secuencialmente apenas unos pocos registros hasta el offset exacto, logrando lecturas ultra-eficientes."
-  },
-  {
-    "id": "q-8",
-    "d": 1,
-    "t": "Segment Roll y Políticas de Retención",
-    "q": "Un tópico de auditoría tiene configurada una retención por tiempo de 7 días (**retention.ms=604800000**). Sin embargo, al inspeccionar el almacenamiento del broker, el equipo de SRE descubre mensajes que tienen más de 16 días de antigüedad en el disco. Al revisar la configuración de segmentos, observan que **segment.bytes=1073741824** (1 GB) y **segment.ms=1814400000** (21 días), y el archivo **.log** actual apenas pesa 250 MB. ¿Por qué no se han eliminado los mensajes antiguos?",
-    "o": [
-      "Porque las políticas de retención de Kafka solo se aplican a los segmentos cerrados (inactivos); mientras el segmento activo no supere **segment.bytes** o **segment.ms**, no se cierra ni se purga ningún mensaje que resida en él.",
-      "Porque Kafka requiere que el consumidor de auditoría envíe un comando explícito de confirmación de purga antes de poder borrar segmentos.",
-      "Porque la retención por tiempo en Kafka solo funciona si el tópico tiene habilitada simultáneamente la compactación de logs (**cleanup.policy=compact**).",
-      "Porque el broker detecta que el espacio libre en disco es superior al 50 % y deshabilita automáticamente el hilo de purga de logs para ahorrar ciclos de CPU."
-    ],
-    "a": 0,
-    "e": "En Kafka, el segmento activo (aquel en el que se están escribiendo los nuevos mensajes) nunca se elimina ni se compacta, independientemente de la antigüedad de los registros que contenga. Las políticas de retención (tanto por tiempo con **retention.ms** como por tamaño con **retention.bytes**) solo se evalúan y aplican sobre segmentos cerrados (inactivos). Para tópicos con bajo ritmo de publicación, es crucial ajustar **segment.ms** a un valor menor o igual a **retention.ms** para forzar el roll del segmento y permitir la purga oportuna."
-  },
-  {
-    "id": "q-9",
-    "d": 1,
-    "t": "Quórum de Controladores KRaft y Tolerancia a Fallos",
-    "q": "En una arquitectura KRaft para un entorno financiero regulado, se despliegan **5 nodos dedicados** con el rol de controladores (**process.roles=controller**). Basándote en el algoritmo de consenso Raft utilizado por KRaft, ¿cuál es el número mínimo de controladores que deben permanecer en línea y operativos para que el quórum pueda elegir un líder de metadatos y procesar cambios en el clúster (como creación de tópicos o reasignación de particiones)?",
-    "o": [
-      "Deben permanecer operativos al menos 3 controladores (mayoría simple del quórum: (5/2) + 1), tolerando la caída de hasta 2 controladores simultáneos.",
-      "Deben permanecer operativos los 5 controladores de forma estricta; cualquier caída individual detiene el quórum de metadatos por seguridad.",
-      "Basta con que permanezcan operativos 2 controladores si se activa el parámetro de quórum flexible **raft.election.timeout.ms=1000**.",
-      "Deben permanecer operativos al menos 4 controladores, ya que Raft exige una mayoría calificada del 80 % para operaciones de escritura en el log @metadata."
-    ],
-    "a": 0,
-    "e": "KRaft se basa en el algoritmo de consenso distribuido Raft. Para un quórum de N nodos, el número de nodos activos requeridos para formar mayoría (quórum) es **floor(N/2) + 1**. Para N = 5, se requiere que al menos 3 controladores estén en línea y comunicados entre sí. Por lo tanto, el sistema puede tolerar la caída simultánea de hasta **(N - 1) / 2 = 2** controladores sin perder la capacidad de realizar cambios en los metadatos del clúster."
-  },
-  {
-    "id": "q-10",
-    "d": 1,
-    "t": "Rack Awareness y Distribución de Réplicas",
-    "q": "Estás desplegando un clúster de Kafka en AWS a través de 3 Zonas de Disponibilidad (us-east-1a, us-east-1b, us-east-1c). Quieres asegurarte de que para cualquier tópico con **replication.factor=3**, ninguna partición tenga más de una réplica ubicada en la misma Zona de Disponibilidad, garantizando que la caída total de una AZ no provoque pérdida de datos ni indisponibilidad. ¿Qué configuración debe definirse en cada broker?",
-    "o": [
-      "Configurar el parámetro **broker.rack** en cada broker con el identificador de la zona (ej. us-east-1a), permitiendo que el asignador de réplicas de Kafka distribuya las particiones a través de diferentes racks físicos/lógicos.",
-      "Crear tres listeners independientes en el broker, uno por cada zona de disponibilidad, con la propiedad **advertised.listeners** apuntando al DNS de la subred.",
-      "Configurar el parámetro **replica.selector.class** con el valor por defecto y dejar que el particionador de los clientes distribuya los mensajes por AZ.",
-      "Establecer la propiedad de tópico **min.insync.replicas=3** y activar la replicación asíncrona entre VPCs mediante un plugin de red CNI."
-    ],
-    "a": 0,
-    "e": "La propiedad **broker.rack** habilita el mecanismo de Rack Awareness en Apache Kafka. Al indicar a qué rack o zona de disponibilidad pertenece cada broker, el algoritmo de asignación de réplicas distribuye automáticamente las réplicas de cada partición entre distintos racks lógicos. De este modo, para **replication.factor=3** repartido en 3 AZs distintas, se garantiza que cada réplica resida en una AZ diferente, protegiendo al clúster contra caídas completas de un datacenter o AZ."
-  },
-  {
-    "id": "q-11",
-    "d": 1,
-    "t": "Particionado y Capacidad de Paralelismo",
-    "q": "Una plataforma de streaming de video necesita procesar una tasa sostenida de **60.000 eventos por segundo**. Se ha medido rigurosamente que cada instancia de microservicio consumidor puede procesar de forma estable un máximo de **3.000 eventos por segundo**. El tópico fue creado originalmente con **8 particiones**. El equipo de operaciones despliega un deployment en Kubernetes con **20 pods** del mismo Consumer Group. ¿Cuál será el throughput real alcanzado y cómo debe resolverse el cuello de botella?",
-    "o": [
-      "Solo 8 pods procesarán datos alcanzando un máximo de 24.000 eventos/s (los otros 12 pods quedarán ociosos); se debe aumentar el número de particiones del tópico a un mínimo de 20 para permitir que los 20 pods consuman en paralelo.",
-      "Los 20 pods procesarán 3.000 eventos/s cada uno alcanzando los 60.000 eventos/s requeridos, ya que Kafka multiplexa múltiples consumidores sobre la misma partición usando hilos virtuales.",
-      "El clúster entrará en un error de **IllegalStateException** porque Kafka no permite que un Consumer Group tenga más miembros que el número de particiones del tópico.",
-      "El throughput será de 60.000 eventos/s pero con duplicados masivos, ya que 12 pods leerán las mismas particiones de forma redundante."
-    ],
-    "a": 0,
-    "e": "Una regla fundamental del protocolo de Consumer Groups en Apache Kafka es que cada partición de un tópico es asignada a **a lo sumo un consumidor** dentro de un mismo grupo. Por tanto, con 8 particiones, como máximo 8 instancias pueden procesar datos en paralelo (8 × 3.000 = 24.000 eps); las 12 instancias restantes permanecen ociosas en espera pasiva. Para alcanzar los 60.000 eps, el tópico debe escalarse a al menos 20 particiones (20 × 3.000 = 60.000 eps)."
-  },
-  {
-    "id": "q-12",
-    "d": 1,
-    "t": "Zero-Copy y Rendimiento de I/O en Linux",
-    "q": "Una de las razones primordiales por las cuales un broker de Apache Kafka puede entregar millones de mensajes por segundo con un consumo de CPU excepcionalmente bajo es el uso de la técnica **Zero-Copy**. ¿Cómo opera esta optimización a nivel del sistema operativo y qué llamada al sistema de Linux utiliza el broker para transferir datos desde los segmentos de log hacia los sockets de red de los consumidores?",
-    "o": [
-      "Utiliza la syscall **sendfile()**, que transfiere los datos directamente desde el PageCache del kernel al buffer del socket de la tarjeta de red (NIC) mediante DMA, sin copiar los datos al espacio de usuario de la JVM.",
-      "Utiliza la llamada **mmap()** combinada con **read()** y **write()**, copiando los bloques de bytes en un buffer DirectByteBuffer gestionado por el Garbage Collector de Java.",
-      "Utiliza la librería de compresión **libzstd** del kernel para empaquetar los bloques en memoria física evitando la tabla de páginas virtuales de Linux.",
-      "Ejecuta una llamada ioctl sobre los discos NVMe para delegar la transmisión de paquetes TCP/IP directamente al firmware del SSD sin pasar por el stack de red del kernel."
-    ],
-    "a": 0,
-    "e": "En arquitecturas tradicionales, leer de disco y enviar por red requiere 4 cambios de contexto y 4 copias de datos (disco -> kernel buffer -> user space JVM -> socket buffer -> NIC). Con la llamada al sistema **sendfile()** de Linux (Zero-Copy), los datos se transfieren por DMA directamente desde el PageCache del kernel al socket de red de la interfaz física, sin cruzar jamás la frontera al espacio de usuario de la JVM. Esto elimina el uso innecesario de memoria en el heap y libera ciclos de CPU."
-  },
-  {
-    "id": "q-13",
-    "d": 2,
-    "t": "Garantías de Durabilidad en Productores",
-    "q": "Una plataforma bancaria procesa transferencias monetarias de alto valor y simultáneamente recopila métricas de clics de navegación web. El equipo de desarrollo debe configurar dos productores de Kafka independientes. Para las transferencias bancarias no se tolera la pérdida de un solo evento bajo ninguna circunstancia; para las métricas web se busca la mínima latencia posible y se tolera pérdida ocasional. ¿Cuáles son las configuraciones de **acks** recomendadas para cada caso?",
-    "o": [
-      "Transferencias: **acks=all** (-1) junto con **retries=Integer.MAX_VALUE**; Métricas web: **acks=0**.",
-      "Transferencias: **acks=1**; Métricas web: **acks=all** (-1) con **retries=0**.",
-      "Transferencias: **acks=0**; Métricas web: **acks=1** con compresión zstd.",
-      "Transferencias: **acks=2**; Métricas web: **acks=-1** con **linger.ms=0**."
-    ],
-    "a": 0,
-    "e": "Para transacciones bancarias críticas donde la pérdida de datos es inaceptable, la configuración mandatoria es **acks=all** (o -1), obligando al broker líder a esperar la confirmación de todas las réplicas en el ISR antes de responder ACK al productor, combinada con reintentos prácticamente infinitos (**retries=Integer.MAX_VALUE** o **delivery.timeout.ms** alto). Para métricas descartables donde prima la mínima latencia y el máximo throughput, **acks=0** envía los paquetes en modo fire-and-forget sin esperar confirmación alguna."
-  },
-  {
-    "id": "q-14",
-    "d": 2,
-    "t": "Idempotencia de Productor (KIP-98)",
-    "q": "Un productor envía un mensaje crítico al broker. El broker persiste el mensaje en disco exitosamente, pero una micro-interrupción de red impide que la respuesta de ACK llegue de regreso al productor. Al expirar el timeout, el productor reintenta automáticamente el envío del mismo mensaje. Si el productor tiene configurado **enable.idempotence=true**, ¿cómo evita el broker registrar un mensaje duplicado?",
-    "o": [
-      "El broker utiliza el identificador único del productor (Producer ID o PID) y el número de secuencia monotónicamente creciente (Sequence Number) asignado a cada mensaje para detectar que ya fue persistido y devolver un ACK exitoso sin duplicar el registro en el log.",
-      "El broker calcula el hash SHA-256 del contenido del payload y consulta una base de datos Redis en memoria para verificar si el hash ya existe.",
-      "El broker descarta automáticamente cualquier mensaje que llegue con una marca de tiempo idéntica al último mensaje recibido en la partición.",
-      "El broker fuerza al productor a abrir una transacción de base de datos relacional con nivel de aislamiento Serializable."
-    ],
-    "a": 0,
-    "e": "Con **enable.idempotence=true**, el broker asigna a cada productor un Producer ID (PID) único durante el inicio. Por cada partición, el productor mantiene un número de secuencia entero monotónico por mensaje o lote. El broker guarda en memoria los últimos números de secuencia procesados: si recibe un mensaje con un PID y Sequence Number que ya tiene registrado, reconoce que se trata de un reintento por fallo de red, devuelve ACK al productor y descarta escribir el duplicado en el commit log."
-  },
-  {
-    "id": "q-15",
-    "d": 2,
-    "t": "Ordenamiento y max.in.flight.requests con Idempotencia",
-    "q": "Tradicionalmente, para garantizar que los mensajes no se desordenen en caso de reintentos por fallo de red, los ingenieros de Kafka debían configurar **max.in.flight.requests.per.connection=1**, lo que penalizaba severamente el throughput. ¿Por qué en versiones modernas de Apache Kafka con **enable.idempotence=true** es posible configurar **max.in.flight.requests.per.connection** hasta **5** manteniendo una estricta garantía de orden?",
-    "o": [
-      "Porque el broker almacena los últimos 5 números de secuencia en memoria por cada PID y partición; si un lote con número de secuencia superior llega antes debido a un reintento del lote anterior, el broker rechaza el lote desordenado con OutOfOrderSequenceException forzando al productor a preservar el orden estricto.",
-      "Porque Kafka suspende la conexión TCP y encola físicamente los paquetes en el socket del cliente hasta recibir el ACK de la petición previa.",
-      "Porque el particionador asigna automáticamente cada una de las 5 peticiones a una partición física diferente del clúster.",
-      "Porque el protocolo KRaft reordena automáticamente los mensajes en el quórum de metadatos antes de enviarlos a los brokers."
-    ],
-    "a": 0,
-    "e": "Con idempotencia habilitada, el broker rastrea hasta 5 peticiones en vuelo por partición validando los números de secuencia. Si el lote 0 sufre un fallo transitorio de red y se reintenta mientras el lote 1 ya está en tránsito, el broker no aceptará el lote 1 hasta que el lote 0 haya sido persistido secuencialmente (o arrojará **OutOfOrderSequenceException** si se produce un salto inesperado), garantizando el orden perfecto de llegada sin reducir el paralelismo de red a 1."
-  },
-  {
-    "id": "q-16",
-    "d": 2,
-    "t": "Transacciones EOS y transactional.id",
-    "q": "Una aplicación de procesamiento financiero implementa el patrón **consume-transform-produce** para transferir saldo entre dos cuentas representadas en diferentes tópicos. Para garantizar semántica Exactly-Once (EOS), el desarrollador inicializa el productor con un **transactional.id** estático y delimita el procesamiento con **beginTransaction()** y **commitTransaction()**. ¿Cuál es el rol del componente **Transaction Coordinator** en el broker durante este flujo?",
-    "o": [
-      "Coordina un protocolo Two-Phase Commit (2PC) registrando el estado de la transacción en el tópico interno **__transaction_state** y escribiendo marcadores de control (COMMIT o ABORT) en las particiones de datos de los tópicos participantes.",
-      "Bloquea todas las particiones del clúster para impedir que otros productores escriban mientras dure la transacción.",
-      "Mantiene los datos en la memoria RAM del broker y solo escribe en el disco cuando la aplicación cliente llama al método close().",
-      "Genera un token OAuth 2.0 efímero para autorizar cada mensaje individual en el listener SSL."
-    ],
-    "a": 0,
-    "e": "El Transaction Coordinator (un broker asignado en función del hash del **transactional.id**) lidera una partición del tópico interno **__transaction_state**. Gestiona el ciclo de vida de la transacción mediante un protocolo Two-Phase Commit distribuido: registra las particiones involucradas, anota el estado inicial (Ongoing), y al recibir el commit, escribe marcadores de control atómicos (**Control Markers: COMMIT/ABORT**) en las particiones de destino antes de marcar la transacción como Complete."
-  },
-  {
-    "id": "q-17",
-    "d": 2,
-    "t": "Nivel de Aislamiento en Consumidores (read_committed)",
-    "q": "Una transacción en un productor incluye 100 mensajes en el tópico **transactions**. A mitad del proceso, una llamada a un servicio externo falla y la aplicación ejecuta **abortTransaction()**, lo que provoca que el Transaction Coordinator escriba un marcador de control **ABORT** en la partición. Un consumidor que está leyendo de este tópico tiene configurado **isolation.level=read_uncommitted**. ¿Qué observará este consumidor?",
-    "o": [
-      "Leerá los 100 mensajes que pertenecían a la transacción abortada como si fueran mensajes válidos ordinarios, ya que **read_uncommitted** lee todos los mensajes hasta el High Watermark sin filtrar transacciones abortadas.",
-      "Filtrará los mensajes abortados de forma transparente porque el broker los elimina físicamente del disco de inmediato al recibir el marcador de control ABORT.",
-      "Se detendrá arrojando una excepción **TransactionAbortedException** obligando a reiniciar el proceso.",
-      "Recibirá los 100 mensajes con el payload reemplazado por bytes nulos (Tombstones)."
-    ],
-    "a": 0,
-    "e": "Por defecto, los consumidores operan con **isolation.level=read_uncommitted**, lo que significa que leen todos los mensajes que han alcanzado el High Watermark, ignorando si pertenecen a transacciones abiertas, committeadas o abortadas. Para ignorar mensajes abortados y procesar únicamente datos de transacciones exitosamente finalizadas, los consumidores deben configurarse estrictamente con **isolation.level=read_committed**."
-  },
-  {
-    "id": "q-18",
-    "d": 2,
-    "t": "Mecánica de Batching: linger.ms y batch.size",
-    "q": "Un microservicio productor publica eventos con una configuración de **batch.size=32768** (32 KB) y **linger.ms=10**. La aplicación envía un primer mensaje de 500 bytes hacia la partición 2 y luego se queda inactiva sin producir ningún otro evento. ¿En qué momento se transmitirá físicamente ese mensaje a través de la red hacia el broker?",
-    "o": [
-      "Se transmitirá exactamente después de 10 milisegundos, ya que al no llenarse el buffer de 32 KB, el temporizador de **linger.ms** expira y fuerza el envío del lote acumulado.",
-      "Se transmitirá instantáneamente en 0 milisegundos, ya que el primer mensaje de cualquier sesión nunca se retiene en el RecordAccumulator.",
-      "Quedará bloqueado indefinidamente en la memoria del cliente hasta que la aplicación envíe suficientes mensajes para completar los 32 KB.",
-      "Se enviará transcurrido el tiempo definido en **request.timeout.ms** (por defecto 30 segundos)."
-    ],
-    "a": 0,
-    "e": "El productor de Kafka envía un lote de registros por partición cuando se cumple cualquiera de dos condiciones (lo que ocurra primero): el tamaño acumulado alcanza **batch.size**, o transcurre el tiempo especificado en **linger.ms**. Como el mensaje de 500 bytes no alcanza los 32 KB, el productor retiene el mensaje esperando acumular más datos hasta que el temporizador de **linger.ms** (10 ms) expira, disparando el envío inmediato del lote."
-  },
-  {
-    "id": "q-19",
-    "d": 2,
-    "t": "Compresión de Mensajes en el Productor",
-    "q": "Una arquitectura de ingesta de logs en la nube genera mensajes JSON con un tamaño promedio de 80 KB. Se configura en el productor **compression.type=lz4**. Al monitorear la infraestructura, ¿en qué componente se ejecuta el cómputo de compresión y descompresión de los datos, y qué impacto tiene en los brokers?",
-    "o": [
-      "La compresión se ejecuta en el cliente productor en memoria y la descompresión en el cliente consumidor; los brokers almacenan y reenvían los datos comprimidos tal cual sin descomprimirlos, ahorrando CPU en el broker y optimizando el ancho de banda de red.",
-      "La compresión la ejecuta el broker líder al recibir el mensaje y la descompresión la realiza el broker antes de enviar los datos al consumidor.",
-      "La compresión se ejecuta en la tarjeta de red del broker mediante aceleración de hardware TCP Offload Engine.",
-      "El productor comprime los datos, pero el broker está obligado a descomprimir y volver a comprimir cada mensaje para indexar el offset en el archivo .index."
-    ],
-    "a": 0,
-    "e": "En Kafka, la compresión es de extremo a extremo: el cliente productor comprime el lote de registros completo en memoria antes de transmitirlo por el socket de red, y el cliente consumidor lo descomprime al leerlo. El broker simplemente almacena los bytes comprimidos directamente en el log de disco y los transmite a los consumidores usando **sendfile()** sin descomprimirlos, preservando la CPU del broker (salvo que se configuren esquemas o transformaciones incompatibles entre tópicos)."
-  },
-  {
-    "id": "q-20",
-    "d": 2,
-    "t": "Sticky Partitioner (KIP-480)",
-    "q": "Una aplicación publica eventos de sensores que no tienen una clave de negocio definida, por lo que todos los mensajes se envían con **key=null** hacia un tópico con 16 particiones. En versiones anteriores de Kafka, el particionador por defecto distribuía los mensajes uno a uno en round-robin registro a registro, produciendo micro-lotes ineficientes. ¿Cómo resuelve este problema el **Sticky Partitioner**?",
-    "o": [
-      "Agrupa mensajes consecutivos sin clave en la misma partición hasta llenar el **batch.size** o alcanzar **linger.ms**, y solo entonces rota hacia la siguiente partición, reduciendo la latencia y maximizando el tamaño de los lotes.",
-      "Asigna todos los mensajes con clave null permanentemente a la partición 0 del tópico para evitar fragmentación de disco.",
-      "Genera una clave aleatoria UUID v4 para cada mensaje en memoria antes de calcular la función hash Murmur2.",
-      "Descarta el uso de memoria en el cliente y envía los mensajes directamente al broker mediante llamadas HTTP/2 concurrentes."
-    ],
-    "a": 0,
-    "e": "El Sticky Partitioner (introducido en KIP-480) mejora radicalmente el rendimiento de mensajes sin clave (**key=null**). En lugar de dispersar cada mensaje individual a una partición distinta en round-robin puro (lo que creaba batches diminutos de 1 mensaje con alta sobrecarga de red), el Sticky Partitioner se adhiere (sticks) a una partición específica hasta que el lote se llena o vence **linger.ms**, logrando lotes más densos y reduciendo sustancialmente la latencia de extremo a extremo."
-  },
-  {
-    "id": "q-21",
-    "d": 2,
-    "t": "Confluent Schema Registry Wire Format",
-    "q": "Un servicio legacy intenta consumir mensajes de un tópico gobernado por Confluent Schema Registry utilizando un deserializador genérico de texto plano (**StringDeserializer**). La aplicación falla inmediatamente con caracteres extraños al inicio de cada mensaje. Al examinar el payload binario crudo con un visor hexadecimal, los ingenieros ven los primeros bytes: **[0x00, 0x00, 0x00, 0x00, 0x2A]**. ¿Qué representan exactamente estos 5 bytes según el Confluent Wire Format?",
-    "o": [
-      "El byte 0 es el Magic Byte (0x00) que identifica el protocolo de Confluent, y los siguientes 4 bytes representan el Schema ID (en este caso el ID entero 42 en formato Big-Endian) registrado en Schema Registry.",
-      "Son 5 bytes de paridad CRC32 calculados por el productor para verificar la integridad del mensaje ante corrupción de memoria RAM.",
-      "Es el identificador del broker líder (Broker ID) seguido del número de partición física en la que se almacenó el registro.",
-      "Es un timestamp UNIX truncado a 40 bits que indica el momento exacto en el que el registro fue serializado."
-    ],
-    "a": 0,
-    "e": "El estándar de serialización de Confluent Schema Registry (para Avro, Protobuf y JSON Schema) antepone exactamente 5 bytes de metadatos al payload serializado: el Byte 0 es el **Magic Byte (0x00)** que identifica el protocolo de Schema Registry, y los Bytes 1 al 4 corresponden al **Schema ID** expresado como un entero de 4 bytes en orden Big-Endian. Cualquier deserializador estándar que ignore esta cabecera fallará al interpretar los primeros 5 bytes como parte de los datos."
-  },
-  {
-    "id": "q-22",
-    "d": 2,
-    "t": "Compatibilidad BACKWARD en Schema Registry",
-    "q": "En una arquitectura orientada a eventos, un tópico utiliza un esquema Avro con la política de compatibilidad por defecto: **BACKWARD**. El equipo del servicio de pedidos desea actualizar el esquema agregando un nuevo campo opcional con un valor por defecto (**default**). Siguiendo las reglas estrictas de compatibilidad BACKWARD, ¿cuál debe ser el orden de despliegue en producción para evitar fallos?",
-    "o": [
-      "Se deben actualizar y desplegar primero todos los **Consumidores** con el nuevo esquema, y posteriormente desplegar los **Productores**.",
-      "Se deben desplegar primero los **Productores** para que comiencen a emitir el nuevo campo, y semanas después actualizar los **Consumidores**.",
-      "Tanto Productores como Consumidores deben detenerse simultáneamente, purgar el tópico completo y reiniciar todos los servicios al mismo segundo.",
-      "No se puede desplegar sin cambiar el modo de compatibilidad a **NONE**, ya que BACKWARD prohíbe terminantemente añadir nuevos campos a un esquema."
-    ],
-    "a": 0,
-    "e": "La compatibilidad **BACKWARD** garantiza que los consumidores que utilizan el nuevo esquema puedan procesar correctamente los datos generados con esquemas anteriores. Por lo tanto, el orden mandatorio de despliegue exige **actualizar primero a los consumidores** (estos podrán seguir leyendo los mensajes viejos que los productores aún emiten, aplicando el valor por defecto al campo nuevo) y, una vez que todos los consumidores soporten el nuevo esquema, **actualizar a los productores**."
-  },
-  {
-    "id": "q-23",
-    "d": 2,
-    "t": "Compatibilidad FULL en Schema Registry",
-    "q": "Una organización global cuenta con decenas de equipos autónomos que despliegan microservicios de forma continua e independiente (CI/CD). La gerencia de arquitectura exige una política en Confluent Schema Registry que garantice que cualquier equipo pueda desplegar productores o consumidores en **cualquier orden**, asegurando que los consumidores nuevos lean mensajes de productores viejos y los consumidores viejos lean mensajes de productores nuevos. ¿Qué modo de compatibilidad debe configurarse?",
-    "o": [
-      "Configurar el modo de compatibilidad **FULL** (o **FULL_TRANSITIVE**), que exige que los esquemas sean simultáneamente compatibles hacia atrás (Backward) y hacia adelante (Forward).",
-      "Configurar el modo **FORWARD**, ya que este modo permite por definición el despliegue de consumidores en cualquier instante de tiempo.",
-      "Configurar el modo **NONE** en todos los subjects para deshabilitar las validaciones y permitir cualquier cambio en el payload.",
-      "Configurar el modo **BACKWARD_TRANSITIVE** con el parámetro **allow.any.order=true** en el archivo schema-registry.properties."
-    ],
-    "a": 0,
-    "e": "El modo de compatibilidad **FULL** (y su variante **FULL_TRANSITIVE**) combina las garantías de BACKWARD y FORWARD. Esto significa que un consumidor con un esquema nuevo puede leer datos producidos con esquemas antiguos, y un consumidor con un esquema antiguo puede leer datos producidos con el esquema nuevo. Esta simetría total desacopla por completo el ciclo de despliegue, permitiendo actualizar productores o consumidores en cualquier orden sin riesgo de incompatibilidad."
-  },
-  {
-    "id": "q-24",
-    "d": 2,
-    "t": "Ruptura de Enrutamiento al Modificar Particiones",
-    "q": "Un tópico de pagos está particionado por la clave **user_id** utilizando el particionador por defecto de Kafka (**murmur2**). Originalmente el tópico tenía **12 particiones**. Debido a un aumento del tráfico, un operador ejecuta el comando **kafka-topics.sh --alter** para incrementar las particiones a **24**. ¿Qué consecuencia inmediata sufre la aplicación respecto al orden de procesamiento por usuario?",
-    "o": [
-      "Los mensajes futuros para un mismo **user_id** pueden asignarse a una partición física distinta a la que se asignaban anteriormente (ya que **hash(key) % 24 != hash(key) % 12**), rompiendo la garantía de orden estricto de eventos para ese usuario.",
-      "Kafka redistribuye automáticamente todos los mensajes históricos de las primeras 12 particiones a las 24 particiones en tiempo real sin impacto.",
-      "Todos los productores fallarán con **SerializationException** hasta que se reinicien para refrescar los metadatos de particionado.",
-      "El orden por usuario se mantiene intacto porque Kafka guarda una tabla de correspondencia clave-partición en el archivo meta.properties."
-    ],
-    "a": 0,
-    "e": "El particionador por defecto asigna las particiones calculando **murmur2(key) % total_partitions**. Si el número total de particiones cambia (de 12 a 24), el resultado del módulo matemático cambia para la gran mayoría de las claves. A partir de ese instante, nuevos eventos para el usuario 'user-123' se escribirán en una partición distinta a donde están sus eventos históricos, rompiendo la garantía de orden secuencial por clave. Por ello, nunca se debe alterar el número de particiones de un tópico con clave sin planificar una migración."
-  },
-  {
-    "id": "q-25",
-    "d": 3,
-    "t": "Topología de Consumer Groups y Particionamiento",
-    "q": "Un tópico de eventos de facturación tiene **12 particiones**. Existen dos sistemas downstream independientes que consumen de este tópico: el servicio de facturación (**group.id=billing-app**) que cuenta con **4 instancias** activas, y el servicio de fraude en tiempo real (**group.id=fraud-app**) que cuenta con **12 instancias** activas. ¿Cómo asigna Kafka las particiones a los miembros de cada grupo?",
-    "o": [
-      "En **billing-app**, cada una de las 4 instancias recibe exactamente 3 particiones; en **fraud-app**, cada una de las 12 instancias recibe exactamente 1 partición; ambos grupos reciben el 100 % de los mensajes del tópico de forma totalmente independiente.",
-      "Los mensajes se reparten entre las 16 instancias totales de ambos grupos de forma aleatoria, por lo que cada mensaje es procesado por un solo servicio.",
-      "En **billing-app** 8 particiones quedan sin consumir porque el número de instancias no coincide exactamente con el número de particiones del tópico.",
-      "En **fraud-app**, solo 4 instancias pueden procesar datos para mantener paridad con el grupo de facturación y evitar contención en el broker."
-    ],
-    "a": 0,
-    "e": "El modelo de Consumer Groups de Apache Kafka desacopla completamente los grupos entre sí: cada grupo con un **group.id** diferente actúa como un suscriptor pub/sub independiente y recibe la totalidad de los datos del tópico. Dentro de cada grupo, el coordinador reparte las particiones equitativamente: en **billing-app** 12 particiones / 4 consumidores = 3 particiones por consumidor; en **fraud-app** 12 particiones / 12 consumidores = 1 partición por consumidor."
-  },
-  {
-    "id": "q-26",
-    "d": 3,
-    "t": "Comportamiento de auto.offset.reset",
-    "q": "Un equipo de ciencia de datos despliega una nueva aplicación analítica con un identificador de grupo nunca antes utilizado (**group.id=analytics-v1**) para consumir de un tópico con 10 millones de eventos acumulados durante el último año. El cliente se inicializa con la configuración **auto.offset.reset=earliest**. ¿Desde qué posición comenzará a leer la aplicación en su primer arranque?",
-    "o": [
-      "Comenzará a leer desde el offset más antiguo disponible en cada una de las particiones (el inicio absoluto del log no purgado por la retención), procesando todo el historial existente.",
-      "Comenzará a leer únicamente los mensajes nuevos que se publiquen a partir del milisegundo exacto en que la aplicación envía su primer FetchRequest.",
-      "Arrojará inmediatamente una excepción **NoOffsetForPartitionException** requiriendo que un administrador configure los offsets con la herramienta CLI.",
-      "Comenzará a leer desde el High Watermark actual ignorando los mensajes históricos para optimizar la memoria RAM del consumidor."
-    ],
-    "a": 0,
-    "e": "La propiedad **auto.offset.reset** define la política a seguir cuando no existe un offset previamente comprometido en el tópico **__consumer_offsets** para ese grupo (o cuando el offset guardado ha sido eliminado por expirar la retención). Con **auto.offset.reset=earliest**, el consumidor se posiciona en el offset más bajo disponible en cada partición (el inicio del commit log), permitiendo procesar todo el historial existente de datos."
-  },
-  {
-    "id": "q-27",
-    "d": 3,
-    "t": "Riesgos del Commit Automático (enable.auto.commit)",
-    "q": "Un consumidor procesa pedidos en una base de datos relacional con **enable.auto.commit=true** y **auto.commit.interval.ms=5000** (5 segundos). Durante una ejecución, el consumidor extrae 100 mensajes en una llamada a **poll()**. Logra persistir 40 pedidos en la base de datos tras 3 segundos de procesamiento, pero en ese instante se produce un fallo catastrófico en el nodo (Kernel Panic) que apaga el proceso sin ejecutar ningún bloque finally. ¿Qué ocurrirá cuando el pod se reinicie y vuelva a unirse al grupo?",
-    "o": [
-      "El consumidor volverá a leer desde el último offset confirmado antes de la llamada a poll() (hace más de 3 segundos), por lo que reprocesará los 40 pedidos ya guardados en la base de datos (generando duplicados si la base de datos no es idempotente), además de los 60 pedidos restantes.",
-      "Los 60 pedidos no procesados se perderán para siempre porque Kafka confirma automáticamente los 100 mensajes en el instante en que salen de poll().",
-      "Kafka revertirá automáticamente las 40 inserciones en la base de datos externa utilizando una transacción XA distribuida.",
-      "El broker detectará que 40 mensajes fueron leídos y avanzará el offset de la partición a 40 para evitar reprocesamiento."
-    ],
-    "a": 0,
-    "e": "Con **enable.auto.commit=true**, los offsets solo se comprometen periódicamente durante las llamadas a **poll()** si ha transcurrido el intervalo de 5 segundos. Como el crash ocurrió a los 3 segundos, ningún commit fue enviado por los 100 registros leídos. Al reiniciarse, el consumidor recupera el último offset confirmado en el broker y vuelve a solicitar los mismos 100 mensajes, provocando el reprocesamiento duplicado de los 40 pedidos ya guardados (semántica At-Least-Once no idempotente)."
-  },
-  {
-    "id": "q-28",
-    "d": 3,
-    "t": "commitSync vs. commitAsync y Reintentos",
-    "q": "Un desarrollador de Kafka busca maximizar el throughput reemplazando **commitSync()** por **commitAsync()**. Para evitar pérdida de datos, decide implementar un callback en **commitAsync()** que, en caso de recibir un error transitorio de red, ejecuta inmediatamente un nuevo reintento del commit con ese mismo offset fallido. ¿Por qué este patrón de reintentos en **commitAsync()** se considera un grave antipatrón en producción?",
-    "o": [
-      "Porque si el commit del offset 200 falla transitoriamente pero una llamada posterior logra confirmar exitosamente el offset 300, un reintento tardío del commit del offset 200 sobrescribiría el offset 300 en **__consumer_offsets**, provocando un retroceso de offset y reprocesamiento masivo de datos.",
-      "Porque **commitAsync()** bloquea el hilo de ejecución principal durante los reintentos, destruyendo la ventaja de concurrencia asíncrona.",
-      "Porque Kafka prohíbe el uso de callbacks en operaciones de commit por motivos de seguridad en los permisos de usuario.",
-      "Porque los brokers de Kafka rechazan cualquier commit asíncrono que no venga firmado por un certificado digital mTLS."
-    ],
-    "a": 0,
-    "e": "**commitAsync()** no reintenta deliberadamente por diseño arquitectónico. Considera la secuencia: la petición para confirmar el offset 200 falla por un parpadeo de red, pero 50 ms después una nueva petición para confirmar el offset 300 tiene éxito. Si el callback reintenta el commit del offset 200 después de que el offset 300 ya fue persistido, el broker sobrescribirá el progreso con 200, provocando que si el consumidor se reinicia vuelva a reprocesar todo desde 200 en adelante."
-  },
-  {
-    "id": "q-29",
-    "d": 3,
-    "t": "max.poll.interval.ms y Rebalance Storms",
-    "q": "Un consumidor extrae lotes con la configuración por defecto de **max.poll.records=500**. Cada mensaje requiere una llamada HTTP a un servicio legacy de calificación crediticia que tarda en promedio 200 ms por registro (un total de 100 segundos para el lote completo). El parámetro **max.poll.interval.ms** está configurado en su valor por defecto de 300.000 ms (5 minutos). En una campaña de marketing, el servicio legacy se degrada y pasa a tardar 800 ms por registro (400 segundos para procesar el lote). ¿Qué síntoma crítico observará el equipo en el consumidor?",
-    "o": [
-      "El consumidor superará el tiempo límite de **max.poll.interval.ms** sin llamar a **poll()**, por lo que el cliente se declarará a sí mismo zombie y abandonará el grupo, provocando un rebalanceo destructivo continuo (Rebalance Storm) y dejando los mensajes sin committear.",
-      "El hilo de heartbeat del consumidor mantendrá la sesión activa en el broker sin ningún inconveniente, esperando pacientemente los 400 segundos hasta el próximo poll().",
-      "El broker desconectará la conexión TCP del cliente tras 60 segundos arrojando un error **LeaderNotAvailableException**.",
-      "Kafka dividirá automáticamente el lote restante y lo transferirá a otro broker mediante el protocolo Zero-Copy."
-    ],
-    "a": 0,
-    "e": "El parámetro **max.poll.interval.ms** define el tiempo máximo que el hilo principal de procesamiento puede tardar entre dos invocaciones sucesivas de **poll()**. Aunque el hilo de fondo (Heartbeat Thread) continúe enviando latidos al broker, si el procesamiento del lote supera este límite, el cliente asume que está bloqueado o en deadlock y abandona el grupo deliberadamente. El coordinador inicia un rebalanceo asignando las particiones a otro consumidor, que también se bloqueará, generando una tormenta de rebalanceos continua."
-  },
-  {
-    "id": "q-30",
-    "d": 3,
-    "t": "session.timeout.ms vs. heartbeat.interval.ms",
-    "q": "En la configuración de un cliente consumidor de Kafka, ¿cuál es la diferencia de responsabilidades y la relación matemática recomendada entre **session.timeout.ms** y **heartbeat.interval.ms**?",
-    "o": [
-      "**session.timeout.ms** es el tiempo que el Group Coordinator espera sin recibir latidos antes de dar por muerto a un consumidor y disparar un rebalanceo; **heartbeat.interval.ms** es la cadencia con la que el hilo de fondo envía latidos y debe ser como máximo **1/3** de **session.timeout.ms**.",
-      "**session.timeout.ms** controla el tiempo máximo de procesamiento de un batch en el hilo principal y debe ser siempre el triple de **heartbeat.interval.ms**.",
-      "**heartbeat.interval.ms** es el tiempo que el broker tarda en enviar mensajes al cliente y debe ser exactamente igual a **session.timeout.ms**.",
-      "Ambos parámetros son obsoletos desde Kafka 2.4 y han sido reemplazados completamente por la métrica de **consumer.lag**."
-    ],
-    "a": 0,
-    "e": "**session.timeout.ms** es el umbral de detección de fallos de nodo o pérdida de red en el Group Coordinator. Por su parte, **heartbeat.interval.ms** determina con qué frecuencia el hilo de heartbeat de fondo envía señales de vida al coordinador. La recomendación oficial es configurar **heartbeat.interval.ms** en como máximo **un tercio (1/3)** de **session.timeout.ms** (por ejemplo, 3 s frente a 10 s o 45 s) para tolerar pérdidas transitorias de paquetes de red sin disparar rebalanceos prematuros."
-  },
-  {
-    "id": "q-31",
-    "d": 3,
-    "t": "Rebalanceo Cooperativo Incremental (KIP-429)",
-    "q": "Una empresa experimenta caídas periódicas de rendimiento en sus consumidores cada vez que un nuevo pod se suma al Consumer Group debido a la política tradicional de rebalanceo Eager (Stop-The-World). El equipo decide actualizar su asignador a **CooperativeStickyAssignor**. ¿Cómo transforma este protocolo el comportamiento del rebalanceo?",
-    "o": [
-      "En lugar de revocar todas las particiones de todos los consumidores de golpe paralizando el procesamiento, el rebalanceo cooperativo solo revoca y transfiere las particiones específicas que deben cambiar de dueño en una segunda fase, permitiendo que el resto continúe consumiendo sin interrupción.",
-      "Elimina por completo el concepto de rebalanceo asignando todas las particiones del clúster a una dirección IP flotante compartida.",
-      "Obliga a que todos los mensajes de todas las particiones se consuman estrictamente en orden cronológico absoluto usando un mutex distribuido.",
-      "Transfiere la coordinación del Consumer Group desde el broker de Kafka hacia una instancia de Redis Sentinel."
-    ],
-    "a": 0,
-    "e": "El protocolo tradicional Eager requería que todos los miembros del grupo renunciaran a todas sus particiones asignadas (pausa Stop-The-World) mientras el líder del grupo calculaba el nuevo reparto. Con **CooperativeStickyAssignor** (KIP-429), el rebalanceo es incremental: los consumidores conservan sus particiones actuales y continúan procesando datos; únicamente se revocan y migran aquellas particiones específicas que deben reasignarse para equilibrar la carga, eliminando los picos de latencia en despliegues."
-  },
-  {
-    "id": "q-32",
-    "d": 3,
-    "t": "Static Membership con group.instance.id (KIP-345)",
-    "q": "Un conjunto de 20 consumidores de Kafka se ejecuta en Kubernetes. Cada vez que se realiza un despliegue por Rolling Update, los pods se destruyen y recrean uno por uno, provocando 40 rebalanceos globales sucesivos que saturan el clúster. ¿Cómo permite la función de **Static Membership** mediante la propiedad **group.instance.id** mitigar este problema?",
-    "o": [
-      "Asigna un identificador estático único e inmutable a cada pod; cuando un pod se reinicia durante el despliegue, el Group Coordinator reconoce su identidad y reserva sus particiones sin disparar ningún rebalanceo durante el periodo de **session.timeout.ms**.",
-      "Convierte a los pods en réplicas de solo lectura que leen directamente desde el PageCache del nodo de Kubernetes sin registrarse en Kafka.",
-      "Hace que Kubernetes congele las peticiones HTTP externas hasta que todos los 20 pods estén completamente sincronizados en el offset cero.",
-      "Guarda el estado de las particiones en un volumen persistente NFS compartido para que cualquier pod tome cualquier partición sin avisar a Kafka."
-    ],
-    "a": 0,
-    "e": "Con Static Membership (KIP-345), cada consumidor define un **group.instance.id** persistente (por ejemplo, el nombre del StatefulSet de Kubernetes: **consumer-pod-0**). Cuando un pod se reinicia, el coordinador no lanza un rebalanceo inmediato al perder el socket TCP; en su lugar, espera pacientemente durante **session.timeout.ms**. Si el pod vuelve a conectarse con el mismo **group.instance.id** antes de que expire dicho tiempo, retoma exactamente sus mismas particiones asignadas sin que ningún otro consumidor sufra interrupción alguna."
-  },
-  {
-    "id": "q-33",
-    "d": 3,
-    "t": "Commit Manual por Partición con OffsetAndMetadata",
-    "q": "Un microservicio procesa eventos complejos y desea asegurar semántica At-Least-Once estricta a nivel de registro sin esperar a terminar un lote completo de 500 mensajes devuelto por **poll()**. Si ocurre un fallo en el registro 150 de la partición 2, la aplicación desea que los offsets de los registros ya procesados en la partición 1 y en los primeros 149 de la partición 2 queden asegurados en el broker. ¿Qué técnica de la API del consumidor debe utilizarse?",
-    "o": [
-      "Invocar **commitSync(Map<TopicPartition, OffsetAndMetadata>)** pasando explícitamente el TopicPartition correspondiente y el siguiente offset a procesar (**offsetActual + 1**) tras completar cada unidad de trabajo.",
-      "Invocar **seekToBeginning()** inmediatamente antes de cada llamada al método save() del repositorio de base de datos.",
-      "Activar **enable.auto.commit=true** con un intervalo de **auto.commit.interval.ms=1**.",
-      "Llamar al método **pause()** sobre todas las particiones y enviar un mensaje Tombstone al tópico __consumer_offsets."
-    ],
-    "a": 0,
-    "e": "Para un control granular de offsets, Kafka permite invocar **commitSync(offsetsMap)** o **commitAsync(offsetsMap)** pasando un mapa que vincula cada **TopicPartition** con un objeto **OffsetAndMetadata**. Es una regla crítica recordar que el offset comprometido debe ser siempre el **siguiente offset que se espera leer** (es decir, el offset del último registro procesado con éxito + 1). De este modo, ante un fallo o rebalanceo, el consumidor retomará exactamente en el registro no procesado."
-  },
-  {
-    "id": "q-34",
-    "d": 3,
-    "t": "ConsumerRebalanceListener y Gestión de Estado",
-    "q": "Una aplicación utiliza un buffer en memoria para acumular agregaciones de métricas por partición antes de volcarlas a una base de datos Time-Series. Para evitar pérdida de datos o duplicados cuando se produce un rebalanceo del Consumer Group, ¿qué implementación del **ConsumerRebalanceListener** debe programarse?",
-    "o": [
-      "En el método **onPartitionsRevoked()**, volcar los datos pendientes del buffer de las particiones revocadas hacia la base de datos y ejecutar un **commitSync()** de los offsets antes de que el coordinador transfiera las particiones a otro miembro.",
-      "En el método **onPartitionsAssigned()**, vaciar todos los registros del log del broker llamando a un método de truncado administrativo.",
-      "En el método **onPartitionsLost()**, reintentar indefinidamente la reconexión TCP bloqueando el hilo de ejecución mediante un bucle while(true).",
-      "Registrar un listener vacío sin código para deshabilitar las notificaciones de rebalanceo del broker."
-    ],
-    "a": 0,
-    "e": "La interfaz **ConsumerRebalanceListener** expone los métodos **onPartitionsRevoked** y **onPartitionsAssigned**. El método **onPartitionsRevoked()** se invoca justo antes de que el consumidor pierda la propiedad de sus particiones asignadas. Es el momento crítico obligatorio para volcar cualquier estado o acumulador en memoria a un almacenamiento persistente y comprometer de forma síncrona (**commitSync**) los offsets procesados, asegurando que el nuevo dueño de la partición comience desde el punto exacto."
-  },
-  {
-    "id": "q-35",
-    "d": 3,
-    "t": "Asignación Manual con assign() vs. subscribe()",
-    "q": "Un proceso de auditoría forense debe leer periódicamente y de forma exclusiva los datos contenidos en la partición 3 del tópico **security-logs**, sin participar en el protocolo dinámico de Consumer Groups, sin registrarse en **__consumer_offsets** y sin disparar jamás rebalanceos a otras instancias. ¿Cómo debe configurarse el consumidor?",
-    "o": [
-      "Invocar el método **assign(Collections.singleton(new TopicPartition(\"security-logs\", 3)))** en lugar del método **subscribe()**, asignando estáticamente la partición deseada.",
-      "Invocar **subscribe()** pasando una expresión regular que filtre únicamente la partición 3 con un group.id fijado en null.",
-      "Establecer la propiedad de configuración **group.id=\"\"** (string vacío) y llamar a **poll()** normalmente.",
-      "Modificar las ACLs del tópico para prohibir las operaciones de JoinGroup y SyncGroup al usuario del proceso forense."
-    ],
-    "a": 0,
-    "e": "En la API de Kafka Consumer existen dos modos de suscripción mutuamente excluyentes: **subscribe()** (suscripción dinámica con Consumer Groups, balanceo automático de particiones y detección de fallos) y **assign()** (asignación estática y manual de particiones específicas). Al utilizar **assign()**, el consumidor no utiliza el Group Coordinator, no participa en rebalanceos y procesa exclusivamente las particiones indicadas de forma manual."
-  },
-  {
-    "id": "q-36",
-    "d": 3,
-    "t": "Tópico Interno __consumer_offsets y Group Coordinator",
-    "q": "Un ingeniero de soporte necesita diagnosticar un problema de coordinación de un Consumer Group con **group.id=\"payment-processor\"**. Para identificar exactamente cuál de los 30 brokers del clúster está actuando como el **Group Coordinator** de ese grupo, ¿qué cálculo interno realiza el protocolo de Kafka?",
-    "o": [
-      "Calcula la partición objetivo en el tópico **__consumer_offsets** con la fórmula **Math.abs(group.id.hashCode()) % offsets.topic.num.partitions** (por defecto 50); el broker que sea el líder de esa partición de **__consumer_offsets** es el Group Coordinator.",
-      "Consulta la tabla de hash distribuida en el quórum de KRaft que asigna aleatoriamente un broker en cada llamada a poll().",
-      "El Group Coordinator es siempre y de forma fija el broker con el identificador numérico más bajo (**broker.id=0**).",
-      "El coordinador es elegido por el cliente consumidor seleccionando el broker con menor tiempo de ping de red ICMP."
-    ],
-    "a": 0,
-    "e": "En Kafka, el tópico interno **__consumer_offsets** tiene por defecto **50 particiones** con política de compactación. Para determinar qué partición aloja los commits de un determinado grupo, se calcula el hash del **group.id** en módulo con el total de particiones (**abs(hashCode) % 50**). El broker líder de esa partición de **__consumer_offsets** asume automáticamente el rol de **Group Coordinator** para todos los miembros de ese grupo."
-  },
-  {
-    "id": "q-37",
-    "d": 4,
-    "t": "Kafka Connect: Standalone vs. Distributed",
-    "q": "Un equipo de ingeniería de datos diseña un pipeline de producción para capturar cambios (CDC con Debezium) desde 15 bases de datos PostgreSQL hacia Apache Kafka. Un ingeniero propone desplegar Kafka Connect en modo **Standalone** para simplificar la configuración inicial sin crear tópicos internos. ¿Por qué el modo Standalone es inaceptable para este entorno empresarial?",
-    "o": [
-      "Porque el modo Standalone se ejecuta en un único proceso de sistema operativo sin tolerancia a fallos (SPOF); si el proceso colapsa, todas las tareas se detienen sin posibilidad de auto-recuperación ni escalabilidad horizontal.",
-      "Porque el modo Standalone no admite conectores de tipo Source, funcionando exclusivamente con conectores de tipo Sink.",
-      "Porque el modo Standalone cifra obligatoriamente todos los mensajes con claves RSA de 4096 bits ralentizando el rendimiento.",
-      "Porque el modo Standalone no permite conectarse a clústeres de Kafka que utilicen el quórum de KRaft."
-    ],
-    "a": 0,
-    "e": "El modo Standalone de Kafka Connect está pensado únicamente para pruebas locales y desarrollo. Se ejecuta en un proceso único, guarda los offsets y configuraciones en archivos planos locales en disco y no ofrece alta disponibilidad ni escalabilidad. En cambio, el modo **Distributed** forma un clúster de múltiples workers coordinados por el protocolo de grupos de Kafka, distribuye las tareas (Tasks) de forma balanceada y, si un worker cae, reasigna automáticamente sus tareas a los nodos supervivientes."
-  },
-  {
-    "id": "q-38",
-    "d": 4,
-    "t": "Tópicos Internos de Kafka Connect",
-    "q": "Al inicializar un clúster de Kafka Connect en modo distribuido, un administrador crea manualmente los tópicos internos. Por error, crea el tópico **config.storage.topic** con **3 particiones** en lugar de **1 partición**. Al arrancar los workers de Connect, el clúster falla y se niega a iniciar. ¿Por qué el tópico de configuraciones de Connect exige estrictamente tener **exactamente 1 partición**?",
-    "o": [
-      "Porque exige una partición única con política de compactación para garantizar una vista consistente con ordenamiento lineal total y cronológico estricto de todas las configuraciones de conectores en todos los workers del clúster.",
-      "Porque Kafka Connect no admite balanceo de carga en tópicos que utilicen serializadores de texto JSON o Avro.",
-      "Porque el broker líder de Kafka solo permite que el usuario del sistema connect-user escriba en la partición 0 de cualquier tópico interno.",
-      "Porque tener más de una partición provocaría un bloqueo mutuo (deadlock) en la memoria del kernel de Linux al aplicar Zero-Copy."
-    ],
-    "a": 0,
-    "e": "El tópico **config.storage.topic** almacena las configuraciones de todos los conectores y tareas del clúster de Connect con política de compactación (**cleanup.policy=compact**). Exige estrictamente **1 sola partición** para que todos los workers lean exactamente la misma secuencia ordenada de eventos de configuración. Si tuviera múltiples particiones, diferentes workers podrían observar actualizaciones de configuración en distinto orden relativo, rompiendo la coherencia distribuida del clúster."
-  },
-  {
-    "id": "q-39",
-    "d": 4,
-    "t": "Single Message Transforms (SMTs)",
-    "q": "Un conector Source JDBC extrae registros de una tabla de clientes que contiene una columna con datos personales sensibles denominada **credit_card_number**. La normativa de cumplimiento (PCI-DSS) prohíbe que los números de tarjeta sin enmascarar toquen los tópicos de Kafka. ¿Qué componente nativo y declarativo de Kafka Connect debe configurarse en el conector sin necesidad de programar un microservicio intermedio?",
-    "o": [
-      "Una Single Message Transform (SMT) utilizando la transformación **org.apache.kafka.connect.transforms.MaskField$Value** para reemplazar los dígitos de la tarjeta por una máscara o valor nulo antes de que el mensaje sea publicado en Kafka.",
-      "Un nuevo listener de red en el broker configurado con **ssl.client.auth=required** y cifrado AES-GCM.",
-      "Una regla de compatibilidad **FORWARD** en Confluent Schema Registry configurada para rechazar campos de tipo string.",
-      "Un interceptor en el consumidor downstream que filtre los mensajes después de haber sido confirmados en disco."
-    ],
-    "a": 0,
-    "e": "Las Single Message Transforms (SMTs) son transformaciones ligeras en memoria que se ejecutan directamente en los workers de Kafka Connect sobre cada registro individual. Para conectores Source, la transformación se aplica después de leer del sistema de origen y antes de escribir en Kafka. Utilizando la transformación estándar **MaskField$Value**, el conector enmascara el campo confidencial en vuelo, garantizando que el dato sensible jamás se persista en el commit log de Kafka."
-  },
-  {
-    "id": "q-40",
-    "d": 4,
-    "t": "Dead Letter Queue (DLQ) en Sink Connectors",
-    "q": "Un conector Sink de Kafka Connect transfiere eventos desde un tópico hacia un clúster de OpenSearch. De forma imprevista, una aplicación publica un mensaje con un JSON corrupto y malformado (Poison Pill). La tarea del conector falla inmediatamente y pasa a estado **FAILED**, deteniendo el consumo de la partición. ¿Cómo debe configurarse el conector para enviar automáticamente los registros inválidos a un tópico de aislamiento sin detener el flujo de datos?",
-    "o": [
-      "Establecer **errors.tolerance=all**, definir **errors.deadletterqueue.topic.name=opensearch-dlq** y habilitar **errors.deadletterqueue.context.headers.enable=true** para registrar la causa del fallo en las cabeceras.",
-      "Establecer **errors.tolerance=none** y aumentar **max.poll.interval.ms** a 600.000 ms en las propiedades del worker.",
-      "Cambiar el deserializador del tópico a **ByteArrayDeserializer** y activar el parámetro **unclean.leader.election.enable=true**.",
-      "Configurar una réplica standby de Kafka Connect con **connect.recovery.mode=auto-skip**."
-    ],
-    "a": 0,
-    "e": "Por defecto, Kafka Connect detiene las tareas ante el primer error (**errors.tolerance=none**). Al configurar **errors.tolerance=all**, el conector tolera registros defectuosos y continúa procesando el resto. Combinado con **errors.deadletterqueue.topic.name**, cualquier registro que falle en la deserialización o transformación se desvía de forma automática al tópico de DLQ indicado. Activar las cabeceras de contexto (**context.headers.enable=true**) añade metadata invaluable sobre el error, el tópico y el offset original."
-  },
-  {
-    "id": "q-41",
-    "d": 4,
-    "t": "Converters vs. Transforms en Kafka Connect",
-    "q": "En la arquitectura de Kafka Connect, ¿cuál es la diferencia fundamental de propósito entre un **Converter** (como **AvroConverter** o **JsonConverter**) y una **Single Message Transform (SMT)**?",
-    "o": [
-      "El **Converter** traduce entre el formato binario de bytes almacenado en Kafka y el modelo de datos interno de Connect (**Connect Data API**); la **SMT** manipula la estructura o los campos del registro mientras este ya se encuentra en la memoria del worker.",
-      "El **Converter** solo se ejecuta en conectores Sink, mientras que las **SMTs** solo son compatibles con conectores Source.",
-      "El **Converter** realiza el enrutamiento de red entre los brokers, mientras que la **SMT** gestiona la retención y purga de segmentos en disco.",
-      "Son términos sinónimos que pueden utilizarse indistintamente en el archivo connect-distributed.properties."
-    ],
-    "a": 0,
-    "e": "Kafka almacena únicamente arrays de bytes planos (byte[]). El **Converter** tiene la misión exclusiva de serializar y deserializar: convierte bytes de Kafka en el modelo de objetos tipado de Kafka Connect (**ConnectRecord**) o viceversa. Por otro lado, las **SMTs** operan en memoria sobre ese **ConnectRecord** ya deserializado, permitiendo modificar campos, filtrar datos, cambiar claves o renombrar tópicos de destino de forma dinámica."
-  },
-  {
-    "id": "q-42",
-    "d": 4,
-    "t": "Kafka Streams: KStream vs. KTable",
-    "q": "Una plataforma de comercio electrónico construye un sistema analítico con la librería Kafka Streams. Tienen dos fuentes de datos: una cola ininterrumpida de clics de usuarios en la web (cada clic es un evento independiente) y un flujo de actualizaciones de perfiles de usuario (donde cada mensaje representa la dirección y país actualizados de un usuario identificado por su ID). ¿Qué abstracción de Kafka Streams debe utilizarse para modelar cada caso?",
-    "o": [
-      "Los clics deben modelarse como un **KStream** (flujo de hechos continuos e independientes); las actualizaciones de perfil deben modelarse como una **KTable** (vista materializada del último estado por clave).",
-      "Los clics deben modelarse como una **KTable** con retención de 1 hora; las actualizaciones de perfil deben modelarse como un **GlobalKTable** sin clave.",
-      "Ambas fuentes deben modelarse obligatoriamente como **KStream**, ya que Kafka Streams no soporta semántica de actualización en memoria.",
-      "Los clics deben modelarse como un **SessionWindow** y las actualizaciones de perfil como un **TumblingWindow** de 5 segundos."
-    ],
-    "a": 0,
-    "e": "La dualidad Stream-Table es el núcleo conceptual de Kafka Streams. Un **KStream** representa un flujo inmutable de inserciones (hechos o eventos históricos como clics, transacciones o lecturas de sensores), donde cada registro se añade sin sobreescribir los anteriores. Una **KTable** representa un changelog o tabla materializada: cada registro es un UPSERT sobre la clave primaria, donde un nuevo valor reemplaza al anterior (y un valor nulo representa un DELETE)."
-  },
-  {
-    "id": "q-43",
-    "d": 4,
-    "t": "Requisito de Co-partitioning en Joins de Kafka Streams",
-    "q": "Una aplicación de Kafka Streams realiza un join interno entre un KStream (**orders**) y una KTable (**customers**). Ambos flujos utilizan el **customer_id** como clave y el mismo serializador. Sin embargo, el tópico **orders** tiene **12 particiones** y el tópico **customers** tiene **4 particiones**. Al iniciar la topología, ¿qué problema ocurrirá y cuál es la solución técnica requerida?",
-    "o": [
-      "Se violará el requisito obligatorio de co-particionado (**co-partitioning**), provocando resultados incompletos o una **TopologyException**; la solución es asegurar que ambos tópicos tengan exactamente el mismo número de particiones (12 particiones) o forzar un re-particionado del stream.",
-      "Kafka Streams creará 3 réplicas virtuales del tópico customers en memoria RAM automáticamente sin ninguna configuración adicional ni penalización de I/O.",
-      "El join funcionará perfectamente porque Kafka Streams ignora el número de particiones siempre que las claves coincidan en tipo de dato.",
-      "El clúster de Kafka truncará las 12 particiones de orders a 4 particiones en el primer rebalanceo del grupo de streams."
-    ],
-    "a": 0,
-    "e": "Para que un join entre streams y tables funcione correctamente de forma local y paralela en Kafka Streams, ambos tópicos deben estar **co-particionados**: deben tener estrictamente el **mismo número de particiones** y la **misma función de particionamiento por clave**. Si tienen diferente número de particiones (12 frente a 4), los registros con la misma clave terminarán en tareas de procesamiento asignadas a diferentes instancias físicas, impidiendo que el join encuentre las coincidencias locales."
-  },
-  {
-    "id": "q-44",
-    "d": 4,
-    "t": "GlobalKTable y Joins sin Co-partitioning",
-    "q": "Necesitas enriquecer un KStream masivo de transacciones bancarias (50 particiones) con una tabla de referencia pequeña de códigos postales y sucursales (5 particiones). Deseas evitar el coste y la complejidad de re-particionar el stream masivo de transacciones. ¿Qué abstracción de Kafka Streams permite realizar este join directamente sin requerir que ambos tópicos estén co-particionados?",
-    "o": [
-      "Modelar el tópico de códigos postales como una **GlobalKTable**, la cual replica todas las particiones del tópico en el almacenamiento local de cada instancia de la aplicación, permitiendo joins por cualquier campo sin importar el particionado del stream.",
-      "Utilizar un **SessionWindow** asimétrico con un buffer de memoria de 2 GB.",
-      "Convertir el stream de transacciones en un **KGroupedStream** con particionamiento aleatorio por timestamp.",
-      "Invocar el método **peek()** para guardar los códigos postales en un archivo temporal en /tmp/kafka."
-    ],
-    "a": 0,
-    "e": "Una **GlobalKTable** lee y almacena **la totalidad de las particiones** del tópico de referencia en el State Store local de **todas las instancias** de la aplicación. Gracias a esto, cualquier tarea que procese un registro del KStream puede buscar información en la GlobalKTable de forma local e instantánea, sin importar cómo esté particionado el stream de entrada y sin exigir co-particionado. El trade-off es que el dataset de la GlobalKTable debe ser lo suficientemente pequeño para caber en el disco de cada nodo."
-  },
-  {
-    "id": "q-45",
-    "d": 4,
-    "t": "State Stores de RocksDB y Changelog Topics",
-    "q": "Una topología de Kafka Streams calcula una ventana de agregación con estado (Stateful Processing). El equipo necesita garantizar alta resiliencia y un tiempo de recuperación mínimo (RTO) ante la caída de una de las instancias de la aplicación en producción. ¿Cómo persiste Kafka Streams el estado local y qué configuración acelera drásticamente el failover?",
-    "o": [
-      "El estado se guarda localmente en una base de datos embebida **RocksDB** respaldada por un **Changelog Topic interno compactado** en Kafka; configurando **num.standby.replicas=1** (o superior), otras instancias mantienen una réplica en caliente lista para asumir el control de inmediato sin esperar a reconstruir el estado.",
-      "El estado se almacena exclusivamente en la memoria Heap de Java; ante una caída, Kafka Streams recupera los objetos leyendo el archivo core dump del sistema operativo.",
-      "Kafka Streams escribe el estado directamente en una base de datos Cassandra externa mediante transacciones distribuidas XA.",
-      "Se debe deshabilitar RocksDB y usar exclusivamente tablas volátiles en memoria configurando **state.store.type=none**."
-    ],
-    "a": 0,
-    "e": "Kafka Streams utiliza por defecto **RocksDB** como almacenamiento local persistente off-heap para sus State Stores. Para tolerar fallos, cada mutación de estado se envía en paralelo a un **Changelog Topic interno** en Kafka con política de compactación. Si una instancia cae, otra instancia puede reconstruir el estado leyendo este changelog. Para lograr failover casi instantáneo (RTO de segundos), se configura **num.standby.replicas**, lo que hace que réplicas standby mantengan su RocksDB local sincronizado en caliente."
-  },
-  {
-    "id": "q-46",
-    "d": 4,
-    "t": "Ventanas Temporales: Tumbling vs. Hopping vs. Sliding",
-    "q": "Un sistema de monitorización industrial debe calcular el consumo energético promedio de una fábrica **cada 15 minutos en bloques independientes y no solapados** (ej. de 08:00 a 08:15, de 08:15 a 08:30). Ningún evento debe pertenecer a más de una ventana temporal. ¿Qué tipo de ventana de Kafka Streams debe seleccionarse?",
-    "o": [
-      "Una ventana fija sin solapamiento (**Tumbling Window**) de 15 minutos de duración (**TimeWindows.ofSizeWithNoGrace(Duration.ofMinutes(15)))**.",
-      "Una ventana con solapamiento (**Hopping Window**) con tamaño de 15 minutos y avance de 1 minuto.",
-      "Una ventana basada en inactividad (**Session Window**) con gap de 15 minutos.",
-      "Una ventana deslizante continua (**Sliding Window**) basada en la diferencia temporal entre eventos consecutivos."
-    ],
-    "a": 0,
-    "e": "Las **Tumbling Windows** son ventanas de tiempo de tamaño fijo, contiguas y que **no se solapan** jamás. Cada registro individual pertenece a una única ventana en función de su marca de tiempo (timestamp). Por el contrario, las Hopping Windows se solapan periódicamente según su intervalo de avance, y las Session Windows dependen de periodos variables de inactividad de los usuarios."
-  },
-  {
-    "id": "q-47",
-    "d": 4,
-    "t": "ksqlDB: Push Queries vs. Pull Queries",
-    "q": "Un equipo de desarrollo implementa una solución de monitorización de fraude con **ksqlDB**. En un dashboard web en tiempo real necesitan mostrar alertas instantáneas a medida que ocurren nuevas transacciones sospechosas, mientras que en un servicio de atención telefónica necesitan consultar el saldo actual de un usuario bajo demanda cuando el cliente llama. ¿Qué tipo de consultas ksqlDB corresponden a cada necesidad?",
-    "o": [
-      "El dashboard web requiere una **Push Query** (utilizando la cláusula **EMIT CHANGES** para mantener una suscripción abierta que emite eventos futuros de forma continua); el servicio telefónico requiere una **Pull Query** (consulta tipo request/response que devuelve el estado materializado actual de una tabla).",
-      "Ambas necesidades deben resolverse exclusivamente mediante **Pull Queries** ejecutadas en un bucle polling HTTP cada 100 milisegundos.",
-      "El dashboard requiere una **Pull Query** con retención de 30 días y el servicio telefónico una **Push Query** sin filtros WHERE.",
-      "ksqlDB solo soporta consultas tipo batch ejecutadas mediante scripts de shell programados en cron."
-    ],
-    "a": 0,
-    "e": "ksqlDB define dos paradigmas de consulta: las **Push Queries** (definidas con la cláusula **EMIT CHANGES**) son suscripciones reactivas de streaming que se mantienen permanentemente abiertas, enviando cada nuevo evento a medida que llega; son ideales para dashboards en tiempo real y alertas. Las **Pull Queries** funcionan como las consultas SQL tradicionales: son puntuales, síncronas y leen el estado actual materializado en una tabla de ksqlDB para una clave dada."
-  },
-  {
-    "id": "q-48",
-    "d": 4,
-    "t": "ksqlDB: Definición de Claves y Agregaciones",
-    "q": "Al crear un STREAM en ksqlDB a partir de un tópico de Kafka existente utilizando la sentencia **CREATE STREAM orders_stream (...) WITH (KAFKA_TOPIC='orders', VALUE_FORMAT='AVRO');**, ¿por qué es fundamental definir explícitamente la propiedad **KEY = 'order_id'** si se planea ejecutar posteriormente una cláusula **GROUP BY order_id** o realizar joins con otras tablas?",
-    "o": [
-      "Porque ksqlDB necesita saber qué campo del mensaje actúa como la clave primaria del registro de Kafka para evitar tener que re-particionar el tópico completo a través de la red al ejecutar la agregación o el join.",
-      "Porque si no se define la clave, ksqlDB destruye todos los mensajes del tópico original en la primera ejecución.",
-      "Porque los esquemas de Avro prohíben la lectura de campos sin clave mediante el protocolo HTTP REST.",
-      "Porque ksqlDB no admite sentencias GROUP BY sobre campos que tengan tipo de dato numérico (BIGINT o INT)."
-    ],
-    "a": 0,
-    "e": "En ksqlDB y Kafka Streams, las operaciones de agregación (**GROUP BY**) y los joins requieren que los mensajes estén particionados por la clave correspondiente. Al especificar **KEY = 'campo'**, ksqlDB reconoce que el tópico ya está particionado por esa clave en Kafka. Si no se define o si se agrupa por un campo distinto a la clave actual, ksqlDB se verá forzado a generar internamente un tópico intermedio de re-particionado (**repartition topic**), duplicando el tráfico de red y el uso de almacenamiento."
-  },
-  {
-    "id": "q-49",
-    "d": 5,
-    "t": "Autenticación: mTLS vs. SASL/SCRAM",
-    "q": "Un banco digital debe autenticar a miles de microservicios clientes y usuarios administradores contra su clúster de Kafka. Para las aplicaciones que residen en nubes públicas prefieren gestión de credenciales con rotación dinámica de contraseñas almacenadas de forma nativa en Kafka sin depender de certificados emitidos para cada cliente. ¿Qué mecanismo de autenticación de Kafka cumple con este requerimiento?",
-    "o": [
-      "**SASL/SCRAM** (SCRAM-SHA-256 o SCRAM-SHA-512), el cual almacena las credenciales con salting y hashing criptográfico en los metadatos de Kafka (KRaft o ZK) y permite la creación y rotación dinámica de usuarios en caliente mediante la CLI **kafka-configs.sh**.",
-      "**mTLS** (Mutual TLS), ya que no requiere almacenar claves privadas ni certificados en el cliente.",
-      "**SASL/PLAIN** sin TLS, porque cifra las contraseñas en el kernel del broker mediante curvas elípticas.",
-      "**Kerberos (SASL/GSSAPI)**, porque no necesita un servidor KDC centralizado para validar tickets."
-    ],
-    "a": 0,
-    "e": "**SASL/SCRAM** (Salted Challenge Response Authentication Mechanism) es el estándar nativo para autenticación segura basada en credenciales en Kafka. Permite definir usuarios y contraseñas salteadas/hasheadas (SHA-256 / SHA-512) que se almacenan directamente en los metadatos de Kafka. Permite crear, modificar y revocar usuarios en tiempo de ejecución sin reiniciar brokers (**kafka-configs.sh**), evitando la complejidad de gestionar PKI y certificados X.509 individuales para cada cliente."
-  },
-  {
-    "id": "q-50",
-    "d": 5,
-    "t": "Configuración de Keystore y Truststore en mTLS",
-    "q": "Al configurar la autenticación mutua TLS (**mTLS**) en un cliente de Kafka en Java, el desarrollador especifica dos almacenes de certificados: **ssl.keystore.location** y **ssl.truststore.location**. ¿Cuál es la función técnica exacta de cada uno de estos almacenes?",
-    "o": [
-      "El **Keystore** contiene la clave privada y el certificado digital propio del cliente para presentarse y demostrar su identidad ante el broker; el **Truststore** contiene los certificados de las Autoridades Certificadoras (CA) de confianza para verificar que el certificado presentado por el broker es legítimo.",
-      "El **Keystore** contiene las contraseñas en texto claro de los tópicos; el **Truststore** contiene las reglas de autorización ACL del clúster.",
-      "El **Truststore** cifra los mensajes en el disco del broker; el **Keystore** cifra el canal de red TCP entre ambos extremos.",
-      "Ambos archivos cumplen exactamente la misma función y pueden intercambiarse o fusionarse sin ninguna configuración adicional."
-    ],
-    "a": 0,
-    "e": "En la infraestructura de clave pública (PKI) utilizada por Java y Kafka para mTLS: el **Keystore** aloja la identidad propia del cliente (su clave privada secreta y el certificado público correspondiente firmado por una CA). El **Truststore** almacena exclusivamente los certificados públicos de las CAs en las que el cliente confía. Cuando el broker le entrega su certificado TLS durante el handshake, el cliente usa el Truststore para validar la firma de la CA del broker."
-  },
-  {
-    "id": "q-51",
-    "d": 5,
-    "t": "Autorización con ACLs y Principio de Menor Privilegio",
-    "q": "Un nuevo microservicio productor (**Principal: User:order-service**) debe publicar mensajes de forma transaccional (utilizando transacciones EOS y **transactional.id=\"tx-order-01\"**) en el tópico **orders**. ¿Cuáles son los permisos mínimos indispensables que un administrador debe otorgar mediante **kafka-acls.sh** siguiendo el principio de menor privilegio?",
-    "o": [
-      "Permisos de operación **Write** y **Describe** sobre el recurso **Topic:orders**, y permisos de operación **Write** y **Describe** sobre el recurso **TransactionalId:tx-order-01**.",
-      "Permisos de operación **All** sobre el recurso **Cluster** y permisos de operación **Read** sobre el tópico **orders**.",
-      "Únicamente permiso de operación **Write** sobre el recurso **Cluster**, ya que los permisos de tópico se heredan automáticamente.",
-      "Permisos de operación **Read**, **Write** y **Delete** sobre el tópico interno **__transaction_state**."
-    ],
-    "a": 0,
-    "e": "Para que un productor transaccional pueda operar bajo el principio de menor privilegio, requiere permisos de **Write** y **Describe** sobre el tópico de datos (**Topic:orders**) para enviar mensajes y consultar sus metadatos de partición. Adicionalmente, al usar transacciones, el Transaction Coordinator valida que el Principal tenga permisos de **Write** y **Describe** sobre el recurso **TransactionalId** configurado (**tx-order-01**). Nunca se deben conceder permisos directos a clientes sobre los tópicos internos como **__transaction_state**."
-  },
-  {
-    "id": "q-52",
-    "d": 5,
-    "t": "Precedencia de Deny y allow.everyone.if.no.acl.found",
-    "q": "En un clúster con ACLs habilitadas y **allow.everyone.if.no.acl.found=false**, el administrador configura las siguientes dos reglas para el usuario **User:analyst** sobre el tópico **reports**:\n1. ALLOW Operation Read from Host 192.168.1.50\n2. DENY Operation Read from Host *\nEl usuario intenta leer del tópico desde la máquina con IP 192.168.1.50. ¿Qué resultado obtendrá y por qué?",
-    "o": [
-      "El acceso será denegado inmediatamente con una **TopicAuthorizationException**, porque en el modelo de seguridad de Kafka las reglas de **DENY tienen precedencia absoluta** sobre cualquier regla de ALLOW coincidente.",
-      "El acceso será permitido porque la regla de ALLOW especifica una IP exacta que es más granular que el comodín (*) de la regla de DENY.",
-      "El acceso será permitido porque la regla 1 fue registrada en los metadatos antes que la regla 2.",
-      "El clúster entrará en pánico y reiniciará el broker por inconsistencia de metadatos de autorización."
-    ],
-    "a": 0,
-    "e": "El algoritmo de evaluación de ACLs en Apache Kafka sigue una jerarquía estricta: si existe **cualquier regla explícita de DENY** que coincida con el usuario, host y operación, **el acceso es bloqueado de inmediato** (Deny Precedence), sin importar que existan reglas de ALLOW específicas. Si no hay un DENY coincidente, se evalúan las reglas de ALLOW. Si no coincide ninguna regla de ALLOW y **allow.everyone.if.no.acl.found=false**, el acceso se deniega por defecto."
-  },
-  {
-    "id": "q-53",
-    "d": 5,
-    "t": "Mecánica de Log Compaction: Head vs. Tail",
-    "q": "Un tópico de configuraciones globales tiene configurada la política de limpieza **cleanup.policy=compact**. ¿Cómo opera internamente el proceso de compactación de logs (**Log Cleaner**) en el broker y cuál es el tratamiento del segmento de log activo?",
-    "o": [
-      "El Log Cleaner divide la partición en el **Tail** (segmentos limpios ya compactados) y el **Head** (segmentos sucios pendientes de compactar); construye un mapa de offsets recientes en RAM y purga los registros antiguos con claves repetidas en el Tail, mientras que el **segmento activo nunca es compactado**.",
-      "El Log Cleaner compacta continuamente el segmento activo en tiempo real a medida que cada mensaje individual entra por el socket de red.",
-      "El Log Cleaner fusiona todos los segmentos de la partición en un único archivo comprimido en formato tar.gz cada medianoche.",
-      "La compactación requiere detener el broker y ejecutar un script de mantenimiento sin conexión (offline compaction)."
-    ],
-    "a": 0,
-    "e": "Durante la compactación de logs, la partición se divide lógicamente en el **Tail** (segmentos cerrados donde ya se purgaron versiones previas de claves) y el **Head** (segmentos cerrados con registros nuevos aún no procesados por el limpiador). Los hilos de Log Cleaner construyen una tabla de hash en memoria (SkimpyOffsetMap) con las últimas claves del Head y reescriben los segmentos del Tail eliminando registros obsoletos. Es una regla universal que **el segmento activo nunca se compacta** para no interferir con las escrituras en curso."
-  },
-  {
-    "id": "q-54",
-    "d": 5,
-    "t": "Tombstones y delete.retention.ms",
-    "q": "En una tabla de usuarios respaldada por un tópico compactado (**cleanup.policy=compact**), un servicio elimina un usuario publicando un registro con la clave **user-884** y el **payload=null** (un registro de eliminación denominado **Tombstone**). ¿Por qué Kafka no elimina físicamente este registro de inmediato durante la siguiente ronda de compactación y espera el tiempo configurado en **delete.retention.ms** (por defecto 24 horas)?",
-    "o": [
-      "Porque debe garantizar que los consumidores que leen a un ritmo más lento (o que están temporalmente fuera de línea) tengan tiempo suficiente para observar el Tombstone y procesar la eliminación en sus bases de datos o cachés locales antes de que desaparezca del log.",
-      "Porque el sistema de archivos ext4 de Linux no permite borrar archivos que contengan valores nulos hasta que se ejecute fsck.",
-      "Porque el protocolo KRaft necesita 24 horas para sincronizar los marcadores de borrado con los controladores standby.",
-      "Porque el broker reintenta reenviar el payload original al productor durante 24 horas por si se trató de un borrado accidental."
-    ],
-    "a": 0,
-    "e": "Un Tombstone es un marcador explícito que indica a los consumidores que la clave ha sido eliminada. Si Kafka eliminara el Tombstone inmediatamente durante una ronda de compactación antes de que un consumidor rezagado o caído alcance ese offset, dicho consumidor nunca se enteraría de la eliminación y conservaría el registro antiguo en su base de datos para siempre. El parámetro **delete.retention.ms** garantiza una ventana de tiempo suficiente para que todos los consumidores downstream procesen el borrado."
-  },
-  {
-    "id": "q-55",
-    "d": 5,
-    "t": "Métrica JMX: UnderReplicatedPartitions",
-    "q": "Durante una guardia de soporte en producción, una alerta de Prometheus notifica que la métrica de JMX **kafka.server:type=ReplicaManager,name=UnderReplicatedPartitions** ha aumentado de 0 a **18** en el clúster. ¿Cuál es el significado técnico de esta alerta y cuáles son sus causas operativas más habituales?",
-    "o": [
-      "Significa que 18 particiones tienen una o más réplicas follower que se han desfasado del líder y han sido expulsadas del ISR; las causas típicas incluyen un broker caído, saturación severa de red o discos excesivamente lentos en un nodo.",
-      "Significa que 18 particiones se han borrado accidentalmente del sistema de archivos del broker.",
-      "Significa que 18 consumidores han superado el parámetro max.poll.interval.ms y están generando un rebalanceo.",
-      "Significa que 18 productores están enviando mensajes con acks=0 saturando los sockets de red."
-    ],
-    "a": 0,
-    "e": "**UnderReplicatedPartitions** es la métrica de salud más crítica de un clúster de Kafka. Un valor mayor que 0 indica que para una o más particiones, el número de réplicas en el ISR actual es inferior al **replication.factor** configurado. Esto ocurre comúnmente cuando un broker se apaga, pierde conectividad de red, sufre pausas masivas de Garbage Collection o experimenta cuellos de botella de I/O en disco que le impiden seguir el ritmo del líder."
-  },
-  {
-    "id": "q-56",
-    "d": 5,
-    "t": "Métrica JMX: ActiveControllerCount",
-    "q": "En un panel de observabilidad de un clúster de Apache Kafka, un ingeniero de SRE revisa la métrica **kafka.controller:type=KafkaController,name=ActiveControllerCount**. ¿Cuál es el único valor saludable que debe exhibir esta métrica a nivel global en el clúster, y qué indican valores anómalos de 0 o mayores a 1?",
-    "o": [
-      "El valor saludable debe ser **exactamente 1**; si es **0**, no hay ningún controlador activo y las operaciones administrativas (creación de tópicos, rebalanceo de réplicas) están bloqueadas; si es **> 1** (en ZooKeeper), indica una situación catastrófica de Split-Brain.",
-      "El valor debe ser igual al número total de brokers (ej. 10 si hay 10 brokers) para asegurar que todos participen en el control.",
-      "El valor debe ser 0 en condiciones normales, activándose en 1 únicamente cuando ocurre una caída de broker.",
-      "El valor debe coincidir con el número de particiones del tópico interno @metadata."
-    ],
-    "a": 0,
-    "e": "En todo clúster de Apache Kafka, debe existir en todo momento **exactamente un único controlador activo** (**ActiveControllerCount = 1** agregado en todo el clúster; cada broker reporta 0, excepto el líder que reporta 1). Si la suma da 0, significa que no hay controlador elegido (los metadatos están congelados). Si da mayor que 1 en entornos ZooKeeper heredados, denota un estado de Split-Brain donde dos brokers creen ser el controlador simultáneamente, amenazando la integridad del clúster."
-  },
-  {
-    "id": "q-57",
-    "d": 5,
-    "t": "Métrica JMX: RequestHandlerAvgIdlePercent",
-    "q": "El dashboard de Grafana de un broker muestra que la métrica **kafka.server:type=KafkaRequestHandlerPool,name=RequestHandlerAvgIdlePercent** ha caído sostenidamente al **0.06** (6 % de tiempo ocioso). Al mismo tiempo, los productores reportan incrementos masivos en la latencia de confirmación. ¿Qué diagnóstico técnico representa esta métrica?",
-    "o": [
-      "Los hilos de procesamiento de peticiones (**num.io.threads**) del broker están saturados al 94 % de su capacidad procesando I/O de disco o peticiones de clientes; el broker está al borde del colapso por saturación de recursos.",
-      "El broker está completamente ocioso y apagará los hilos de red para ahorrar energía en el centro de datos.",
-      "Los consumidores están cometiendo errores de autenticación SSL en el 94 % de las conexiones.",
-      "El recolector de basura de la JVM ha finalizado el 94 % de los ciclos de recolección de memoria joven."
-    ],
-    "a": 0,
-    "e": "**RequestHandlerAvgIdlePercent** mide el porcentaje promedio de tiempo que los hilos de atención de peticiones (configurados con **num.io.threads**) permanecen ociosos esperando trabajo. Un valor saludable se sitúa por encima del 30 % - 40 % (0.3 - 0.4). Una caída al 6 % (0.06) significa que los hilos pasan el 94 % del tiempo ocupados, lo que indica saturación crítica de disco o CPU en el broker, provocando que las peticiones entrantes se encolen en la cola de red y disparando la latencia."
-  },
-  {
-    "id": "q-58",
-    "d": 5,
-    "t": "Tiered Storage en Confluent Platform (KIP-405)",
-    "q": "Una multinacional retiene datos de eventos financieros durante 5 años por motivos regulatorios. Tradicionalmente, esto requería añadir continuamente discos SSD/NVMe a los brokers, encareciendo los costos y provocando que la reasignación de particiones durara semanas. ¿Cómo resuelve **Tiered Storage** (Almacenamiento por Niveles) este cuello de botella arquitectónico?",
-    "o": [
-      "Separa la computación del almacenamiento descargando automáticamente los segmentos cerrados antiguos hacia almacenamiento de objetos masivo y económico (S3, GCS, Azure Blob), conservando solo los segmentos activos recientes en discos locales rápidos; al reasignar particiones, solo se copian los datos locales calientes, reduciendo el tiempo de migración de semanas a minutos.",
-      "Comprime los datos históricos utilizando algoritmos de deduplicación cuántica en la memoria RAM del controlador KRaft.",
-      "Mueve los mensajes antiguos a cintas magnéticas físicas controladas por robots de centros de datos.",
-      "Convierte los tópicos antiguos en vistas SQL de solo lectura en un clúster de Apache Spark externo."
-    ],
-    "a": 0,
-    "e": "Tiered Storage (KIP-405) desacopla el cómputo del almacenamiento en Kafka. Los datos recientes (\"calientes\") se retienen en almacenamiento local NVMe/SSD en el broker para lecturas en tiempo real de bajísima latencia. Los segmentos cerrados se envían de forma asíncrona a almacenamiento en la nube de objetos (S3, GCS), ofreciendo retención prácticamente infinita a bajo coste. Además, cuando una partición se migra de broker, solo se copian los pocos datos locales calientes, haciendo los rebalanceos casi instantáneos."
-  },
-  {
-    "id": "q-59",
-    "d": 5,
-    "t": "Dimensionamiento del Heap de JVM y Linux PageCache",
-    "q": "Un ingeniero junior propone configurar el Heap de la JVM de un broker de Kafka en **60 GB** en un servidor que cuenta con 64 GB de RAM física, argumentando que \"más memoria para Java siempre mejora el rendimiento\". ¿Por qué un arquitecto senior de Kafka rechaza enfáticamente esta propuesta?",
-    "o": [
-      "Porque Kafka depende de forma intensiva del **PageCache del kernel de Linux** para almacenar en caché los segmentos de log y ejecutar transferencias Zero-Copy con sendfile(); un heap de 60 GB provocaría pausas gigantescas de Garbage Collection y privaría al sistema operativo de RAM para el PageCache, forzando a que las lecturas toquen constantemente los discos físicos.",
-      "Porque la JVM de Java no es capaz de direccionar más de 32 GB de memoria bajo arquitecturas de 64 bits.",
-      "Porque Kafka almacena todos los índices y registros en el espacio de intercambio Swap de Linux por diseño.",
-      "Porque KRaft exige que el heap del broker sea exactamente igual a la mitad de los hilos de CPU del servidor."
-    ],
-    "a": 0,
-    "e": "A diferencia de otros sistemas de datos en Java, Apache Kafka fue diseñado para no almacenar datos de mensajes en el heap de la JVM. Un heap modesto (típicamente de 6 a 10 GB) es más que suficiente para los objetos internos del broker, evitando pausas de Stop-The-World de Garbage Collection. Toda la memoria RAM restante del servidor debe dejarse libre para que el kernel de Linux la utilice automáticamente como **PageCache**, lo que permite atender peticiones de fetch de los consumidores a velocidad de RAM sin lecturas a disco físico."
-  },
-  {
-    "id": "q-60",
-    "d": 5,
-    "t": "Integración de Seguridad con SASL/OAUTHBEARER",
-    "q": "Una empresa adopta una arquitectura Zero-Trust y decide integrar la autenticación de todos sus clientes de Kafka con su proveedor de identidad corporativo (Okta / Azure AD / Keycloak) utilizando tokens JWT. ¿Qué protocolo nativo de Kafka se utiliza y cómo se garantiza que los clientes con tokens expirados sean desconectados?",
-    "o": [
-      "Se configura **SASL/OAUTHBEARER**; los clientes obtienen un token JWT del proveedor OpenID Connect (IdP) y lo presentan al broker; el broker valida la firma criptográfica usando las claves públicas del IdP (JWKS) y monitoriza la expiración del token para forzar la re-autenticación o cierre de sesión.",
-      "Se configura **SASL/PLAIN** con un script que consulta la API de Okta cada 5 milisegundos mediante webhooks.",
-      "Se utiliza una regla de compatibilidad en Schema Registry que convalida el encabezado Authorization de cada registro.",
-      "Se configuran ACLs con el prefijo Bearer en la herramienta kafka-acls.sh para simular OAuth."
-    ],
-    "a": 0,
-    "e": "**SASL/OAUTHBEARER** es el estándar de Kafka para federación de identidades mediante OAuth 2.0 y OpenID Connect. El cliente solicita un token firmado (JWT) a su Authorization Server / IdP y se autentica contra el broker presentando dicho token. El broker valida el token contra el endpoint JWKS del IdP. Además, el broker rastrea el tiempo de expiración (**exp**) del JWT: al vencer el token, Kafka exige una re-autenticación automática o desconecta al cliente si este no renueva su credencial."
-  }
-],
     why: {
-  "q-1": [
-    "",
-    "Mezclar roles (broker,controller) en 100 nodos degrada severamente el consenso Raft por contención de I/O de disco y pausas de GC causadas por el tráfico masivo de datos de los brokers.",
-    "Tener un único controlador introduce un punto único de fallo (SPOF) absoluto: si ese nodo cae, el clúster queda totalmente incapacitado para coordinar particiones o atender metadatos.",
-    "Los sistemas basados en quórum como Raft exigen un número impar de nodos (3 o 5); un número par como 4 no incrementa la tolerancia a fallos frente a 3 nodos y empeora la resolución de empates (split-brain)."
-  ],
-  "q-2": [
-    "",
-    "El nivel **isolation.level=read_uncommitted** no permite leer más allá del High Watermark; solo permite leer mensajes de transacciones no committeadas que ya hayan alcanzado el HW.",
-    "La configuración de **acks** del productor no modifica la regla del consumidor: ningún mensaje es visible para los consumidores antes de ser replicado en el ISR hasta el High Watermark.",
-    "Por defecto, los consumidores leen del líder de la partición independientemente de la AZ, salvo que se active explícitamente **replica.selector.class** y Rack-Aware Fetching."
-  ],
-  "q-3": [
-    "",
-    "El líder no detiene las escrituras de los productores si aún se cumple **min.insync.replicas**; simplemente continúa aceptando tráfico con el ISR restante.",
-    "Una partición solo entra en estado Offline si no queda ningún líder disponible o no se puede elegir un nuevo líder tras una caída del broker líder.",
-    "Un líder jamás cede el liderazgo a una réplica rezagada que no está respondiendo a las peticiones de sincronización; eso destruiría la consistencia del log."
-  ],
-  "q-4": [
-    "",
-    "Los consumidores no se bloquean: pueden continuar leyendo con total normalidad todos los registros previamente confirmados hasta el último High Watermark.",
-    "Kafka nunca degrada silenciosamente una configuración estricta como **acks=all** a **acks=1**; violar las garantías de durabilidad pactadas está estrictamente prohibido por diseño.",
-    "Kafka no crea brokers al vuelo en 5 segundos sin intervención externa ni auto-escalado de infraestructura; arroja una excepción limpia al cliente productor."
-  ],
-  "q-5": [
-    "",
-    "Con **unclean.leader.election.enable=false**, el controlador tiene estrictamente prohibido elegir réplicas fuera del ISR como líder para evitar la pérdida silenciosa de datos.",
-    "Kafka no inventa particiones vacías para enmascarar la indisponibilidad de datos históricos confirmados.",
-    "Los nodos controller de KRaft gestionan metadatos del clúster; no alojan particiones de datos de usuario ni actúan como réplicas de datos de tópicos ordinarios."
-  ],
-  "q-6": [
-    "",
-    "KRaft no mantiene particiones secretas de backup de mensajes perdidos; los mensajes no replicados en el nuevo líder se truncan y desaparecen para siempre del log.",
-    "Los consumidores no reciben **CorruptRecordException**; simplemente leen el nuevo log truncado sin saber que faltan transacciones históricas intermedias.",
-    "El nuevo líder acepta escrituras inmediatamente sin exigir compactación manual ni herramientas auxiliares."
-  ],
-  "q-7": [
-    "",
-    "Kafka no utiliza SQLite ni bases de datos relacionales embebidas para indexar mensajes; su diseño se basa puramente en archivos planos en el sistema de archivos.",
-    "El archivo **.timeindex** se utiliza para búsquedas temporales (timestamps), no para resolver peticiones estándar por offset numérico.",
-    "Descomprimir gigabytes de logs en el heap de la JVM destruiría el rendimiento del broker por saturación de memoria y pausas catastróficas de Garbage Collection."
-  ],
-  "q-8": [
-    "",
-    "La retención en Kafka es un proceso completamente autónomo del broker que no requiere confirmación ni comandos de borrado por parte de los consumidores.",
-    "La retención por tiempo (**retention.ms**) funciona tanto en tópicos con política **delete** como en modo híbrido **compact,delete**.",
-    "El broker no suspende las tareas de retención basándose en el porcentaje de espacio libre en disco; sigue estrictamente los umbrales configurados."
-  ],
-  "q-9": [
-    "",
-    "Raft no exige que el 100 % de los nodos estén activos; está diseñado precisamente para tolerar fallos manteniendo el quórum de mayoría.",
-    "Un quórum de 5 nodos con solo 2 nodos vivos no puede operar porque 2 no representa una mayoría estricta de 5 (se requieren 3).",
-    "Raft utiliza la regla de mayoría simple (más del 50 % de votos), no una mayoría calificada del 80 % ni requiere 4 de 5 nodos para confirmar escrituras en @metadata."
-  ],
-  "q-10": [
-    "",
-    "Múltiples listeners resuelven la conectividad de red y el enrutamiento de clientes, pero no informan al asignador de particiones de Kafka sobre la topología física de racks.",
-    "El particionador de los clientes determina a qué partición va un mensaje según su clave, no en qué brokers físicos residen las réplicas de esa partición.",
-    "El parámetro **min.insync.replicas** define el número mínimo de confirmaciones requeridas, pero no controla en qué servidores o zonas se ubican las réplicas."
-  ],
-  "q-11": [
-    "",
-    "Kafka no permite que dos consumidores del mismo grupo procesen en paralelo la misma partición; cada partición se asigna a una sola instancia dentro del grupo.",
-    "Tener más consumidores que particiones no arroja ninguna excepción; es un estado perfectamente legal donde los miembros sobrantes quedan en modo standby.",
-    "Los pods adicionales no leen de forma redundante ni generan duplicados; simplemente no reciben ninguna partición asignada por el Group Coordinator."
-  ],
-  "q-12": [
-    "",
-    "El uso de **mmap()** con **read()** y **write()** fuerza la copia de los datos al espacio de usuario, perdiendo las ventajas del bypass de kernel que ofrece Zero-Copy.",
-    "Kafka no usa librerías de compresión del kernel en el broker para transferir paquetes por la red; los mensajes se transmiten comprimidos tal como los envió el productor.",
-    "Los discos NVMe no procesan paquetes TCP/IP de forma autónoma sin pasar por el stack de red del kernel del sistema operativo."
-  ],
-  "q-13": [
-    "",
-    "Configurar **acks=1** en transferencias bancarias expone al sistema a pérdida de datos si el líder colapsa antes de replicar a los followers.",
-    "Configurar **acks=0** en un sistema financiero significa que el productor no espera ninguna confirmación, tolerando pérdida masiva ante caídas.",
-    "No existe el valor numérico **acks=2** en el protocolo de Kafka; los valores válidos de confirmación son únicamente 0, 1 y all (o -1)."
-  ],
-  "q-14": [
-    "",
-    "Kafka no utiliza Redis ni cálculos de hash SHA-256 en memoria para deduplicar mensajes de productores; utiliza PIDs y Sequence Numbers nativos del protocolo.",
-    "El broker no descarta mensajes por tener timestamps repetidos; múltiples eventos legítimos pueden ocurrir en el mismo milisegundo.",
-    "El protocolo de Kafka no interactúa ni depende de niveles de aislamiento de bases de datos relacionales como Serializable para la idempotencia de red."
-  ],
-  "q-15": [
-    "",
-    "Kafka no bloquea la conexión TCP esperando ACKs individuales cuando **max.in.flight.requests > 1**; procesa peticiones en pipeline asíncrono.",
-    "El particionador selecciona la partición en base a la clave del mensaje, no en función del número de peticiones en vuelo concurrentes.",
-    "El quórum de KRaft coordina los metadatos del clúster, no reordena los mensajes de datos en vuelo que envían los productores hacia los brokers."
-  ],
-  "q-16": [
-    "",
-    "El Transaction Coordinator no bloquea el clúster entero ni congela a otros productores; las transacciones en Kafka son concurrentes y no bloqueantes a nivel de partición.",
-    "Los mensajes transaccionales se escriben inmediatamente en el commit log de disco del broker; no se mantienen flotando exclusivamente en la memoria RAM.",
-    "El Transaction Coordinator no emite tokens OAuth para autorizar mensajes; gestiona el estado y marcadores atómicos del Two-Phase Commit."
-  ],
-  "q-17": [
-    "",
-    "El broker no borra físicamente del disco los mensajes abortados de inmediato; simplemente escribe un marcador ABORT al final de la partición.",
-    "El consumidor no lanza **TransactionAbortedException**; en modo **read_uncommitted** simplemente devuelve todos los mensajes sin distinguir si fueron abortados.",
-    "El payload de los mensajes abortados permanece intacto en disco; no se convierte en Tombstones con valor null."
-  ],
-  "q-18": [
-    "",
-    "El primer mensaje no se envía en 0 ms si **linger.ms > 0** y no se ha llenado el batch; el productor espera deliberadamente a ver si llegan más registros.",
-    "El mensaje nunca se queda bloqueado indefinidamente; el propósito de **linger.ms** es precisamente forzar la transmisión una vez cumplido el límite de tiempo.",
-    "El parámetro **request.timeout.ms** mide el tiempo máximo de espera de respuesta del broker tras enviar el paquete por red, no el tiempo de buffering local."
-  ],
-  "q-19": [
-    "",
-    "El broker no ejecuta la compresión ni la descompresión en el flujo regular de datos; hacerlo saturaría la CPU del servidor con miles de clientes.",
-    "La compresión es una función a nivel de aplicación en la JVM/SDK de Kafka, no una característica delegada a aceleradores de hardware de red TCP.",
-    "El broker no necesita descomprimir el log para indexar offsets; calcula el offset relativo basándose en el número de registros declarados en la cabecera del lote."
-  ],
-  "q-20": [
-    "",
-    "El Sticky Partitioner no envía todos los mensajes a la partición 0 permanentemente; va rotando de partición a medida que llena lotes sucesivos.",
-    "El cliente no genera UUIDs falsos para particionar; la clave sigue siendo null y la lógica de rotación de lotes se encarga del reparto equilibrado.",
-    "El Sticky Partitioner utiliza buffers estándar en memoria y conexiones TCP con el protocolo nativo de Kafka, no llamadas HTTP/2 independientes."
-  ],
-  "q-21": [
-    "",
-    "Los primeros 5 bytes no corresponden a un checksum CRC32; son el Magic Byte de protocolo y el Schema ID que referencia a Schema Registry.",
-    "El broker ID y la partición no se insertan en el payload del mensaje; residen en las cabeceras a nivel de protocolo de red de Kafka.",
-    "El timestamp del mensaje tiene su propio campo dedicado en la cabecera del registro de Kafka según KIP-32, no en los primeros 5 bytes del payload."
-  ],
-  "q-22": [
-    "",
-    "Actualizar primero los productores en modo BACKWARD provoca que los consumidores antiguos fallen con **SerializationException** al encontrar campos nuevos que no conocen.",
-    "Detener todo el clúster y purgar datos no es una estrategia de producción tolerada y destruye el desacoplamiento que ofrece Kafka.",
-    "El modo BACKWARD sí permite añadir campos nuevos, siempre y cuando estos campos tengan definido un valor por defecto (**default**)."
-  ],
-  "q-23": [
-    "",
-    "El modo FORWARD solo permite desplegar productores primero y consumidores después; no ofrece compatibilidad bidireccional simétrica.",
-    "El modo NONE desactiva por completo la validación de compatibilidad, provocando fallos impredecibles en tiempo de ejecución por esquemas corruptos.",
-    "No existe un parámetro llamado **allow.any.order=true** en la configuración de Schema Registry; el comportamiento lo define el modo de compatibilidad del subject."
-  ],
-  "q-24": [
-    "",
-    "Kafka nunca redistribuye ni mueve mensajes históricos existentes cuando se añaden nuevas particiones; los datos viejos permanecen en sus particiones originales.",
-    "Los productores no arrojan **SerializationException**; simplemente refrescan sus metadatos de particiones y continúan calculando el hash con el nuevo divisor.",
-    "Kafka no almacena un índice histórico de claves en el archivo meta.properties; el enrutamiento es puramente una función matemática de hashing en el cliente."
-  ],
-  "q-25": [
-    "",
-    "Los mensajes no se dividen entre ambos grupos: cada grupo con distinto **group.id** recibe su propia copia completa e independiente de todos los mensajes (Pub/Sub).",
-    "Tener 4 consumidores para 12 particiones no deja particiones sin consumir; cada consumidor recibe 3 particiones asignadas.",
-    "Las instancias del grupo fraud-app no se limitan a 4; el número de consumidores activos útiles de un grupo está determinado únicamente por las particiones del tópico (12)."
-  ],
-  "q-26": [
-    "",
-    "La opción descrita corresponde a **auto.offset.reset=latest**, que solo lee mensajes producidos después del inicio del consumidor.",
-    "**NoOffsetForPartitionException** solo se arroja cuando **auto.offset.reset=none** y no existe un offset registrado para el grupo.",
-    "El consumidor no ignora el historial por memoria RAM; procesa secuencialmente leyendo del disco o del PageCache según el offset configurado."
-  ],
-  "q-27": [
-    "",
-    "Los mensajes no se pierden en este escenario porque el auto-commit aún no había ocurrido; los offsets no se habían avanzado en el broker.",
-    "Kafka no coordina transacciones XA distribuidas con motores de bases de datos externas de forma automática.",
-    "El broker no adivina cuántos registros procesó la aplicación localmente; solo avanza el offset cuando recibe una petición explícita de commit."
-  ],
-  "q-28": [
-    "",
-    "**commitAsync()** es estrictamente no bloqueante; los reintentos en su callback no detienen el hilo principal pero sí corrompen la coherencia de los offsets.",
-    "Kafka soporta perfectamente callbacks en operaciones asíncronas de su SDK; el peligro radica en la inversión del orden cronológico de commits concurrentes.",
-    "Los commits asíncronos no requieren validaciones de certificados mTLS adicionales más allá de la autenticación estándar de la sesión."
-  ],
-  "q-29": [
-    "",
-    "El hilo de heartbeats mantiene la conectividad de red, pero Kafka separa la liveness de procesamiento: si no se llama a **poll()** antes de **max.poll.interval.ms**, el cliente se expulsa a sí mismo.",
-    "El broker no cierra la conexión TCP a los 60 segundos por lentitud del consumidor; es el propio cliente el que detecta el vencimiento y se desconecta.",
-    "Kafka no divide batches ni reasigna fragmentos de lotes ya transmitidos a un consumidor mediante Zero-Copy."
-  ],
-  "q-30": [
-    "",
-    "**session.timeout.ms** no controla el tiempo de procesamiento del lote; esa responsabilidad recae exclusivamente en **max.poll.interval.ms**.",
-    "**heartbeat.interval.ms** es un temporizador del cliente hacia el broker, no del broker hacia el cliente, y nunca debe ser igual a session.timeout.ms.",
-    "Estos parámetros siguen siendo totalmente vigentes y fundamentales en todas las versiones modernas de Apache Kafka y Confluent Platform."
-  ],
-  "q-31": [
-    "",
-    "El protocolo cooperativo no elimina los rebalanceos ni usa IPs compartidas; sigue coordinando la asignación de particiones a nivel de miembros del grupo.",
-    "Kafka Streams y los consumidores no utilizan mutexes globales distribuidos para ordenar todas las particiones del clúster entre sí.",
-    "La coordinación de grupos en Kafka se ejecuta nativamente en los brokers mediante el Group Coordinator, sin intermediación de Redis."
-  ],
-  "q-32": [
-    "",
-    "Static Membership no convierte a los pods en réplicas de solo lectura de Kubernetes ni cambia la forma en que el consumidor lee de Kafka.",
-    "Kubernetes no congela el tráfico HTTP externo basándose en offsets de Kafka al desplegar pods con Static Membership.",
-    "El estado del grupo se coordina a través del broker de Kafka, no mediante carpetas compartidas en volúmenes NFS."
-  ],
-  "q-33": [
-    "",
-    "**seekToBeginning()** reinicia la lectura al inicio del log de la partición, lo que generaría un bucle infinito de reprocesamiento.",
-    "Configurar **auto.commit.interval.ms=1** no garantiza atomicidad por registro y degrada severamente el rendimiento con peticiones continuas a red.",
-    "Pausar particiones con **pause()** detiene temporalmente la entrega de mensajes en el siguiente poll(), pero no realiza ningún commit de offsets."
-  ],
-  "q-34": [
-    "",
-    "El método **onPartitionsAssigned()** notifica qué particiones se han recibido; truncar el log del broker destruiría los datos de todos los clientes.",
-    "**onPartitionsLost()** se invoca cuando las particiones ya se perdieron de forma irrecuperable; un bucle infinito colapsaría la aplicación.",
-    "Dejar un listener vacío no deshabilita los rebalanceos del clúster; solo impide que la aplicación limpie su estado y guarde offsets a tiempo."
-  ],
-  "q-35": [
-    "",
-    "El método **subscribe()** con regex no admite un **group.id** nulo y siempre activa el protocolo dinámico de Consumer Groups.",
-    "Configurar un **group.id** vacío o nulo en un consumidor que utiliza **subscribe()** arroja una excepción de configuración inválida.",
-    "Bloquear permisos de JoinGroup con ACLs impediría el funcionamiento de la aplicación en lugar de permitirle leer particiones de forma estática."
-  ],
-  "q-36": [
-    "",
-    "El Group Coordinator no se asigna aleatoriamente en cada llamada a poll(); es un broker fijo determinado determinísticamente por el hash del group.id.",
-    "El coordinador no es necesariamente el broker 0; en un clúster con decenas de brokers, los coordinadores se reparten entre todos los nodos.",
-    "El cliente no escoge su coordinador por ping ICMP; consulta los metadatos del clúster enviando una petición **FindCoordinatorRequest**."
-  ],
-  "q-37": [
-    "",
-    "El modo Standalone sí admite conectores tanto Source como Sink; su incapacidad radica en la falta de alta disponibilidad, tolerancia a fallos y escalabilidad.",
-    "Kafka Connect no fuerza el cifrado RSA en modo Standalone; el cifrado depende de la configuración de red TLS del listener.",
-    "El modo Standalone es compatible a nivel de cliente con clústeres KRaft, pero no es apto para producción por ser un punto único de fallo (SPOF)."
-  ],
-  "q-38": [
-    "",
-    "Kafka Connect soporta nativamente serializadores JSON, Avro y Protobuf independientemente del número de particiones de sus tópicos de datos.",
-    "Los permisos de escritura de los tópicos se controlan mediante ACLs estándar, no por el número de partición física.",
-    "Tener múltiples particiones no genera un bloqueo en el kernel de Linux por Zero-Copy; el impedimento es la pérdida de orden total de configuraciones."
-  ],
-  "q-39": [
-    "",
-    "Cifrar el canal con TLS protege los datos en tránsito frente a intercepciones en la red, pero el dato confidencial seguiría escribiéndose sin enmascarar en el disco de Kafka.",
-    "Schema Registry valida la compatibilidad y tipos de datos del esquema, no enmascara activamente contenidos de campos confidenciales.",
-    "Filtrar en el consumidor downstream es una violación grave de PCI-DSS, ya que el número de tarjeta ya habría quedado almacenado en el log de Kafka de forma insegura."
-  ],
-  "q-40": [
-    "",
-    "**errors.tolerance=none** es la configuración por defecto que detiene la tarea ante el primer error; no permite continuar el procesamiento ni desviar registros a la DLQ.",
-    "Cambiar a ByteArrayDeserializer no corrige un JSON inválido al indexar en OpenSearch y unclean leader election no guarda relación con errores de datos en Connect.",
-    "No existe un parámetro llamado **connect.recovery.mode=auto-skip** en el framework oficial de Apache Kafka Connect."
-  ],
-  "q-41": [
-    "",
-    "Tanto los Converters como las SMTs operan en ambos tipos de conectores (Source y Sink) en diferentes etapas del ciclo de vida del registro.",
-    "El enrutamiento de red y la gestión de segmentos en disco son responsabilidades del protocolo TCP y del broker de Kafka, no de los componentes de Connect.",
-    "No son sinónimos: el Converter maneja la serialización/deserialización binaria, mientras que la SMT aplica lógica de transformación sobre la estructura de datos."
-  ],
-  "q-42": [
-    "",
-    "Modelar millones de clics como una KTable causaría que cada clic sobrescriba los clics previos del mismo usuario, perdiendo el historial completo de eventos.",
-    "Kafka Streams soporta plenamente semántica de actualización de estado mediante KTable y State Stores locales.",
-    "Las ventanas temporales (Session y Tumbling) son operaciones de agregación con estado, no abstracciones básicas para modelar flujos de entrada continuos."
-  ],
-  "q-43": [
-    "",
-    "Kafka Streams no triplica réplicas mágicamente en memoria sin consumir recursos; exige co-particionado físico o fuerza un costoso paso de re-partición.",
-    "Kafka Streams no ignora las particiones: las particiones determinan la asignación de StreamTasks a los hilos de ejecución locales.",
-    "El clúster de Kafka no trunca particiones existentes de un tópico de datos durante un rebalanceo de Kafka Streams."
-  ],
-  "q-44": [
-    "",
-    "Las ventanas de sesión no sustituyen el modelo de tablas de referencia y aumentar el buffer no resuelve el desacoplamiento de particiones.",
-    "Agrupar con **KGroupedStream** con particionamiento aleatorio destruiría la correlación por clave necesaria para el join.",
-    "El método **peek()** es una función auxiliar de depuración sin efectos secundarios; no almacena tablas en el sistema de archivos /tmp."
-  ],
-  "q-45": [
-    "",
-    "El estado no reside únicamente en el heap de Java; almacenar grandes estados en el heap generaría pausas inmanejables de Garbage Collection.",
-    "Kafka Streams no requiere ni utiliza bases de datos externas como Cassandra para persistir el estado de sus topologías.",
-    "Deshabilitar los state stores impediría ejecutar operaciones agregadas con ventana o joins que requieran mantener estado histórico."
-  ],
-  "q-46": [
-    "",
-    "Una Hopping Window avanza con solapamiento, por lo que un mismo evento pertenecería a múltiples ventanas consecutivas.",
-    "Una Session Window se define por periodos dinámicos de inactividad, no por bloques de tiempo rígidos de 15 minutos en el reloj.",
-    "Una Sliding Window se calcula en base a la distancia relativa en milisegundos entre pares de eventos, no en bloques fijos discretos."
-  ],
-  "q-47": [
-    "",
-    "Hacer polling HTTP intensivo con Pull Queries cada 100 ms genera sobrecarga masiva y contradice el modelo reactivo de streaming que ofrece ksqlDB.",
-    "Las Push Queries no se usan para consultas puntuales request/response como el saldo telefónico, sino para flujos reactivos continuos.",
-    "ksqlDB está diseñado específicamente para streaming en tiempo real y procesamiento continuo de eventos, no únicamente para procesos batch por cron."
-  ],
-  "q-48": [
-    "",
-    "ksqlDB nunca borra ni destruye los datos del tópico subyacente de Kafka si no se define la clave; simplemente los lee sin asignación de clave primaria.",
-    "Schema Registry y Avro soportan perfectamente mensajes que no tengan clave definida (key=null).",
-    "ksqlDB admite agregaciones GROUP BY sobre cualquier tipo de dato válido (incluyendo BIGINT, INT, VARCHAR)."
-  ],
-  "q-49": [
-    "",
-    "mTLS exige generar, distribuir y renovar certificados digitales y claves privadas X.509 en cada máquina cliente, lo cual no es una gestión de contraseñas dinámicas nativas en Kafka.",
-    "SASL/PLAIN transmite contraseñas en texto claro; no utiliza curvas elípticas en el kernel y es inseguro si no se encapsula dentro de TLS.",
-    "Kerberos (SASL/GSSAPI) requiere obligatoriamente una infraestructura compleja de KDC (Key Distribution Center) y Active Directory."
-  ],
-  "q-50": [
-    "",
-    "Ni el Keystore ni el Truststore almacenan contraseñas de tópicos ni reglas de autorización de ACLs; su propósito es estrictamente criptográfico para TLS.",
-    "El Truststore no cifra el disco del broker; el cifrado en reposo lo gestiona el sistema operativo o plugins de almacenamiento, no el truststore de Java.",
-    "No son intercambiables: el Keystore guarda claves privadas secretas que nunca deben compartirse; el Truststore contiene certificados públicos de confianza de CAs."
-  ],
-  "q-51": [
-    "",
-    "Conceder permisos All sobre Cluster y Read sobre Topic viola gravemente el principio de menor privilegio y da facultades administrativas innecesarias al productor.",
-    "Los permisos de escritura de tópicos no se heredan mágicamente de permisos sobre el recurso Cluster; deben declararse explícitamente.",
-    "Los clientes jamás deben tener permisos directos sobre el tópico interno **__transaction_state**; ese tópico lo gestiona únicamente el Transaction Coordinator."
-  ],
-  "q-52": [
-    "",
-    "En Kafka, la granularidad de la IP de host no anula un DENY; cualquier coincidencia con un DENY bloquea el acceso de forma inapelable.",
-    "El orden temporal en que se registran las ACLs no influye en la evaluación; el authorizer agrupa y evalúa DENY antes que cualquier ALLOW.",
-    "Tener reglas simultáneas de ALLOW y DENY es común en producción y está completamente contemplado por el authorizer de Kafka; no causa ningún reinicio ni pánico."
-  ],
-  "q-53": [
-    "",
-    "El Log Cleaner nunca compacta el segmento activo en tiempo real; el segmento activo es append-only puro para mantener baja latencia de escritura.",
-    "Kafka no comprime los segmentos en archivos tar.gz ni cambia la estructura de los archivos .log y .index durante la compactación.",
-    "La compactación de logs es un proceso continuo que se ejecuta en segundo plano en caliente sin requerir detener el broker ni mantenimiento offline."
-  ],
-  "q-54": [
-    "",
-    "El sistema de archivos ext4 no tiene ninguna limitación respecto a escribir valores nulos; la retención es una regla lógica de la arquitectura de Kafka.",
-    "KRaft no requiere 24 horas para sincronizar metadatos; el retraso existe exclusivamente para proteger a los consumidores de datos downstream.",
-    "Kafka no intenta reenviar payloads eliminados al productor; los mensajes se tratan como unidireccionales desde el cliente hacia el broker."
-  ],
-  "q-55": [
-    "",
-    "UnderReplicatedPartitions no significa que las particiones hayan sido borradas del disco; las particiones existen pero han perdido copias en el ISR.",
-    "La lentitud de los consumidores se refleja en la métrica de **consumer lag**, no en las particiones sub-replicadas de los brokers.",
-    "Los productores con acks=0 no afectan directamente al conjunto del ISR salvo si saturan tanto la red que impiden los fetch requests de los followers."
-  ],
-  "q-56": [
-    "",
-    "Tener un controlador por cada broker significaría una anarquía sin consenso; en todo momento debe haber exactamente 1 único líder del quórum.",
-    "El controlador debe estar permanentemente activo para atender metadatos y cambios de partición, no solo cuando un broker se cae.",
-    "El número de controladores no tiene ninguna relación con las particiones del tópico interno @metadata."
-  ],
-  "q-57": [
-    "",
-    "Una caída en el porcentaje de tiempo ocioso significa saturación extrema, no que el broker esté inactivo o apagando hilos.",
-    "Los errores de autenticación SSL se reflejan en métricas de conexiones fallidas, no en la utilización de los hilos de I/O de atención de peticiones.",
-    "La métrica RequestHandlerAvgIdlePercent mide hilos de atención de peticiones del broker, no las estadísticas del recolector de basura de la JVM."
-  ],
-  "q-58": [
-    "",
-    "Tiered Storage no utiliza compresión cuántica ni almacena datos en la RAM del controlador; utiliza almacenamiento de objetos estándar en la nube.",
-    "No se basa en cintas magnéticas físicas operadas por robots, sino en servicios de Cloud Object Storage accesibles mediante APIs REST seguras.",
-    "No convierte los tópicos en vistas de Apache Spark; Kafka continúa sirviendo las lecturas transparentemente a través de la misma API de consumidor."
-  ],
-  "q-59": [
-    "",
-    "La JVM de 64 bits puede direccionar terabytes de memoria RAM; el problema de asignar 60 GB es la ineficiencia de GC y la privación del PageCache.",
-    "Kafka nunca utiliza el espacio Swap de disco; de hecho, en producción se recomienda encarecidamente deshabilitar o minimizar la swap (vm.swappiness=1).",
-    "El tamaño del heap de la JVM no está vinculado matemáticamente con el número de núcleos de CPU de la máquina."
-  ],
-  "q-60": [
-    "",
-    "SASL/PLAIN no soporta tokens JWT ni validación de firmas criptográficas con JWKS de proveedores OpenID Connect.",
-    "Schema Registry valida esquemas de datos del cuerpo del mensaje, no credenciales de autenticación a nivel de conexión de transporte.",
-    "Las ACLs gestionan autorización una vez que el cliente ya está autenticado; no sustituyen el mecanismo de autenticación SASL/OAUTHBEARER."
-  ]
-},
+      "q-1": [
+        null,
+        "Mezclar roles (`broker,controller`) en 100 nodos degrada el consenso Raft por contención de I/O y pausas de GC debidas al tráfico masivo de datos de los brokers.",
+        "Un único controlador introduce un punto único de fallo (SPOF); si cae, el clúster queda incapaz de coordinar particiones o atender cambios de metadatos.",
+        "Los quórums Raft requieren un número impar de nodos (3 o 5); un número par como 4 no incrementa la tolerancia a fallos frente a 3 y dificulta resolver empates."
+      ],
+      "q-2": [
+        null,
+        "`isolation.level=read_uncommitted` solo permite leer registros de transacciones no abortadas que ya alcanzaron el High Watermark; nunca permite leer por encima del HW hasta el LEO.",
+        "La configuración de `acks` del productor no altera la regla del consumidor: ningún mensaje es visible antes de ser replicado en el ISR hasta el High Watermark.",
+        "Los consumidores leen del líder por defecto y el parámetro `min.insync.replicas` aplica a escrituras del productor con `acks=all`, no redirige lecturas obligatoriamente a followers."
+      ],
+      "q-3": [
+        null,
+        "El líder solo rechaza escrituras con `NotEnoughReplicasException` si el tamaño del ISR cae por debajo de `min.insync.replicas`; de lo contrario sigue aceptando tráfico.",
+        "Una partición solo queda `Offline` si cae su broker líder y no hay réplicas elegibles para sucederlo, no por la expulsión de un follower del ISR.",
+        "El líder no cede voluntariamente su rol a un nodo que no responde; la reelección de líder solo ocurre ante la caída del propio líder."
+      ],
+      "q-4": [
+        null,
+        "Los consumidores no se bloquean con `NotEnoughReplicasException`; esta excepción solo afecta a las escrituras con `acks=all` cuando el ISR es menor que `min.insync.replicas`.",
+        "Kafka jamás degrada silenciosamente `acks=all` a `acks=1` para evitar violar las garantías de durabilidad contratadas por el productor.",
+        "`NotEnoughReplicasException` se devuelve inmediatamente al productor al intentar escribir, y los consumidores pueden seguir consumiendo hasta el High Watermark sin errores de offset."
+      ],
+      "q-5": [
+        null,
+        "Con `unclean.leader.election.enable=false`, el controlador tiene estrictamente prohibido elegir réplicas fuera del ISR para evitar pérdida silenciosa de datos.",
+        "Kafka no puede reasignar datos inexistentes a otro broker ni solicitar al productor retransmitir datos arbitrarios ya confirmados por un líder caído.",
+        "Una partición sin réplicas disponibles en el ISR entra en estado `Offline` total; no queda en modo solo lectura en réplicas fuera del ISR."
+      ],
+      "q-6": [
+        null,
+        "Kafka no desvía automáticamente registros faltantes a un tópico de Dead Letter Queue ante una elección sucia; los datos simplemente se pierden.",
+        "El nuevo líder acepta lecturas y escrituras de inmediato; no entra en modo de solo lectura ni espera una reconciliación manual.",
+        "Los consumidores no reciben `OffsetOutOfRangeException` por la elección; continuarán leyendo desde el nuevo High Watermark sin detectar la omisión de los offsets perdidos."
+      ],
+      "q-7": [
+        null,
+        "El archivo `.timeindex` mapea marcas de tiempo con offsets lógicos para búsquedas temporales, no para resolver peticiones directas de lectura por offset.",
+        "El archivo `leader-epoch-checkpoint` mapea épocas de líder con sus offsets de inicio para reconciliación entre réplicas, no para indexar registros individuales.",
+        "Kafka no utiliza filtros de Bloom para búsquedas por offset en disco; se apoya directamente en el archivo de índice disperso `.index` y búsqueda binaria."
+      ],
+      "q-8": [
+        null,
+        "`retention.check.interval.ms` solo define la frecuencia periódica del hilo evaluador (por defecto 5 minutos); no posterga el borrado en función del tamaño del log.",
+        "La retención de Kafka es independiente del progreso de los consumidores; no espera a que los offsets sean confirmados en `__consumer_offsets` para purgar segmentos inactivos.",
+        "`segment.ms` determina cuándo se rota un segmento activo por tiempo, no actúa como período de gracia ni bloquea la purga de segmentos ya cerrados."
+      ],
+      "q-9": [
+        null,
+        "Raft utiliza una mayoría simple (más del 50 % de los votos del quórum: 3 de 5), no una supermayoría de dos tercios.",
+        "Un quórum de 5 nodos con 2 nodos vivos no puede procesar metadatos porque 2 no constituye mayoría estricta frente al quórum total de 5.",
+        "El quórum Raft está diseñado específicamente para tolerar caídas de minorías; con 5 nodos tolera hasta 2 caídas sin detener las operaciones de metadatos."
+      ],
+      "q-10": [
+        null,
+        "`RackAwareReplicaSelector` permite a los consumidores leer de la réplica más cercana (Follower Fetching), pero no controla cómo se asignan las réplicas a los brokers.",
+        "`advertised.listeners` gestiona la conectividad y resolución de red para los clientes, y el parámetro `zookeeper.rack.enable` no existe en Apache Kafka.",
+        "`min.insync.replicas` fija el número mínimo de réplicas que deben confirmar escrituras con `acks=all`, pero no influye en la colocación física de las particiones."
+      ],
+      "q-11": [
+        null,
+        "Kafka no permite que dos miembros de un mismo Consumer Group lean en paralelo de la misma partición; cada partición se asigna a lo sumo a un consumidor.",
+        "Tener más consumidores que particiones es válido; los consumidores adicionales simplemente permanecen en estado inactivo (idle) como reserva.",
+        "Los pods en exceso no generan duplicados; el coordinador no les asigna ninguna partición, manteniéndolos en espera pasiva."
+      ],
+      "q-12": [
+        null,
+        "`mmap()` evita algunas copias pero aún involucra interacción con el espacio de usuario; `sendfile()` ejecuta la transferencia completa dentro del kernel vía DMA.",
+        "`splice()` conecta descriptores vía pipes pero no es el mecanismo estándar de Kafka para transferir segmentos de log a sockets de clientes, ni descomprime lotes.",
+        "`readv()` y `writev()` ejecutan I/O dispersa pasando por el espacio de usuario, requiriendo copias entre buffers del kernel y la aplicación."
+      ],
+      "q-13": [
+        null,
+        "Con `acks=1` se pueden perder datos si el líder falla antes de replicar a los followers; y `acks=all` en métricas web añade latencia innecesaria.",
+        "Configurar `retries=0` en transferencias expone a pérdidas ante cualquier error de red transitorio; y `acks=1` en métricas no ofrece la menor latencia posible.",
+        "El valor `acks=2` no existe en el protocolo de Kafka (solo 0, 1 o all/-1), y `acks=-1` contradice el requisito de baja latencia para métricas."
+      ],
+      "q-14": [
+        null,
+        "Kafka no usa sumas CRC32 del payload para deduplicación semántica; el CRC solo valida integridad física contra corrupción de datos en tránsito o disco.",
+        "Los offsets son asignados exclusivamente por el broker líder al escribir en el log, nunca por el cliente productor.",
+        "La idempotencia se gestiona en cada broker para sus particiones mediante PID y secuencias; no interviene el quórum KRaft ni se usan tablas de hashes."
+      ],
+      "q-15": [
+        null,
+        "El productor no frena el socket TCP de forma síncrona; envía hasta 5 peticiones concurrentes en pipeline confiando en la validación de secuencia del broker.",
+        "El broker no reordena por timestamp del registro; persiste estrictamente en base a los números de secuencia contiguos asignados por el productor.",
+        "El quórum KRaft solo gestiona metadatos del clúster; los datos de usuario son transmitidos directamente entre clientes y brokers sin pasar por KRaft."
+      ],
+      "q-16": [
+        null,
+        "Kafka no adquiere bloqueos de lectura en las particiones durante las transacciones; el aislamiento se resuelve en los consumidores según `isolation.level`.",
+        "Los mensajes transaccionales se escriben inmediatamente en los segmentos de disco; su validez se define mediante marcadores de control COMMIT/ABORT.",
+        "La deduplicación básica por secuencia la hace cada broker en sus réplicas locales; el Transaction Coordinator gestiona el ciclo 2PC en `__transaction_state`."
+      ],
+      "q-17": [
+        null,
+        "El broker no elimina físicamente los mensajes abortados al recibir el marcador; permanecen en el log hasta que la retención habitual de segmentos los depure.",
+        "El consumidor con `read_uncommitted` no arroja excepciones ante transacciones abortadas; simplemente entrega los registros como mensajes corrientes.",
+        "Kafka no reemplaza los mensajes abortados con tombstones; el contenido original permanece intacto en disco junto al marcador de control."
+      ],
+      "q-18": [
+        null,
+        "El productor no envía en 0 ms si `linger.ms > 0`; espera deliberadamente el intervalo configurado para intentar acumular más registros en el lote.",
+        "Los mensajes no se retienen indefinidamente; `linger.ms` asegura un límite máximo de espera para enviar el lote aunque no alcance `batch.size`.",
+        "`delivery.timeout.ms` es el tiempo máximo total para confirmar el mensaje (incluyendo reintentos); el envío físico inicial se activa por `linger.ms` o `batch.size`."
+      ],
+      "q-19": [
+        null,
+        "La compresión configurada en el productor la ejecuta el propio cliente, no el broker líder al escribir en disco.",
+        "El broker no necesita descomprimir el lote para indexar; los metadatos de offsets y tamaños se leen directamente de la cabecera del lote (RecordBatch).",
+        "Kafka implementa compresión a nivel de aplicación en la JVM/SDK; no utiliza aceleración TCP Offload en la tarjeta de red para comprimir mensajes."
+      ],
+      "q-20": [
+        null,
+        "El Sticky Partitioner no concentra todo en la partición 0; rota de partición cada vez que se completa un lote para repartir la carga uniformemente.",
+        "El productor no genera UUIDs falsos para mensajes sin clave; preserva la clave null y utiliza lógica de adhesión (stickiness) por lote.",
+        "El Sticky Partitioner busca exactamente lo contrario a enviar un registro por paquete; maximiza el tamaño de los lotes para reducir la sobrecarga de red."
+      ],
+      "q-21": [
+        null,
+        "Esos 5 bytes no son un checksum CRC32; corresponden al Magic Byte (0x00) y al identificador de esquema asignado por Confluent Schema Registry.",
+        "El broker ID y la partición residen en las cabeceras del protocolo de red de Kafka, nunca como prefijo binario dentro del payload del registro.",
+        "El timestamp del registro se almacena en los metadatos nativos del RecordBatch de Kafka, no como un prefijo de 5 bytes dentro del cuerpo del mensaje."
+      ],
+      "q-22": [
+        null,
+        "En modo `BACKWARD`, si se actualizan primero los productores, los consumidores antiguos fallarán porque no saben deserializar el nuevo campo.",
+        "La compatibilidad evolutiva de esquemas en Kafka está diseñada precisamente para evitar paradas simultáneas de mantenimiento y purgas de tópicos.",
+        "`BACKWARD` permite perfectamente añadir campos nuevos siempre que tengan un valor `default`; no se requiere cambiar la política a `FORWARD`."
+      ],
+      "q-23": [
+        null,
+        "`FORWARD` solo garantiza que consumidores antiguos puedan leer datos de productores nuevos, pero no asegura que consumidores nuevos lean datos de productores antiguos.",
+        "`BACKWARD_TRANSITIVE` requiere actualizar consumidores antes que productores, y la propiedad `allow.schema.evolution` no existe en Schema Registry.",
+        "El modo `NONE` desactiva toda comprobación de compatibilidad en el registro de esquemas, exponiendo a fallos impredecibles en tiempo de ejecución."
+      ],
+      "q-24": [
+        null,
+        "Kafka nunca redistribuye registros históricos al añadir particiones; los mensajes antiguos permanecen intactos en sus particiones originales.",
+        "Los productores no arrojan excepciones de autorización; simplemente refrescan los metadatos del tópico y aplican el nuevo número de particiones al hash.",
+        "Kafka no mantiene tablas de mapeo de claves en `meta.properties`; la partición se calcula matemáticamente en el cliente con la fórmula de hashing."
+      ],
+      "q-25": [
+        null,
+        "Los Consumer Groups son independientes (modelo Pub/Sub); cada grupo recibe su propia copia completa de los datos de las 12 particiones.",
+        "Un grupo con menos instancias que particiones asigna varias particiones a cada instancia (12 / 4 = 3); ninguna partición queda huérfana.",
+        "La asignación de un grupo no afecta a otros grupos; en `fraud-app` las 12 instancias reciben 1 partición cada una sin limitarse a 4."
+      ],
+      "q-26": [
+        null,
+        "Leer solo los mensajes producidos después del inicio del consumidor corresponde al comportamiento de `auto.offset.reset=latest`, no de `earliest`.",
+        "`NoOffsetForPartitionException` se arroja únicamente si se configura `auto.offset.reset=none` y no existen offsets previos guardados.",
+        "`auto.offset.reset` no calcula ventanas de 24 horas; los valores estándar válidos son `earliest`, `latest` o `none`."
+      ],
+      "q-27": [
+        null,
+        "Con `enable.auto.commit=true`, la confirmación se dispara periódicamente en la llamada a `poll()`; no confirma los mensajes en el instante en que se reciben.",
+        "El broker no sabe cuántos registros ha procesado la aplicación localmente; solo actualiza los offsets cuando recibe una petición explícita de commit.",
+        "Kafka no valida el estado de bases de datos externas; `CommitFailedException` ocurre por rebalanceos o timeouts en el protocolo de miembros del grupo."
+      ],
+      "q-28": [
+        null,
+        "`commitAsync()` no bloquea el hilo principal; el problema es puramente lógico por inversión del orden de offsets confirmados en reintentos fuera de secuencia.",
+        "El broker procesa peticiones de OffsetCommit según van llegando; no valida dependencias síncronas entre commits asíncronos previos.",
+        "La API de Kafka permite utilizar callbacks con `commitAsync()` perfectamente; el riesgo radica en la lógica incorrecta de reintentos manuales desordenados."
+      ],
+      "q-29": [
+        null,
+        "Aunque el hilo de heartbeats siga vivo, no llamar a `poll()` dentro de `max.poll.interval.ms` hace que el cliente abandone el grupo activamente por considerarse bloqueado.",
+        "El broker no corta el socket TCP por lentitud en el procesamiento; es el cliente quien decide abandonar el grupo al superar el timeout local de poll.",
+        "Kafka no ajusta automáticamente el tamaño de los lotes (`max.poll.records`) en caliente; esa configuración es estática en el cliente."
+      ],
+      "q-30": [
+        null,
+        "El tiempo máximo de procesamiento del hilo principal lo controla `max.poll.interval.ms`, mientras que `session.timeout.ms` detecta caídas de conectividad o del proceso.",
+        "Los heartbeats los envía el cliente hacia el Group Coordinator, nunca a la inversa, y el intervalo debe ser sensiblemente inferior (1/3) a la sesión.",
+        "Estos parámetros regulan la membresía y detección de fallos en Consumer Groups, no la expiración ni renovación de credenciales SASL."
+      ],
+      "q-31": [
+        null,
+        "El protocolo cooperativo no delega la asignación en KRaft ni crea réplicas provisionales; coordina la cesión de particiones en dos fases consecutivas.",
+        "Kafka prohíbe que múltiples miembros del mismo grupo consuman la misma partición simultáneamente; el protocolo cooperativo respeta esta regla fundamental.",
+        "Aunque el líder calcula el reparto en el protocolo de asignación, el Group Coordinator siempre orquesta y confirma las fases de unión y sincronización."
+      ],
+      "q-32": [
+        null,
+        "Static Membership se gestiona a nivel de protocolo Kafka con el broker; no depende de almacenar asignaciones en volúmenes persistentes PVC de Kubernetes.",
+        "El coordinador espera durante `session.timeout.ms`, no `max.poll.interval.ms`, y no almacena mensajes en buffers temporales especiales durante la ausencia.",
+        "Static Membership no gestiona tokens de red ni reutiliza sockets TCP mediante Ingress; el cliente reabre una sesión reconociéndose por su `group.instance.id`."
+      ],
+      "q-33": [
+        null,
+        "`seek()` solo reposiciona el puntero local de lectura del consumidor en memoria para la siguiente llamada a `poll()`; no persiste ni confirma offsets en el broker.",
+        "`auto.commit.interval.ms=1` no asegura atomicidad por registro y satura el clúster de peticiones de red sin garantizar qué mensaje exacto fue procesado.",
+        "`commitAsync()` sin parámetros confirma el último offset devuelto por `poll()`, no el registro intermedio que la aplicación esté procesando en ese instante."
+      ],
+      "q-34": [
+        null,
+        "`onPartitionsAssigned()` se invoca cuando ya se asignaron las particiones; vaciar el buffer ahí pierde los datos de las particiones revocadas previamente.",
+        "`onPartitionsLost()` indica que las particiones ya fueron reclamadas por otro consumidor; hacer commit ahí fallará inevitablemente con `CommitFailedException`.",
+        "Kafka no admite canalizaciones directas gRPC entre consumidores para transferir buffers de memoria; el estado debe persistirse y committearse en el broker."
+      ],
+      "q-35": [
+        null,
+        "`subscribe()` activa el protocolo coordinado de grupos dinámicos y requiere obligatoriamente un `group.id` válido; no permite omitirlo ni aislar particiones con regex.",
+        "Usar `subscribe()` con `group.id` vacío o nulo arroja una excepción de configuración (`InvalidGroupIdException`), impidiendo el inicio del consumidor.",
+        "Denegar permisos de coordinación mediante ACLs impedirá que la aplicación arranque, en lugar de concederle acceso directo o aislar una partición específica."
+      ],
+      "q-36": [
+        null,
+        "El Group Coordinator se calcula de forma determinista mediante el hash del `group.id`; no se asigna aleatoriamente en KRaft ni en `@metadata`.",
+        "El coordinador no es el broker 0; las particiones de `__consumer_offsets` se reparten entre todos los brokers para distribuir la carga equitativamente.",
+        "El cliente no elige el coordinador por latencia de red; solicita la identidad del coordinador al clúster mediante una petición `FindCoordinatorRequest`."
+      ],
+      "q-37": [
+        null,
+        "El modo Standalone admite conectores de tipo Source y Sink; su grave limitación es la ausencia de tolerancia a fallos, balanceo y alta disponibilidad.",
+        "El modo Standalone soporta convertidores de Schema Registry como Avro; la restricción inaceptable en producción es ser un punto único de fallo (SPOF).",
+        "Kafka Connect Standalone se comunica por TCP estándar y admite mecanismos SASL; su inviabilidad radica en la falta de resiliencia y escalabilidad."
+      ],
+      "q-38": [
+        null,
+        "El impedimento no es un error de segmentos en el consumidor, sino la imposibilidad de garantizar orden lineal total de configuraciones con múltiples particiones.",
+        "Connect no limita sus lecturas a la partición 0 por diseño de rebalanceo; requiere 1 partición para que todos los workers vean exactamente las mismas actualizaciones en orden.",
+        "La compactación de logs funciona independientemente del número de particiones; el requisito de 1 partición responde a la necesidad de orden global consistente."
+      ],
+      "q-39": [
+        null,
+        "Cifrar con un convertidor genérico no enmascara selectivamente el campo antes de escribirlo en el log de Kafka como exige PCI-DSS; una SMT aplica la transformación al vuelo.",
+        "Schema Registry valida la estructura y compatibilidad de tipos del esquema, pero no inspecciona ni anonimiza los datos contenidos dentro de los campos.",
+        "Filtrar en el consumidor downstream es inaceptable para PCI-DSS porque el número de tarjeta ya habría quedado almacenado en texto sin enmascarar en los discos del broker."
+      ],
+      "q-40": [
+        null,
+        "`errors.tolerance=none` detiene la tarea inmediatamente ante cualquier error; no desvía mensajes a la DLQ ni permite continuar el consumo.",
+        "Si `errors.tolerance` permanece en `none`, la tarea falla ante el primer registro corrupto y la DLQ nunca llega a utilizarse.",
+        "Cambiar el convertidor a bytes no resuelve la indexación errónea en OpenSearch ni envía los registros erróneos a una cola de mensajes no entregados."
+      ],
+      "q-41": [
+        null,
+        "Tanto los Converters como las SMTs pueden aplicarse tanto en conectores Source como Sink en distintas etapas del pipeline de Connect.",
+        "La compresión y el enrutamiento de red son gestionados por el cliente productor/consumidor subyacente y los brokers, no por los componentes de Connect.",
+        "La compatibilidad la verifica el Schema Registry y el commit de offsets lo realiza el framework de Connect; la SMT transforma registros individuales."
+      ],
+      "q-42": [
+        null,
+        "Modelar clics continuos en una `KTable` sobrescribiría los clics anteriores del mismo usuario perdiendo eventos; y una `GlobalKTable` requiere clave.",
+        "Kafka Streams provee la abstracción `KTable` precisamente para representar vistas mutables de estado por clave sin necesidad de agregaciones manuales.",
+        "Las ventanas temporales se aplican sobre operaciones de agregación, no para modelar entidades básicas de entrada continua como flujos o tablas changelog."
+      ],
+      "q-43": [
+        null,
+        "Kafka Streams no multiplexa particiones asimétricas en joins locales; exige rigurosamente que ambos tópicos tengan el mismo número de particiones.",
+        "El fallo por distinto particionado es de topología (`TopologyException`), no de serialización, y no se resuelve con `auto.offset.reset`.",
+        "Kafka no puede reducir ni trunca particiones de tópicos de datos existentes en caliente; el co-particionado debe planificarse o forzarse en el flujo."
+      ],
+      "q-44": [
+        null,
+        "Una `KTable` estándar siempre exige co-particionado; el parámetro ficticio `streams.join.broadcast` no existe en la API de Kafka Streams.",
+        "Re-particionar el stream masivo de 50 particiones añade sobrecarga de red y almacenamiento, que es exactamente lo que el enunciado pide evitar usando `GlobalKTable`.",
+        "Las ventanas deslizantes (`SlidingWindows`) sirven para agregaciones temporales entre dos streams, no para enriquecer flujos contra tablas de referencia."
+      ],
+      "q-45": [
+        null,
+        "Almacenar grandes estados en el Heap saturaría la memoria con pausas de GC, y Kafka Streams no respalda State Stores en buckets S3 de forma nativa.",
+        "Kafka Streams utiliza RocksDB embebido y changelog topics internos; no escribe transacciones síncronas contra bases de datos externas como Cassandra.",
+        "`in_memory` pierde todo el estado al caer la instancia y obligaría a reconstruirlo desde cero desde el changelog, aumentando drásticamente el RTO."
+      ],
+      "q-46": [
+        null,
+        "Las `Hopping Windows` avanzan con solapamiento periódico, haciendo que los eventos pertenezcan simultáneamente a múltiples ventanas adyacentes.",
+        "Las `Session Windows` no tienen longitud fija de 15 minutos; se abren y cierran dinámicamente según la inactividad entre eventos del mismo emisor.",
+        "Las `Sliding Windows` se evalúan continuamente en base a diferencias temporales relativas entre pares de eventos, no en bloques fijos discretos."
+      ],
+      "q-47": [
+        null,
+        "El dashboard en tiempo real se beneficia de `Push Queries` reactivas con `EMIT CHANGES`; hacer polling con `Pull Queries` introduce sobrecarga y latencia.",
+        "Las `Pull Queries` no ofrecen actualización reactiva continua para el dashboard; este modelo requeriría peticiones repetitivas ineficientes.",
+        "El servicio telefónico requiere consultar puntualmente el saldo actual bajo demanda (request/response); una `Push Query` continua sería innecesaria e ineficiente."
+      ],
+      "q-48": [
+        null,
+        "ksqlDB permite crear streams sin definir `KEY`; la clave se define para optimizar topologías y evitar re-particionados innecesarios en la red.",
+        "ksqlDB es solo una capa de procesamiento; nunca trunca ni destruye datos de los tópicos subyacentes de Kafka al omitir la clave.",
+        "Avro y Schema Registry gestionan esquemas independientes para clave y valor (`-key` y `-value`); no exigen campos compuestos únicos para agrupar."
+      ],
+      "q-49": [
+        null,
+        "mTLS requiere generar y distribuir certificados y claves privadas X.509 a cada cliente; no utiliza contraseñas almacenadas nativamente en Kafka.",
+        "SASL/PLAIN transmite contraseñas en texto claro requiriendo TLS, y no almacena credenciales dinámicas con salting en los metadatos de Kafka.",
+        "Kerberos requiere una infraestructura centralizada compleja de KDC (Key Distribution Center), no almacena credenciales dinámicas nativas en Kafka."
+      ],
+      "q-50": [
+        null,
+        "El Keystore contiene las credenciales propias (clave privada y certificado) del cliente; el Truststore valida autoridades CA, no contiene ACLs ni contraseñas SASL.",
+        "Keystore y Truststore son componentes de autenticación y cifrado en tránsito TLS; no gestionan el cifrado en reposo en el disco de los brokers.",
+        "No deben confundirse ni fusionarse: el Keystore guarda la clave privada secreta del cliente, mientras que el Truststore contiene certificados públicos de confianza (CA)."
+      ],
+      "q-51": [
+        null,
+        "Conceder `All` sobre `Cluster` viola el principio de menor privilegio al otorgar permisos administrativos innecesarios para producir transaccionalmente.",
+        "Los permisos sobre tópicos y transacciones no se heredan mágicamente de `Cluster`; deben asignarse explícitamente sobre el tópico y el `TransactionalId`.",
+        "Los clientes nunca deben tener acceso directo al tópico interno `__transaction_state`; ese tópico lo gestiona exclusivamente el Transaction Coordinator."
+      ],
+      "q-52": [
+        null,
+        "En Kafka no hay especificidad por IP: una coincidencia con una regla `DENY` anula cualquier regla `ALLOW`, independientemente de que el host sea comodín.",
+        "El orden en que se registraron las ACLs no influye; el authorizer agrupa y evalúa primero las denegaciones antes que cualquier concesión.",
+        "Las reglas de autorización no bloquean handshakes TCP por ambigüedad; el authorizer resuelve determinísticamente denegando el acceso de inmediato."
+      ],
+      "q-53": [
+        null,
+        "El segmento activo nunca es compactado por el Log Cleaner; se mantiene append-only puro para no degradar la latencia de escrituras entrantes.",
+        "Kafka no detiene a los productores ni consolida particiones completas en un único archivo comprimido; limpia segmentos inactivos en segundo plano.",
+        "La compactación de logs se ejecuta en caliente y de manera continua en segundo plano mediante hilos cleaner; no requiere mantenimiento offline."
+      ],
+      "q-54": [
+        null,
+        "El sistema de archivos ext4 o XFS no tiene restricciones sobre escribir registros con payload nulo; la retención de tombstones es una regla lógica de Kafka.",
+        "KRaft no tarda 24 horas en sincronizar metadatos; la retención del tombstone protege el procesamiento de los consumidores de datos downstream.",
+        "Kafka no reintenta recuperar datos eliminados contactando productores; los registros publicados son inmutables y de flujo estrictamente unidireccional."
+      ],
+      "q-55": [
+        null,
+        "`UnderReplicatedPartitions` no mide pérdida de particiones en disco; mide particiones cuyo número actual de réplicas en sincronía (ISR) es menor que su `replication.factor`.",
+        "El retraso de los consumidores se monitoriza con la métrica de `consumer lag`, no afecta a las particiones sub-replicadas del broker.",
+        "La configuración de `acks=0` en productores no determina si las réplicas followers se mantienen en sincronía dentro del ISR de la partición."
+      ],
+      "q-56": [
+        null,
+        "En Kafka solo debe haber exactamente un controlador activo líder en todo el clúster; un modelo multimaestro con múltiples líderes no existe en KRaft ni ZooKeeper.",
+        "El valor saludable en régimen normal es 1, no 0; un valor de 0 significa que ningún broker ejerce el liderazgo de metadatos, impidiendo cambios administrativos.",
+        "La métrica `ActiveControllerCount` mide el líder activo (exactamente 1), no el número total de nodos o votantes que conforman el quórum de controladores."
+      ],
+      "q-57": [
+        null,
+        "La métrica mide porcentaje de tiempo ocioso (idle); un 6 % de idle significa una saturación crítica del 94 %, no una baja carga de trabajo.",
+        "Los fallos de autenticación se reflejan en métricas de errores de conexión SASL/SSL, no en la utilización del pool de hilos de atención de peticiones (`num.io.threads`).",
+        "La métrica monitorea directamente los hilos de `KafkaRequestHandlerPool`, no las pausas de recolección de basura ni la memoria del heap de la JVM."
+      ],
+      "q-58": [
+        null,
+        "Tiered Storage descarga segmentos a Cloud Object Storage (S3, GCS, Azure Blob), no se basa en volúmenes EBS fríos ni deduplicación en memoria RAM.",
+        "Tiered Storage mantiene los datos accesibles de forma transparente para los clientes de Kafka mediante la API estándar; no requiere tablas Iceberg ni motores externos.",
+        "MirrorMaker 2 replica entre clústeres independientes, pero no es Tiered Storage (que desacopla el almacenamiento nativo en un único clúster)."
+      ],
+      "q-59": [
+        null,
+        "Aunque se pierda la compresión de punteros (Compressed OOPs) pasando de 32 GB, la razón primordial por la que Kafka usa heaps pequeños (6-10 GB) es maximizar el PageCache del SO y evitar pausas de GC.",
+        "Kafka no utiliza el espacio Swap de Linux; al contrario, la swap debe desactivarse o minimizarse (`vm.swappiness=1`) para evitar caídas severas de rendimiento.",
+        "KRaft no establece restricciones de heap basadas en hilos de red; los brokers se dimensionan para dejar la mayor parte de la RAM al PageCache del sistema operativo."
+      ],
+      "q-60": [
+        null,
+        "SASL/SCRAM no se federa con endpoints de introspección JWT vía webhooks; el estándar nativo de Kafka para tokens JWT es SASL/OAUTHBEARER.",
+        "SASL/GSSAPI está diseñado para autenticación Kerberos corporativa, no para federación directa con tokens OpenID Connect/OAuth 2.0.",
+        "Las ACLs gestionan autorización, no autenticación ni validación de tokens JWT, y Schema Registry no interviene en la seguridad a nivel de transporte TCP."
+      ]
+    },
     glossary: [
   {
     "term": "ISR (In-Sync Replicas)",

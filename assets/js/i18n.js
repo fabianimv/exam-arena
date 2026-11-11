@@ -6,7 +6,7 @@
   'use strict';
 
   var STORAGE_LANG_KEY = 'exam-arena-lang';
-  var CACHE_KEY = 'exam-arena-tr-en-v1';
+  var CACHE_KEY = 'exam-arena-tr-en-v2';
 
   /* ---------- 1. Formateo y escape de texto ---------- */
 
