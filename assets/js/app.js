@@ -33,12 +33,104 @@
     });
   }
 
+  var METRIC_REGEX = /\b((?:HTTP\s+)?[1-5]\d\d\s+(?:Bad Gateway|Gateway Timeout|Service Unavailable|Too Many Requests|Internal Server Error)|HTTP\s+[1-5]\d\d|p90|p95|p99(?:\.9)?|RTO|RPO|SLO|SLA|SLI|OOMKilled|CrashLoopBackOff|Pending|ImagePullBackOff|ErrImagePull)\b/g;
+
+  function highlightMetrics(text) {
+    if (!text) return '';
+    return text.replace(/(<[^>]+>)|([^<]+)/g, function (m, tag, textPart) {
+      if (tag) return tag;
+      return textPart.replace(METRIC_REGEX, '<span class="hl-metric">$1</span>');
+    });
+  }
+
   function fmt(s) {
     if (s == null) return '';
     if (w.ExamI18n && w.ExamI18n.fmt) return w.ExamI18n.fmt(s);
-    return esc(s)
-      .replace(/`([^`]+)`/g, '<strong>$1</strong>')
-      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    var out = esc(s)
+      .replace(/`([^`]+)`/g, '<strong class="hl-term">$1</strong>')
+      .replace(/\*\*([^*]+)\*\*/g, '<strong class="hl-term">$1</strong>');
+    return highlightMetrics(out);
+  }
+
+  function fmtQuestion(rawText) {
+    if (!rawText) return '';
+    var s = String(rawText).trim();
+
+    var scenarioPart = '';
+    var askPart = '';
+
+    var qPos = s.lastIndexOf('¿');
+    var qMark = s.lastIndexOf('?');
+
+    if (qPos > 0) {
+      var beforeQ = s.slice(0, qPos);
+      var lastPeriod = Math.max(beforeQ.lastIndexOf('. '), beforeQ.lastIndexOf('.\n'), beforeQ.lastIndexOf('? '));
+      if (lastPeriod !== -1 && (qPos - lastPeriod) < 60) {
+        scenarioPart = s.slice(0, lastPeriod + 1).trim();
+        askPart = s.slice(lastPeriod + 1).trim();
+      } else {
+        scenarioPart = s.slice(0, qPos).trim();
+        askPart = s.slice(qPos).trim();
+      }
+    } else if (qPos === 0) {
+      scenarioPart = '';
+      askPart = s;
+    } else if (qMark !== -1) {
+      var beforeQMark = s.slice(0, qMark);
+      var lastSep = Math.max(
+        beforeQMark.lastIndexOf('. '),
+        beforeQMark.lastIndexOf('.\n'),
+        beforeQMark.lastIndexOf(':\n'),
+        beforeQMark.lastIndexOf(': '),
+        beforeQMark.lastIndexOf('? ')
+      );
+      if (lastSep !== -1 && lastSep > 15) {
+        scenarioPart = s.slice(0, lastSep + 1).trim();
+        askPart = s.slice(lastSep + 1).trim();
+      } else {
+        scenarioPart = '';
+        askPart = s;
+      }
+    } else {
+      var lastSep = Math.max(
+        s.lastIndexOf('. '),
+        s.lastIndexOf('.\n'),
+        s.lastIndexOf(':\n'),
+        s.lastIndexOf(': ')
+      );
+      if (lastSep !== -1 && lastSep > 25) {
+        scenarioPart = s.slice(0, lastSep + 1).trim();
+        askPart = s.slice(lastSep + 1).trim();
+      } else {
+        scenarioPart = '';
+        askPart = s;
+      }
+    }
+
+    if (!askPart) {
+      askPart = scenarioPart || s;
+      scenarioPart = '';
+    }
+
+    var scenarioLabel = t('scenario_label', 'Escenario / Contexto');
+    var askLabel = t('ask_label', 'Pregunta clave');
+
+    var askHtml = '<div class="q-ask">' +
+      '<span class="q-ask-icon" aria-hidden="true">?</span>' +
+      '<div class="q-ask-content">' +
+        '<div class="q-ask-label">' + askLabel + '</div>' +
+        '<div class="q-ask-text">' + fmt(askPart) + '</div>' +
+      '</div>' +
+    '</div>';
+
+    if (scenarioPart) {
+      return '<div class="q-scenario">' +
+        '<div class="q-section-label"><span class="q-section-dot"></span><span>' + scenarioLabel + '</span></div>' +
+        '<div class="q-scenario-body">' + fmt(scenarioPart) + '</div>' +
+      '</div>' + askHtml;
+    }
+
+    return askHtml;
   }
 
   function stripTicks(s) {
@@ -501,15 +593,23 @@
     var kbHint = t('kb_hint', 'Atajos: teclas <kbd>A</kbd>–<kbd>D</kbd> o <kbd>1</kbd>–<kbd>4</kbd> para marcar · <kbd>Enter</kbd> para responder / avanzar');
     var answerBtnText = t('btn_answer', 'Responder');
 
+    var domainName = (ex.shortDomains && ex.shortDomains[q.d]) || (ex.domains && ex.domains[q.d]) || '';
+    var domainLabelText = t('domain_label', 'Dominio') + ' ' + q.d + (domainName ? ' · ' + esc(domainName) : '');
+
     view.innerHTML =
       '<div class="testbar"><span>' + ex.icon + ' <b>' + esc(ex.badge) + '</b> · ' + qOfText + '</span>' +
       '<span>' + correctCountText + ' <b id="tok">' + T.ok + '</b></span>' +
       '<button id="tquit" class="link">' + quitText + '</button></div>' +
       '<div class="progress"><div style="width:' + pct + '%"></div></div>' +
-      '<div class="card">' +
-      '<div class="muted small">' + t('domain_label', 'Dominio') + ' ' + q.d + ' · ' + esc(q.t) + '</div>' +
-      '<p class="qtext">' + fmt(q.q) + '</p>' +
-      '<p class="muted small pick-guide">' + pickText + '</p>' +
+      '<div class="card q-card">' +
+      '<div class="q-header">' +
+        '<div class="q-header-left">' +
+          '<span class="q-domain-badge"><span class="q-domain-dot"></span>' + domainLabelText + '</span>' +
+          '<span class="q-topic-badge" id="q-topic-text">📌 ' + fmt(q.t) + '</span>' +
+        '</div>' +
+        '<span class="q-pick-badge">' + pickText + '</span>' +
+      '</div>' +
+      '<div class="qtext">' + fmtQuestion(q.q) + '</div>' +
       '<div class="kb-hint muted small">' + kbHint + '</div>' +
       '<div class="opts">' + order.map(function (idx, pos) {
         return '<button class="opt" data-i="' + idx + '"><span class="letter">' + LETTERS[pos] + '</span><span>' + fmt(q.o[idx]) + '</span></button>';
@@ -549,10 +649,10 @@
       w.ExamI18n.translateQuestion(q, function (trQ) {
         if (!T.list || T.list[T.i] !== q) return; // Si la sesión cambió de pregunta, no sobreescribir
         var qtextEl = view.querySelector('.qtext');
-        if (qtextEl && trQ.q) qtextEl.innerHTML = fmt(trQ.q);
+        if (qtextEl && trQ.q) qtextEl.innerHTML = fmtQuestion(trQ.q);
 
-        var metaEl = view.querySelector('.card > .muted.small');
-        if (metaEl && trQ.t) metaEl.innerHTML = (t('domain_label', 'Dominio') + ' ' + trQ.d + ' · ' + esc(trQ.t));
+        var topicEl = d.getElementById('q-topic-text');
+        if (topicEl && trQ.t) topicEl.innerHTML = '📌 ' + fmt(trQ.t);
 
         var optBtns = view.querySelectorAll('.opt');
         Array.prototype.forEach.call(optBtns, function (btn) {
@@ -658,8 +758,16 @@
       (wrong.length ? '<h2>' + reviewTitle + '</h2><div id="wrong-review-list">' + wrong.map(function (r) {
         var correct = [].concat(r.q.a);
         var why = (ex.why || {})[r.q.id] || [];
-        return '<div class="card review" data-qid="' + esc(r.q.id) + '"><div class="muted small">' + t('domain_label', 'Dominio') + ' ' + r.q.d + ' · ' + esc(r.q.t) + '</div>' +
-          '<p class="qtext">' + fmt(r.q.q) + '</p>' +
+        var domainName = (ex.shortDomains && ex.shortDomains[r.q.d]) || (ex.domains && ex.domains[r.q.d]) || '';
+        var domainLabelText = t('domain_label', 'Dominio') + ' ' + r.q.d + (domainName ? ' · ' + esc(domainName) : '');
+        return '<div class="card review q-card" data-qid="' + esc(r.q.id) + '">' +
+          '<div class="q-header">' +
+            '<div class="q-header-left">' +
+              '<span class="q-domain-badge"><span class="q-domain-dot"></span>' + domainLabelText + '</span>' +
+              '<span class="q-topic-badge">📌 ' + fmt(r.q.t) + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="qtext">' + fmtQuestion(r.q.q) + '</div>' +
           feedbackHtml(r.q, r.order, correct, r.picked.filter(function (p) { return correct.indexOf(p) === -1; }), why, false) +
           '</div>';
       }).join('') + '</div>' : '');
@@ -678,9 +786,16 @@
           var cardEl = view.querySelector('.card.review[data-qid="' + r.q.id + '"]');
           if (cardEl) {
             var correct = [].concat(trQ.a);
-            cardEl.innerHTML = '<div class="muted small">' + t('domain_label', 'Dominio') + ' ' + trQ.d + ' · ' + esc(trQ.t) + '</div>' +
-              '<p class="qtext">' + fmt(trQ.q) + '</p>' +
-              feedbackHtml(trQ, r.order, correct, r.picked.filter(function (p) { return correct.indexOf(p) === -1; }), trWhy || why, false);
+            var domainName = (ex.shortDomains && ex.shortDomains[trQ.d]) || (ex.domains && ex.domains[trQ.d]) || '';
+            var domainLabelText = t('domain_label', 'Dominio') + ' ' + trQ.d + (domainName ? ' · ' + esc(domainName) : '');
+            cardEl.innerHTML = '<div class="q-header">' +
+              '<div class="q-header-left">' +
+                '<span class="q-domain-badge"><span class="q-domain-dot"></span>' + domainLabelText + '</span>' +
+                '<span class="q-topic-badge">📌 ' + fmt(trQ.t) + '</span>' +
+              '</div>' +
+            '</div>' +
+            '<div class="qtext">' + fmtQuestion(trQ.q) + '</div>' +
+            feedbackHtml(trQ, r.order, correct, r.picked.filter(function (p) { return correct.indexOf(p) === -1; }), trWhy || why, false);
           }
         });
       });

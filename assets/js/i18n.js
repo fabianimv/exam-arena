@@ -25,17 +25,34 @@
       .replace(/'/g, '&#39;');
   }
 
+  var METRIC_REGEX = /\b((?:HTTP\s+)?[1-5]\d\d\s+(?:Bad Gateway|Gateway Timeout|Service Unavailable|Too Many Requests|Internal Server Error)|HTTP\s+[1-5]\d\d|p90|p95|p99(?:\.9)?|RTO|RPO|SLO|SLA|SLI|OOMKilled|CrashLoopBackOff|Pending|ImagePullBackOff|ErrImagePull)\b/g;
+
+  /**
+   * Resalta tokens técnicos y métricas fuera de tags HTML.
+   * @param {string} text
+   * @returns {string}
+   */
+  function highlightMetrics(text) {
+    if (!text) return '';
+    return text.replace(/(<[^>]+>)|([^<]+)/g, function (m, tag, textPart) {
+      if (tag) return tag;
+      return textPart.replace(METRIC_REGEX, '<span class="hl-metric">$1</span>');
+    });
+  }
+
   /**
    * Escapa HTML y convierte backticks `codigo` y negritas markdown **texto**
-   * en <strong>$1</strong> sin mostrar las comillas invertidas.
+   * en <strong class="hl-term">$1</strong> sin mostrar las comillas invertidas.
+   * Además, resalta automáticamente métricas y códigos de estado con <span class="hl-metric">.
    * @param {string} s
    * @returns {string}
    */
   function fmt(s) {
     if (s == null) return '';
     var out = esc(s);
-    out = out.replace(/`([^`]+)`/g, '<strong>$1</strong>');
-    out = out.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    out = out.replace(/`([^`]+)`/g, '<strong class="hl-term">$1</strong>');
+    out = out.replace(/\*\*([^*]+)\*\*/g, '<strong class="hl-term">$1</strong>');
+    out = highlightMetrics(out);
     return out;
   }
 
@@ -183,6 +200,8 @@
 
       // Durante la Prueba
       q_of: 'Pregunta <b>{i}</b> de {n}',
+      scenario_label: 'Escenario / Contexto',
+      ask_label: 'Pregunta clave',
       correct_count: 'Correctas:',
       btn_quit: 'Terminar',
       pick_multi: 'Elige {n} respuestas.',
@@ -274,6 +293,8 @@
 
       // During Quiz
       q_of: 'Question <b>{i}</b> of {n}',
+      scenario_label: 'Scenario Context',
+      ask_label: 'Key Question',
       correct_count: 'Correct:',
       btn_quit: 'Finish',
       pick_multi: 'Choose {n} answers.',
