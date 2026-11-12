@@ -482,30 +482,11 @@
   function resolveVisualAid(ex, item, isTopic) {
     if (!w.EXAM_VISUALS || !ex || !item) return null;
     var pack = w.EXAM_VISUALS[ex.id];
-    if (pack) {
-      if (isTopic && pack.topics && pack.topics[item.id]) return pack.topics[item.id];
-      if (!isTopic && pack.questions && pack.questions[item.id]) return pack.questions[item.id];
+    if (!pack) return null;
+    if (isTopic) {
+      return (pack.topics && pack.topics[item.id]) || null;
     }
-    var haystack = isTopic
-      ? ((item.title || '') + ' ' + (item.html || ''))
-      : ((item.t || '') + ' ' + (item.q || '') + ' ' + ((item.o || []).join(' ')));
-    var searchPacks = [];
-    if (pack && Array.isArray(pack.patterns)) searchPacks.push(pack.patterns);
-    EXAM_ORDER.forEach(function (id) {
-      if (id !== ex.id && w.EXAM_VISUALS[id] && Array.isArray(w.EXAM_VISUALS[id].patterns)) {
-        searchPacks.push(w.EXAM_VISUALS[id].patterns);
-      }
-    });
-    for (var p = 0; p < searchPacks.length; p++) {
-      var list = searchPacks[p];
-      for (var i = 0; i < list.length; i++) {
-        var entry = list[i];
-        if (!entry || !entry.svg) continue;
-        if (entry.match instanceof RegExp && entry.match.test(haystack)) return entry;
-        if (typeof entry.match === 'string' && haystack.toLowerCase().indexOf(entry.match.toLowerCase()) !== -1) return entry;
-      }
-    }
-    return null;
+    return (pack.questions && pack.questions[item.id]) || null;
   }
 
   function visualAidHtml(ex, item, isTopic) {
