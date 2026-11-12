@@ -1917,3 +1917,111 @@ input[type=search] {
     width: 100%;
   }
 }
+
+/* ---------- 11. Apoyos Visuales, Diagramas SVG y Gráficos de Telemetría ---------- */
+.q-visual-card {
+  margin: 0.75rem 0 1rem;
+  border-radius: 14px;
+  border: 1.5px solid var(--line);
+  background: var(--surface-2);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.q-visual-card[open] {
+  border-color: var(--blue);
+  box-shadow: 0 6px 20px -6px var(--accent-soft);
+}
+
+.q-visual-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 1rem;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  background: linear-gradient(90deg, var(--accent-soft) 0%, transparent 100%);
+  border-bottom: 1px solid transparent;
+}
+
+.q-visual-card[open] .q-visual-header {
+  border-bottom-color: var(--line);
+}
+
+.q-visual-header::-webkit-details-marker {
+  display: none;
+}
+
+.q-visual-title-wrap {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.q-visual-eyebrow {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--blue);
+}
+
+.q-visual-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  background: var(--accent-grad);
+  color: #ffffff;
+}
+
+.q-visual-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--txt);
+}
+
+.q-visual-toggle {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.q-visual-body {
+  padding: 0.9rem 1.1rem;
+  background: var(--card);
+}
+
+.q-visual-canvas {
+  width: 100%;
+  overflow-x: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  background: #0f172a;
+  padding: 0.75rem;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.q-visual-canvas svg {
+  width: 100%;
+  max-width: 720px;
+  height: auto;
+  display: block;
+}
+
+.q-visual-caption {
+  margin-top: 0.65rem;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--muted);
+  border-left: 3px solid var(--blue);
+  padding-left: 0.75rem;
+}
+

@@ -479,8 +479,62 @@
     }
   }
 
+  function resolveVisualAid(ex, item, isTopic) {
+    if (!w.EXAM_VISUALS || !ex || !item) return null;
+    var pack = w.EXAM_VISUALS[ex.id];
+    if (pack) {
+      if (isTopic && pack.topics && pack.topics[item.id]) return pack.topics[item.id];
+      if (!isTopic && pack.questions && pack.questions[item.id]) return pack.questions[item.id];
+    }
+    var haystack = isTopic
+      ? ((item.title || '') + ' ' + (item.html || ''))
+      : ((item.t || '') + ' ' + (item.q || '') + ' ' + ((item.o || []).join(' ')));
+    var searchPacks = [];
+    if (pack && Array.isArray(pack.patterns)) searchPacks.push(pack.patterns);
+    EXAM_ORDER.forEach(function (id) {
+      if (id !== ex.id && w.EXAM_VISUALS[id] && Array.isArray(w.EXAM_VISUALS[id].patterns)) {
+        searchPacks.push(w.EXAM_VISUALS[id].patterns);
+      }
+    });
+    for (var p = 0; p < searchPacks.length; p++) {
+      var list = searchPacks[p];
+      for (var i = 0; i < list.length; i++) {
+        var entry = list[i];
+        if (!entry || !entry.svg) continue;
+        if (entry.match instanceof RegExp && entry.match.test(haystack)) return entry;
+        if (typeof entry.match === 'string' && haystack.toLowerCase().indexOf(entry.match.toLowerCase()) !== -1) return entry;
+      }
+    }
+    return null;
+  }
+
+  function visualAidHtml(ex, item, isTopic) {
+    var v = resolveVisualAid(ex, item, isTopic);
+    if (!v || !v.svg) return '';
+    var isEn = getLang() === 'en';
+    var title = (isEn && v.titleEn) ? v.titleEn : (v.title || (isEn ? 'Visual Architecture & Telemetry Aid' : 'Apoyo Visual · Arquitectura y Telemetría'));
+    var caption = (isEn && v.captionEn) ? v.captionEn : (v.caption || '');
+    var badge = v.badge || (isEn ? 'Visual Diagram' : 'Diagrama Visual');
+    var eyebrow = isEn ? '📊 VISUAL AID' : '📊 APOYO VISUAL';
+    return '<details class="q-visual-card" open>' +
+      '<summary class="q-visual-header">' +
+        '<div class="q-visual-title-wrap">' +
+          '<span class="q-visual-eyebrow">' + eyebrow + '</span>' +
+          '<span class="q-visual-badge">' + esc(badge) + '</span>' +
+          '<strong class="q-visual-title">' + esc(title) + '</strong>' +
+        '</div>' +
+        '<span class="q-visual-toggle">' + (isEn ? 'Toggle chart' : 'Ver / ocultar') + '</span>' +
+      '</summary>' +
+      '<div class="q-visual-body">' +
+        '<div class="q-visual-canvas">' + v.svg + '</div>' +
+        (caption ? '<div class="q-visual-caption">' + fmt(caption) + '</div>' : '') +
+      '</div>' +
+    '</details>';
+  }
+
   function topicHtml(tItem) {
-    return '<details class="topic"><summary>' + fmt(tItem.title) + '</summary><div class="body">' + tItem.html + '</div></details>';
+    var ex = exam();
+    return '<details class="topic"><summary>' + fmt(tItem.title) + '</summary><div class="body">' + visualAidHtml(ex, tItem, true) + tItem.html + '</div></details>';
   }
 
   /* ---------- Prueba ---------- */
@@ -610,6 +664,7 @@
         '<span class="q-pick-badge">' + pickText + '</span>' +
       '</div>' +
       '<div class="qtext">' + fmtQuestion(q.q) + '</div>' +
+      visualAidHtml(ex, q, false) +
       '<div class="kb-hint muted small">' + kbHint + '</div>' +
       '<div class="opts">' + order.map(function (idx, pos) {
         return '<button class="opt" data-i="' + idx + '"><span class="letter">' + LETTERS[pos] + '</span><span>' + fmt(q.o[idx]) + '</span></button>';
@@ -768,6 +823,7 @@
             '</div>' +
           '</div>' +
           '<div class="qtext">' + fmtQuestion(r.q.q) + '</div>' +
+          visualAidHtml(ex, r.q, false) +
           feedbackHtml(r.q, r.order, correct, r.picked.filter(function (p) { return correct.indexOf(p) === -1; }), why, false) +
           '</div>';
       }).join('') + '</div>' : '');
