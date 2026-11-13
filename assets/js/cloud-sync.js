@@ -644,7 +644,7 @@
           lastErrorMessage = 'Sin conexión a internet o la URL de Supabase es inaccesible.';
         } else if (msg.indexOf('JWT') !== -1 || msg.indexOf('API key') !== -1 || msg.indexOf('401') !== -1) {
           currentStatus = 'error';
-          lastErrorMessage = 'Credenciales de Supabase no válidas (revisa tu Anon Key y URL).';
+          lastErrorMessage = 'Credenciales de Supabase no válidas (revisa tu Anon Key y URL). Detalle: ' + msg;
         } else {
           currentStatus = 'error';
           lastErrorMessage = msg;
@@ -962,11 +962,11 @@
       '  <div id="cloud-advanced-panel" style="display:' + (isExpanded ? 'block' : 'none') + ';margin-bottom:1rem;padding:1rem;border-radius:var(--radius-md);background:var(--surface-2);border:1px dashed var(--line)">',
       '    <div class="sync-field">',
       '      <label for="cloud-input-url">Supabase Project URL</label>',
-      '      <input type="text" id="cloud-input-url" placeholder="https://xyzcompany.supabase.co" value="' + url + '" spellcheck="false">',
+      '      <input type="text" id="cloud-input-url" placeholder="https://xyzcompany.supabase.co" value="' + url + '" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">',
       '    </div>',
       '    <div class="sync-field">',
       '      <label for="cloud-input-key">Supabase Anon Public Key</label>',
-      '      <input type="password" id="cloud-input-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." value="' + key + '" spellcheck="false">',
+      '      <input type="text" id="cloud-input-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." value="' + key + '" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-1p-ignore="true" data-lpignore="true" style="font-family:monospace;font-size:0.78rem">',
       '      <small style="color:var(--muted);font-size:0.76rem;display:block;margin-top:0.25rem">Clave pública anónima (anon key). Es 100% segura para GitHub Pages con Row Level Security.</small>',
       '    </div>',
       '    <div class="sql-copy-box" style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem;flex-wrap:wrap">',
@@ -1045,8 +1045,10 @@
         var inKey = backdrop.querySelector('#cloud-input-key');
 
         var newEmail = setEmail(inEmail ? inEmail.value : '');
-        var newUrl = setUrl(inUrl ? inUrl.value : '');
-        var newKey = setKey(inKey ? inKey.value : '');
+        var rawUrl = inUrl ? String(inUrl.value || '').trim().replace(/\/+$/, '') : '';
+        var rawKey = inKey ? String(inKey.value || '').trim() : '';
+        var newUrl = setUrl(rawUrl === DEFAULT_SUPABASE_URL ? '' : rawUrl) || DEFAULT_SUPABASE_URL;
+        var newKey = setKey(rawKey === DEFAULT_SUPABASE_ANON_KEY ? '' : rawKey) || DEFAULT_SUPABASE_ANON_KEY;
 
         if (!newEmail) {
           alert('Por favor ingresa un correo electrónico válido.');
