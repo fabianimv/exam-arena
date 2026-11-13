@@ -507,8 +507,8 @@
       });
     }
 
-    // Traducción dinámica suave al inglés de títulos de dominios y temas visibles
-    if (isEn && w.ExamI18n && w.ExamI18n.translateBatch) {
+    // Traducción dinámica al español de títulos de dominios y temas visibles
+    if (!isEn && w.ExamI18n && w.ExamI18n.translateBatch) {
       var summaries = view.querySelectorAll('details.topic > summary');
       var toTranslate = [];
       Array.prototype.forEach.call(summaries, function (s) {
@@ -727,8 +727,8 @@
       };
     }
 
-    // Traducción automática suave al inglés si el idioma seleccionado es 'en'
-    if (isEn && w.ExamI18n && w.ExamI18n.translateQuestion) {
+    // Traducción automática al español si el idioma seleccionado es 'es'
+    if (!isEn && w.ExamI18n && w.ExamI18n.translateQuestion) {
       w.ExamI18n.translateQuestion(q, function (trQ) {
         if (!T.list || T.list[T.i] !== q) return; // Si la sesión cambió de pregunta, no sobreescribir
         var qtextEl = view.querySelector('.qtext');
@@ -787,8 +787,8 @@
     var tok = d.getElementById('tok');
     if (tok) tok.textContent = T.ok;
 
-    // Si está en inglés, traducir automáticamente la explicación y respuestas en el feedback
-    if (getLang() === 'en' && w.ExamI18n && w.ExamI18n.translateQuestion) {
+    // Si está en español, traducir automáticamente la explicación y respuestas en el feedback
+    if (getLang() === 'es' && w.ExamI18n && w.ExamI18n.translateQuestion) {
       w.ExamI18n.translateQuestion(q, why, function (trQ, trWhy) {
         renderFeedbackWith(trQ, trWhy || why);
       });
@@ -862,8 +862,8 @@
     if (nt) nt.onclick = showSetup;
     w.scrollTo(0, 0);
 
-    // Traducción dinámica de la revisión de preguntas falladas al inglés
-    if (isEn && wrong.length && w.ExamI18n && w.ExamI18n.translateQuestion) {
+    // Traducción dinámica de la revisión de preguntas falladas al español
+    if (!isEn && wrong.length && w.ExamI18n && w.ExamI18n.translateQuestion) {
       wrong.forEach(function (r) {
         var why = (ex.why || {})[r.q.id] || [];
         w.ExamI18n.translateQuestion(r.q, why, function (trQ, trWhy) {
@@ -1070,8 +1070,8 @@
     if (input) input.oninput = paint;
     paint();
 
-    // Traducción dinámica al inglés para términos y definiciones del glosario
-    if (isEn && w.ExamI18n && w.ExamI18n.translateBatch) {
+    // Traducción dinámica al español para términos y definiciones del glosario
+    if (!isEn && w.ExamI18n && w.ExamI18n.translateBatch) {
       var defEls = view.querySelectorAll('.gitem .gdef');
       var defTexts = [];
       Array.prototype.forEach.call(defEls, function (el) {

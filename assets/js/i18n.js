@@ -6,7 +6,7 @@
   'use strict';
 
   var STORAGE_LANG_KEY = 'exam-arena-lang';
-  var CACHE_KEY = 'exam-arena-tr-en-v3';
+  var CACHE_KEY = 'exam-arena-tr-es-v1';
 
   /* ---------- 1. Formateo y escape de texto ---------- */
 
@@ -151,7 +151,7 @@
       // Hub (Catálogo)
       hub_title: 'Simulador General de Exámenes Cloud & SRE',
       hub_desc: 'Elige un proveedor o certificación. Cada pregunta se corrige al instante explicando <b>por qué tu opción elegida es incorrecta</b> y <b>por qué la respuesta correcta es la adecuada</b>. Todo tu avance se guarda localmente en este navegador con <code>@fabianimv/study-tracker</code> y puede sincronizarse en la nube.',
-      kpi_total_q: 'Preguntas en 13 simuladores',
+      kpi_total_q: 'Preguntas en 14 simuladores',
       featured_badge: '✨ Destacado · Nuevo',
       kpi_seen: 'Preguntas vistas',
       kpi_mastery: 'Dominio global estimado',
@@ -245,7 +245,7 @@
       // Hub (Catalog)
       hub_title: 'Cloud & SRE Multi-Provider Exam Simulator',
       hub_desc: 'Choose a provider or certification. Each question is graded instantly explaining <b>why your chosen option is incorrect</b> and <b>why the correct answer is appropriate</b>. All your progress is stored locally in this browser with <code>@fabianimv/study-tracker</code> and can be synced to the cloud.',
-      kpi_total_q: 'Questions in 13 simulators',
+      kpi_total_q: 'Questions in 14 simulators',
       featured_badge: '✨ Featured · New',
       kpi_seen: 'Questions seen',
       kpi_mastery: 'Estimated global mastery',
@@ -537,7 +537,7 @@
       stringsArray = stringsArray != null ? [String(stringsArray)] : [];
     }
 
-    if (stringsArray.length === 0 || getLang() !== 'en') {
+    if (stringsArray.length === 0 || getLang() !== 'es') {
       var copy = stringsArray.slice();
       if (typeof callback === 'function') callback(copy);
       return copy;
@@ -598,7 +598,7 @@
 
     function processChunk(chunk) {
       var query = chunk.join(DELIM);
-      var url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=es&tl=en&dt=t&q=' + encodeURIComponent(query);
+      var url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=es&dt=t&q=' + encodeURIComponent(query);
 
       httpGet(url, function (err, data) {
         if (!err && data) {
@@ -647,7 +647,7 @@
    * @returns {string} (devuelve el texto original o traducción en caché si está disponible de inmediato)
    */
   function translateText(str, callback) {
-    if (typeof str !== 'string' || !str.trim() || getLang() !== 'en') {
+    if (typeof str !== 'string' || !str.trim() || getLang() !== 'es') {
       if (typeof callback === 'function') callback(str);
       return str;
     }
@@ -676,7 +676,7 @@
       whyArray = null;
     }
 
-    if (!q || getLang() !== 'en') {
+    if (!q || getLang() !== 'es') {
       if (typeof callback === 'function') callback(q, whyArray);
       return;
     }
