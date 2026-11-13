@@ -227,7 +227,7 @@
         "q": "An enterprise RAG search engine uses a bi-encoder to retrieve the 50 most similar chunks in `Mosaic AI Vector Search`. However, irrelevant chunks that contain matching words but opposite meaning frequently displace the correct answers. Which two-stage retrieval pattern solves this deficiency?",
         "o": [
           "Add a second re-ranking stage with a cross-encoder (e.g., `BGE-reranker`) over the top-50 to reorder and select the 5 best chunks.",
-          "Replace the Vector Search index with a standard SQL relational query using the pattern-matching operator `WHERE columna_texto LIKE '%query%'`.",
+          "Replace the Vector Search index with a standard SQL relational query using the pattern-matching operator `WHERE text_column LIKE '%query%'`.",
           "Run a second bi-encoder identical to the first with the same vector weights and arithmetically average all the previously computed Euclidean distances.",
           "Reverse the positional order of the 50 retrieved chunks so that the chunks with the lowest bi-encoder similarity appear at the top of the delivered context prompt."
         ],
@@ -409,7 +409,7 @@
         "id": "dbg-23",
         "d": 3,
         "t": "GDPR Compliance and Deletes in Delta Sync",
-        "q": "In compliance with the right to be forgotten (GDPR), a customer requests the deletion of their records. An analyst runs `DELETE FROM clientes_docs WHERE cliente_id = 'C-8842'` on the Delta table connected to a `Delta Sync Index`. Which TWO elements ensure that the associated vectors disappear from the Vector Search results? (Choose 2 answers)",
+        "q": "In compliance with the right to be forgotten (GDPR), a customer requests the deletion of their records. An analyst runs `DELETE FROM customer_docs WHERE customer_id = 'C-8842'` on the Delta table connected to a `Delta Sync Index`. Which TWO elements ensure that the associated vectors disappear from the Vector Search results? (Choose 2 answers)",
         "o": [
           "That the Delta table has Change Data Feed (CDF) enabled, recording the delete event for propagation to the index.",
           "That the index synchronization pipeline processes the changes (continuously or on the next scheduled run in triggered mode).",

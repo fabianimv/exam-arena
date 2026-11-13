@@ -303,7 +303,7 @@
         "id": "sre-16",
         "d": 2,
         "t": "PodDisruptionBudget and Node Draining",
-        "q": "You are trying to upgrade the Kubernetes version of your worker nodes. The command `kubectl drain node-04 --ignore-daemonsets --delete-emptydir-data` has been blocked for 40 minutes, retrying to evict pod `ordenes-api-7f8b9-x2k` with the message: `error when evicting pods: Cannot evict pod as it would violate the pod's disruption budget`. What should you check?",
+        "q": "You are trying to upgrade the Kubernetes version of your worker nodes. The command `kubectl drain node-04 --ignore-daemonsets --delete-emptydir-data` has been blocked for 40 minutes, retrying to evict pod `orders-api-7f8b9-x2k` with the message: `error when evicting pods: Cannot evict pod as it would violate the pod's disruption budget`. What should you check?",
         "o": [
           "Check `kubectl get pdb`: a `PodDisruptionBudget` with `minAvailable: 100%` (or `maxUnavailable: 0`), or with secondary replicas that are not `Ready`, leaves `ALLOWED DISRUPTIONS = 0` and vetoes the eviction.",
           "Check for blockages in the node's CNI network interfaces and force the eviction by running `kubectl drain --force --disable-eviction=true`, assuming there are blocking open sockets in the Pod.",
@@ -348,12 +348,12 @@
         "id": "sre-19",
         "d": 2,
         "t": "NetworkPolicies and Connectivity",
-        "q": "A team deploys a `NetworkPolicy` for the first time in the `pagos` namespace to allow only the `checkout` service to connect to port `8080` of `pagos-api` (an `Ingress`-type policy). Immediately afterward, `pagos-api` still receives requests from `checkout`, but it can no longer connect to the external RDS database and stops resolving names in CoreDNS. What would have happened if the policy had also included `policyTypes: [\"Ingress\", \"Egress\"]` with `egress: []`?",
+        "q": "A team deploys a `NetworkPolicy` for the first time in the `payments` namespace to allow only the `checkout` service to connect to port `8080` of `payments-api` (an `Ingress`-type policy). Immediately afterward, `payments-api` still receives requests from `checkout`, but it can no longer connect to the external RDS database and stops resolving names in CoreDNS. What would have happened if the policy had also included `policyTypes: [\"Ingress\", \"Egress\"]` with `egress: []`?",
         "o": [
           "Declaring `Egress` with `egress: []` imposes a strict default-deny that blocks all outbound traffic, including DNS (port 53) and RDS; both outbound paths must be explicitly authorized in the `egress` section.",
           "An empty `egress: []` section allows all outbound traffic by default according to the Kubernetes specification; the DNS block would be due to an incompatibility with the cluster's CNI driver.",
           "Traffic to essential services such as `kube-dns` is exempt by default in policies; the isolation would only restrict external public IPs but would keep the connection to RDS in the VPC.",
-          "The rule would isolate only outbound communications to other pods within the same `pagos` namespace, leaving TCP connections destined for endpoints outside the cluster intact."
+          "The rule would isolate only outbound communications to other pods within the same `payments` namespace, leaving TCP connections destined for endpoints outside the cluster intact."
         ],
         "a": 0,
         "e": "In Kubernetes, as soon as a Pod is selected by a `NetworkPolicy` that declares `Egress` in `policyTypes`, all outbound traffic not explicitly authorized is blocked (including DNS traffic to port 53 in `kube-system`). Forgetting to allow egress to CoreDNS (UDP/TCP 53) is one of the most common causes of outages after applying Zero-Trust policies."
@@ -376,7 +376,7 @@
         "id": "sre-21",
         "d": 3,
         "t": "Kafka Rebalance Storms",
-        "q": "In your production Kafka cluster, the `procesador-facturas` consumer group enters a continuous loop of rebalances (`PreparingRebalance` → `CompletingRebalance`) every 5 minutes, `consumer_lag` grows nonstop, and duplicate invoices are being generated. In the consumer logs you see: `CommitFailedException: Offset commit cannot be completed since the consumer is not part of an active group for auto partition assignment; it is likely that the consumer was kicked out of the group`. Each batch of 500 messages makes calls to an external web service that now responds in ~800 ms per message. Which parameter has been exceeded and how do you mitigate it?",
+        "q": "In your production Kafka cluster, the `invoice-processor` consumer group enters a continuous loop of rebalances (`PreparingRebalance` → `CompletingRebalance`) every 5 minutes, `consumer_lag` grows nonstop, and duplicate invoices are being generated. In the consumer logs you see: `CommitFailedException: Offset commit cannot be completed since the consumer is not part of an active group for auto partition assignment; it is likely that the consumer was kicked out of the group`. Each batch of 500 messages makes calls to an external web service that now responds in ~800 ms per message. Which parameter has been exceeded and how do you mitigate it?",
         "o": [
           "The batch takes 400 s and exceeds `max.poll.interval.ms` (300 s), causing ejection by the coordinator; it is mitigated by reducing `max.poll.records` (e.g., to 50) and/or increasing `max.poll.interval.ms`.",
           "The heartbeat thread is blocked by the external web service latency, exceeding `session.timeout.ms` (45 s); it is mitigated by reducing `heartbeat.interval.ms` to 1000 ms and tripling the broker pool.",
@@ -418,7 +418,7 @@
         "id": "sre-24",
         "d": 3,
         "t": "Hot Partitions and Key Skew",
-        "q": "Your `eventos-inventario` topic has 24 partitions and your consumer microservice has 24 replica pods. However, during CyberDay you see that 23 pods are at 5 % CPU with lag 0, while a single pod is at 100 % CPU and accumulates 800,000 messages of lag on partition 7. What is the cause and what should you check?",
+        "q": "Your `inventory-events` topic has 24 partitions and your consumer microservice has 24 replica pods. However, during CyberDay you see that 23 pods are at 5 % CPU with lag 0, while a single pod is at 100 % CPU and accumulates 800,000 messages of lag on partition 7. What is the cause and what should you check?",
         "o": [
           "Key skew (Key Skew / Hot Partition): the producer uses a hyper-frequent partitioning key (such as the central warehouse ID or a null string) that the hash function invariably assigns to partition 7.",
           "Horizontally scale the consumer Deployment from 24 to 48 replicas to associate multiple concurrent pods with partition 7 through parallel worker threads within the same Kafka consumer group.",
@@ -488,7 +488,7 @@
         "id": "sre-29",
         "d": 3,
         "t": "Eventual Consistency and the Outbox Pattern",
-        "q": "A microservice saves an order in PostgreSQL (`COMMIT`) and on the next line publishes an `PedidoCreado` event to Kafka. During a brief network outage to Kafka, the `COMMIT` in PostgreSQL succeeds but the publish to Kafka fails (or the pod dies right between the two lines), leaving paid orders in the database that are never sent to the warehouse. Which pattern resolves this dual write (Dual Write)?",
+        "q": "A microservice saves an order in PostgreSQL (`COMMIT`) and on the next line publishes an `OrderCreated` event to Kafka. During a brief network outage to Kafka, the `COMMIT` in PostgreSQL succeeds but the publish to Kafka fails (or the pod dies right between the two lines), leaving paid orders in the database that are never sent to the warehouse. Which pattern resolves this dual write (Dual Write)?",
         "o": [
           "Transactional Outbox pattern: write the order and the event to the `outbox` table in the same local ACID transaction; a decoupled process (CDC or poller) relays the events to Kafka with delivery guarantees.",
           "Reverse the execution sequence: first publish the event to the Kafka topic with full replica acknowledgment and then commit the ACID transaction in PostgreSQL with explicit error handling.",
@@ -687,7 +687,7 @@
         "id": "sre-43",
         "d": 5,
         "t": "DDL Migrations and Table Locks",
-        "q": "At 12:30 PM (peak hour), a deployment runs a schema migration on the `transacciones` table (180 million rows) in PostgreSQL that tries to add a column with an operation that requires a prolonged `ACCESS EXCLUSIVE LOCK`. Although the `ALTER TABLE` is left waiting behind a 10-minute analytical query, all new reads (`SELECT`) and writes (`INSERT`) from the application are immediately blocked in a queue and the site goes down completely. Why were even the `SELECT`s blocked and how is it avoided?",
+        "q": "At 12:30 PM (peak hour), a deployment runs a schema migration on the `transactions` table (180 million rows) in PostgreSQL that tries to add a column with an operation that requires a prolonged `ACCESS EXCLUSIVE LOCK`. Although the `ALTER TABLE` is left waiting behind a 10-minute analytical query, all new reads (`SELECT`) and writes (`INSERT`) from the application are immediately blocked in a queue and the site goes down completely. Why were even the `SELECT`s blocked and how is it avoided?",
         "o": [
           "A DDL waiting for `ACCESS EXCLUSIVE LOCK` queues and blocks all subsequent transactions (`SELECT`, `INSERT`); it is avoided by setting a short `lock_timeout` (e.g., 2s) with retries and expand-and-contract techniques.",
           "PostgreSQL automatically raises the isolation level to `SERIALIZABLE` during any `ALTER TABLE` operation; it is avoided by running the change with the `SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED` option.",
@@ -729,11 +729,11 @@
         "id": "sre-46",
         "d": 5,
         "t": "Read-After-Write Consistency with Read Replicas",
-        "q": "To relieve the load on the primary database node, you modify the API so that all `POST /perfil` requests write to the primary node and all `GET /perfil` requests read from the asynchronous read replicas. Users immediately report that when they save a change to their profile and the screen automatically reloads (100 ms later), they see their old data as if it had not been saved. What phenomenon is occurring and how is it resolved without giving up the replicas?",
+        "q": "To relieve the load on the primary database node, you modify the API so that all `POST /profile` requests write to the primary node and all `GET /profile` requests read from the asynchronous read replicas. Users immediately report that when they save a change to their profile and the screen automatically reloads (100 ms later), they see their old data as if it had not been saved. What phenomenon is occurring and how is it resolved without giving up the replicas?",
         "o": [
           "Read-after-write (Read-your-own-writes) consistency violation due to asynchronous replication lag; resolve it by pinning the author's reads to the primary node for a few seconds after writes, or checking the transaction LSN/GTID.",
           "Dirty read phenomenon under MVCC concurrency; resolve it by setting the transaction isolation level to `SERIALIZABLE` across all read replica connections.",
-          "HTTP stale response caching in the browser; resolve it by adding `Cache-Control: no-cache, no-store, must-revalidate` headers to the `POST /perfil` response.",
+          "HTTP stale response caching in the browser; resolve it by adding `Cache-Control: no-cache, no-store, must-revalidate` headers to the `POST /profile` response.",
           "Replication stream corruption between primary and standby nodes; resolve it by terminating all read replicas and scaling the primary database vertically."
         ],
         "a": 0,
@@ -771,18 +771,18 @@
         "id": "sre-49",
         "d": 5,
         "t": "N+1 Queries and Missing Indexes After a Deployment",
-        "q": "After deploying a new `/api/v2/historial-compras` endpoint, the database CPU usage rises from 20 % to 99 % even though the endpoint receives only 30 requests per second. In `pg_stat_statements` you observe that the query `SELECT * FROM items_pedido WHERE pedido_id = $1` runs 6,000 times per second doing a `Seq Scan` (full sequential scan). Which two combined problems are taking down the database? (Choose 2 answers)",
+        "q": "After deploying a new `/api/v2/purchase-history` endpoint, the database CPU usage rises from 20 % to 99 % even though the endpoint receives only 30 requests per second. In `pg_stat_statements` you observe that the query `SELECT * FROM order_items WHERE order_id = $1` runs 6,000 times per second doing a `Seq Scan` (full sequential scan). Which two combined problems are taking down the database? (Choose 2 answers)",
         "o": [
           "The code introduces an N+1 query antipattern in the ORM: for each of the 30 requests it iterates, executing 200 individual SQL queries instead of grouping with `IN` or `JOIN`.",
-          "Absence of a B-Tree index on the foreign key `items_pedido(pedido_id)`, which forces the optimizer to perform a full sequential scan (`Seq Scan`) on each of the 6,000 QPS.",
+          "Absence of a B-Tree index on the foreign key `order_items(order_id)`, which forces the optimizer to perform a full sequential scan (`Seq Scan`) on each of the 6,000 QPS.",
           "The query optimizer statistics are out of date in `pg_statistic`, causing the engine to choose a sequential scan instead of using the existing index.",
-          "The application's connection pool lacks a `statement_timeout`, accumulating transactions waiting on row locks in the `items_pedido` table that saturate the CPU through contention."
+          "The application's connection pool lacks a `statement_timeout`, accumulating transactions waiting on row locks in the `order_items` table that saturate the CPU through contention."
         ],
         "a": [
           0,
           1
         ],
-        "e": "Unlike primary keys, many relational engines (including PostgreSQL) do NOT automatically create an index on a foreign key (`FOREIGN KEY`) column. If, on top of the missing index on `pedido_id` (which causes a `Seq Scan`), you add an N+1 loop in the ORM/code that multiplies the queries per request by 200, 30 RPS is enough to completely saturate all the database CPUs."
+        "e": "Unlike primary keys, many relational engines (including PostgreSQL) do NOT automatically create an index on a foreign key (`FOREIGN KEY`) column. If, on top of the missing index on `order_id` (which causes a `Seq Scan`), you add an N+1 loop in the ORM/code that multiplies the queries per request by 200, 30 RPS is enough to completely saturate all the database CPUs."
       },
       {
         "id": "sre-50",
@@ -802,11 +802,11 @@
         "id": "sre-51",
         "d": 6,
         "t": "ArgoCD Self-Heal during an Incident",
-        "q": "During a P1 incident at 04:00 AM, you discover that a misconfigured environment variable in the `pagos-api` Deployment is causing the failure. To mitigate quickly, you run `kubectl set env deployment/pagos-api FEATURE_X=false`. The new pods start fine and the error disappears, but exactly 45 seconds later the pods are recreated on their own with `FEATURE_X=true` and the incident returns. The cluster is managed with ArgoCD. What happened and how should you act?",
+        "q": "During a P1 incident at 04:00 AM, you discover that a misconfigured environment variable in the `payments-api` Deployment is causing the failure. To mitigate quickly, you run `kubectl set env deployment/payments-api FEATURE_X=false`. The new pods start fine and the error disappears, but exactly 45 seconds later the pods are recreated on their own with `FEATURE_X=true` and the incident returns. The cluster is managed with ArgoCD. What happened and how should you act?",
         "o": [
           "ArgoCD has `selfHeal: true` and reverts the divergence from Git; you must apply the mitigation through a GitOps commit or temporarily pause `auto-sync` on the Application while you stabilize the service.",
           "An admission policy controller (Kyverno/Gatekeeper) detected unauthorized mutation of the manifest and forced a rollback of the Deployment; it is solved by adding an exemption annotation in the metadata.",
-          "The deployment was blocked by a race condition with the Kubernetes Deployment Controller; it is mitigated by running `kubectl rollout pause deployment/pagos-api` to freeze ArgoCD synchronization.",
+          "The deployment was blocked by a race condition with the Kubernetes Deployment Controller; it is mitigated by running `kubectl rollout pause deployment/payments-api` to freeze ArgoCD synchronization.",
           "The application lacks RBAC permissions to update environment variables at runtime; it is solved by modifying the `SyncPolicy` directive in ArgoCD to disable strict schema validation."
         ],
         "a": 0,
@@ -816,7 +816,7 @@
         "id": "sre-52",
         "d": 6,
         "t": "TLS Certificates and Incomplete Intermediate Chain",
-        "q": "You manually renewed the TLS certificate on a load balancer for `api.tuempresa.com`. When testing from your laptop with Chrome and Safari, the green padlock appears with no errors. However, as soon as it goes to production, webhooks from external partners, Python scripts (`requests`), Go/Java microservices, and Android devices fail en masse with `SSLHandshakeException` / `SSL: CERTIFICATE_VERIFY_FAILED (unable to get local issuer certificate)`. What is the exact cause?",
+        "q": "You manually renewed the TLS certificate on a load balancer for `api.yourcompany.com`. When testing from your laptop with Chrome and Safari, the green padlock appears with no errors. However, as soon as it goes to production, webhooks from external partners, Python scripts (`requests`), Go/Java microservices, and Android devices fail en masse with `SSLHandshakeException` / `SSL: CERTIFICATE_VERIFY_FAILED (unable to get local issuer certificate)`. What is the exact cause?",
         "o": [
           "You installed only the leaf certificate without the intermediate chain (`fullchain.pem`); browsers download the missing issuer through AIA fetching, but libraries such as OpenSSL, Python, and the JVM require the full chain.",
           "The load balancer forcibly negotiated TLS 1.3 with modern elliptic-curve algorithms, causing incompatibility with legacy HTTP libraries in Java and Python that require traditional RSA cipher suites.",
@@ -824,7 +824,7 @@
           "The issuing Certificate Authority used an obsolete SHA-1 signature algorithm, causing backend trust stores to reject the handshake while desktop browsers tolerate the connection."
         ],
         "a": 0,
-        "e": "This is the number one incident after renewing TLS certificates: strict clients (cURL, OpenSSL, JVM, Go, Python, Android) only have the root CAs in their local store and need the server to present the domain certificate followed by the intermediate certificates (`fullchain`). You can always verify it with `openssl s_client -connect api.tuempresa.com:443 -servername api.tuempresa.com`."
+        "e": "This is the number one incident after renewing TLS certificates: strict clients (cURL, OpenSSL, JVM, Go, Python, Android) only have the root CAs in their local store and need the server to present the domain certificate followed by the intermediate certificates (`fullchain`). You can always verify it with `openssl s_client -connect api.yourcompany.com:443 -servername api.yourcompany.com`."
       },
       {
         "id": "sre-53",

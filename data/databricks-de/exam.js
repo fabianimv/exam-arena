@@ -39,19 +39,19 @@
         "id": "dbd-t-1-2",
         "d": 1,
         "title": "1.2 · Delta Lake Internals: ACID, _delta_log, Time Travel, VACUUM, and Liquid Clustering",
-        "html": "\n<h4>Delta Lake Internal Anatomy: The Transaction Log (_delta_log)</h4>\n<p>Delta Lake implements ACID transactions on object storage through an ordered, deterministic transaction log located in the <code>_delta_log/</code> subdirectory at the root of each table:</p>\n<ul>\n  <li><b>JSON Commit Files:</b> Each operation (insert, update, delete) generates an atomic sequential JSON file (<code>000000.json</code>, <code>000001.json</code>) containing actions that add (<code>add</code>) and logically remove (<code>remove</code>) Parquet files, along with column statistics (minimums, maximums, null counts).</li>\n  <li><b>Parquet Checkpoints:</b> Every 10 transactions (by default), Delta Lake compacts the accumulated state into a <code>.checkpoint.parquet</code> file (e.g., <code>000010.checkpoint.parquet</code>), avoiding scanning thousands of JSON files to reconstruct the current state.</li>\n  <li><b>Optimistic Concurrency Control (OCC):</b> Writers assume there will be no collisions; if two transactions modify the same files simultaneously, Delta checks whether the conflicts are reconcilable or fails the second one with <code>ConcurrentModificationException</code> to guarantee serializability.</li>\n</ul>\n\n<h4>Time Travel and Historical Restore</h4>\n<p>Thanks to the immutable commit log, Delta Lake allows querying previous versions of the table without physically duplicating the underlying files:</p>\n<ul>\n  <li><b>SQL syntax:</b> <code>SELECT * FROM tabla VERSION AS OF 15;</code> or <code>SELECT * FROM tabla TIMESTAMP AS OF '2024-01-15 10:00:00';</code>.</li>\n  <li><b>Restore:</b> <code>RESTORE TABLE tabla TO VERSION AS OF 12;</code> creates a new commit that returns the table to the exact state of that version.</li>\n</ul>\n\n<h4>Physical Maintenance: OPTIMIZE, Liquid Clustering, and VACUUM</h4>\n<table class=\"keytable\">\n<tr><th>Command / Technique</th><th>Function and Internal Mechanism</th><th>Operational Impact</th></tr>\n<tr><td><b>OPTIMIZE (Bin-packing)</b></td><td>Compacts collections of small files into uniform ~1 GB files through atomic rewrite operations.</td><td>Dramatically speeds up reads by reducing the file-open overhead on cloud storage.</td></tr>\n<tr><td><b>Liquid Clustering (CLUSTER BY)</b></td><td>Replaces rigid physical partitioning and <code>Z-ORDER</code>. Organizes data in a multidimensional, dynamic way based on commonly queried columns.</td><td>Avoids over-partitioning problems and allows changing the clustering keys without rewriting the entire table.</td></tr>\n<tr><td><b>VACUUM</b></td><td>Physically removes from storage the Parquet files that were marked as removed (<code>remove</code>) and exceed the retention threshold.</td><td>Frees up disk space. Its default retention is <b>7 days</b>; running it with zero retention breaks Time Travel and risks corrupting active concurrent reads.</td></tr>\n</table>\n\n<div class=\"tip\"><b>Danger of VACUUM with reduced retention:</b> The property <code>spark.databricks.delta.vacuum.retentionCheck.enabled = false</code> allows running <code>VACUUM</code> with less than 168 hours (7 days). It is strongly discouraged in production environments, since any long-running query that is reading old Parquet files will fail if they are purged while the query is still running.</div>\n"
+        "html": "\n<h4>Delta Lake Internal Anatomy: The Transaction Log (_delta_log)</h4>\n<p>Delta Lake implements ACID transactions on object storage through an ordered, deterministic transaction log located in the <code>_delta_log/</code> subdirectory at the root of each table:</p>\n<ul>\n  <li><b>JSON Commit Files:</b> Each operation (insert, update, delete) generates an atomic sequential JSON file (<code>000000.json</code>, <code>000001.json</code>) containing actions that add (<code>add</code>) and logically remove (<code>remove</code>) Parquet files, along with column statistics (minimums, maximums, null counts).</li>\n  <li><b>Parquet Checkpoints:</b> Every 10 transactions (by default), Delta Lake compacts the accumulated state into a <code>.checkpoint.parquet</code> file (e.g., <code>000010.checkpoint.parquet</code>), avoiding scanning thousands of JSON files to reconstruct the current state.</li>\n  <li><b>Optimistic Concurrency Control (OCC):</b> Writers assume there will be no collisions; if two transactions modify the same files simultaneously, Delta checks whether the conflicts are reconcilable or fails the second one with <code>ConcurrentModificationException</code> to guarantee serializability.</li>\n</ul>\n\n<h4>Time Travel and Historical Restore</h4>\n<p>Thanks to the immutable commit log, Delta Lake allows querying previous versions of the table without physically duplicating the underlying files:</p>\n<ul>\n  <li><b>SQL syntax:</b> <code>SELECT * FROM my_table VERSION AS OF 15;</code> or <code>SELECT * FROM my_table TIMESTAMP AS OF '2024-01-15 10:00:00';</code>.</li>\n  <li><b>Restore:</b> <code>RESTORE TABLE my_table TO VERSION AS OF 12;</code> creates a new commit that returns the table to the exact state of that version.</li>\n</ul>\n\n<h4>Physical Maintenance: OPTIMIZE, Liquid Clustering, and VACUUM</h4>\n<table class=\"keytable\">\n<tr><th>Command / Technique</th><th>Function and Internal Mechanism</th><th>Operational Impact</th></tr>\n<tr><td><b>OPTIMIZE (Bin-packing)</b></td><td>Compacts collections of small files into uniform ~1 GB files through atomic rewrite operations.</td><td>Dramatically speeds up reads by reducing the file-open overhead on cloud storage.</td></tr>\n<tr><td><b>Liquid Clustering (CLUSTER BY)</b></td><td>Replaces rigid physical partitioning and <code>Z-ORDER</code>. Organizes data in a multidimensional, dynamic way based on commonly queried columns.</td><td>Avoids over-partitioning problems and allows changing the clustering keys without rewriting the entire table.</td></tr>\n<tr><td><b>VACUUM</b></td><td>Physically removes from storage the Parquet files that were marked as removed (<code>remove</code>) and exceed the retention threshold.</td><td>Frees up disk space. Its default retention is <b>7 days</b>; running it with zero retention breaks Time Travel and risks corrupting active concurrent reads.</td></tr>\n</table>\n\n<div class=\"tip\"><b>Danger of VACUUM with reduced retention:</b> The property <code>spark.databricks.delta.vacuum.retentionCheck.enabled = false</code> allows running <code>VACUUM</code> with less than 168 hours (7 days). It is strongly discouraged in production environments, since any long-running query that is reading old Parquet files will fail if they are purged while the query is still running.</div>\n"
       },
       {
         "id": "dbd-t-2-1",
         "d": 2,
         "title": "2.1 · Ingestion and Extraction with Spark SQL, Higher-Order Functions, and JSON",
-        "html": "\n<h4>Direct File Reads and Ingestion with Spark SQL</h4>\n<p>Spark SQL allows interacting directly with files stored in cloud storage using ANSI SQL syntax or the DataFrame API:</p>\n<ul>\n  <li><b>Direct file queries:</b> <code>SELECT * FROM parquet.`/ruta/directorio/`</code> or <code>SELECT * FROM json.`/ruta/logs/`</code>.</li>\n  <li><b>COPY INTO command:</b> Declarative, idempotent SQL statement recommended for batch ingestion of millions of new files into existing Delta tables:\n    <pre><code>COPY INTO delta.`/ruta/delta_table`\nFROM `/ruta/landing/`\nFILEFORMAT = CSV\nFORMAT_OPTIONS ('header' = 'true', 'inferSchema' = 'true')\nCOPY_OPTIONS ('mergeSchema' = 'true');</code></pre>\n  </li>\n</ul>\n\n<h4>Handling Semi-Structured Data and JSON Parsing</h4>\n<p>In modern pipelines, events land as untyped JSON strings. Spark SQL offers optimized native functions:</p>\n<ul>\n  <li><b>from_json(col, schema):</b> Deserializes a JSON text column into a strongly typed structure (<code>STRUCT</code> or <code>ARRAY</code>) according to the provided schema.</li>\n  <li><b>to_json(col):</b> Converts a complex structure (<code>STRUCT</code> or <code>MAP</code>) into a standardized JSON string.</li>\n  <li><b>schema_of_json(json_str):</b> Automatically infers the schema signature from a representative sample of JSON text.</li>\n  <li><b>Navigation operators:</b> Attribute access using dot notation (<code>cliente.direccion.ciudad</code>) or the colon operator (<code>payload:id::int</code>).</li>\n</ul>\n\n<h4>Higher-Order Functions on Arrays</h4>\n<p>They allow manipulating collections and nested arrays directly in SQL without resorting to costly unnesting operations (<code>explode</code>) followed by groupings:</p>\n<table class=\"keytable\">\n<tr><th>Function</th><th>Signature / Example</th><th>Purpose</th></tr>\n<tr><td><b>TRANSFORM</b></td><td><code>TRANSFORM(items, i -> i.precio * 1.21)</code></td><td>Applies a transformation expression element by element, returning a new transformed array.</td></tr>\n<tr><td><b>FILTER</b></td><td><code>FILTER(transacciones, t -> t.monto &gt; 100)</code></td><td>Filters the array elements, keeping only those that satisfy the boolean predicate.</td></tr>\n<tr><td><b>EXISTS</b></td><td><code>EXISTS(etiquetas, tag -> tag = 'urgente')</code></td><td>Evaluates whether at least one array element satisfies the boolean condition (returns true/false).</td></tr>\n<tr><td><b>AGGREGATE</b></td><td><code>AGGREGATE(lineas, 0.0, (acc, x) -> acc + x.subtotal)</code></td><td>Reduces the array to a single accumulated value using an accumulator function and an initial value.</td></tr>\n</table>\n\n<div class=\"tip\"><b>Higher-Order Function performance:</b> Using <code>TRANSFORM</code> and <code>FILTER</code> is dramatically more efficient than breaking an array apart with <code>explode()</code> and re-aggregating it with <code>collect_list()</code>, since it avoids massive data shuffles across the cluster network.</div>\n"
+        "html": "\n<h4>Direct File Reads and Ingestion with Spark SQL</h4>\n<p>Spark SQL allows interacting directly with files stored in cloud storage using ANSI SQL syntax or the DataFrame API:</p>\n<ul>\n  <li><b>Direct file queries:</b> <code>SELECT * FROM parquet.`/path/directory/`</code> or <code>SELECT * FROM json.`/path/logs/`</code>.</li>\n  <li><b>COPY INTO command:</b> Declarative, idempotent SQL statement recommended for batch ingestion of millions of new files into existing Delta tables:\n    <pre><code>COPY INTO delta.`/path/delta_table`\nFROM `/path/landing/`\nFILEFORMAT = CSV\nFORMAT_OPTIONS ('header' = 'true', 'inferSchema' = 'true')\nCOPY_OPTIONS ('mergeSchema' = 'true');</code></pre>\n  </li>\n</ul>\n\n<h4>Handling Semi-Structured Data and JSON Parsing</h4>\n<p>In modern pipelines, events land as untyped JSON strings. Spark SQL offers optimized native functions:</p>\n<ul>\n  <li><b>from_json(col, schema):</b> Deserializes a JSON text column into a strongly typed structure (<code>STRUCT</code> or <code>ARRAY</code>) according to the provided schema.</li>\n  <li><b>to_json(col):</b> Converts a complex structure (<code>STRUCT</code> or <code>MAP</code>) into a standardized JSON string.</li>\n  <li><b>schema_of_json(json_str):</b> Automatically infers the schema signature from a representative sample of JSON text.</li>\n  <li><b>Navigation operators:</b> Attribute access using dot notation (<code>customer.address.city</code>) or the colon operator (<code>payload:id::int</code>).</li>\n</ul>\n\n<h4>Higher-Order Functions on Arrays</h4>\n<p>They allow manipulating collections and nested arrays directly in SQL without resorting to costly unnesting operations (<code>explode</code>) followed by groupings:</p>\n<table class=\"keytable\">\n<tr><th>Function</th><th>Signature / Example</th><th>Purpose</th></tr>\n<tr><td><b>TRANSFORM</b></td><td><code>TRANSFORM(items, i -> i.price * 1.21)</code></td><td>Applies a transformation expression element by element, returning a new transformed array.</td></tr>\n<tr><td><b>FILTER</b></td><td><code>FILTER(transactions, t -> t.amount &gt; 100)</code></td><td>Filters the array elements, keeping only those that satisfy the boolean predicate.</td></tr>\n<tr><td><b>EXISTS</b></td><td><code>EXISTS(tags, tag -> tag = 'urgent')</code></td><td>Evaluates whether at least one array element satisfies the boolean condition (returns true/false).</td></tr>\n<tr><td><b>AGGREGATE</b></td><td><code>AGGREGATE(lines, 0.0, (acc, x) -> acc + x.subtotal)</code></td><td>Reduces the array to a single accumulated value using an accumulator function and an initial value.</td></tr>\n</table>\n\n<div class=\"tip\"><b>Higher-Order Function performance:</b> Using <code>TRANSFORM</code> and <code>FILTER</code> is dramatically more efficient than breaking an array apart with <code>explode()</code> and re-aggregating it with <code>collect_list()</code>, since it avoids massive data shuffles across the cluster network.</div>\n"
       },
       {
         "id": "dbd-t-2-2",
         "d": 2,
         "title": "2.2 · Advanced Manipulation, Deduplication, MERGE INTO, and Window Functions",
-        "html": "\n<h4>Data Deduplication in ELT Pipelines</h4>\n<p>Ingestion from distributed sources often produces duplicate records due to network retries with at-least-once semantics. There are two main deduplication approaches:</p>\n<ul>\n  <li><b>dropDuplicates([cols]):</b> Fast method in the PySpark DataFrame API that keeps an arbitrary row for each unique key identified.</li>\n  <li><b>Window Function Deduplication:</b> Deterministic SQL approach when you need to keep the most recent record according to a timestamp:\n    <pre><code>WITH clasificados AS (\n  SELECT *,\n    ROW_NUMBER() OVER (PARTITION BY cliente_id ORDER BY updated_at DESC) AS ranking\n  FROM raw_eventos\n)\nSELECT * EXCEPT(ranking) FROM clasificados WHERE ranking = 1;</code></pre>\n  </li>\n</ul>\n\n<h4>Atomic Upserts with MERGE INTO</h4>\n<p>Delta Lake provides full native support for atomic <code>MERGE INTO</code> operations, combining inserts, updates, and deletes in a single ACID transaction:</p>\n<pre><code>MERGE INTO target_silver AS t\nUSING source_updates AS s\nON t.pedido_id = s.pedido_id\nWHEN MATCHED AND s.es_cancelado = true THEN\n  DELETE\nWHEN MATCHED THEN\n  UPDATE SET t.estado = s.estado, t.monto = s.monto, t.fecha_actualizacion = current_timestamp()\nWHEN NOT MATCHED THEN\n  INSERT (pedido_id, estado, monto, fecha_creacion, fecha_actualizacion)\n  VALUES (s.pedido_id, s.estado, s.monto, s.fecha_evento, current_timestamp());</code></pre>\n\n<h4>UDF (User-Defined Function) Types and Performance</h4>\n<table class=\"keytable\">\n<tr><th>UDF Type</th><th>Language / Environment</th><th>Performance</th><th>Optimal Use Case</th></tr>\n<tr><td><b>SQL UDF</b></td><td>Native ANSI SQL</td><td><b>Maximum</b>: Optimized by Catalyst and accelerated by the Photon engine.</td><td>Standard business logic, mathematical calculations, string transformations.</td></tr>\n<tr><td><b>Pandas UDF (Vectorized)</b></td><td>Python + PyArrow</td><td><b>High</b>: Processes entire batches in columnar memory via Apache Arrow.</td><td>Complex statistical transformations, batch ML model inference.</td></tr>\n<tr><td><b>Standard Python UDF</b></td><td>Pure Python (row-by-row)</td><td><b>Low</b>: Incurs massive IPC/Py4J serialization overhead between the JVM and the Python runtime.</td><td>Discouraged except for legacy libraries without columnar support.</td></tr>\n</table>\n\n<div class=\"tip\"><b>Managed vs External Tables:</b> When running <code>DROP TABLE</code> on a <b>Managed</b> table, Databricks removes both the metadata definition in the catalog and the underlying physical Parquet files. On an <b>External</b> table (defined with a <code>LOCATION</code> clause), <code>DROP TABLE</code> only removes the metadata, leaving the data files intact in cloud storage.</div>\n"
+        "html": "\n<h4>Data Deduplication in ELT Pipelines</h4>\n<p>Ingestion from distributed sources often produces duplicate records due to network retries with at-least-once semantics. There are two main deduplication approaches:</p>\n<ul>\n  <li><b>dropDuplicates([cols]):</b> Fast method in the PySpark DataFrame API that keeps an arbitrary row for each unique key identified.</li>\n  <li><b>Window Function Deduplication:</b> Deterministic SQL approach when you need to keep the most recent record according to a timestamp:\n    <pre><code>WITH ranked_rows AS (\n  SELECT *,\n    ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY updated_at DESC) AS ranking\n  FROM raw_events\n)\nSELECT * EXCEPT(ranking) FROM ranked_rows WHERE ranking = 1;</code></pre>\n  </li>\n</ul>\n\n<h4>Atomic Upserts with MERGE INTO</h4>\n<p>Delta Lake provides full native support for atomic <code>MERGE INTO</code> operations, combining inserts, updates, and deletes in a single ACID transaction:</p>\n<pre><code>MERGE INTO target_silver AS t\nUSING source_updates AS s\nON t.order_id = s.order_id\nWHEN MATCHED AND s.is_canceled = true THEN\n  DELETE\nWHEN MATCHED THEN\n  UPDATE SET t.status = s.status, t.amount = s.amount, t.updated_at = current_timestamp()\nWHEN NOT MATCHED THEN\n  INSERT (order_id, status, amount, created_at, updated_at)\n  VALUES (s.order_id, s.status, s.amount, s.event_date, current_timestamp());</code></pre>\n\n<h4>UDF (User-Defined Function) Types and Performance</h4>\n<table class=\"keytable\">\n<tr><th>UDF Type</th><th>Language / Environment</th><th>Performance</th><th>Optimal Use Case</th></tr>\n<tr><td><b>SQL UDF</b></td><td>Native ANSI SQL</td><td><b>Maximum</b>: Optimized by Catalyst and accelerated by the Photon engine.</td><td>Standard business logic, mathematical calculations, string transformations.</td></tr>\n<tr><td><b>Pandas UDF (Vectorized)</b></td><td>Python + PyArrow</td><td><b>High</b>: Processes entire batches in columnar memory via Apache Arrow.</td><td>Complex statistical transformations, batch ML model inference.</td></tr>\n<tr><td><b>Standard Python UDF</b></td><td>Pure Python (row-by-row)</td><td><b>Low</b>: Incurs massive IPC/Py4J serialization overhead between the JVM and the Python runtime.</td><td>Discouraged except for legacy libraries without columnar support.</td></tr>\n</table>\n\n<div class=\"tip\"><b>Managed vs External Tables:</b> When running <code>DROP TABLE</code> on a <b>Managed</b> table, Databricks removes both the metadata definition in the catalog and the underlying physical Parquet files. On an <b>External</b> table (defined with a <code>LOCATION</code> clause), <code>DROP TABLE</code> only removes the metadata, leaving the data files intact in cloud storage.</div>\n"
       },
       {
         "id": "dbd-t-3-1",
@@ -81,13 +81,13 @@
         "id": "dbd-t-5-1",
         "d": 5,
         "title": "5.1 · Unity Catalog: 3-Level Namespace, Metastore, and External Locations",
-        "html": "\n<h4>Centralized Architecture of Unity Catalog</h4>\n<p><b>Unity Catalog</b> is Databricks' comprehensive governance solution for data and artificial intelligence. Unlike traditional solutions based on a local Hive Metastore per cluster, Unity Catalog operates at the account level and provides:</p>\n<ul>\n  <li><b>Unified Regional Metastore:</b> A single centralized metadata store per geographic region that is attached to multiple Databricks workspaces, facilitating shared governance.</li>\n  <li><b>Three-Level Namespace:</b> The resolution of any data object follows the canonical hierarchy:\n    <br/><code>&lt;catalog&gt;.&lt;schema&gt;.&lt;object&gt;</code> (example: <code>corp_prod.finanzas.facturacion</code>).</li>\n</ul>\n\n<h4>Securable Objects and Secure Storage</h4>\n<table class=\"keytable\">\n<tr><th>Securable Object</th><th>Definition and Architectural Role</th><th>Governance and Permissions</th></tr>\n<tr><td><b>Storage Credential</b></td><td>Encapsulates a managed cloud identity (AWS IAM Role, Azure Managed Identity, or GCP Service Account) with read/write permissions on object storage.</td><td>Only Metastore admins can create them; avoids exposing secret keys or tokens to users.</td></tr>\n<tr><td><b>External Location</b></td><td>Associates a specific <code>Storage Credential</code> with a cloud storage URL prefix (e.g., <code>s3://mi-bucket-datalake/silver/</code>).</td><td>Allows granting privileges such as <code>CREATE EXTERNAL TABLE</code> or <code>READ FILES</code> to engineers without giving them direct IAM access.</td></tr>\n<tr><td><b>Managed Storage</b></td><td>Root storage location assigned at the catalog or schema level where managed tables are automatically stored.</td><td>When a Managed Table is dropped with <code>DROP TABLE</code>, Unity Catalog automatically purges the physical files from the bucket.</td></tr>\n<tr><td><b>Volumes</b></td><td>Unity Catalog object designed to govern unstructured or semi-structured files (PDFs, images, raw CSVs, checkpoints).</td><td>Available as <b>Managed Volumes</b> or <b>External Volumes</b>, accessible via POSIX paths at <code>/Volumes/catalog/schema/volume/</code>.</td></tr>\n</table>\n\n<div class=\"tip\"><b>Resolving Objects Without a Full Prefix:</b> If the 3-level name is not specified, Databricks falls back to the catalog and schema active in the current session, configured with <code>USE CATALOG catalog;</code> and <code>USE SCHEMA schema;</code>.</div>\n"
+        "html": "\n<h4>Centralized Architecture of Unity Catalog</h4>\n<p><b>Unity Catalog</b> is Databricks' comprehensive governance solution for data and artificial intelligence. Unlike traditional solutions based on a local Hive Metastore per cluster, Unity Catalog operates at the account level and provides:</p>\n<ul>\n  <li><b>Unified Regional Metastore:</b> A single centralized metadata store per geographic region that is attached to multiple Databricks workspaces, facilitating shared governance.</li>\n  <li><b>Three-Level Namespace:</b> The resolution of any data object follows the canonical hierarchy:\n    <br/><code>&lt;catalog&gt;.&lt;schema&gt;.&lt;object&gt;</code> (example: <code>corp_prod.finance.billing</code>).</li>\n</ul>\n\n<h4>Securable Objects and Secure Storage</h4>\n<table class=\"keytable\">\n<tr><th>Securable Object</th><th>Definition and Architectural Role</th><th>Governance and Permissions</th></tr>\n<tr><td><b>Storage Credential</b></td><td>Encapsulates a managed cloud identity (AWS IAM Role, Azure Managed Identity, or GCP Service Account) with read/write permissions on object storage.</td><td>Only Metastore admins can create them; avoids exposing secret keys or tokens to users.</td></tr>\n<tr><td><b>External Location</b></td><td>Associates a specific <code>Storage Credential</code> with a cloud storage URL prefix (e.g., <code>s3://my-datalake-bucket/silver/</code>).</td><td>Allows granting privileges such as <code>CREATE EXTERNAL TABLE</code> or <code>READ FILES</code> to engineers without giving them direct IAM access.</td></tr>\n<tr><td><b>Managed Storage</b></td><td>Root storage location assigned at the catalog or schema level where managed tables are automatically stored.</td><td>When a Managed Table is dropped with <code>DROP TABLE</code>, Unity Catalog automatically purges the physical files from the bucket.</td></tr>\n<tr><td><b>Volumes</b></td><td>Unity Catalog object designed to govern unstructured or semi-structured files (PDFs, images, raw CSVs, checkpoints).</td><td>Available as <b>Managed Volumes</b> or <b>External Volumes</b>, accessible via POSIX paths at <code>/Volumes/catalog/schema/volume/</code>.</td></tr>\n</table>\n\n<div class=\"tip\"><b>Resolving Objects Without a Full Prefix:</b> If the 3-level name is not specified, Databricks falls back to the catalog and schema active in the current session, configured with <code>USE CATALOG catalog;</code> and <code>USE SCHEMA schema;</code>.</div>\n"
       },
       {
         "id": "dbd-t-5-2",
         "d": 5,
         "title": "5.2 · Governance in Unity Catalog: GRANT Permissions, Dynamic Views, Filters, and Lineage",
-        "html": "\n<h4>Declarative Access Control (ANSI SQL RBAC)</h4>\n<p>Unity Catalog implements a standard ANSI SQL privilege model managed through declarative statements that grant and revoke permissions on centralized account-level identities (users and groups):</p>\n<pre><code>GRANT USAGE ON CATALOG corp_prod TO `analistas_bi`;\nGRANT USAGE ON SCHEMA corp_prod.ventas TO `analistas_bi`;\nGRANT SELECT ON TABLE corp_prod.ventas.resumen_anual TO `analistas_bi`;</code></pre>\n<p><i>Fundamental inheritance rule:</i> To access any table, a user requires the <code>USAGE</code> privilege on all higher levels of the hierarchy (both on the catalog and on the corresponding schema).</p>\n\n<h4>Granular Security: Row Filters and Column Masks</h4>\n<p>Unity Catalog lets you implement row-level security policies and dynamic column masking without duplicating physical tables:</p>\n<ul>\n  <li><b>Row Filters:</b> SQL functions that evaluate whether the current session can view a given row:\n    <pre><code>CREATE FUNCTION region_filter(region STRING)\nRETURN IF(IS_ACCOUNT_GROUP_MEMBER('admin_global') OR region = 'EMEA', true, false);\n\nALTER TABLE corp_prod.ventas.pedidos\nSET ROW FILTER region_filter ON (region);</code></pre>\n  </li>\n  <li><b>Column Masks:</b> Obfuscate sensitive data (PII, credit cards) for unauthorized groups:\n    <pre><code>CREATE FUNCTION mask_tarjeta(numero STRING)\nRETURN IF(IS_ACCOUNT_GROUP_MEMBER('auditoria_financiera'), numero, CONCAT('****-****-****-', RIGHT(numero, 4)));\n\nALTER TABLE corp_prod.finanzas.pagos\nALTER COLUMN tarjeta_credito SET MASK mask_tarjeta;</code></pre>\n  </li>\n  <li><b>Dynamic Views:</b> Traditional method using built-in functions such as <code>current_user()</code> or <code>is_account_group_member()</code> within the <code>WHERE</code> clause of a standard view.</li>\n</ul>\n\n<h4>Automated Data Lineage</h4>\n<p>Unity Catalog automatically records <b>table- and column-level data lineage</b> at runtime for any query executed in Databricks, with no need for additional libraries or code instrumentation. It facilitates regulatory compliance audits (GDPR/CCPA) and visual impact analysis for schema changes.</p>\n"
+        "html": "\n<h4>Declarative Access Control (ANSI SQL RBAC)</h4>\n<p>Unity Catalog implements a standard ANSI SQL privilege model managed through declarative statements that grant and revoke permissions on centralized account-level identities (users and groups):</p>\n<pre><code>GRANT USAGE ON CATALOG corp_prod TO `bi_analysts`;\nGRANT USAGE ON SCHEMA corp_prod.sales TO `bi_analysts`;\nGRANT SELECT ON TABLE corp_prod.sales.annual_summary TO `bi_analysts`;</code></pre>\n<p><i>Fundamental inheritance rule:</i> To access any table, a user requires the <code>USAGE</code> privilege on all higher levels of the hierarchy (both on the catalog and on the corresponding schema).</p>\n\n<h4>Granular Security: Row Filters and Column Masks</h4>\n<p>Unity Catalog lets you implement row-level security policies and dynamic column masking without duplicating physical tables:</p>\n<ul>\n  <li><b>Row Filters:</b> SQL functions that evaluate whether the current session can view a given row:\n    <pre><code>CREATE FUNCTION region_filter(region STRING)\nRETURN IF(IS_ACCOUNT_GROUP_MEMBER('global_admin') OR region = 'EMEA', true, false);\n\nALTER TABLE corp_prod.sales.orders\nSET ROW FILTER region_filter ON (region);</code></pre>\n  </li>\n  <li><b>Column Masks:</b> Obfuscate sensitive data (PII, credit cards) for unauthorized groups:\n    <pre><code>CREATE FUNCTION mask_card(number STRING)\nRETURN IF(IS_ACCOUNT_GROUP_MEMBER('financial_audit'), number, CONCAT('****-****-****-', RIGHT(number, 4)));\n\nALTER TABLE corp_prod.finance.payments\nALTER COLUMN card_number SET MASK mask_card;</code></pre>\n  </li>\n  <li><b>Dynamic Views:</b> Traditional method using built-in functions such as <code>current_user()</code> or <code>is_account_group_member()</code> within the <code>WHERE</code> clause of a standard view.</li>\n</ul>\n\n<h4>Automated Data Lineage</h4>\n<p>Unity Catalog automatically records <b>table- and column-level data lineage</b> at runtime for any query executed in Databricks, with no need for additional libraries or code instrumentation. It facilitates regulatory compliance audits (GDPR/CCPA) and visual impact analysis for schema changes.</p>\n"
       }
     ],
     "questions": [
@@ -195,9 +195,9 @@
         "id": "dbd-06",
         "d": 1,
         "t": "Delta Lake: Time Travel and Recovery",
-        "q": "During a manual production update, an analyst accidentally runs an `UPDATE` without a `WHERE` clause, corrupting the price column across the entire `ventas_silver` table. The table has an intact transaction history going back 30 days. What is the fastest and safest way to restore the table to the exact state prior to the error?",
+        "q": "During a manual production update, an analyst accidentally runs an `UPDATE` without a `WHERE` clause, corrupting the price column across the entire `sales_silver` table. The table has an intact transaction history going back 30 days. What is the fastest and safest way to restore the table to the exact state prior to the error?",
         "o": [
-          "Atomically restore the table by running `RESTORE TABLE ventas_silver TO VERSION AS OF <previous_version>;`.",
+          "Atomically restore the table by running `RESTORE TABLE sales_silver TO VERSION AS OF <previous_version>;`.",
           "Download the latest manual database backup from a zip file and overwrite the storage bucket folder using terminal bash commands.",
           "Create a new Databricks cluster and run a full re-ingestion of all historical files from the company's relational source system.",
           "Run a standard relational database `ROLLBACK TRANSACTION;` command, assuming the interactive session is still open in the current notebook."
@@ -217,8 +217,8 @@
         "t": "Delta Lake: Compaction with OPTIMIZE",
         "q": "A streaming pipeline writes thousands of small Parquet files (~500 KB each) per hour to an orders Delta table. As a result, analytical queries take several minutes because of the overhead of listing and opening files in object storage. Which maintenance action solves this small-file problem?",
         "o": [
-          "Run the command `VACUUM pedidos RETAIN 0 HOURS;` to immediately purge all files smaller than 1 MB from cloud object storage.",
-          "Run the command `OPTIMIZE pedidos;` to automatically compact collections of small files into larger files of approximately 1 GB.",
+          "Run the command `VACUUM orders RETAIN 0 HOURS;` to immediately purge all files smaller than 1 MB from cloud object storage.",
+          "Run the command `OPTIMIZE orders;` to automatically compact collections of small files into larger files of approximately 1 GB.",
           "Physically repartition the directory in the operating system using a Python script, dividing the total rows across 100 file system folders.",
           "Change the storage format from Delta to flat CSV to avoid columnar metadata packaging in reads by the company's business analysts."
         ],
@@ -235,12 +235,12 @@
         "id": "dbd-08",
         "d": 1,
         "t": "Physical Optimization: Liquid Clustering vs Z-ORDER",
-        "q": "Your team manages a 50 TB Delta table with frequent queries filtered concurrently by `cliente_id` (high cardinality) and `fecha_pedido` (time series). Traditional date-based partitioning was historically used, but it caused over-partitioning and data skew problems. Which two statements about modern physical organization techniques in Delta Lake are correct? (Choose 2 answers)",
+        "q": "Your team manages a 50 TB Delta table with frequent queries filtered concurrently by `customer_id` (high cardinality) and `order_date` (time series). Traditional date-based partitioning was historically used, but it caused over-partitioning and data skew problems. Which two statements about modern physical organization techniques in Delta Lake are correct? (Choose 2 answers)",
         "o": [
-          "`Liquid Clustering` (`CLUSTER BY (cliente_id, fecha_pedido)`) simplifies physical design by allowing flexible multidimensional clustering without over-partitioning.",
+          "`Liquid Clustering` (`CLUSTER BY (customer_id, order_date)`) simplifies physical design by allowing flexible multidimensional clustering without over-partitioning.",
           "`Z-ORDER BY` allows dynamically modifying the ordering keys without needing to rewrite or reorder the existing files in the table.",
           "`Liquid Clustering` supports evolving clustering keys over time without requiring redefining or rewriting the entire historical table.",
-          "Classic physical partitioning by high-cardinality columns such as `cliente_id` is the officially recommended Databricks practice for large tables."
+          "Classic physical partitioning by high-cardinality columns such as `customer_id` is the officially recommended Databricks practice for large tables."
         ],
         "a": [
           0,
@@ -258,7 +258,7 @@
         "id": "dbd-09",
         "d": 1,
         "t": "Maintenance with VACUUM and Retention",
-        "q": "A data engineer periodically runs the `VACUUM` command on a Delta table to free up space in object storage. A developer suggests running `SET spark.databricks.delta.vacuum.retentionCheck.enabled = false; VACUUM ventas RETAIN 0 HOURS;` after each micro-batch to keep the bucket completely clean. Why is this practice a serious risk in production?",
+        "q": "A data engineer periodically runs the `VACUUM` command on a Delta table to free up space in object storage. A developer suggests running `SET spark.databricks.delta.vacuum.retentionCheck.enabled = false; VACUUM sales RETAIN 0 HOURS;` after each micro-batch to keep the bucket completely clean. Why is this practice a serious risk in production?",
         "o": [
           "Because it permanently deletes old files that may be being read by active concurrent queries and destroys the Time Travel capability.",
           "Because it permanently disables the Photon engine on the cluster, forcing interpreted, non-vectorized compilation of all subsequent SQL queries in the catalog.",
@@ -278,11 +278,11 @@
         "id": "dbd-10",
         "d": 1,
         "t": "Managed vs External Tables",
-        "q": "An infrastructure team needs to define a table in Databricks called `telemetria_nodos`. They want to ensure that if a user with permissions accidentally runs `DROP TABLE telemetria_nodos;`, the data files in the S3 or ADLS Gen2 bucket remain completely intact. How should this table be declared?",
+        "q": "An infrastructure team needs to define a table in Databricks called `telemetry_nodes`. They want to ensure that if a user with permissions accidentally runs `DROP TABLE telemetry_nodes;`, the data files in the S3 or ADLS Gen2 bucket remain completely intact. How should this table be declared?",
         "o": [
           "As a managed table (`Managed Table`) within the main catalog without specifying any external location clause in the create command.",
           "As a global temporary table (`GLOBAL TEMP VIEW`) within the system database so that it resides permanently in volatile cluster storage.",
-          "As an external table (`External Table`) by explicitly specifying a storage path with the `LOCATION 's3://bucket/ruta/'` clause.",
+          "As an external table (`External Table`) by explicitly specifying a storage path with the `LOCATION 's3://bucket/path/'` clause.",
           "As a standard view (`VIEW`) based on a `SELECT * FROM parquet` query with storage managed in the central metastore of the corporate region."
         ],
         "a": 2,
@@ -338,12 +338,12 @@
         "id": "dbd-13",
         "d": 2,
         "t": "Spark SQL: Querying Files Directly",
-        "q": "A data analyst needs to quickly inspect the contents of several newly downloaded Parquet files at the path `dbfs:/mnt/landing/pedidos/` without creating a formal table in the metastore or registering persistent metadata. Which Databricks ANSI SQL syntax allows querying these files directly?",
+        "q": "A data analyst needs to quickly inspect the contents of several newly downloaded Parquet files at the path `dbfs:/mnt/landing/orders/` without creating a formal table in the metastore or registering persistent metadata. Which Databricks ANSI SQL syntax allows querying these files directly?",
         "o": [
-          "Run `OPEN FILE 'dbfs:/mnt/landing/pedidos/' FORMAT PARQUET;` to load the content into the development workspace's interactive console.",
-          "Run `SELECT * FROM parquet.`dbfs:/mnt/landing/pedidos/`;` using the format notation and backticks around the path.",
-          "Run `IMPORT TABLE pedidos FROM 'dbfs:/mnt/landing/pedidos/' TYPE PARQUET;` to instantiate a volatile pointer in shared memory.",
-          "Run `READ_PARQUET('dbfs:/mnt/landing/pedidos/')` as a scalar function within a `WHERE` clause in an interactive Python session."
+          "Run `OPEN FILE 'dbfs:/mnt/landing/orders/' FORMAT PARQUET;` to load the content into the development workspace's interactive console.",
+          "Run `SELECT * FROM parquet.`dbfs:/mnt/landing/orders/`;` using the format notation and backticks around the path.",
+          "Run `IMPORT TABLE orders FROM 'dbfs:/mnt/landing/orders/' TYPE PARQUET;` to instantiate a volatile pointer in shared memory.",
+          "Run `READ_PARQUET('dbfs:/mnt/landing/orders/')` as a scalar function within a `WHERE` clause in an interactive Python session."
         ],
         "a": 1,
         "e": "Spark SQL supports direct queries on files stored in file systems or buckets using the syntax `SELECT * FROM <format>.`<path>``. This allows exploring data in Parquet, JSON, CSV, Delta, or text formats without having to register tables in the catalog beforehand.",
@@ -360,10 +360,10 @@
         "t": "Idempotent Ingestion with COPY INTO",
         "q": "A daily pipeline receives thousands of CSV files in a cloud bucket and must load them into a target Delta table. If the pipeline fails midway and is retried, duplicate records must not be inserted for files that were already processed successfully. Which declarative SQL command provides this incremental, idempotent load guarantee?",
         "o": [
-          "Use `INSERT INTO delta_destino SELECT * FROM csv.`ruta/`;` relying on the Catalyst optimizer to discard previously read files.",
+          "Use `INSERT INTO delta_target SELECT * FROM csv.`path/`;` relying on the Catalyst optimizer to discard previously read files.",
           "Run a bash script with `rsync` that moves the processed files to a temporary folder before invoking a `LOAD DATA INPATH` command in the metastore.",
-          "Use the `COPY INTO delta_destino FROM 'ruta/' FILEFORMAT = CSV FORMAT_OPTIONS ('header'='true');` command, which records the files already loaded.",
-          "Run `CREATE OR REPLACE TABLE delta_destino AS SELECT * FROM csv.`ruta/`;` to overwrite the table on each daily pipeline run."
+          "Use the `COPY INTO delta_target FROM 'path/' FILEFORMAT = CSV FORMAT_OPTIONS ('header'='true');` command, which records the files already loaded.",
+          "Run `CREATE OR REPLACE TABLE delta_target AS SELECT * FROM csv.`path/`;` to overwrite the table on each daily pipeline run."
         ],
         "a": 2,
         "e": "The `COPY INTO` command is a declarative, idempotent SQL statement designed to load new files incrementally into Delta tables. It internally records the files already processed in the table metadata; if re-run on the same folder, it automatically skips the files already loaded without duplicating data.",
@@ -378,15 +378,15 @@
         "id": "dbd-15",
         "d": 2,
         "t": "Semi-Structured Data: from_json",
-        "q": "An events table in the Bronze layer stores in the `payload_str` column text strings with JSON objects that contain nested fields: `{\"usuario_id\": 102, \"detalles\": {\"ip\": \"192.168.1.1\", \"accion\": \"login\"}}`. You want to extract the `ip` field as a structured column in the Silver layer. What is the appropriate, best-performing method?",
+        "q": "An events table in the Bronze layer stores in the `payload_str` column text strings with JSON objects that contain nested fields: `{\"user_id\": 102, \"details\": {\"ip\": \"192.168.1.1\", \"action\": \"login\"}}`. You want to extract the `ip` field as a structured column in the Silver layer. What is the appropriate, best-performing method?",
         "o": [
           "Apply a regular expression with `regexp_extract()` on the text string to look for alphanumeric character patterns between quotes in the column.",
           "Write a custom pure Python UDF that invokes the standard library `json.loads()` row by row on each distributed executor in the cluster.",
           "Split the string by commas and braces using `split()` and get the element at the static position using array indexes in the final projection.",
-          "Define the schema with `STRUCT` and deserialize the column using `from_json(payload_str, 'STRUCT<usuario_id: INT, detalles: STRUCT<ip: STRING, accion: STRING>>')`."
+          "Define the schema with `STRUCT` and deserialize the column using `from_json(payload_str, 'STRUCT<user_id: INT, details: STRUCT<ip: STRING, action: STRING>>')`."
         ],
         "a": 3,
-        "e": "`from_json()` is the optimized native Spark SQL function for transforming JSON strings into structured types (`STRUCT` or `ARRAY`). By providing an explicit schema or one inferred with `schema_of_json()`, the Catalyst and Photon engines compile the deserialization to highly efficient native code, allowing nested fields to be accessed using dot notation (`col.detalles.ip`).",
+        "e": "`from_json()` is the optimized native Spark SQL function for transforming JSON strings into structured types (`STRUCT` or `ARRAY`). By providing an explicit schema or one inferred with `schema_of_json()`, the Catalyst and Photon engines compile the deserialization to highly efficient native code, allowing nested fields to be accessed using dot notation (`col.details.ip`).",
         "why": [
           "Regular expressions with `regexp_extract` are slow, brittle against minor changes in the JSON format, and prone to parsing errors.",
           "A row-by-row Python UDF suffers a severe performance penalty from IPC serialization between the JVM and the Python interpreter.",
@@ -398,12 +398,12 @@
         "id": "dbd-16",
         "d": 2,
         "t": "Higher-Order Functions: TRANSFORM",
-        "q": "You have a table with the column `precios_base` of type `ARRAY<DOUBLE>`. You need to apply a 16% tax to each element of the array, generating a new column `precios_con_impuesto` of type `ARRAY<DOUBLE>` with the resulting amounts. Which Spark SQL higher-order function performs this transformation without needing to unnest the array?",
+        "q": "You have a table with the column `base_prices` of type `ARRAY<DOUBLE>`. You need to apply a 16% tax to each element of the array, generating a new column `prices_with_tax` of type `ARRAY<DOUBLE>` with the resulting amounts. Which Spark SQL higher-order function performs this transformation without needing to unnest the array?",
         "o": [
-          "`TRANSFORM(precios_base, p -> round(p * 1.16, 2))` to apply the lambda function to each element of the array directly in memory.",
-          "`FILTER(precios_base, p -> p * 1.16)` to multiply each value and return the transformed set in a new collection in the catalog.",
-          "`EXPLODE_TRANSFORM(precios_base, p -> p * 1.16)` to temporarily unnest the elements and automatically rebuild the list through an internal collector.",
-          "`MAP_VALUES(precios_base, p -> p * 1.16)` to iterate over the array's numeric indexes and update the underlying records on disk."
+          "`TRANSFORM(base_prices, p -> round(p * 1.16, 2))` to apply the lambda function to each element of the array directly in memory.",
+          "`FILTER(base_prices, p -> p * 1.16)` to multiply each value and return the transformed set in a new collection in the catalog.",
+          "`EXPLODE_TRANSFORM(base_prices, p -> p * 1.16)` to temporarily unnest the elements and automatically rebuild the list through an internal collector.",
+          "`MAP_VALUES(base_prices, p -> p * 1.16)` to iterate over the array's numeric indexes and update the underlying records on disk."
         ],
         "a": 0,
         "e": "The higher-order function `TRANSFORM(array, element -> expression)` evaluates an expression or lambda function on each element of an array and returns a new array with the transformed results. This avoids the computational cost of breaking the array apart with `explode()` and then regrouping it with `collect_list()`.",
@@ -418,12 +418,12 @@
         "id": "dbd-17",
         "d": 2,
         "t": "Higher-Order Functions: FILTER and EXISTS",
-        "q": "In an e-commerce table, each order has an `articulos` column of type `ARRAY<STRUCT<nombre: STRING, categoria: STRING, precio: DOUBLE>>`. You want to filter the table to select only the orders that contain at least one item in the category 'Electrónica' with a price greater than 500 dollars. Which SQL condition in the `WHERE` clause meets the requirement optimally?",
+        "q": "In an e-commerce table, each order has an `items` column of type `ARRAY<STRUCT<name: STRING, category: STRING, price: DOUBLE>>`. You want to filter the table to select only the orders that contain at least one item in the category 'Electronics' with a price greater than 500 dollars. Which SQL condition in the `WHERE` clause meets the requirement optimally?",
         "o": [
-          "`WHERE articulos.categoria = 'Electrónica' AND articulos.precio > 500` referencing array fields directly as if they were scalar columns in the table.",
-          "`WHERE EXISTS(articulos, a -> a.categoria = 'Electrónica' AND a.precio > 500)` using the boolean higher-order function.",
-          "`WHERE ARRAY_CONTAINS(articulos.categoria, 'Electrónica') AND MAX(articulos.precio) > 500` combining array and aggregation functions in the query's WHERE clause.",
-          "`WHERE COUNT_IF(articulos, a -> a.categoria = 'Electrónica') >= 1` to count the matches in the array at cluster disk-scan time."
+          "`WHERE items.category = 'Electronics' AND items.price > 500` referencing array fields directly as if they were scalar columns in the table.",
+          "`WHERE EXISTS(items, a -> a.category = 'Electronics' AND a.price > 500)` using the boolean higher-order function.",
+          "`WHERE ARRAY_CONTAINS(items.category, 'Electronics') AND MAX(items.price) > 500` combining array and aggregation functions in the query's WHERE clause.",
+          "`WHERE COUNT_IF(items, a -> a.category = 'Electronics') >= 1` to count the matches in the array at cluster disk-scan time."
         ],
         "a": 1,
         "e": "The higher-order function `EXISTS(expr, x -> boolean_expression)` returns `true` if at least one array element satisfies the boolean condition defined by the lambda function. It is the cleanest and most efficient solution in Spark SQL for checking predicates on complex arrays without requiring `explode()`.",
@@ -438,12 +438,12 @@
         "id": "dbd-18",
         "d": 2,
         "t": "Deduplication in Spark SQL",
-        "q": "An ingestion pipeline processes shopping cart events that contain duplicates caused by mobile network retries. The events have the columns `sesion_id`, `producto_id`, `cantidad`, and `timestamp_evento`. You must remove duplicates while keeping only the event with the most recent timestamp for each (`sesion_id`, `producto_id`) pair. Which two techniques in Spark SQL and DataFrames are correct? (Choose 2 answers)",
+        "q": "An ingestion pipeline processes shopping cart events that contain duplicates caused by mobile network retries. The events have the columns `session_id`, `product_id`, `quantity`, and `event_timestamp`. You must remove duplicates while keeping only the event with the most recent timestamp for each (`session_id`, `product_id`) pair. Which two techniques in Spark SQL and DataFrames are correct? (Choose 2 answers)",
         "o": [
-          "Call `df.dropDuplicates([\"sesion_id\", \"producto_id\"])` after first sorting the entire DataFrame with `df.sort(\"timestamp_evento\")`.",
-          "Compute `ROW_NUMBER() OVER (PARTITION BY sesion_id, producto_id ORDER BY timestamp_evento DESC)` in a CTE and filter `WHERE row_num = 1`.",
-          "Use the `GROUP BY sesion_id, producto_id` clause, directly selecting `FIRST(cantidad)` without defining an explicit ordering criterion.",
-          "Use `QUALIFY ROW_NUMBER() OVER (PARTITION BY sesion_id, producto_id ORDER BY timestamp_evento DESC) = 1` directly in the SQL query."
+          "Call `df.dropDuplicates([\"session_id\", \"product_id\"])` after first sorting the entire DataFrame with `df.sort(\"event_timestamp\")`.",
+          "Compute `ROW_NUMBER() OVER (PARTITION BY session_id, product_id ORDER BY event_timestamp DESC)` in a CTE and filter `WHERE row_num = 1`.",
+          "Use the `GROUP BY session_id, product_id` clause, directly selecting `FIRST(quantity)` without defining an explicit ordering criterion.",
+          "Use `QUALIFY ROW_NUMBER() OVER (PARTITION BY session_id, product_id ORDER BY event_timestamp DESC) = 1` directly in the SQL query."
         ],
         "a": [
           1,
@@ -453,7 +453,7 @@
         "why": [
           "`dropDuplicates` does not guarantee keeping the most recent row after a distributed sort, because internal partitions can alter the partition order.",
           null,
-          "`FIRST(cantidad)` without ordering is nondeterministic and can return any arbitrary value across successive executions.",
+          "`FIRST(quantity)` without ordering is nondeterministic and can return any arbitrary value across successive executions.",
           null
         ]
       },
@@ -461,12 +461,12 @@
         "id": "dbd-19",
         "d": 2,
         "t": "Atomic Operations: MERGE INTO",
-        "q": "You have a Delta table named `clientes_silver` and a batch of updates in the temporary table `updates_bronze`. You want to update the `email` and `direccion` fields of existing customers and add new customers that do not exist yet. Which SQL statement correctly implements this atomic upsert pattern?",
+        "q": "You have a Delta table named `customers_silver` and a batch of updates in the temporary table `updates_bronze`. You want to update the `email` and `address` fields of existing customers and add new customers that do not exist yet. Which SQL statement correctly implements this atomic upsert pattern?",
         "o": [
-          "Run a bulk `UPDATE` followed by an `INSERT INTO clientes_silver SELECT * FROM updates_bronze WHERE id NOT IN (SELECT id FROM clientes_silver)` in two separate transactions.",
-          "Overwrite the entire partition using the `INSERT OVERWRITE clientes_silver SELECT * FROM updates_bronze` clause in a single catalog transaction.",
-          "`MERGE INTO clientes_silver AS t USING updates_bronze AS s ON t.id = s.id WHEN MATCHED THEN UPDATE SET t.email=s.email, t.direccion=s.direccion WHEN NOT MATCHED THEN INSERT *;`",
-          "Create a temporary view combined with `UNION ALL` and run a physical compaction command with `OPTIMIZE clientes_silver ZORDER BY (id)` on the bucket."
+          "Run a bulk `UPDATE` followed by an `INSERT INTO customers_silver SELECT * FROM updates_bronze WHERE id NOT IN (SELECT id FROM customers_silver)` in two separate transactions.",
+          "Overwrite the entire partition using the `INSERT OVERWRITE customers_silver SELECT * FROM updates_bronze` clause in a single catalog transaction.",
+          "`MERGE INTO customers_silver AS t USING updates_bronze AS s ON t.id = s.id WHEN MATCHED THEN UPDATE SET t.email=s.email, t.address=s.address WHEN NOT MATCHED THEN INSERT *;`",
+          "Create a temporary view combined with `UNION ALL` and run a physical compaction command with `OPTIMIZE customers_silver ZORDER BY (id)` on the bucket."
         ],
         "a": 2,
         "e": "The Delta Lake `MERGE INTO` statement allows coordinated Upsert operations (updates and inserts) in a single atomic ACID transaction. It evaluates the match condition (`ON t.id = s.id`) and runs the `WHEN MATCHED` branches to update existing rows and `WHEN NOT MATCHED` to insert new records.",
@@ -481,15 +481,15 @@
         "id": "dbd-20",
         "d": 2,
         "t": "MERGE INTO with Conditional Delete",
-        "q": "An inventory system sends catalog change records. The source table `novedades_stock` includes an `operacion` column with the values 'UPDATE', 'INSERT', or 'DELETE'. You need to synchronize the Delta table `stock_actual`. If the operation is 'DELETE' and the product matches, it must be removed from the target table. How is this logic expressed within a `MERGE INTO` command?",
+        "q": "An inventory system sends catalog change records. The source table `stock_updates` includes an `operation` column with the values 'UPDATE', 'INSERT', or 'DELETE'. You need to synchronize the Delta table `current_stock`. If the operation is 'DELETE' and the product matches, it must be removed from the target table. How is this logic expressed within a `MERGE INTO` command?",
         "o": [
-          "Add a `WHEN MATCHED AND s.operacion = 'DELETE' THEN DROP ROW` clause as the first condition of the MERGE statement in the SQL query.",
+          "Add a `WHEN MATCHED AND s.operation = 'DELETE' THEN DROP ROW` clause as the first condition of the MERGE statement in the SQL query.",
           "Create an external database trigger that captures the delete events and makes Databricks REST API calls to process them.",
           "Run a Python stored procedure that extracts the IDs with 'DELETE' and runs a `for` loop issuing individual `DELETE FROM` statements on the cluster.",
-          "Configure the `WHEN MATCHED AND s.operacion = 'DELETE' THEN DELETE` clause before the standard update clause."
+          "Configure the `WHEN MATCHED AND s.operation = 'DELETE' THEN DELETE` clause before the standard update clause."
         ],
         "a": 3,
-        "e": "Delta Lake supports multiple `WHEN MATCHED` clauses, evaluated in the order they are declared. To handle conditional deletes, declare `WHEN MATCHED AND s.operacion = 'DELETE' THEN DELETE` first, and then `WHEN MATCHED THEN UPDATE SET ...`. This way, the rows flagged for deletion are logically purged from the table in the same atomic transaction.",
+        "e": "Delta Lake supports multiple `WHEN MATCHED` clauses, evaluated in the order they are declared. To handle conditional deletes, declare `WHEN MATCHED AND s.operation = 'DELETE' THEN DELETE` first, and then `WHEN MATCHED THEN UPDATE SET ...`. This way, the rows flagged for deletion are logically purged from the table in the same atomic transaction.",
         "why": [
           "The `DROP ROW` syntax does not exist in the standard SQL `MERGE INTO` statement or in Delta Lake (the `DELETE` keyword is used).",
           "Databricks does not support traditional OLTP database triggers, and REST calls would add unacceptable latency to the data pipeline.",
@@ -521,12 +521,12 @@
         "id": "dbd-22",
         "d": 2,
         "t": "Handling Dates and Timestamps",
-        "q": "In a billing report, you need to truncate the `timestamp_transaccion` column (TIMESTAMP type) to the first day of the corresponding month at 00:00:00 to perform monthly aggregations. Which function is recommended in Spark SQL for this temporal truncation?",
+        "q": "In a billing report, you need to truncate the `transaction_timestamp` column (TIMESTAMP type) to the first day of the corresponding month at 00:00:00 to perform monthly aggregations. Which function is recommended in Spark SQL for this temporal truncation?",
         "o": [
-          "`DATE_FORMAT(timestamp_transaccion, 'yyyy-MM')` to convert the timestamp to a text string and then filter it alphabetically in the query.",
-          "`DATE_TRUNC('month', timestamp_transaccion)`, which returns the timestamp adjusted to the start of the specified time unit while preserving the type.",
-          "`TRUNCATE_TIME(timestamp_transaccion, '30 days')`, computing a fixed 30-day subtraction on the timestamp of each record evaluated by the engine.",
-          "`TO_MONTH_START(timestamp_transaccion)`, which mathematically rounds the Unix epoch number to the nearest monthly multiple of seconds at runtime."
+          "`DATE_FORMAT(transaction_timestamp, 'yyyy-MM')` to convert the timestamp to a text string and then filter it alphabetically in the query.",
+          "`DATE_TRUNC('month', transaction_timestamp)`, which returns the timestamp adjusted to the start of the specified time unit while preserving the type.",
+          "`TRUNCATE_TIME(transaction_timestamp, '30 days')`, computing a fixed 30-day subtraction on the timestamp of each record evaluated by the engine.",
+          "`TO_MONTH_START(transaction_timestamp)`, which mathematically rounds the Unix epoch number to the nearest monthly multiple of seconds at runtime."
         ],
         "a": 1,
         "e": "The Spark SQL `date_trunc(unit, timestamp)` function truncates a timestamp to the specified unit (e.g., `'month'`, `'year'`, `'day'`, `'hour'`), returning a `TIMESTAMP` value at the exact start of the period. This preserves the native data type for efficient comparisons and sorting without converting to text strings.",
@@ -541,12 +541,12 @@
         "id": "dbd-23",
         "d": 2,
         "t": "Nested Structures: Accessing STRUCT Fields",
-        "q": "You have a `cliente` column of type `STRUCT<nombre: STRING, direccion: STRUCT<ciudad: STRING, codigo_postal: INT>>`. You want to project the customer's city in a SQL query. Which syntax is valid for accessing the nested `ciudad` field in Databricks SQL?",
+        "q": "You have a `customer` column of type `STRUCT<name: STRING, address: STRUCT<city: STRING, postal_code: INT>>`. You want to project the customer's city in a SQL query. Which syntax is valid for accessing the nested `city` field in Databricks SQL?",
         "o": [
-          "`SELECT cliente->direccion->ciudad FROM ventas;` using arrow-style pointer operators similar to C++-based languages.",
-          "`SELECT EXTRACT_FIELD(cliente, 'direccion.ciudad') FROM ventas;` calling a helper function for inspecting system column metadata.",
-          "`SELECT cliente.direccion.ciudad FROM ventas;` using the standard dot-notation navigation over nested structures.",
-          "`SELECT cliente['direccion']['ciudad']::string FROM ventas;` forcing a key-value map cast over tuple structures in distributed memory."
+          "`SELECT customer->address->city FROM sales;` using arrow-style pointer operators similar to C++-based languages.",
+          "`SELECT EXTRACT_FIELD(customer, 'address.city') FROM sales;` calling a helper function for inspecting system column metadata.",
+          "`SELECT customer.address.city FROM sales;` using the standard dot-notation navigation over nested structures.",
+          "`SELECT customer['address']['city']::string FROM sales;` forcing a key-value map cast over tuple structures in distributed memory."
         ],
         "a": 2,
         "e": "In Spark SQL and Databricks SQL, fields inside a `STRUCT` data type are accessed naturally with dot notation: `column_name.field.subfield`. This syntax is intuitive, ANSI SQL-compliant, and highly optimized by the execution engine.",
@@ -563,10 +563,10 @@
         "t": "Unnesting Arrays: explode vs posexplode",
         "q": "A table contains orders with an `items` column of type `ARRAY<STRING>`. Some orders contain no items (`items` is an empty array or `NULL`). You need to flatten the array so that each item occupies its own row, but without losing the orders that have no items (they must appear with a `NULL` value). Which SQL function should be used?",
         "o": [
-          "`SELECT pedido_id, explode(items) FROM pedidos;` relying on the engine to automatically keep the rows with null or empty arrays in the result.",
-          "`SELECT pedido_id, posexplode(items) FROM pedidos;` to generate both the integer position and the corresponding element value in each row.",
-          "`SELECT pedido_id, unnest_all(items) FROM pedidos;` calling the standard dimensional flattening function of PostgreSQL databases on the cluster.",
-          "`SELECT pedido_id, explode_outer(items) FROM pedidos;` to ensure the parent rows with null or empty arrays are preserved in the result."
+          "`SELECT order_id, explode(items) FROM orders;` relying on the engine to automatically keep the rows with null or empty arrays in the result.",
+          "`SELECT order_id, posexplode(items) FROM orders;` to generate both the integer position and the corresponding element value in each row.",
+          "`SELECT order_id, unnest_all(items) FROM orders;` calling the standard dimensional flattening function of PostgreSQL databases on the cluster.",
+          "`SELECT order_id, explode_outer(items) FROM orders;` to ensure the parent rows with null or empty arrays are preserved in the result."
         ],
         "a": 3,
         "e": "`explode_outer(col)` is the variant of `explode()` that preserves rows whose array is `NULL` or empty (`size = 0`). Unlike `explode()`, which silently discards these rows (behavior analogous to an `INNER JOIN`), `explode_outer()` emits a row with a `NULL` value for the flattened column (behavior analogous to a `LEFT OUTER JOIN`).",
@@ -603,10 +603,10 @@
         "t": "Window Functions: RANK vs DENSE_RANK",
         "q": "In a sales competition, two employees tie for first place with 100 sales each, and the next employee has 90 sales. You want the employee with 90 sales to appear in position 2 of the ranking without gaps in the numbering. Which analytic window function should be used in the SQL query?",
         "o": [
-          "`ROW_NUMBER() OVER (ORDER BY ventas DESC)` to assign sequential numbers independent of ties in the sales values evaluated by the query.",
-          "`DENSE_RANK() OVER (ORDER BY ventas DESC)` to assign the same rank to tied values without creating jumps in the subsequent numbering.",
-          "`RANK() OVER (ORDER BY ventas DESC)` to compute the positions, leaving a gap equal to the number of tied competitors in the table.",
-          "`PERCENT_RANK() OVER (ORDER BY ventas DESC)` to express each employee's relative position as a percentage of the total staff evaluated."
+          "`ROW_NUMBER() OVER (ORDER BY sales DESC)` to assign sequential numbers independent of ties in the sales values evaluated by the query.",
+          "`DENSE_RANK() OVER (ORDER BY sales DESC)` to assign the same rank to tied values without creating jumps in the subsequent numbering.",
+          "`RANK() OVER (ORDER BY sales DESC)` to compute the positions, leaving a gap equal to the number of tied competitors in the table.",
+          "`PERCENT_RANK() OVER (ORDER BY sales DESC)` to express each employee's relative position as a percentage of the total staff evaluated."
         ],
         "a": 1,
         "e": "`DENSE_RANK()` assigns the same rank to identical values in the `ORDER BY` clause and continues with the next consecutive integer (1, 1, 2...). In contrast, `RANK()` would leave a gap (1, 1, 3...), and `ROW_NUMBER()` would assign unique, arbitrary sequential values to the tied rows (1, 2, 3).",
@@ -623,10 +623,10 @@
         "t": "Multidimensional Aggregations: ROLLUP and CUBE",
         "q": "The business analyst team requires a sales report that includes hierarchical cumulative subtotals: first the company grand total, then the subtotals by year, and within each year the subtotals by month and region. Which SQL aggregation clause solves this hierarchy without resorting to multiple `UNION ALL` statements?",
         "o": [
-          "`GROUP BY region, mes, anio WITH RECURSIVE` to iteratively compute the cumulative totals through an in-memory graph common expression.",
-          "`GROUP BY CUBE (anio, mes, region)` to exhaustively compute all $2^3 = 8$ possible combinations of dimensions regardless of hierarchy.",
-          "`GROUP BY ROLLUP (anio, mes, region)` to generate the aggregated subtotals in strictly hierarchical order from left to right.",
-          "`GROUP BY anio, mes, region ORDER BY TOTALS DESC` forcing the injection of synthetically computed rows in the final sort stage on the cluster."
+          "`GROUP BY region, month, year WITH RECURSIVE` to iteratively compute the cumulative totals through an in-memory graph common expression.",
+          "`GROUP BY CUBE (year, month, region)` to exhaustively compute all $2^3 = 8$ possible combinations of dimensions regardless of hierarchy.",
+          "`GROUP BY ROLLUP (year, month, region)` to generate the aggregated subtotals in strictly hierarchical order from left to right.",
+          "`GROUP BY year, month, region ORDER BY TOTALS DESC` forcing the injection of synthetically computed rows in the final sort stage on the cluster."
         ],
         "a": 2,
         "e": "`GROUP BY ROLLUP (a, b, c)` generates progressive hierarchical aggregations considering the order of the declared columns: `(a, b, c)`, `(a, b)`, `(a)`, and the overall grand total `()`. It is the optimal clause for generating reports with hierarchically structured subtotals (e.g., year &rarr; month &rarr; region) in a single aggregation pass.",
@@ -824,12 +824,12 @@
         "id": "dbd-37",
         "d": 3,
         "t": "DLT: Quality Expectations (DROP ROW)",
-        "q": "In a Delta Live Tables (DLT) pipeline, the data quality team stipulates the following rule: records with a null `cliente_id` or an `edad` under 18 must be silently dropped without stopping pipeline execution, recording the number of skipped records in the DLT metrics. Which expectation clause meets this requirement?",
+        "q": "In a Delta Live Tables (DLT) pipeline, the data quality team stipulates the following rule: records with a null `customer_id` or an `age` under 18 must be silently dropped without stopping pipeline execution, recording the number of skipped records in the DLT metrics. Which expectation clause meets this requirement?",
         "o": [
-          "`CONSTRAINT regla_edad CHECK (cliente_id IS NOT NULL AND edad >= 18) ON ERROR SKIP RECORD in the corporate metadata catalog.`",
-          "`EXPECT (cliente_id IS NOT NULL AND edad >= 18) ON VIOLATION ABORT PIPELINE with immediate notification to the on-call operations team.`",
-          "`EXPECT (cliente_id IS NOT NULL AND edad >= 18) ON INVALID DISCARD INTO DLQ isolating non-conforming rows in a secondary audit table.`",
-          "`CONSTRAINT clientes_validos EXPECT (cliente_id IS NOT NULL AND edad >= 18) ON VIOLATION DROP ROW`"
+          "`CONSTRAINT age_rule CHECK (customer_id IS NOT NULL AND age >= 18) ON ERROR SKIP RECORD in the corporate metadata catalog.`",
+          "`EXPECT (customer_id IS NOT NULL AND age >= 18) ON VIOLATION ABORT PIPELINE with immediate notification to the on-call operations team.`",
+          "`EXPECT (customer_id IS NOT NULL AND age >= 18) ON INVALID DISCARD INTO DLQ isolating non-conforming rows in a secondary audit table.`",
+          "`CONSTRAINT valid_customers EXPECT (customer_id IS NOT NULL AND age >= 18) ON VIOLATION DROP ROW`"
         ],
         "a": 3,
         "e": "Delta Live Tables provides the `ON VIOLATION DROP ROW` clause within the expectation definition (`CONSTRAINT ... EXPECT ... ON VIOLATION DROP ROW`). This action automatically filters out and drops any row that does not satisfy the boolean condition, allowing valid rows to continue to the target table and recording the dropped-row metrics in the DLT Event Log.",
@@ -844,15 +844,15 @@
         "id": "dbd-38",
         "d": 3,
         "t": "DLT: Quality Expectations (FAIL UPDATE vs Warn)",
-        "q": "A regulatory bank reconciliation pipeline in Delta Live Tables cannot tolerate under any circumstances that the `monto_transferencia` column is negative or null. If a single record violates this condition, the entire pipeline must stop immediately and mark the run as failed to alert the engineers. Which DLT expectation guarantees this behavior?",
+        "q": "A regulatory bank reconciliation pipeline in Delta Live Tables cannot tolerate under any circumstances that the `transfer_amount` column is negative or null. If a single record violates this condition, the entire pipeline must stop immediately and mark the run as failed to alert the engineers. Which DLT expectation guarantees this behavior?",
         "o": [
-          "`CONSTRAINT monto_positivo EXPECT (monto_transferencia > 0) ON VIOLATION FAIL UPDATE`",
-          "`EXPECT (monto_transferencia > 0) ON VIOLATION DROP ROW silently dropping the row to continue processing without errors.`",
-          "`CONSTRAINT monto_positivo EXPECT (monto_transferencia > 0) only emitting a warning in the system's quality metrics log.`",
-          "`EXPECT (monto_transferencia > 0) ON ANOMALY RAISE CRITICAL ALERT stopping the network service of the corporate account's compute cluster.`"
+          "`CONSTRAINT positive_amount EXPECT (transfer_amount > 0) ON VIOLATION FAIL UPDATE`",
+          "`EXPECT (transfer_amount > 0) ON VIOLATION DROP ROW silently dropping the row to continue processing without errors.`",
+          "`CONSTRAINT positive_amount EXPECT (transfer_amount > 0) only emitting a warning in the system's quality metrics log.`",
+          "`EXPECT (transfer_amount > 0) ON ANOMALY RAISE CRITICAL ALERT stopping the network service of the corporate account's compute cluster.`"
         ],
         "a": 0,
-        "e": "The `ON VIOLATION FAIL UPDATE` action is the strictest directive in Delta Live Tables expectations. If any processed row violates the boolean condition (`monto_transferencia > 0`), DLT immediately aborts the pipeline update, prevents corrupt data from being persisted, and marks the job run as failed to trigger on-call alerts.",
+        "e": "The `ON VIOLATION FAIL UPDATE` action is the strictest directive in Delta Live Tables expectations. If any processed row violates the boolean condition (`transfer_amount > 0`), DLT immediately aborts the pipeline update, prevents corrupt data from being persisted, and marks the job run as failed to trigger on-call alerts.",
         "why": [
           null,
           "`ON VIOLATION DROP ROW` would drop the row and continue execution successfully, which violates the strict regulatory requirement.",
@@ -1029,10 +1029,10 @@
         "t": "Unity Catalog: 3-Level Namespace",
         "q": "A data engineer at a multinational corporation needs to unambiguously reference the customers table located in the sales domain of the production environment governed by Unity Catalog. What is the canonical three-level namespace format that must be used in SQL queries?",
         "o": [
-          "`cluster.database.table` (for example, `etl_cluster_01.ventas.clientes`), identifying the cluster that processes the query in real time.",
-          "`metastore.workspace.table` (for example, `global_ms.workspace_01.clientes`), identifying the regional metastore and the local workspace.",
-          "`bucket.folder.table` (for example, `s3_lakehouse.ventas_curated.clientes`), identifying the physical path in the cloud object storage.",
-          "`catalog.schema.table` (for example, `prod_corp.ventas.clientes`), identifying the catalog, schema (database), and table."
+          "`cluster.database.table` (for example, `etl_cluster_01.sales.customers`), identifying the cluster that processes the query in real time.",
+          "`metastore.workspace.table` (for example, `global_ms.workspace_01.customers`), identifying the regional metastore and the local workspace.",
+          "`bucket.folder.table` (for example, `s3_lakehouse.sales_curated.customers`), identifying the physical path in the cloud object storage.",
+          "`catalog.schema.table` (for example, `prod_corp.sales.customers`), identifying the catalog, schema (database), and table."
         ],
         "a": 3,
         "e": "Unity Catalog standardizes object resolution through a hierarchical **3-level namespace**: `<catalog>.<schema>.<table>` (or view / volume / model). The first level (`catalog`) usually represents the environment or business domain, the second (`schema` or database) the functional logical grouping, and the third (`table`) the specific data entity.",
@@ -1067,10 +1067,10 @@
         "id": "dbd-49",
         "d": 5,
         "t": "Unity Catalog: Granular Security (Row Filters & Column Masks)",
-        "q": "A table contains employee payroll and salaries (`empleados_silver`). The human resources leadership requires that: 1) analysts can only view employees belonging to their own country (`pais_id`); 2) the `salario` field be visible in clear text to the `rrhh_directivos` group, but appear as `NULL` or masked for all other users. Which two Unity Catalog mechanisms make it possible to meet these guidelines without duplicating the physical table? (Choose 2 answers)",
+        "q": "A table contains employee payroll and salaries (`employees_silver`). The human resources leadership requires that: 1) analysts can only view employees belonging to their own country (`country_id`); 2) the `salary` field be visible in clear text to the `hr_directors` group, but appear as `NULL` or masked for all other users. Which two Unity Catalog mechanisms make it possible to meet these guidelines without duplicating the physical table? (Choose 2 answers)",
         "o": [
-          "Apply a `Row Filter` on the table through a SQL function that checks `is_account_group_member()` and dynamically filters the `pais_id` field.",
-          "Apply a `Column Mask` on the `salario` column through a SQL function that obfuscates the value for users who do not belong to the authorized group.",
+          "Apply a `Row Filter` on the table through a SQL function that checks `is_account_group_member()` and dynamically filters the `country_id` field.",
+          "Apply a `Column Mask` on the `salary` column through a SQL function that obfuscates the value for users who do not belong to the authorized group.",
           "Create a separate physical cluster for each country and duplicate the Parquet files into 50 different storage buckets in the public cloud.",
           "Run a nightly script that rewrites the table, permanently removing the salary column from the files in object storage."
         ],
@@ -1213,7 +1213,7 @@
       "dbd-18": [
         "`dropDuplicates` does not guarantee keeping the most recent row after a distributed sort, because internal partitions can alter the partition order.",
         null,
-        "`FIRST(cantidad)` without ordering is nondeterministic and can return any arbitrary value across successive executions.",
+        "`FIRST(quantity)` without ordering is nondeterministic and can return any arbitrary value across successive executions.",
         null
       ],
       "dbd-19": [
