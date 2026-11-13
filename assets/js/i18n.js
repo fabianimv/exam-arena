@@ -73,7 +73,9 @@
 
   /**
    * Obtiene el idioma activo ('es' o 'en').
-   * Prioridad: localStorage > detección de navegador > 'en'.
+   * Prioridad: localStorage ('es' o 'en') > 'en' por defecto incondicional.
+   * Se elimina la detección automática por navegador para que los entornos en español
+   * sigan usando inglés por defecto a menos que el usuario use el toggle EN/ES.
    * @returns {'es'|'en'}
    */
   function getLang() {
@@ -81,23 +83,6 @@
       if (w.localStorage) {
         var saved = w.localStorage.getItem(STORAGE_LANG_KEY);
         if (saved === 'es' || saved === 'en') return saved;
-      }
-    } catch (e) {}
-
-    try {
-      var nav = w.navigator;
-      if (nav) {
-        var langs = nav.languages;
-        if (langs && langs.length) {
-          for (var i = 0; i < langs.length; i++) {
-            var l = (langs[i] || '').toLowerCase();
-            if (l.indexOf('en') === 0) return 'en';
-            if (l.indexOf('es') === 0) return 'es';
-          }
-        }
-        var single = (nav.language || nav.userLanguage || '').toLowerCase();
-        if (single.indexOf('es') === 0) return 'es';
-        if (single.indexOf('en') === 0) return 'en';
       }
     } catch (e) {}
 
@@ -111,7 +96,7 @@
    * @returns {'es'|'en'}
    */
   function setLang(lang) {
-    var target = (lang === 'en') ? 'en' : 'es';
+    var target = (lang === 'es') ? 'es' : 'en';
     try {
       if (w.localStorage) {
         w.localStorage.setItem(STORAGE_LANG_KEY, target);
@@ -733,10 +718,16 @@
   }
 
   /* ---------- Inicialización en el DOM ---------- */
-  if (d && d.documentElement) {
-    try {
-      d.documentElement.lang = getLang();
-    } catch (e) {}
+  function applyInitialLang() {
+    if (d && d.documentElement) {
+      try {
+        d.documentElement.lang = getLang();
+      } catch (e) {}
+    }
+  }
+  applyInitialLang();
+  if (d && d.addEventListener) {
+    d.addEventListener('DOMContentLoaded', applyInitialLang);
   }
 
   /* ---------- Exportar API ---------- */
@@ -754,7 +745,8 @@
     translateQuestion: translateQuestion,
     getCachedTranslation: getCachedTranslation,
     clearCache: clearCache,
-    DICTIONARY: DICTIONARY
+    DICTIONARY: DICTIONARY,
+    UI_DICT: DICTIONARY
   };
 
   w.ExamI18n = ExamI18n;

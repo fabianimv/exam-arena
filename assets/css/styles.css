@@ -2118,4 +2118,199 @@ input[type=search] {
   background: radial-gradient(480px circle at 100% 0%, var(--accent-soft), transparent 55%), var(--card);
 }
 
+/* ---------- 13. Logotipos SVG de Certificación y Emblemas ---------- */
+
+/* Base SVG / Logo Container */
+.cert-logo {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.cert-logo svg,
+svg.cert-logo {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Hub Cards: Cabecera con Emblema de Certificación y Badges */
+.hub-card-top,
+.hub-card-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  margin-bottom: 0.35rem;
+}
+
+.hub-card-logo-box {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: var(--radius-md, 12px);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+  overflow: hidden;
+}
+
+.hub-card:hover .hub-card-logo-box {
+  transform: translateY(-2px);
+  border-color: var(--blue);
+  box-shadow: var(--shadow-sm);
+}
+
+.hub-card-head-content,
+.hub-card-head-body,
+.hub-card-top-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.hub-card-head-content h3,
+.hub-card-head-body h3 {
+  margin: 0.2rem 0 0.25rem;
+}
+
+.hub-cert-logo,
+.hub-card-logo-box .cert-logo {
+  width: 36px;
+  height: 36px;
+  max-width: 36px;
+  max-height: 36px;
+  display: block;
+}
+
+/* Proveedor Badge: Logotipo de Certificación Incrustado */
+.badge .cert-logo,
+.badge-cert-logo {
+  width: 15px;
+  height: 15px;
+  max-width: 15px;
+  max-height: 15px;
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.badge {
+  line-height: 1.25;
+}
+
+/* Banner Activo de Examen: Emblema y Badge */
+.exam-banner-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  width: 100%;
+}
+
+.exam-banner-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.banner-logo-box {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: var(--radius-md, 12px);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  overflow: hidden;
+}
+
+.banner-cert-logo,
+.banner-logo-box .cert-logo {
+  width: 28px;
+  height: 28px;
+  max-width: 28px;
+  max-height: 28px;
+  display: block;
+}
+
+.exam-banner .badge .badge-cert-logo,
+.exam-banner .badge .cert-logo {
+  width: 16px;
+  height: 16px;
+  max-width: 16px;
+  max-height: 16px;
+}
+
+/* Barra de Quiz (Testbar) Inline Logo */
+.inline-cert-logo,
+.testbar .cert-logo {
+  width: 16px;
+  height: 16px;
+  max-width: 16px;
+  max-height: 16px;
+  display: inline-block;
+  vertical-align: -0.18em;
+  flex-shrink: 0;
+}
+
+/* Pulido en Modo Oscuro para Contenedores de Logo */
+:root[data-theme="dark"] .hub-card-logo-box,
+:root[data-theme="dark"] .banner-logo-box {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.10);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .hub-card-logo-box,
+  :root:not([data-theme="light"]) .banner-logo-box {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.10);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  }
+}
+
+/* Adaptación Responsiva Móvil */
+@media (max-width: 520px) {
+  .hub-card-top,
+  .hub-card-head {
+    gap: 0.7rem;
+  }
+
+  .hub-card-logo-box {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  .hub-cert-logo,
+  .hub-card-logo-box .cert-logo {
+    width: 32px;
+    height: 32px;
+  }
+
+  .banner-logo-box {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  .banner-cert-logo,
+  .banner-logo-box .cert-logo {
+    width: 24px;
+    height: 24px;
+  }
+}
+
 

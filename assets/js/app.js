@@ -47,6 +47,18 @@
     });
   }
 
+  function certLogo(id, size, extraClass) {
+    if (!id) return '';
+    if (typeof w.getCertLogo === 'function') {
+      try {
+        return w.getCertLogo(id, { size: size, className: extraClass }) || '';
+      } catch (err) {
+        return '';
+      }
+    }
+    return '';
+  }
+
   var METRIC_REGEX = /\b((?:HTTP\s+)?[1-5]\d\d\s+(?:Bad Gateway|Gateway Timeout|Service Unavailable|Too Many Requests|Internal Server Error)|HTTP\s+[1-5]\d\d|p90|p95|p99(?:\.9)?|RTO|RPO|SLO|SLA|SLI|OOMKilled|CrashLoopBackOff|Pending|ImagePullBackOff|ErrImagePull)\b/g;
 
   function highlightMetrics(text) {
@@ -268,12 +280,22 @@
       navigate(nextExam, targetTab);
     };
   }
+  var updateExamPicker = initPicker;
 
   function examBannerHtml(ex) {
+    if (!ex) return '';
+    var bannerLogo = certLogo(ex.id, 28, 'banner-cert-logo');
+    var badgeIcon = certLogo(ex.id, 16, 'badge-cert-logo') || ex.icon;
+    var logoBox = bannerLogo ? '<div class="banner-logo-box">' + bannerLogo + '</div>' : '';
     return '<div class="exam-banner">' +
-      '<div><span class="badge">' + ex.icon + ' ' + esc(ex.provider) + '</span>' +
-      '<h1>' + esc(ex.title) + '</h1>' +
-      '<p class="muted small">' + esc(ex.subtitle) + '</p></div>' +
+      '<div class="exam-banner-head">' +
+        logoBox +
+        '<div class="exam-banner-text">' +
+          '<span class="badge">' + badgeIcon + ' ' + esc(ex.provider) + '</span>' +
+          '<h1>' + esc(ex.title) + '</h1>' +
+          '<p class="muted small">' + esc(ex.subtitle) + '</p>' +
+        '</div>' +
+      '</div>' +
       '</div>';
   }
 
@@ -384,11 +406,19 @@
       }).join('');
 
       var featuredHtml = ex.featured ? '<span class="featured-pill">' + t('featured_badge', '✨ Featured') + '</span>' : '';
+      var cardLogo = certLogo(id, 36, 'hub-cert-logo');
+      var badgeLogo = certLogo(id, 15, 'badge-cert-logo') || ex.icon;
+      var logoBoxHtml = cardLogo ? '<div class="hub-card-logo-box">' + cardLogo + '</div>' : '';
 
       return '<div class="hub-card' + (isCurrent ? ' current' : '') + (ex.featured ? ' is-featured' : '') + '" data-provider="' + esc(id) + '">' +
         '<div>' +
-          '<div class="hub-card-badges"><span class="badge">' + ex.icon + ' ' + esc(ex.provider) + '</span>' + featuredHtml + '</div>' +
-          '<h3>' + esc(ex.title) + '</h3>' +
+          '<div class="hub-card-top hub-card-head">' +
+            logoBoxHtml +
+            '<div class="hub-card-head-content">' +
+              '<div class="hub-card-badges"><span class="badge">' + badgeLogo + ' ' + esc(ex.provider) + '</span>' + featuredHtml + '</div>' +
+              '<h3>' + esc(ex.title) + '</h3>' +
+            '</div>' +
+          '</div>' +
           '<p class="muted small">' + esc(ex.subtitle) + '</p>' +
           '<div class="hub-domains">' + domainChips + '</div>' +
         '</div>' +
@@ -648,7 +678,7 @@
     var domainLabelText = t('domain_label', 'Dominio') + ' ' + q.d + (domainName ? ' · ' + esc(domainName) : '');
 
     view.innerHTML =
-      '<div class="testbar"><span>' + ex.icon + ' <b>' + esc(ex.badge) + '</b> · ' + qOfText + '</span>' +
+      '<div class="testbar"><span>' + (certLogo(ex.id, 16, 'inline-cert-logo') || ex.icon) + ' <b>' + esc(ex.badge) + '</b> · ' + qOfText + '</span>' +
       '<span>' + correctCountText + ' <b id="tok">' + T.ok + '</b></span>' +
       '<button id="tquit" class="link">' + quitText + '</button></div>' +
       '<div class="progress"><div style="width:' + pct + '%"></div></div>' +

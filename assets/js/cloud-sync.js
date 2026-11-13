@@ -802,13 +802,15 @@
     var container = topActions || topHeader;
     if (!container) return null;
 
+    var es = !!(window.ExamI18n && window.ExamI18n.getLang && window.ExamI18n.getLang() === 'es');
+
     btn = document.createElement('button');
     btn.id = 'cloud-sync-btn';
     btn.className = 'sync-pill';
     btn.type = 'button';
-    btn.setAttribute('aria-label', 'Sincronizar progreso en la nube');
-    btn.title = 'Sincronizar progreso en la nube (Supabase)';
-    btn.innerHTML = '☁️ <span id="cloud-sync-label">Sync</span>';
+    btn.setAttribute('aria-label', es ? 'Sincronizar progreso en la nube' : 'Sync progress to cloud');
+    btn.title = es ? 'Sincronizar progreso en la nube (Supabase)' : 'Sync progress to cloud (Supabase)';
+    btn.innerHTML = '☁️ <span id="cloud-sync-label">' + (es ? 'Nube' : 'Sync') + '</span>';
 
     var themeToggle = document.getElementById('theme-toggle');
     if (themeToggle && themeToggle.parentNode === container) {
@@ -834,20 +836,26 @@
     var label = document.getElementById('cloud-sync-label');
     var email = getEmail();
     var configured = isConfigured();
+    var es = !!(window.ExamI18n && window.ExamI18n.getLang && window.ExamI18n.getLang() === 'es');
 
     btn.classList.remove('sync-ok', 'sync-busy', 'sync-err', 'synced', 'syncing', 'error', 'table_missing', 'unconfigured');
+    btn.setAttribute('aria-label', es ? 'Sincronizar progreso en la nube' : 'Sync progress to cloud');
 
     if (!configured) {
       btn.classList.add('unconfigured');
-      if (label) label.textContent = 'Sync';
-      btn.title = '☁️ Nube: Sin configurar (haz clic para conectar tu correo)';
+      if (label) label.textContent = es ? 'Nube' : 'Sync';
+      btn.title = es
+        ? '☁️ Nube: Sin configurar (haz clic para conectar tu correo)'
+        : '☁️ Cloud: Not configured (click to connect your email)';
       return;
     }
 
     if (currentStatus === 'syncing') {
       btn.classList.add('sync-busy', 'syncing');
-      if (label) label.textContent = 'Sync...';
-      btn.title = '🔄 Sincronizando progreso con Supabase (' + email + ')...';
+      if (label) label.textContent = es ? 'Nube…' : 'Sync…';
+      btn.title = es
+        ? '🔄 Sincronizando progreso con Supabase (' + email + ')...'
+        : '🔄 Syncing progress with Supabase (' + email + ')...';
     } else if (currentStatus === 'synced') {
       btn.classList.add('sync-ok', 'synced');
       var last = getLastSync();
@@ -857,29 +865,38 @@
           dateStr = new Date(last).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         } catch (e) {}
       }
-      if (label) label.textContent = 'Sync ✓';
-      btn.title = '☁️✓ Sincronizado (' + email + (dateStr ? ' · ' + dateStr : '') + ')';
+      if (label) label.textContent = es ? 'Nube ✓' : 'Sync ✓';
+      btn.title = es
+        ? '☁️✓ Sincronizado (' + email + (dateStr ? ' · ' + dateStr : '') + ')'
+        : '☁️✓ Synced (' + email + (dateStr ? ' · ' + dateStr : '') + ')';
     } else if (currentStatus === 'table_missing') {
       btn.classList.add('sync-err', 'table_missing');
-      if (label) label.textContent = 'Falta SQL';
-      btn.title = '⚠️ Supabase: Falta crear la tabla exam_arena_progress (clic para copiar SQL)';
+      if (label) label.textContent = es ? 'Falta SQL' : 'Missing SQL';
+      btn.title = es
+        ? '⚠️ Supabase: Falta crear la tabla exam_arena_progress (clic para copiar SQL)'
+        : '⚠️ Supabase: exam_arena_progress table missing (click to copy SQL)';
     } else if (currentStatus === 'error') {
       btn.classList.add('sync-err', 'error');
       if (label) label.textContent = 'Error';
-      btn.title = '⚠️ Error de sincronización (' + (lastErrorMessage || 'Verifica la conexión') + ')';
+      btn.title = es
+        ? '⚠️ Error de sincronización (' + (lastErrorMessage || 'Verifica la conexión') + ')'
+        : '⚠️ Sync error (' + (lastErrorMessage || 'Check connection') + ')';
     } else {
-      if (label) label.textContent = 'Sync';
-      btn.title = '☁️ Sincronización en la nube lista (' + email + ')';
+      if (label) label.textContent = es ? 'Nube' : 'Sync';
+      btn.title = es
+        ? '☁️ Sincronización en la nube lista (' + email + ')'
+        : '☁️ Cloud sync ready (' + email + ')';
     }
   }
 
   /* ---------- 11. Modal de Configuración y Estado ---------- */
   function copySqlToClipboard(btnEl) {
     var text = SUPABASE_SCHEMA_SQL;
+    var es = !!(window.ExamI18n && window.ExamI18n.getLang && window.ExamI18n.getLang() === 'es');
     function showFeedback() {
       if (btnEl) {
         var orig = btnEl.innerHTML;
-        btnEl.innerHTML = '✓ ¡SQL Copiado!';
+        btnEl.innerHTML = es ? '✓ ¡SQL Copiado!' : '✓ SQL Copied!';
         setTimeout(function () { btnEl.innerHTML = orig; }, 2500);
       }
     }
@@ -920,17 +937,18 @@
     var key = getKey();
     var lastSync = getLastSync();
     var isExpanded = !url || !key; // Si faltan credenciales, mostrar desplegado por defecto
+    var es = !!(window.ExamI18n && window.ExamI18n.getLang && window.ExamI18n.getLang() === 'es');
 
-    var statusLabel = 'Sin configurar';
+    var statusLabel = es ? 'Sin configurar' : 'Not configured';
     var statusClass = '';
     if (isConfigured()) {
-      if (currentStatus === 'synced') { statusLabel = 'Sincronizado'; statusClass = 'ok'; }
-      else if (currentStatus === 'syncing') { statusLabel = 'Sincronizando...'; statusClass = ''; }
-      else if (currentStatus === 'table_missing') { statusLabel = 'Falta tabla SQL en Supabase'; statusClass = 'err'; }
-      else if (currentStatus === 'error') { statusLabel = 'Error de conexión'; statusClass = 'err'; }
+      if (currentStatus === 'synced') { statusLabel = es ? 'Sincronizado' : 'Synced'; statusClass = 'ok'; }
+      else if (currentStatus === 'syncing') { statusLabel = es ? 'Sincronizando...' : 'Syncing...'; statusClass = ''; }
+      else if (currentStatus === 'table_missing') { statusLabel = es ? 'Falta tabla SQL en Supabase' : 'Missing SQL table in Supabase'; statusClass = 'err'; }
+      else if (currentStatus === 'error') { statusLabel = es ? 'Error de conexión' : 'Connection error'; statusClass = 'err'; }
     }
 
-    var lastSyncText = 'Nunca';
+    var lastSyncText = es ? 'Nunca' : 'Never';
     if (lastSync) {
       try {
         lastSyncText = new Date(lastSync).toLocaleString();
@@ -939,27 +957,31 @@
       }
     }
 
+    var toggleHideText = es ? '▼ Ocultar credenciales de Supabase' : '▼ Hide Supabase credentials';
+    var toggleShowText = es ? '▶ Configurar URL y Clave de Supabase' : '▶ Configure Supabase URL & Anon Key';
+    var btnSaveDefaultText = es ? 'Guardar y Sincronizar' : 'Save & Sync';
+
     backdrop.innerHTML = [
       '<div class="sync-modal" role="dialog" aria-modal="true" aria-labelledby="cloud-sync-title">',
-      '  <h2 id="cloud-sync-title">☁️ Sincronización en la Nube</h2>',
-      '  <p class="sync-desc">Unifica y conserva tu progreso en tiempo real entre tu celular, computadora y cualquier navegador mediante Supabase.</p>',
+      '  <h2 id="cloud-sync-title">' + (es ? '☁️ Sincronización en la Nube' : '☁️ Cloud Sync') + '</h2>',
+      '  <p class="sync-desc">' + (es ? 'Unifica y conserva tu progreso en tiempo real entre tu celular, computadora y cualquier navegador mediante Supabase.' : 'Unify and preserve your progress in real time across mobile, desktop, and any browser via Supabase.') + '</p>',
       '',
       '  <div class="sync-status-box ' + statusClass + '">',
-      '    <div><b>Estado:</b> ' + statusLabel + '</div>',
-      '    <div><b>Última sincronización:</b> ' + lastSyncText + '</div>',
-      '    <div><b>Respuestas totales:</b> ' + stats.totalAnswers + ' respuestas (' + stats.totalSessions + ' sesiones completadas)</div>',
+      '    <div><b>' + (es ? 'Estado:' : 'Status:') + '</b> ' + statusLabel + '</div>',
+      '    <div><b>' + (es ? 'Última sincronización:' : 'Last synced:') + '</b> ' + lastSyncText + '</div>',
+      '    <div><b>' + (es ? 'Respuestas totales:' : 'Total answers:') + '</b> ' + (es ? (stats.totalAnswers + ' respuestas (' + stats.totalSessions + ' sesiones completadas)') : (stats.totalAnswers + ' answers (' + stats.totalSessions + ' completed sessions)')) + '</div>',
       lastErrorMessage ? '    <div style="margin-top:0.35rem;color:var(--bad)">⚠️ ' + lastErrorMessage + '</div>' : '',
       '  </div>',
       '',
       '  <div class="sync-field">',
-      '    <label for="cloud-input-email">Correo Electrónico / ID de Usuario</label>',
-      '    <input type="email" id="cloud-input-email" placeholder="fabian@example.com" value="' + email + '" autocomplete="email" spellcheck="false">',
-      '    <small style="color:var(--muted);font-size:0.78rem;display:block;margin-top:0.35rem">Usa el mismo correo en todos tus dispositivos para sincronizar automáticamente tus 4 exámenes (SRE, GCP, Azure, AWS).</small>',
+      '    <label for="cloud-input-email">' + (es ? 'Correo Electrónico / ID de Usuario' : 'Email Address / User ID') + '</label>',
+      '    <input type="email" id="cloud-input-email" placeholder="user@example.com" value="' + email + '" autocomplete="email" spellcheck="false">',
+      '    <small style="color:var(--muted);font-size:0.78rem;display:block;margin-top:0.35rem">' + (es ? 'Usa el mismo correo en todos tus dispositivos para sincronizar automáticamente tus exámenes.' : 'Use the same email across all your devices to automatically sync your exams.') + '</small>',
       '  </div>',
       '',
       '  <div style="margin-bottom:0.75rem">',
       '    <button type="button" id="cloud-advanced-toggle" style="background:none;border:none;color:var(--blue);cursor:pointer;font-weight:600;font-size:0.84rem;padding:0;text-align:left;display:inline-flex;align-items:center;gap:0.35rem">',
-      '      ' + (isExpanded ? '▼ Ocultar credenciales de Supabase' : '▶ Configurar URL y Clave de Supabase') + '',
+      '      ' + (isExpanded ? toggleHideText : toggleShowText) + '',
       '    </button>',
       '  </div>',
       '',
@@ -971,21 +993,21 @@
       '    <div class="sync-field">',
       '      <label for="cloud-input-key">Supabase Anon Public Key</label>',
       '      <input type="text" id="cloud-input-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." value="' + key + '" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-1p-ignore="true" data-lpignore="true" style="font-family:monospace;font-size:0.78rem">',
-      '      <small style="color:var(--muted);font-size:0.76rem;display:block;margin-top:0.25rem">Clave pública anónima (anon key). Es 100% segura para GitHub Pages con Row Level Security.</small>',
+      '      <small style="color:var(--muted);font-size:0.76rem;display:block;margin-top:0.25rem">' + (es ? 'Clave pública anónima (anon key). Es 100% segura para GitHub Pages con Row Level Security.' : 'Anonymous public key (anon key). 100% safe for GitHub Pages with Row Level Security.') + '</small>',
       '    </div>',
       '    <div class="sql-copy-box" style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem;flex-wrap:wrap">',
-      '      <span>¿Nuevo proyecto Supabase? Copia el script SQL:</span>',
+      '      <span>' + (es ? '¿Nuevo proyecto Supabase? Copia el script SQL:' : 'New Supabase project? Copy the setup SQL script:') + '</span>',
       '      <button type="button" id="cloud-btn-copy-sql" style="padding:0.4rem 0.8rem;font-size:0.8rem;cursor:pointer;border-radius:var(--radius-pill);border:1px solid var(--line);background:var(--card);color:var(--txt)">',
-      '        📋 Copiar SQL de tabla/RPC',
+      '        ' + (es ? '📋 Copiar SQL de tabla/RPC' : '📋 Copy table/RPC SQL') + '',
       '      </button>',
       '    </div>',
       '  </div>',
       '',
       '  <div class="sync-actions">',
-      email ? '    <button type="button" id="cloud-btn-disconnect" style="background:transparent;color:var(--bad);border:1px solid rgba(220,38,38,0.3);border-radius:var(--radius-pill);cursor:pointer;padding:0.55rem 1rem">Desconectar cuenta</button>' : '',
+      email ? '    <button type="button" id="cloud-btn-disconnect" style="background:transparent;color:var(--bad);border:1px solid rgba(220,38,38,0.3);border-radius:var(--radius-pill);cursor:pointer;padding:0.55rem 1rem">' + (es ? 'Desconectar cuenta' : 'Disconnect account') + '</button>' : '',
       '    <div style="flex:1"></div>',
-      '    <button type="button" id="cloud-btn-cancel" style="background:var(--surface-2);color:var(--txt);border:1px solid var(--line);border-radius:var(--radius-pill);cursor:pointer;padding:0.55rem 1.1rem">Cerrar</button>',
-      '    <button type="button" id="cloud-btn-save" class="primary" style="background:linear-gradient(135deg,var(--blue,#2563eb),#1d4ed8);color:#ffffff;border:none;border-radius:var(--radius-pill);cursor:pointer;padding:0.55rem 1.25rem;font-weight:600">Guardar y Sincronizar</button>',
+      '    <button type="button" id="cloud-btn-cancel" style="background:var(--surface-2);color:var(--txt);border:1px solid var(--line);border-radius:var(--radius-pill);cursor:pointer;padding:0.55rem 1.1rem">' + (es ? 'Cerrar' : 'Close') + '</button>',
+      '    <button type="button" id="cloud-btn-save" class="primary" style="background:linear-gradient(135deg,var(--blue,#2563eb),#1d4ed8);color:#ffffff;border:none;border-radius:var(--radius-pill);cursor:pointer;padding:0.55rem 1.25rem;font-weight:600">' + btnSaveDefaultText + '</button>',
       '  </div>',
       '</div>'
     ].join('\n');
@@ -1023,7 +1045,7 @@
       toggleAdv.onclick = function () {
         var isHidden = advPanel.style.display === 'none';
         advPanel.style.display = isHidden ? 'block' : 'none';
-        toggleAdv.innerHTML = isHidden ? '▼ Ocultar credenciales de Supabase' : '▶ Configurar URL y Clave de Supabase';
+        toggleAdv.innerHTML = isHidden ? toggleHideText : toggleShowText;
       };
     }
 
@@ -1035,7 +1057,10 @@
 
     if (btnDisconnect) {
       btnDisconnect.onclick = function () {
-        if (confirm('¿Desconectar la cuenta en la nube? Tu progreso local en este navegador no se borrará.')) {
+        var confirmMsg = es
+          ? '¿Desconectar la cuenta en la nube? Tu progreso local en este navegador no se borrará.'
+          : 'Disconnect cloud account? Your local progress in this browser will not be deleted.';
+        if (confirm(confirmMsg)) {
           disconnect();
           close();
         }
@@ -1055,13 +1080,13 @@
         var newKey = setKey(rawKey === DEFAULT_SUPABASE_ANON_KEY ? '' : rawKey) || DEFAULT_SUPABASE_ANON_KEY;
 
         if (!newEmail) {
-          alert('Por favor ingresa un correo electrónico válido.');
+          alert(es ? 'Por favor ingresa un correo electrónico válido.' : 'Please enter a valid email address.');
           if (inEmail) inEmail.focus();
           return;
         }
 
         if (!newUrl || !newKey) {
-          alert('Por favor completa la URL y Anon Key del proyecto Supabase.');
+          alert(es ? 'Por favor completa la URL y Anon Key del proyecto Supabase.' : 'Please enter the Supabase project URL and Anon Key.');
           if (advPanel) advPanel.style.display = 'block';
           if (inUrl && !newUrl) inUrl.focus();
           else if (inKey) inKey.focus();
@@ -1069,12 +1094,12 @@
         }
 
         btnSave.disabled = true;
-        btnSave.innerHTML = '🔄 Sincronizando...';
+        btnSave.innerHTML = es ? '🔄 Sincronizando...' : '🔄 Syncing...';
 
         syncNow({ silent: false })
           .then(function (res) {
             btnSave.disabled = false;
-            btnSave.innerHTML = 'Guardar y Sincronizar';
+            btnSave.innerHTML = btnSaveDefaultText;
             if (res && res.status === 'synced') {
               close();
             } else {
@@ -1083,7 +1108,7 @@
           })
           .catch(function () {
             btnSave.disabled = false;
-            btnSave.innerHTML = 'Guardar y Sincronizar';
+            btnSave.innerHTML = btnSaveDefaultText;
             openModal();
           });
       };
@@ -1100,6 +1125,12 @@
   /* ---------- 12. Inicialización Automática ---------- */
   function init() {
     ensureHeaderButton();
+
+    if (window && window.addEventListener) {
+      window.addEventListener('exam-arena-lang-change', function () {
+        updateSyncButtonUI();
+      });
+    }
 
     // Precargar trackers de los 4 exámenes
     EXAM_IDS.forEach(function (appId) {
