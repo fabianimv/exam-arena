@@ -10,6 +10,7 @@
     'claude-architect',
     'claude-developer',
     'claude-associate',
+    'harness-engineering',
     'databricks-genai',
     'databricks-de',
     'nvidia-genl',

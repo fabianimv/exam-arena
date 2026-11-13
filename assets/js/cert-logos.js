@@ -1,6 +1,6 @@
 /* =========================================================================
    assets/js/cert-logos.js — High-Craft Inline SVG Certification & Provider Logos
-   Exam Arena Multi-Provider Simulator (13 Certifications)
+   Exam Arena Multi-Provider Simulator (14 Certifications)
 
    Exposes:
      - window.CERT_LOGOS: Map of 32x32 SVG string marks keyed by exam ID.
@@ -96,6 +96,28 @@
       '<path d="M8.5 25.5 L16 29 L23.5 25.5" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
       '<path d="M11 22.5 L16 25 L21 22.5" stroke="#E07A5F" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>' +
       '<path d="M16 19.2 L16.8 21 L18.7 21.2 L17.3 22.5 L17.7 24.3 L16 23.4 L14.3 24.3 L14.7 22.5 L13.3 21.2 L15.2 21 Z" fill="#FBBF24"/>',
+
+    /* AI Agent Harness Engineering */
+    'harness-engineering':
+      '<defs>' +
+        '<linearGradient id="clogo-harness-grad" x1="0%" y1="0%" x2="100%" y2="100%">' +
+          '<stop offset="0%" stop-color="#818CF8"/>' +
+          '<stop offset="100%" stop-color="#6366F1"/>' +
+        '</linearGradient>' +
+        '<linearGradient id="clogo-harness-core" x1="0%" y1="0%" x2="100%" y2="100%">' +
+          '<stop offset="0%" stop-color="#EEF2FF"/>' +
+          '<stop offset="100%" stop-color="#C7D2FE"/>' +
+        '</linearGradient>' +
+      '</defs>' +
+      '<path d="M16 2.8 L26.5 7.2 V15.2 C26.5 22.2 21.8 26.8 16 29.2 C10.2 26.8 5.5 22.2 5.5 15.2 V7.2 Z" fill="#6366F1" fill-opacity="0.16" stroke="#6366F1" stroke-width="1.6" stroke-linejoin="round"/>' +
+      '<ellipse cx="16" cy="16" rx="8" ry="3.5" transform="rotate(-28 16 16)" fill="none" stroke="#818CF8" stroke-width="1.2"/>' +
+      '<ellipse cx="16" cy="16" rx="8" ry="3.5" transform="rotate(28 16 16)" fill="none" stroke="#A5B4FC" stroke-width="1.2" stroke-dasharray="2.5 1.5"/>' +
+      '<circle cx="23.1" cy="12.3" r="1.3" fill="#818CF8"/>' +
+      '<circle cx="8.9" cy="19.7" r="1.3" fill="#818CF8"/>' +
+      '<path d="M16 11 L20 16 L16 21 L12 16 Z" fill="url(#clogo-harness-grad)" stroke="#EEF2FF" stroke-width="0.9"/>' +
+      '<circle cx="16" cy="16" r="1.8" fill="#FFFFFF"/>' +
+      '<path d="M13 5.8 H19" stroke="#818CF8" stroke-width="1.2" stroke-linecap="round"/>' +
+      '<circle cx="16" cy="5.8" r="1" fill="#C7D2FE"/>',
 
     /* 4. Databricks · Generative AI Engineer Associate */
     'databricks-genai':
@@ -261,6 +283,7 @@
   var ALIASES = {
     'claude': 'claude-architect',
     'anthropic': 'claude-architect',
+    'harness': 'harness-engineering',
     'databricks': 'databricks-de',
     'nvidia': 'nvidia-genl',
     'k8s': 'k8s-kcna',
@@ -311,6 +334,7 @@
     'claude-architect',
     'claude-developer',
     'claude-associate',
+    'harness-engineering',
     'databricks-genai',
     'databricks-de',
     'nvidia-genl',
