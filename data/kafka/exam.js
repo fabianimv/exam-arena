@@ -1,5 +1,5 @@
 /* =========================================================================
-   data/kafka/exam.js — Apache Kafka & Confluent (CCDAK / Administración) (English)
+   data/kafka/exam.js — Apache Kafka & Confluent (CCDAK / Administration) (English)
    ========================================================================= */
 (function (w) {
   w.EXAMS = w.EXAMS || {};
