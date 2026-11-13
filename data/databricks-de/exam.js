@@ -1,1591 +1,1590 @@
 /* =========================================================================
-   data/databricks-de/exam.js — Databricks Certified Data Engineer Associate
-   50 preguntas de escenario realista, 10 topics, 25 términos de glosario y WHY por opción.
+   data/databricks-de/exam.js — Databricks · Data Engineer Associate (English)
    ========================================================================= */
 (function (w) {
   w.EXAMS = w.EXAMS || {};
   w.EXAMS["databricks-de"] = {
-  "id": "databricks-de",
-  "appId": "databricks-de",
-  "provider": "Databricks",
-  "badge": "Databricks · Data Eng",
-  "icon": "🧱",
-  "color": "#e02424",
-  "featured": true,
-  "title": "Databricks · Data Engineer Associate",
-  "subtitle": "Lakehouse, Delta Lake, Medallion Architecture, Auto Loader, Workflows y Unity Catalog",
-  "passingScore": 70,
-  "domains": {
-    "1": "Databricks Lakehouse Platform (24 %)",
-    "2": "ELT con Spark SQL y Python (29 %)",
-    "3": "Procesamiento Incremental y DLT (22 %)",
-    "4": "Pipelines en Producción y Workflows (16 %)",
-    "5": "Gobernanza de Datos con Unity Catalog (9 %)"
-  },
-  "shortDomains": {
-    "1": "Lakehouse & Delta",
-    "2": "ELT & Spark",
-    "3": "Streaming & DLT",
-    "4": "Workflows",
-    "5": "Unity Catalog"
-  },
-  "topics": [
-    {
-      "id": "dbd-t-1-1",
-      "d": 1,
-      "title": "1.1 · Arquitectura Lakehouse y Modelo Medallion (Bronze, Silver, Gold)",
-      "html": "\n<h4>Fundamentos del Lakehouse: Convergencia de Data Lake y Data Warehouse</h4>\n<p>El paradigma <b>Databricks Lakehouse</b> elimina los silos de datos tradicionales unificando la escalabilidad y bajo coste del almacenamiento de objetos en la nube (AWS S3, Azure ADLS Gen2, GCP Cloud Storage) con las garantías de confiabilidad, rendimiento y gobernanza de un Data Warehouse corporativo. Se fundamenta en formatos abiertos como <b>Apache Parquet</b> combinados con una capa de metadatos transaccional ACID provista por <b>Delta Lake</b>.</p>\n<ul>\n  <li><b>Separación de cómputo y almacenamiento:</b> Permite escalar la infraestructura de cálculo de forma elástica e independiente del volumen de datos almacenado, aprovisionando clústeres efímeros según la demanda.</li>\n  <li><b>Almacenamiento abierto y estándar:</b> Evita el bloqueo de proveedor (vendor lock-in) al guardar los datos físicos en ficheros Parquet estandarizados accesibles mediante múltiples motores.</li>\n  <li><b>Soporte unificado de cargas de trabajo:</b> Facilita sobre una única copia física de los datos la ejecución simultánea de Business Intelligence (BI), SQL analítico, streaming en tiempo real y Machine Learning.</li>\n</ul>\n\n<h4>La Arquitectura Medallion (Bronze &rarr; Silver &rarr; Gold)</h4>\n<p>El diseño Medallion estructura el refinamiento progresivo de los datos a lo largo de tres capas lógicas para asegurar calidad y gobierno desde la ingesta hasta el consumo analítico:</p>\n<table class=\"keytable\">\n<tr><th>Capa</th><th>Propósito Técnico</th><th>Transformaciones Clave</th><th>Consumidores Principales</th></tr>\n<tr><td><b>Bronze (Raw)</b></td><td>Zona de aterrizaje append-only de datos en bruto procedentes de sistemas fuente (APIs, logs, bases de datos OLTP).</td><td>Conservación del formato original o JSON crudo, añadido de metadatos de ingestión (<code>_rescued_data</code>, timestamp de carga, fichero origen).</td><td>Data Engineers, pipelines de re-procesamiento y auditoría técnica.</td></tr>\n<tr><td><b>Silver (Curada)</b></td><td>Vista empresarial limpia, conformada y estandarizada; punto único de verdad de las entidades de negocio.</td><td>Filtrado de nulos críticos, deduplicación, tipado estricto, enriquecimientos con joins de referencia y normalización.</td><td>Data Engineers, Data Scientists para exploración y feature engineering.</td></tr>\n<tr><td><b>Gold (Negocio)</b></td><td>Capa de consumo analítico de alto rendimiento con datos agregados y modelados según las necesidades de negocio.</td><td>Agregaciones temporales, métricas de KPI, esquemas dimensionales (estrella / copo de nieve) y tablas de hechos.</td><td>Analistas de BI, dashboards ejecutivos, aplicaciones operacionales y modelos ML en producción.</td></tr>\n</table>\n\n<div class=\"tip\"><b>Buenas Prácticas en Capa Bronze:</b> Nunca apliques transformaciones de limpieza de negocio ni filtrado de columnas en la capa Bronze. El objetivo primordial de Bronze es actuar como réplica fiel e inmutable del origen para permitir reprocesar todo el histórico ante cambios de lógica sin requerir extraer nuevamente los datos de los sistemas transaccionales.</div>\n"
+    "id": "databricks-de",
+    "appId": "databricks-de",
+    "provider": "Databricks",
+    "badge": "Databricks · Data Eng",
+    "icon": "🧱",
+    "color": "#e02424",
+    "featured": true,
+    "title": "Databricks · Data Engineer Associate",
+    "subtitle": "Lakehouse, Delta Lake, Medallion Architecture, Auto Loader, Workflows, and Unity Catalog",
+    "passingScore": 70,
+    "domains": {
+      "1": "Databricks Lakehouse Platform (24%)",
+      "2": "ELT with Spark SQL and Python (29%)",
+      "3": "Incremental Processing and DLT (22%)",
+      "4": "Production Pipelines and Workflows (16%)",
+      "5": "Data Governance with Unity Catalog (9%)"
     },
-    {
-      "id": "dbd-t-1-2",
-      "d": 1,
-      "title": "1.2 · Delta Lake Internals: ACID, _delta_log, Time Travel, VACUUM y Liquid Clustering",
-      "html": "\n<h4>Anatomía Interna de Delta Lake: El Registro de Transacciones (_delta_log)</h4>\n<p>Delta Lake implementa transacciones ACID sobre almacenamiento de objetos mediante un registro de transacciones ordenado y determinista ubicado en el subdirectorio <code>_delta_log/</code> en la raíz de cada tabla:</p>\n<ul>\n  <li><b>Ficheros de Commit JSON:</b> Cada operación (insert, update, delete) genera un fichero secuencial JSON atómico (<code>000000.json</code>, <code>000001.json</code>) que contiene acciones de adición (<code>add</code>) y eliminación lógica (<code>remove</code>) de ficheros Parquet, junto con estadísticas de columnas (mínimos, máximos, conteo de nulos).</li>\n  <li><b>Checkpoints Parquet:</b> Cada 10 transacciones (por defecto), Delta Lake compacta el estado acumulado en un fichero <code>.checkpoint.parquet</code> (ej. <code>000010.checkpoint.parquet</code>), evitando escanear miles de ficheros JSON para reconstruir el estado actual.</li>\n  <li><b>Control de Concurrencia Optimista (OCC):</b> Los escritores asumen que no habrá colisiones; si dos transacciones modifican los mismos ficheros simultáneamente, Delta verifica si los conflictos son reconciliables o falla la segunda con <code>ConcurrentModificationException</code> para garantizar serializabilidad.</li>\n</ul>\n\n<h4>Time Travel y Restauración Histórica</h4>\n<p>Gracias al registro inmutable de commits, Delta Lake permite consultar versiones previas de la tabla sin duplicar físicamente los ficheros subyacentes:</p>\n<ul>\n  <li><b>Sintaxis SQL:</b> <code>SELECT * FROM tabla VERSION AS OF 15;</code> o <code>SELECT * FROM tabla TIMESTAMP AS OF '2024-01-15 10:00:00';</code>.</li>\n  <li><b>Restauración:</b> <code>RESTORE TABLE tabla TO VERSION AS OF 12;</code> crea un nuevo commit que devuelve la tabla al estado exacto de dicha versión.</li>\n</ul>\n\n<h4>Mantenimiento Físico: OPTIMIZE, Liquid Clustering y VACUUM</h4>\n<table class=\"keytable\">\n<tr><th>Comando / Técnica</th><th>Función y Mecanismo Interno</th><th>Impacto Operacional</th></tr>\n<tr><td><b>OPTIMIZE (Bin-packing)</b></td><td>Compacta colecciones de ficheros pequeños en ficheros uniformes de ~1 GB mediante operaciones atómicas de reescritura.</td><td>Acelera drásticamente las lecturas al reducir el sobrecoste de apertura de ficheros en el almacenamiento de nube.</td></tr>\n<tr><td><b>Liquid Clustering (CLUSTER BY)</b></td><td>Reemplaza el particionamiento físico rígido y <code>Z-ORDER</code>. Organiza los datos de forma multidimensional y dinámica según columnas de consulta habituales.</td><td>Evita problemas de particionamiento excesivo (over-partitioning) y permite modificar las claves de ordenación sin reescribir toda la tabla.</td></tr>\n<tr><td><b>VACUUM</b></td><td>Elimina físicamente del almacenamiento los ficheros Parquet que fueron marcados como eliminados (<code>remove</code>) y superan el umbral de retención.</td><td>Libera espacio en disco. Su retención por defecto es de <b>7 días</b>; ejecutarlo con retención cero rompe el Time Travel y arriesga corromper lecturas concurrentes activas.</td></tr>\n</table>\n\n<div class=\"tip\"><b>Peligro de VACUUM con retención reducida:</b> La propiedad <code>spark.databricks.delta.vacuum.retentionCheck.enabled = false</code> permite ejecutar <code>VACUUM</code> con menos de 168 horas (7 días). En entornos productivos está fuertemente desaconsejado, ya que cualquier consulta de larga duración que esté leyendo ficheros Parquet antiguos fallará si estos son purgados mientras la consulta sigue en ejecución.</div>\n"
+    "shortDomains": {
+      "1": "Lakehouse & Delta",
+      "2": "ELT & Spark",
+      "3": "Streaming & DLT",
+      "4": "Workflows",
+      "5": "Unity Catalog"
     },
-    {
-      "id": "dbd-t-2-1",
-      "d": 2,
-      "title": "2.1 · Ingestión y Extracción con Spark SQL, Funciones de Orden Superior y JSON",
-      "html": "\n<h4>Lectura Directa de Archivos e Ingestión con Spark SQL</h4>\n<p>Spark SQL permite interactuar directamente con ficheros almacenados en almacenamiento de nube mediante sintaxis ANSI SQL o la API DataFrame:</p>\n<ul>\n  <li><b>Consultas directas a ficheros:</b> <code>SELECT * FROM parquet.`/ruta/directorio/`</code> o <code>SELECT * FROM json.`/ruta/logs/`</code>.</li>\n  <li><b>Comando COPY INTO:</b> Instrucción SQL declarativa e idempotente recomendada para ingesta por lotes de millones de ficheros nuevos en tablas Delta existentes:\n    <pre><code>COPY INTO delta.`/ruta/delta_table`\nFROM `/ruta/landing/`\nFILEFORMAT = CSV\nFORMAT_OPTIONS ('header' = 'true', 'inferSchema' = 'true')\nCOPY_OPTIONS ('mergeSchema' = 'true');</code></pre>\n  </li>\n</ul>\n\n<h4>Tratamiento de Datos Semiestructurados y Parsing de JSON</h4>\n<p>En pipelines modernos, los eventos aterrizan como cadenas JSON sin tipar. Spark SQL ofrece funciones nativas optimizadas:</p>\n<ul>\n  <li><b>from_json(col, schema):</b> Deserializa una columna de texto JSON a una estructura fuertemente tipada (<code>STRUCT</code> o <code>ARRAY</code>) según el esquema provisto.</li>\n  <li><b>to_json(col):</b> Convierte una estructura compleja (<code>STRUCT</code> o <code>MAP</code>) en una cadena JSON estandarizada.</li>\n  <li><b>schema_of_json(json_str):</b> Infiere automáticamente la firma del esquema a partir de una muestra representativa de texto JSON.</li>\n  <li><b>Operadores de navegación:</b> Acceso a atributos mediante notación punto (<code>cliente.direccion.ciudad</code>) o el operador dos puntos (<code>payload:id::int</code>).</li>\n</ul>\n\n<h4>Funciones de Orden Superior (Higher-Order Functions) en Arrays</h4>\n<p>Permiten manipular colecciones y arrays anidados directamente en SQL sin recurrir a costosas operaciones de desanidado (<code>explode</code>) seguidas de agrupaciones:</p>\n<table class=\"keytable\">\n<tr><th>Función</th><th>Firma / Ejemplo</th><th>Propósito</th></tr>\n<tr><td><b>TRANSFORM</b></td><td><code>TRANSFORM(items, i -> i.precio * 1.21)</code></td><td>Aplica una expresión de transformación elemento a elemento, devolviendo un nuevo array transformado.</td></tr>\n<tr><td><b>FILTER</b></td><td><code>FILTER(transacciones, t -> t.monto &gt; 100)</code></td><td>Filtra los elementos del array conservando solo aquellos que cumplen el predicado booleano.</td></tr>\n<tr><td><b>EXISTS</b></td><td><code>EXISTS(etiquetas, tag -> tag = 'urgente')</code></td><td>Evalúa si al menos un elemento del array satisface la condición booleana (devuelve true/false).</td></tr>\n<tr><td><b>AGGREGATE</b></td><td><code>AGGREGATE(lineas, 0.0, (acc, x) -> acc + x.subtotal)</code></td><td>Reduce el array a un único valor acumulado mediante una función acumuladora y valor inicial.</td></tr>\n</table>\n\n<div class=\"tip\"><b>Rendimiento de Higher-Order Functions:</b> El uso de <code>TRANSFORM</code> y <code>FILTER</code> es drásticamente más eficiente que descomponer un array con <code>explode()</code> y volver a agregarlo con <code>collect_list()</code>, ya que evita barajados masivos de datos (shuffles) a través de la red del clúster.</div>\n"
-    },
-    {
-      "id": "dbd-t-2-2",
-      "d": 2,
-      "title": "2.2 · Manipulación Avanzada, Deduplicación, MERGE INTO y Funciones de Ventana",
-      "html": "\n<h4>Deduplicación de Datos en Pipelines ELT</h4>\n<p>La ingesta desde orígenes distribuidos a menudo produce registros duplicados debido a reintentos de red con semántica at-least-once. Existen dos enfoques principales de deduplicación:</p>\n<ul>\n  <li><b>dropDuplicates([cols]):</b> Método rápido en la API DataFrame de PySpark que conserva una fila arbitraria para cada clave única identificada.</li>\n  <li><b>Deduplicación con Ventana (Window Function):</b> Enfoque determinista mediante SQL cuando se requiere conservar el registro más reciente según una marca de tiempo:\n    <pre><code>WITH clasificados AS (\n  SELECT *,\n    ROW_NUMBER() OVER (PARTITION BY cliente_id ORDER BY updated_at DESC) AS ranking\n  FROM raw_eventos\n)\nSELECT * EXCEPT(ranking) FROM clasificados WHERE ranking = 1;</code></pre>\n  </li>\n</ul>\n\n<h4>Upserts Atómicos con MERGE INTO</h4>\n<p>Delta Lake proporciona soporte nativo completo para operaciones atómicas de <code>MERGE INTO</code>, combinando inserciones, actualizaciones y borrados en una única transacción ACID:</p>\n<pre><code>MERGE INTO target_silver AS t\nUSING source_updates AS s\nON t.pedido_id = s.pedido_id\nWHEN MATCHED AND s.es_cancelado = true THEN\n  DELETE\nWHEN MATCHED THEN\n  UPDATE SET t.estado = s.estado, t.monto = s.monto, t.fecha_actualizacion = current_timestamp()\nWHEN NOT MATCHED THEN\n  INSERT (pedido_id, estado, monto, fecha_creacion, fecha_actualizacion)\n  VALUES (s.pedido_id, s.estado, s.monto, s.fecha_evento, current_timestamp());</code></pre>\n\n<h4>Tipos de UDFs (User-Defined Functions) y Rendimiento</h4>\n<table class=\"keytable\">\n<tr><th>Tipo de UDF</th><th>Lenguaje / Entorno</th><th>Rendimiento</th><th>Caso de Uso Óptimo</th></tr>\n<tr><td><b>SQL UDF</b></td><td>ANSI SQL nativo</td><td><b>Máximo</b>: Optimizada por Catalyst y acelerada por el motor Photon.</td><td>Lógica de negocio estándar, cálculos matemáticos, transformaciones de cadenas.</td></tr>\n<tr><td><b>Pandas UDF (Vectorized)</b></td><td>Python + PyArrow</td><td><b>Alto</b>: Procesa lotes completos en memoria columnar mediante Apache Arrow.</td><td>Transformaciones estadísticas complejas, inferencia de modelos ML en lotes.</td></tr>\n<tr><td><b>Python UDF Estándar</b></td><td>Python puro (row-by-row)</td><td><b>Bajo</b>: Incurre en sobrecoste masivo de serialización IPC/Py4J entre JVM y el runtime Python.</td><td>Desaconsejada salvo para librerías legacy sin soporte columnar.</td></tr>\n</table>\n\n<div class=\"tip\"><b>Tablas Administradas vs Externas:</b> Al ejecutar <code>DROP TABLE</code> sobre una tabla <b>Managed</b> (administrada), Databricks elimina tanto la definición de metadatos en el catálogo como los archivos Parquet físicos subyacentes. En una tabla <b>External</b> (definida con cláusula <code>LOCATION</code>), <code>DROP TABLE</code> solo elimina los metadatos, preservando íntegros los ficheros de datos en el almacenamiento de nube.</div>\n"
-    },
-    {
-      "id": "dbd-t-3-1",
-      "d": 3,
-      "title": "3.1 · Structured Streaming, Auto Loader (cloudFiles) y Checkpointing",
-      "html": "\n<h4>El Paradigma de Structured Streaming</h4>\n<p>Spark Structured Streaming procesa flujos continuos tratando las fuentes de datos como <b>tablas ilimitadas (unbounded tables)</b> sobre las que se añaden nuevos registros continuamente. El motor divide internamente el procesamiento en micro-lotes de baja latencia o streaming continuo.</p>\n\n<h4>Modos de Salida (Output Modes)</h4>\n<table class=\"keytable\">\n<tr><th>Output Mode</th><th>Comportamiento en cada Trigger</th><th>Restricciones y Casos de Uso</th></tr>\n<tr><td><b>Append</b> (por defecto)</td><td>Solo se emiten al sink los registros nuevos que han llegado en el micro-lote actual.</td><td>Requerido para pipelines ELT incrementales. En consultas con agregaciones temporales exige definir una marca de agua (Watermark).</td></tr>\n<tr><td><b>Complete</b></td><td>Se reescribe y emite la totalidad de la tabla de resultados acumulada en cada micro-lote.</td><td>Obligatorio para agregaciones sin ventana o métricas de conteo global; no compatible con sinks append-only directos.</td></tr>\n<tr><td><b>Update</b></td><td>Solo se escriben en el sumidero aquellas filas cuyo estado agregado ha sido modificado respecto al trigger previo.</td><td>Ideal para mantener tablas de estado vivas o actualizar dashboards externos.</td></tr>\n</table>\n\n<h4>Auto Loader (format(\"cloudFiles\")): Ingestión Incremental Escalable</h4>\n<p><b>Auto Loader</b> es la tecnología propietaria de Databricks para detectar e ingerir de forma incremental millones de nuevos archivos depositados en el almacenamiento de objetos de la nube:</p>\n<ul>\n  <li><b>Modo Directory Listing:</b> Escanea periódicamente el directorio; óptimo para rutas con menos de 1 millón de ficheros y volumen moderado.</li>\n  <li><b>Modo File Notification:</b> Utiliza servicios de cola y eventos en la nube (AWS SNS/SQS, Azure Event Grid, GCP Pub/Sub) para recibir avisos de nuevos ficheros sin escanear carpetas masivas.</li>\n  <li><b>Inferencia y Evolución de Esquemas:</b>\n    <pre><code>spark.readStream.format(\"cloudFiles\")\n  .option(\"cloudFiles.format\", \"json\")\n  .option(\"cloudFiles.schemaLocation\", \"/checkpoints/schema_dir\")\n  .option(\"cloudFiles.schemaEvolutionMode\", \"addNewColumns\")\n  .load(\"/mnt/raw_landing/\")</code></pre>\n  </li>\n  <li><b>Columna _rescued_data:</b> Captura cualquier columna inesperada, dato corrupto o tipo incompatible en un campo JSON estructurado sin romper la ingesta ni descartar registros.</li>\n</ul>\n\n<h4>Checkpointing y Marcas de Agua (Watermarks)</h4>\n<ul>\n  <li><b>checkpointLocation:</b> Directorio persistente obligatorio en almacenamiento de nube donde el motor guarda el log de offsets leídos, commits y estado de agregaciones. Asegura recuperación ante caídas y semántica <b>exactly-once</b>.</li>\n  <li><b>withWatermark(col, delayThreshold):</b> Establece el umbral temporal máximo admisible para eventos retrasados (ej. <code>withWatermark(\"event_time\", \"10 minutes\")</code>). Permite al motor descartar datos antiguos y purgar el State Store en memoria para prevenir fugas de RAM (OOM).</li>\n</ul>\n"
-    },
-    {
-      "id": "dbd-t-3-2",
-      "d": 3,
-      "title": "3.2 · Delta Live Tables (DLT): Expectativas, Materialized Views y Streaming Tables",
-      "html": "\n<h4>Arquitectura Declarativa de Delta Live Tables (DLT)</h4>\n<p><b>Delta Live Tables (DLT)</b> es el marco de trabajo declarativo de Databricks para construir y orquestar canalizaciones de datos fiables en SQL o Python. El desarrollador define las transformaciones deseadas y DLT se encarga automáticamente de inferir el grafo de dependencias (DAG), gestionar la infraestructura de clústeres, implementar checkpoints y capturar métricas de calidad.</p>\n\n<h4>Datasets en DLT: Streaming Tables vs Materialized Views</h4>\n<table class=\"keytable\">\n<tr><th>Tipo de Objeto</th><th>Sintaxis Declarativa (SQL)</th><th>Mecanismo de Procesamiento</th><th>Caso de Uso Recomendado</th></tr>\n<tr><td><b>Streaming Table</b></td><td><code>CREATE OR REFRESH STREAMING TABLE silver_events AS SELECT * FROM STREAM(raw_source)</code></td><td>Procesamiento estrictamente incremental (append-only); solo procesa datos que nunca antes han sido leídos.</td><td>Ingesta cruda desde Auto Loader, mensajes de colas Kafka, eventos temporales de alto volumen.</td></tr>\n<tr><td><b>Materialized View</b></td><td><code>CREATE OR REFRESH MATERIALIZED VIEW gold_kpis AS SELECT date, sum(total) FROM silver_events GROUP BY date</code></td><td>Calcula y persiste los resultados según el estado más reciente de las tablas fuente, gestionando actualizaciones automáticamente.</td><td>Agregaciones de negocio complejas, deduplicaciones, uniones dimensionales (joins) y capa Gold.</td></tr>\n</table>\n\n<h4>Expectativas de Calidad de Datos (Data Quality Expectations)</h4>\n<p>DLT permite definir restricciones de integridad declarativas aplicadas en vuelo durante la ejecución de los pipelines:</p>\n<table class=\"keytable\">\n<tr><th>Cláusula de Expectativa</th><th>Acción ante Registro Inválido</th><th>Comportamiento del Pipeline</th></tr>\n<tr><td><code>CONSTRAINT v_email EXPECT (email IS NOT NULL)</code></td><td>Conserva el registro en la tabla destino y emite una alerta métrica en el Event Log.</td><td>El pipeline continúa sin interrupción; ideal para monitorización preventiva de calidad.</td></tr>\n<tr><td><code>EXPECT (edad &gt;= 18) ON VIOLATION DROP ROW</code></td><td>Descarta la fila inválida de la tabla destino, registrando el conteo de filas eliminadas.</td><td>El pipeline continúa; garantiza que solo datos conformes avancen a capas Silver/Gold.</td></tr>\n<tr><td><code>EXPECT (id IS NOT NULL) ON VIOLATION FAIL UPDATE</code></td><td>Detiene de inmediato la ejecución y marca el pipeline en estado de error fatal.</td><td>Interrumpe el trabajo de inmediato; obligatorio para claves primarias o datos críticos financieros.</td></tr>\n</table>\n\n<div class=\"tip\"><b>Modo Triggered vs Continuous en DLT:</b> En modo <b>Continuous</b>, los clústeres permanecen activos para procesar datos con latencia de segundos. En modo <b>Triggered</b>, el pipeline procesa todos los datos pendientes acumulados y se detiene, optimizando sustancialmente el consumo de DBUs en ingestas horarias o diarias.</div>\n"
-    },
-    {
-      "id": "dbd-t-4-1",
-      "d": 4,
-      "title": "4.1 · Databricks Workflows: Tipos de Clúster, Orquestación de Tareas y Alertas",
-      "html": "\n<h4>Databricks Workflows: Orquestación Integral de Tareas (Multi-Task Jobs)</h4>\n<p><b>Databricks Workflows</b> es el orquestador nativo totalmente administrado que permite construir flujos de trabajo basados en grafos acíclicos dirigidos (DAG). Soporta tareas heterogéneas incluyendo Notebooks, scripts Python, consultas SQL/dashboards, pipelines DLT y modelos dbt.</p>\n\n<h4>Tipos de Cómputo para Workflows: Job Clusters vs All-Purpose Clusters</h4>\n<table class=\"keytable\">\n<tr><th>Característica</th><th>Job Cluster (Automated)</th><th>All-Purpose Cluster (Interactivo)</th></tr>\n<tr><td><b>Ciclo de Vida</b></td><td>Efímero: Databricks aprovisiona el clúster al iniciar el job y lo destruye inmediatamente al finalizar la ejecución.</td><td>Persistente: Se mantiene en ejecución o en espera según la política de apagado automático (auto-termination).</td></tr>\n<tr><td><b>Coste de DBU</b></td><td><b>Tarifa reducida (~50 % a 60 % de ahorro)</b> frente a los clústeres All-Purpose.</td><td>Tarifa estándar completa de computación interactiva.</td></tr>\n<tr><td><b>Aislamiento</b></td><td>Aislamiento total de recursos y bibliotecas; previene interferencias entre trabajos concurrentes.</td><td>Compartido entre múltiples usuarios o notebooks en desarrollo.</td></tr>\n<tr><td><b>Recomendación</b></td><td><b>Estándar mandatorio para cargas de producción y jobs programados.</b></td><td>Uso exclusivo para desarrollo interactivo y análisis exploratorio.</td></tr>\n</table>\n\n<h4>Paso de Parámetros entre Tareas con TaskValues</h4>\n<p>Databricks permite transferir metadatos y valores dinámicos entre nodos de un DAG mediante la utilidad <code>taskValues</code>:</p>\n<ul>\n  <li><b>Emisor (Tarea upstream):</b> <code>dbutils.jobs.taskValues.set(key = \"batch_count\", value = 14500)</code></li>\n  <li><b>Receptor (Tarea downstream):</b> <code>total = dbutils.jobs.taskValues.get(taskKey = \"tarea_ingesta\", key = \"batch_count\", default = 0)</code></li>\n</ul>\n\n<h4>Resiliencia: Reparación de Trabajos (Repair and Rerun)</h4>\n<p>Cuando un job multi-tarea falla en una de sus ramas intermedias, la funcionalidad <b>Repair and Rerun</b> permite re-ejecutar exclusivamente las tareas fallidas y sus dependencias aguas abajo, sin volver a gastar cómputo en tareas que ya concluyeron exitosamente en la corrida previa.</p>\n\n<div class=\"tip\"><b>Políticas de Reintento y Alertas:</b> Cada tarea en un Workflow permite configurar reintentos automáticos (<code>retries</code>) con intervalos mínimos de espera (<code>min_retry_interval_millis</code>) y notificaciones dirigidas por evento (éxito, fallo, duración excedida) enviadas a correos electrónicos o webhooks corporativos (Slack, PagerDuty).</div>\n"
-    },
-    {
-      "id": "dbd-t-4-2",
-      "d": 4,
-      "title": "4.2 · Ciclo de Vida: Repos Git, CI/CD, Cluster Policies y Gobernanza de Costes",
-      "html": "\n<h4>Integración con Control de Versiones: Databricks Repos</h4>\n<p><b>Databricks Repos</b> proporciona integración bidireccional de nivel empresarial con los principales proveedores Git (GitHub, GitLab, Bitbucket, Azure DevOps). Permite a los equipos de ingeniería:</p>\n<ul>\n  <li>Organizar el código en ramas de desarrollo (feature branches) y realizar operaciones de commit, push, pull y merge directamente desde el espacio de trabajo.</li>\n  <li>Importar y estructurar código modular en paquetes Python puros (<code>.py</code>) reutilizables mediante sentencias estándar <code>import</code> dentro de los notebooks.</li>\n  <li>Asegurar que los jobs productivos se ejecuten apuntando a ramas estables protegidas (ej. <code>main</code> o tags de release).</li>\n</ul>\n\n<h4>Automatización CI/CD con Databricks Asset Bundles (DABs)</h4>\n<p><b>Databricks Asset Bundles (DABs)</b> permite gestionar proyectos de datos como infraestructura como código (IaC). Mediante ficheros declarativos YAML (<code>databricks.yml</code>), los desarrolladores definen pipelines DLT, Workflows, permisos y configuraciones, desplegándolos programáticamente a través de entornos de desarrollo, pruebas y producción con la CLI de Databricks.</p>\n\n<h4>Políticas de Clúster (Cluster Policies) y Control de Costes</h4>\n<p>Las Cluster Policies imponen reglas estrictas sobre qué tipo de recursos pueden ser aprovisionados por los ingenieros de datos en el workspace:</p>\n<ul>\n  <li><b>Limitación de Tipos de Instancia:</b> Restringe las familias de máquinas virtuales permitidas (ej. prohibir GPUs costosas en notebooks analíticos).</li>\n  <li><b>Auto-Terminación Forzada:</b> Obliga a configurar un tiempo máximo de inactividad (ej. 20 minutos) para apagar clústeres olvidados automáticamente.</li>\n  <li><b>Etiquetado Mandatorio (Custom Tags):</b> Obliga a asignar etiquetas como <code>CostCenter</code>, <code>Project</code> o <code>Owner</code> en cada clúster para desglosar la facturación en la nube.</li>\n</ul>\n\n<h4>El Motor Photon: Aceleración Vectorizada en C++</h4>\n<p><b>Photon</b> es el motor de ejecución nativo desarrollado en C++ integrado en el runtime de Databricks que sustituye el motor de ejecución de la JVM por procesamiento vectorizado SIMD moderno. Aunque tiene un recargo por DBU, Photon reduce drásticamente los tiempos de procesamiento de consultas SQL pesadas, scans y joins, logrando frecuentemente un coste total de propiedad (TCO) menor.</p>\n"
-    },
-    {
-      "id": "dbd-t-5-1",
-      "d": 5,
-      "title": "5.1 · Unity Catalog: Espacio de Nombres de 3 Niveles, Metastore y External Locations",
-      "html": "\n<h4>Arquitectura Centralizada de Unity Catalog</h4>\n<p><b>Unity Catalog</b> es la solución integral de gobernanza de Databricks para datos e inteligencia artificial. A diferencia de las soluciones tradicionales basadas en Hive Metastore local por clúster, Unity Catalog opera a nivel de cuenta y provee:</p>\n<ul>\n  <li><b>Metastore Regional Unificado:</b> Un único almacén de metadatos centralizado por región geográfica que se vincula a múltiples workspaces de Databricks, facilitando el gobierno compartido.</li>\n  <li><b>Espacio de Nombres de 3 Niveles (Three-Level Namespace):</b> La resolución de cualquier objeto de datos sigue la jerarquía canónica:\n    <br/><code>&lt;catalogo&gt;.&lt;esquema&gt;.&lt;objeto&gt;</code> (ejemplo: <code>corp_prod.finanzas.facturacion</code>).</li>\n</ul>\n\n<h4>Objetos Securizables y Almacenamiento Seguro</h4>\n<table class=\"keytable\">\n<tr><th>Objeto Securizable</th><th>Definición y Rol Arquitectónico</th><th>Gobernanza y Permisos</th></tr>\n<tr><td><b>Storage Credential</b></td><td>Encapsula una identidad administrada de la nube (AWS IAM Role, Azure Managed Identity o GCP Service Account) con permisos de lectura/escritura en almacenamiento de objetos.</td><td>Solo los administradores del Metastore pueden crearlas; evita exponer llaves secretas o tokens a los usuarios.</td></tr>\n<tr><td><b>External Location</b></td><td>Asocia una <code>Storage Credential</code> específica con un prefijo URL de almacenamiento de nube (ej. <code>s3://mi-bucket-datalake/silver/</code>).</td><td>Permite otorgar privilegios como <code>CREATE EXTERNAL TABLE</code> o <code>READ FILES</code> a ingenieros sin darles acceso IAM directo.</td></tr>\n<tr><td><b>Managed Storage</b></td><td>Ubicación de almacenamiento raíz asignada a nivel de catálogo o esquema donde se guardan automáticamente las tablas administradas.</td><td>Al borrar una Managed Table con <code>DROP TABLE</code>, Unity Catalog purga automáticamente los ficheros físicos del bucket.</td></tr>\n<tr><td><b>Volumes</b></td><td>Objeto de Unity Catalog diseñado para gobernar ficheros no estructurados o semiestructurados (PDFs, imágenes, CSVs crudos, checkpoints).</td><td>Disponibles como <b>Managed Volumes</b> o <b>External Volumes</b>, accesibles vía rutas POSIX en <code>/Volumes/catalogo/esquema/volumen/</code>.</td></tr>\n</table>\n\n<div class=\"tip\"><b>Resolución de Objetos sin Prefijo Completo:</b> Si no se especifica el nombre de 3 niveles, Databricks recurre al catálogo y esquema activos en la sesión actual configurados mediante <code>USE CATALOG catalogo;</code> y <code>USE SCHEMA esquema;</code>.</div>\n"
-    },
-    {
-      "id": "dbd-t-5-2",
-      "d": 5,
-      "title": "5.2 · Gobernanza en Unity Catalog: Permisos GRANT, Dynamic Views, Filtros y Linaje",
-      "html": "\n<h4>Control de Acceso Declarativo (ANSI SQL RBAC)</h4>\n<p>Unity Catalog implementa un modelo de privilegios estándar ANSI SQL administrado mediante sentencias declarativas de otorgamiento y revocación de permisos sobre identidades centralizadas a nivel de cuenta (usuarios y grupos):</p>\n<pre><code>GRANT USAGE ON CATALOG corp_prod TO `analistas_bi`;\nGRANT USAGE ON SCHEMA corp_prod.ventas TO `analistas_bi`;\nGRANT SELECT ON TABLE corp_prod.ventas.resumen_anual TO `analistas_bi`;</code></pre>\n<p><i>Regla fundamental de herencia:</i> Para acceder a cualquier tabla, un usuario requiere el privilegio <code>USAGE</code> en todos los niveles superiores de la jerarquía (tanto en el catálogo como en el esquema correspondiente).</p>\n\n<h4>Seguridad Granular: Row Filters y Column Masks</h4>\n<p>Unity Catalog permite implementar políticas de seguridad a nivel de fila y enmascaramiento dinámico de columnas sin necesidad de duplicar tablas físicas:</p>\n<ul>\n  <li><b>Row Filters (Filtros de Fila):</b> Funciones SQL que evalúan si la sesión actual puede visualizar una fila determinada:\n    <pre><code>CREATE FUNCTION region_filter(region STRING)\nRETURN IF(IS_ACCOUNT_GROUP_MEMBER('admin_global') OR region = 'EMEA', true, false);\n\nALTER TABLE corp_prod.ventas.pedidos\nSET ROW FILTER region_filter ON (region);</code></pre>\n  </li>\n  <li><b>Column Masks (Máscaras de Columna):</b> Ofuscan datos sensibles (PII, tarjetas de crédito) para grupos no autorizados:\n    <pre><code>CREATE FUNCTION mask_tarjeta(numero STRING)\nRETURN IF(IS_ACCOUNT_GROUP_MEMBER('auditoria_financiera'), numero, CONCAT('****-****-****-', RIGHT(numero, 4)));\n\nALTER TABLE corp_prod.finanzas.pagos\nALTER COLUMN tarjeta_credito SET MASK mask_tarjeta;</code></pre>\n  </li>\n  <li><b>Dynamic Views (Vistas Dinámicas):</b> Método tradicional mediante funciones integradas como <code>current_user()</code> o <code>is_account_group_member()</code> dentro de la cláusula <code>WHERE</code> de una vista estándar.</li>\n</ul>\n\n<h4>Linaje de Datos Automatizado (Automated Lineage)</h4>\n<p>Unity Catalog registra automáticamente el <b>linaje de datos a nivel de tabla y columna</b> en tiempo de ejecución para cualquier consulta ejecutada en Databricks, sin necesidad de librerías adicionales ni instrumentación en el código. Facilita auditorías de cumplimiento normativo (GDPR/CCPA) y análisis visual de impacto ante cambios de esquema.</p>\n"
-    }
-  ],
-  "questions": [
-    {
-      "id": "dbd-01",
-      "d": 1,
-      "t": "Arquitectura Lakehouse vs Data Lake/Data Warehouse",
-      "q": "Tu organización financiera almacena terabytes de transacciones en un Data Lake de objetos en la nube (formato Parquet). El equipo de análisis se queja de lecturas inconsistentes cuando los pipelines de ingesta actualizan datos concurrentemente. Además, la auditoría exige eliminar registros por derecho al olvido (GDPR), lo que obliga a reescribir particiones completas manualmente. ¿Qué ventaja técnica fundamental aporta migrar estas tablas a `Delta Lake` en el Lakehouse para resolver ambos problemas?",
-      "o": [
-        "Añade un registro transaccional ACID (`_delta_log`) que garantiza aislamiento serializable en lecturas concurrentes y habilita sentencias `DELETE` a nivel de fila.",
-        "Convierte el almacenamiento de objetos en un cluster transaccional HDFS privado con bloqueos distribuidos síncronos gestionados por un servicio Apache ZooKeeper externo de alta disponibilidad.",
-        "Duplica automáticamente todos los archivos en un clúster dedicado de Data Warehouse relacional para procesar consultas analíticas sin interactuar con el Data Lake abierto.",
-        "Delega el control de concurrencia y los borrados en índices secundarios creados dentro de la memoria RAM del nodo driver de Databricks durante cada sesión interactiva."
-      ],
-      "a": 0,
-      "e": "Delta Lake soluciona la falta de transacciones del Data Lake tradicional mediante su registro de transacciones ACID (`_delta_log`). Este log garantiza lecturas consistentes mediante Control de Concurrencia Optimista (OCC) y aislamiento de instantáneas (snapshot isolation), permitiendo ejecutar operaciones `DELETE`, `UPDATE` y `MERGE INTO` a nivel de registro sin reescribir manualmente particiones enteras.",
-      "why": [
+    "topics": [
+      {
+        "id": "dbd-t-1-1",
+        "d": 1,
+        "title": "1.1 · Lakehouse Architecture and the Medallion Model (Bronze, Silver, Gold)",
+        "html": "\n<h4>Lakehouse Fundamentals: Convergence of Data Lake and Data Warehouse</h4>\n<p>The <b>Databricks Lakehouse</b> paradigm eliminates traditional data silos by unifying the scalability and low cost of cloud object storage (AWS S3, Azure ADLS Gen2, GCP Cloud Storage) with the reliability, performance, and governance guarantees of an enterprise Data Warehouse. It is built on open formats such as <b>Apache Parquet</b> combined with an ACID transactional metadata layer provided by <b>Delta Lake</b>.</p>\n<ul>\n  <li><b>Separation of compute and storage:</b> Allows the compute infrastructure to scale elastically and independently of the volume of stored data, provisioning ephemeral clusters on demand.</li>\n  <li><b>Open, standard storage:</b> Avoids vendor lock-in by keeping the physical data in standardized Parquet files accessible through multiple engines.</li>\n  <li><b>Unified workload support:</b> Enables simultaneous Business Intelligence (BI), analytical SQL, real-time streaming, and Machine Learning on a single physical copy of the data.</li>\n</ul>\n\n<h4>The Medallion Architecture (Bronze &rarr; Silver &rarr; Gold)</h4>\n<p>The Medallion design structures the progressive refinement of data across three logical layers to ensure quality and governance from ingestion to analytical consumption:</p>\n<table class=\"keytable\">\n<tr><th>Layer</th><th>Technical Purpose</th><th>Key Transformations</th><th>Main Consumers</th></tr>\n<tr><td><b>Bronze (Raw)</b></td><td>Append-only landing zone for raw data coming from source systems (APIs, logs, OLTP databases).</td><td>Preservation of the original format or raw JSON, addition of ingestion metadata (<code>_rescued_data</code>, load timestamp, source file).</td><td>Data Engineers, reprocessing pipelines, and technical auditing.</td></tr>\n<tr><td><b>Silver (Curated)</b></td><td>Clean, conformed, and standardized enterprise view; single source of truth for business entities.</td><td>Filtering of critical nulls, deduplication, strict typing, enrichment with reference joins, and normalization.</td><td>Data Engineers, Data Scientists for exploration and feature engineering.</td></tr>\n<tr><td><b>Gold (Business)</b></td><td>High-performance analytical consumption layer with aggregated data modeled to business needs.</td><td>Time-based aggregations, KPI metrics, dimensional schemas (star / snowflake), and fact tables.</td><td>BI Analysts, executive dashboards, operational applications, and production ML models.</td></tr>\n</table>\n\n<div class=\"tip\"><b>Best Practices in the Bronze Layer:</b> Never apply business cleansing transformations or column filtering in the Bronze layer. The primary goal of Bronze is to act as a faithful, immutable replica of the source so that the entire history can be reprocessed when logic changes, without having to extract the data again from the transactional systems.</div>\n"
+      },
+      {
+        "id": "dbd-t-1-2",
+        "d": 1,
+        "title": "1.2 · Delta Lake Internals: ACID, _delta_log, Time Travel, VACUUM, and Liquid Clustering",
+        "html": "\n<h4>Delta Lake Internal Anatomy: The Transaction Log (_delta_log)</h4>\n<p>Delta Lake implements ACID transactions on object storage through an ordered, deterministic transaction log located in the <code>_delta_log/</code> subdirectory at the root of each table:</p>\n<ul>\n  <li><b>JSON Commit Files:</b> Each operation (insert, update, delete) generates an atomic sequential JSON file (<code>000000.json</code>, <code>000001.json</code>) containing actions that add (<code>add</code>) and logically remove (<code>remove</code>) Parquet files, along with column statistics (minimums, maximums, null counts).</li>\n  <li><b>Parquet Checkpoints:</b> Every 10 transactions (by default), Delta Lake compacts the accumulated state into a <code>.checkpoint.parquet</code> file (e.g., <code>000010.checkpoint.parquet</code>), avoiding scanning thousands of JSON files to reconstruct the current state.</li>\n  <li><b>Optimistic Concurrency Control (OCC):</b> Writers assume there will be no collisions; if two transactions modify the same files simultaneously, Delta checks whether the conflicts are reconcilable or fails the second one with <code>ConcurrentModificationException</code> to guarantee serializability.</li>\n</ul>\n\n<h4>Time Travel and Historical Restore</h4>\n<p>Thanks to the immutable commit log, Delta Lake allows querying previous versions of the table without physically duplicating the underlying files:</p>\n<ul>\n  <li><b>SQL syntax:</b> <code>SELECT * FROM tabla VERSION AS OF 15;</code> or <code>SELECT * FROM tabla TIMESTAMP AS OF '2024-01-15 10:00:00';</code>.</li>\n  <li><b>Restore:</b> <code>RESTORE TABLE tabla TO VERSION AS OF 12;</code> creates a new commit that returns the table to the exact state of that version.</li>\n</ul>\n\n<h4>Physical Maintenance: OPTIMIZE, Liquid Clustering, and VACUUM</h4>\n<table class=\"keytable\">\n<tr><th>Command / Technique</th><th>Function and Internal Mechanism</th><th>Operational Impact</th></tr>\n<tr><td><b>OPTIMIZE (Bin-packing)</b></td><td>Compacts collections of small files into uniform ~1 GB files through atomic rewrite operations.</td><td>Dramatically speeds up reads by reducing the file-open overhead on cloud storage.</td></tr>\n<tr><td><b>Liquid Clustering (CLUSTER BY)</b></td><td>Replaces rigid physical partitioning and <code>Z-ORDER</code>. Organizes data in a multidimensional, dynamic way based on commonly queried columns.</td><td>Avoids over-partitioning problems and allows changing the clustering keys without rewriting the entire table.</td></tr>\n<tr><td><b>VACUUM</b></td><td>Physically removes from storage the Parquet files that were marked as removed (<code>remove</code>) and exceed the retention threshold.</td><td>Frees up disk space. Its default retention is <b>7 days</b>; running it with zero retention breaks Time Travel and risks corrupting active concurrent reads.</td></tr>\n</table>\n\n<div class=\"tip\"><b>Danger of VACUUM with reduced retention:</b> The property <code>spark.databricks.delta.vacuum.retentionCheck.enabled = false</code> allows running <code>VACUUM</code> with less than 168 hours (7 days). It is strongly discouraged in production environments, since any long-running query that is reading old Parquet files will fail if they are purged while the query is still running.</div>\n"
+      },
+      {
+        "id": "dbd-t-2-1",
+        "d": 2,
+        "title": "2.1 · Ingestion and Extraction with Spark SQL, Higher-Order Functions, and JSON",
+        "html": "\n<h4>Direct File Reads and Ingestion with Spark SQL</h4>\n<p>Spark SQL allows interacting directly with files stored in cloud storage using ANSI SQL syntax or the DataFrame API:</p>\n<ul>\n  <li><b>Direct file queries:</b> <code>SELECT * FROM parquet.`/ruta/directorio/`</code> or <code>SELECT * FROM json.`/ruta/logs/`</code>.</li>\n  <li><b>COPY INTO command:</b> Declarative, idempotent SQL statement recommended for batch ingestion of millions of new files into existing Delta tables:\n    <pre><code>COPY INTO delta.`/ruta/delta_table`\nFROM `/ruta/landing/`\nFILEFORMAT = CSV\nFORMAT_OPTIONS ('header' = 'true', 'inferSchema' = 'true')\nCOPY_OPTIONS ('mergeSchema' = 'true');</code></pre>\n  </li>\n</ul>\n\n<h4>Handling Semi-Structured Data and JSON Parsing</h4>\n<p>In modern pipelines, events land as untyped JSON strings. Spark SQL offers optimized native functions:</p>\n<ul>\n  <li><b>from_json(col, schema):</b> Deserializes a JSON text column into a strongly typed structure (<code>STRUCT</code> or <code>ARRAY</code>) according to the provided schema.</li>\n  <li><b>to_json(col):</b> Converts a complex structure (<code>STRUCT</code> or <code>MAP</code>) into a standardized JSON string.</li>\n  <li><b>schema_of_json(json_str):</b> Automatically infers the schema signature from a representative sample of JSON text.</li>\n  <li><b>Navigation operators:</b> Attribute access using dot notation (<code>cliente.direccion.ciudad</code>) or the colon operator (<code>payload:id::int</code>).</li>\n</ul>\n\n<h4>Higher-Order Functions on Arrays</h4>\n<p>They allow manipulating collections and nested arrays directly in SQL without resorting to costly unnesting operations (<code>explode</code>) followed by groupings:</p>\n<table class=\"keytable\">\n<tr><th>Function</th><th>Signature / Example</th><th>Purpose</th></tr>\n<tr><td><b>TRANSFORM</b></td><td><code>TRANSFORM(items, i -> i.precio * 1.21)</code></td><td>Applies a transformation expression element by element, returning a new transformed array.</td></tr>\n<tr><td><b>FILTER</b></td><td><code>FILTER(transacciones, t -> t.monto &gt; 100)</code></td><td>Filters the array elements, keeping only those that satisfy the boolean predicate.</td></tr>\n<tr><td><b>EXISTS</b></td><td><code>EXISTS(etiquetas, tag -> tag = 'urgente')</code></td><td>Evaluates whether at least one array element satisfies the boolean condition (returns true/false).</td></tr>\n<tr><td><b>AGGREGATE</b></td><td><code>AGGREGATE(lineas, 0.0, (acc, x) -> acc + x.subtotal)</code></td><td>Reduces the array to a single accumulated value using an accumulator function and an initial value.</td></tr>\n</table>\n\n<div class=\"tip\"><b>Higher-Order Function performance:</b> Using <code>TRANSFORM</code> and <code>FILTER</code> is dramatically more efficient than breaking an array apart with <code>explode()</code> and re-aggregating it with <code>collect_list()</code>, since it avoids massive data shuffles across the cluster network.</div>\n"
+      },
+      {
+        "id": "dbd-t-2-2",
+        "d": 2,
+        "title": "2.2 · Advanced Manipulation, Deduplication, MERGE INTO, and Window Functions",
+        "html": "\n<h4>Data Deduplication in ELT Pipelines</h4>\n<p>Ingestion from distributed sources often produces duplicate records due to network retries with at-least-once semantics. There are two main deduplication approaches:</p>\n<ul>\n  <li><b>dropDuplicates([cols]):</b> Fast method in the PySpark DataFrame API that keeps an arbitrary row for each unique key identified.</li>\n  <li><b>Window Function Deduplication:</b> Deterministic SQL approach when you need to keep the most recent record according to a timestamp:\n    <pre><code>WITH clasificados AS (\n  SELECT *,\n    ROW_NUMBER() OVER (PARTITION BY cliente_id ORDER BY updated_at DESC) AS ranking\n  FROM raw_eventos\n)\nSELECT * EXCEPT(ranking) FROM clasificados WHERE ranking = 1;</code></pre>\n  </li>\n</ul>\n\n<h4>Atomic Upserts with MERGE INTO</h4>\n<p>Delta Lake provides full native support for atomic <code>MERGE INTO</code> operations, combining inserts, updates, and deletes in a single ACID transaction:</p>\n<pre><code>MERGE INTO target_silver AS t\nUSING source_updates AS s\nON t.pedido_id = s.pedido_id\nWHEN MATCHED AND s.es_cancelado = true THEN\n  DELETE\nWHEN MATCHED THEN\n  UPDATE SET t.estado = s.estado, t.monto = s.monto, t.fecha_actualizacion = current_timestamp()\nWHEN NOT MATCHED THEN\n  INSERT (pedido_id, estado, monto, fecha_creacion, fecha_actualizacion)\n  VALUES (s.pedido_id, s.estado, s.monto, s.fecha_evento, current_timestamp());</code></pre>\n\n<h4>UDF (User-Defined Function) Types and Performance</h4>\n<table class=\"keytable\">\n<tr><th>UDF Type</th><th>Language / Environment</th><th>Performance</th><th>Optimal Use Case</th></tr>\n<tr><td><b>SQL UDF</b></td><td>Native ANSI SQL</td><td><b>Maximum</b>: Optimized by Catalyst and accelerated by the Photon engine.</td><td>Standard business logic, mathematical calculations, string transformations.</td></tr>\n<tr><td><b>Pandas UDF (Vectorized)</b></td><td>Python + PyArrow</td><td><b>High</b>: Processes entire batches in columnar memory via Apache Arrow.</td><td>Complex statistical transformations, batch ML model inference.</td></tr>\n<tr><td><b>Standard Python UDF</b></td><td>Pure Python (row-by-row)</td><td><b>Low</b>: Incurs massive IPC/Py4J serialization overhead between the JVM and the Python runtime.</td><td>Discouraged except for legacy libraries without columnar support.</td></tr>\n</table>\n\n<div class=\"tip\"><b>Managed vs External Tables:</b> When running <code>DROP TABLE</code> on a <b>Managed</b> table, Databricks removes both the metadata definition in the catalog and the underlying physical Parquet files. On an <b>External</b> table (defined with a <code>LOCATION</code> clause), <code>DROP TABLE</code> only removes the metadata, leaving the data files intact in cloud storage.</div>\n"
+      },
+      {
+        "id": "dbd-t-3-1",
+        "d": 3,
+        "title": "3.1 · Structured Streaming, Auto Loader (cloudFiles), and Checkpointing",
+        "html": "\n<h4>The Structured Streaming Paradigm</h4>\n<p>Spark Structured Streaming processes continuous streams by treating data sources as <b>unbounded tables</b> to which new records are continuously appended. The engine internally divides processing into low-latency micro-batches or continuous streaming.</p>\n\n<h4>Output Modes</h4>\n<table class=\"keytable\">\n<tr><th>Output Mode</th><th>Behavior at Each Trigger</th><th>Restrictions and Use Cases</th></tr>\n<tr><td><b>Append</b> (default)</td><td>Only the new records that arrived in the current micro-batch are emitted to the sink.</td><td>Required for incremental ELT pipelines. In queries with time-based aggregations it requires defining a Watermark.</td></tr>\n<tr><td><b>Complete</b></td><td>The entire accumulated results table is rewritten and emitted in each micro-batch.</td><td>Mandatory for non-windowed aggregations or global count metrics; not compatible with direct append-only sinks.</td></tr>\n<tr><td><b>Update</b></td><td>Only the rows whose aggregated state has changed since the previous trigger are written to the sink.</td><td>Ideal for maintaining live state tables or updating external dashboards.</td></tr>\n</table>\n\n<h4>Auto Loader (format(\"cloudFiles\")): Scalable Incremental Ingestion</h4>\n<p><b>Auto Loader</b> is Databricks' proprietary technology for incrementally detecting and ingesting millions of new files deposited in cloud object storage:</p>\n<ul>\n  <li><b>Directory Listing mode:</b> Periodically scans the directory; optimal for paths with fewer than 1 million files and moderate volume.</li>\n  <li><b>File Notification mode:</b> Uses cloud queue and event services (AWS SNS/SQS, Azure Event Grid, GCP Pub/Sub) to receive notices of new files without scanning massive folders.</li>\n  <li><b>Schema Inference and Evolution:</b>\n    <pre><code>spark.readStream.format(\"cloudFiles\")\n  .option(\"cloudFiles.format\", \"json\")\n  .option(\"cloudFiles.schemaLocation\", \"/checkpoints/schema_dir\")\n  .option(\"cloudFiles.schemaEvolutionMode\", \"addNewColumns\")\n  .load(\"/mnt/raw_landing/\")</code></pre>\n  </li>\n  <li><b>_rescued_data column:</b> Captures any unexpected column, corrupt data, or incompatible type in a structured JSON field without breaking ingestion or dropping records.</li>\n</ul>\n\n<h4>Checkpointing and Watermarks</h4>\n<ul>\n  <li><b>checkpointLocation:</b> Mandatory persistent directory in cloud storage where the engine saves the log of offsets read, commits, and aggregation state. Ensures recovery after failures and <b>exactly-once</b> semantics.</li>\n  <li><b>withWatermark(col, delayThreshold):</b> Sets the maximum allowable time threshold for late events (e.g., <code>withWatermark(\"event_time\", \"10 minutes\")</code>). Allows the engine to discard old data and purge the in-memory State Store to prevent memory leaks (OOM).</li>\n</ul>\n"
+      },
+      {
+        "id": "dbd-t-3-2",
+        "d": 3,
+        "title": "3.2 · Delta Live Tables (DLT): Expectations, Materialized Views, and Streaming Tables",
+        "html": "\n<h4>Declarative Architecture of Delta Live Tables (DLT)</h4>\n<p><b>Delta Live Tables (DLT)</b> is Databricks' declarative framework for building and orchestrating reliable data pipelines in SQL or Python. The developer defines the desired transformations and DLT automatically infers the dependency graph (DAG), manages the cluster infrastructure, implements checkpoints, and captures quality metrics.</p>\n\n<h4>DLT Datasets: Streaming Tables vs Materialized Views</h4>\n<table class=\"keytable\">\n<tr><th>Object Type</th><th>Declarative Syntax (SQL)</th><th>Processing Mechanism</th><th>Recommended Use Case</th></tr>\n<tr><td><b>Streaming Table</b></td><td><code>CREATE OR REFRESH STREAMING TABLE silver_events AS SELECT * FROM STREAM(raw_source)</code></td><td>Strictly incremental (append-only) processing; only processes data that has never been read before.</td><td>Raw ingestion from Auto Loader, Kafka queue messages, high-volume time-based events.</td></tr>\n<tr><td><b>Materialized View</b></td><td><code>CREATE OR REFRESH MATERIALIZED VIEW gold_kpis AS SELECT date, sum(total) FROM silver_events GROUP BY date</code></td><td>Computes and persists results according to the latest state of the source tables, handling updates automatically.</td><td>Complex business aggregations, deduplication, dimensional joins, and the Gold layer.</td></tr>\n</table>\n\n<h4>Data Quality Expectations</h4>\n<p>DLT allows defining declarative integrity constraints applied in flight while pipelines run:</p>\n<table class=\"keytable\">\n<tr><th>Expectation Clause</th><th>Action on Invalid Record</th><th>Pipeline Behavior</th></tr>\n<tr><td><code>CONSTRAINT v_email EXPECT (email IS NOT NULL)</code></td><td>Keeps the record in the target table and emits a metric alert in the Event Log.</td><td>The pipeline continues uninterrupted; ideal for preventive quality monitoring.</td></tr>\n<tr><td><code>EXPECT (edad &gt;= 18) ON VIOLATION DROP ROW</code></td><td>Drops the invalid row from the target table, recording the count of dropped rows.</td><td>The pipeline continues; ensures that only conforming data advances to Silver/Gold layers.</td></tr>\n<tr><td><code>EXPECT (id IS NOT NULL) ON VIOLATION FAIL UPDATE</code></td><td>Immediately stops execution and marks the pipeline in a fatal error state.</td><td>Halts the job immediately; mandatory for primary keys or critical financial data.</td></tr>\n</table>\n\n<div class=\"tip\"><b>Triggered vs Continuous mode in DLT:</b> In <b>Continuous</b> mode, clusters remain active to process data with latency of seconds. In <b>Triggered</b> mode, the pipeline processes all accumulated pending data and stops, substantially optimizing DBU consumption for hourly or daily ingestion.</div>\n"
+      },
+      {
+        "id": "dbd-t-4-1",
+        "d": 4,
+        "title": "4.1 · Databricks Workflows: Cluster Types, Task Orchestration, and Alerts",
+        "html": "\n<h4>Databricks Workflows: End-to-End Task Orchestration (Multi-Task Jobs)</h4>\n<p><b>Databricks Workflows</b> is the fully managed native orchestrator that lets you build workflows based on directed acyclic graphs (DAGs). It supports heterogeneous tasks including Notebooks, Python scripts, SQL queries/dashboards, DLT pipelines, and dbt models.</p>\n\n<h4>Compute Types for Workflows: Job Clusters vs All-Purpose Clusters</h4>\n<table class=\"keytable\">\n<tr><th>Feature</th><th>Job Cluster (Automated)</th><th>All-Purpose Cluster (Interactive)</th></tr>\n<tr><td><b>Lifecycle</b></td><td>Ephemeral: Databricks provisions the cluster when the job starts and destroys it immediately when the run finishes.</td><td>Persistent: Stays running or idle according to the auto-termination policy.</td></tr>\n<tr><td><b>DBU Cost</b></td><td><b>Reduced rate (~50% to 60% savings)</b> compared to All-Purpose clusters.</td><td>Full standard interactive compute rate.</td></tr>\n<tr><td><b>Isolation</b></td><td>Full isolation of resources and libraries; prevents interference between concurrent jobs.</td><td>Shared among multiple users or notebooks under development.</td></tr>\n<tr><td><b>Recommendation</b></td><td><b>Mandatory standard for production workloads and scheduled jobs.</b></td><td>Used exclusively for interactive development and exploratory analysis.</td></tr>\n</table>\n\n<h4>Passing Parameters Between Tasks with TaskValues</h4>\n<p>Databricks allows transferring metadata and dynamic values between nodes of a DAG using the <code>taskValues</code> utility:</p>\n<ul>\n  <li><b>Sender (Upstream task):</b> <code>dbutils.jobs.taskValues.set(key = \"batch_count\", value = 14500)</code></li>\n  <li><b>Receiver (Downstream task):</b> <code>total = dbutils.jobs.taskValues.get(taskKey = \"tarea_ingesta\", key = \"batch_count\", default = 0)</code></li>\n</ul>\n\n<h4>Resilience: Repair and Rerun</h4>\n<p>When a multi-task job fails in one of its intermediate branches, the <b>Repair and Rerun</b> feature allows re-running only the failed tasks and their downstream dependencies, without spending compute again on tasks that already completed successfully in the previous run.</p>\n\n<div class=\"tip\"><b>Retry Policies and Alerts:</b> Each task in a Workflow lets you configure automatic retries (<code>retries</code>) with minimum wait intervals (<code>min_retry_interval_millis</code>) and event-driven notifications (success, failure, duration exceeded) sent to emails or corporate webhooks (Slack, PagerDuty).</div>\n"
+      },
+      {
+        "id": "dbd-t-4-2",
+        "d": 4,
+        "title": "4.2 · Lifecycle: Git Repos, CI/CD, Cluster Policies, and Cost Governance",
+        "html": "\n<h4>Version Control Integration: Databricks Repos</h4>\n<p><b>Databricks Repos</b> provides enterprise-grade bidirectional integration with the main Git providers (GitHub, GitLab, Bitbucket, Azure DevOps). It allows engineering teams to:</p>\n<ul>\n  <li>Organize code into development branches (feature branches) and perform commit, push, pull, and merge operations directly from the workspace.</li>\n  <li>Import and structure modular code in reusable pure Python packages (<code>.py</code>) using standard <code>import</code> statements within notebooks.</li>\n  <li>Ensure that production jobs run pointing to protected stable branches (e.g., <code>main</code> or release tags).</li>\n</ul>\n\n<h4>CI/CD Automation with Databricks Asset Bundles (DABs)</h4>\n<p><b>Databricks Asset Bundles (DABs)</b> lets you manage data projects as infrastructure as code (IaC). Using declarative YAML files (<code>databricks.yml</code>), developers define DLT pipelines, Workflows, permissions, and configurations, deploying them programmatically across development, test, and production environments with the Databricks CLI.</p>\n\n<h4>Cluster Policies and Cost Control</h4>\n<p>Cluster Policies enforce strict rules on what types of resources data engineers can provision in the workspace:</p>\n<ul>\n  <li><b>Instance Type Limitation:</b> Restricts the allowed virtual machine families (e.g., prohibiting costly GPUs in analytics notebooks).</li>\n  <li><b>Enforced Auto-Termination:</b> Requires configuring a maximum idle time (e.g., 20 minutes) to automatically shut down forgotten clusters.</li>\n  <li><b>Mandatory Tagging (Custom Tags):</b> Requires assigning tags such as <code>CostCenter</code>, <code>Project</code>, or <code>Owner</code> on each cluster to break down cloud billing.</li>\n</ul>\n\n<h4>The Photon Engine: Vectorized Acceleration in C++</h4>\n<p><b>Photon</b> is the native execution engine developed in C++ and integrated into the Databricks runtime that replaces the JVM execution engine with modern SIMD vectorized processing. Although it carries a DBU surcharge, Photon dramatically reduces processing times for heavy SQL queries, scans, and joins, frequently achieving a lower total cost of ownership (TCO).</p>\n"
+      },
+      {
+        "id": "dbd-t-5-1",
+        "d": 5,
+        "title": "5.1 · Unity Catalog: 3-Level Namespace, Metastore, and External Locations",
+        "html": "\n<h4>Centralized Architecture of Unity Catalog</h4>\n<p><b>Unity Catalog</b> is Databricks' comprehensive governance solution for data and artificial intelligence. Unlike traditional solutions based on a local Hive Metastore per cluster, Unity Catalog operates at the account level and provides:</p>\n<ul>\n  <li><b>Unified Regional Metastore:</b> A single centralized metadata store per geographic region that is attached to multiple Databricks workspaces, facilitating shared governance.</li>\n  <li><b>Three-Level Namespace:</b> The resolution of any data object follows the canonical hierarchy:\n    <br/><code>&lt;catalog&gt;.&lt;schema&gt;.&lt;object&gt;</code> (example: <code>corp_prod.finanzas.facturacion</code>).</li>\n</ul>\n\n<h4>Securable Objects and Secure Storage</h4>\n<table class=\"keytable\">\n<tr><th>Securable Object</th><th>Definition and Architectural Role</th><th>Governance and Permissions</th></tr>\n<tr><td><b>Storage Credential</b></td><td>Encapsulates a managed cloud identity (AWS IAM Role, Azure Managed Identity, or GCP Service Account) with read/write permissions on object storage.</td><td>Only Metastore admins can create them; avoids exposing secret keys or tokens to users.</td></tr>\n<tr><td><b>External Location</b></td><td>Associates a specific <code>Storage Credential</code> with a cloud storage URL prefix (e.g., <code>s3://mi-bucket-datalake/silver/</code>).</td><td>Allows granting privileges such as <code>CREATE EXTERNAL TABLE</code> or <code>READ FILES</code> to engineers without giving them direct IAM access.</td></tr>\n<tr><td><b>Managed Storage</b></td><td>Root storage location assigned at the catalog or schema level where managed tables are automatically stored.</td><td>When a Managed Table is dropped with <code>DROP TABLE</code>, Unity Catalog automatically purges the physical files from the bucket.</td></tr>\n<tr><td><b>Volumes</b></td><td>Unity Catalog object designed to govern unstructured or semi-structured files (PDFs, images, raw CSVs, checkpoints).</td><td>Available as <b>Managed Volumes</b> or <b>External Volumes</b>, accessible via POSIX paths at <code>/Volumes/catalog/schema/volume/</code>.</td></tr>\n</table>\n\n<div class=\"tip\"><b>Resolving Objects Without a Full Prefix:</b> If the 3-level name is not specified, Databricks falls back to the catalog and schema active in the current session, configured with <code>USE CATALOG catalog;</code> and <code>USE SCHEMA schema;</code>.</div>\n"
+      },
+      {
+        "id": "dbd-t-5-2",
+        "d": 5,
+        "title": "5.2 · Governance in Unity Catalog: GRANT Permissions, Dynamic Views, Filters, and Lineage",
+        "html": "\n<h4>Declarative Access Control (ANSI SQL RBAC)</h4>\n<p>Unity Catalog implements a standard ANSI SQL privilege model managed through declarative statements that grant and revoke permissions on centralized account-level identities (users and groups):</p>\n<pre><code>GRANT USAGE ON CATALOG corp_prod TO `analistas_bi`;\nGRANT USAGE ON SCHEMA corp_prod.ventas TO `analistas_bi`;\nGRANT SELECT ON TABLE corp_prod.ventas.resumen_anual TO `analistas_bi`;</code></pre>\n<p><i>Fundamental inheritance rule:</i> To access any table, a user requires the <code>USAGE</code> privilege on all higher levels of the hierarchy (both on the catalog and on the corresponding schema).</p>\n\n<h4>Granular Security: Row Filters and Column Masks</h4>\n<p>Unity Catalog lets you implement row-level security policies and dynamic column masking without duplicating physical tables:</p>\n<ul>\n  <li><b>Row Filters:</b> SQL functions that evaluate whether the current session can view a given row:\n    <pre><code>CREATE FUNCTION region_filter(region STRING)\nRETURN IF(IS_ACCOUNT_GROUP_MEMBER('admin_global') OR region = 'EMEA', true, false);\n\nALTER TABLE corp_prod.ventas.pedidos\nSET ROW FILTER region_filter ON (region);</code></pre>\n  </li>\n  <li><b>Column Masks:</b> Obfuscate sensitive data (PII, credit cards) for unauthorized groups:\n    <pre><code>CREATE FUNCTION mask_tarjeta(numero STRING)\nRETURN IF(IS_ACCOUNT_GROUP_MEMBER('auditoria_financiera'), numero, CONCAT('****-****-****-', RIGHT(numero, 4)));\n\nALTER TABLE corp_prod.finanzas.pagos\nALTER COLUMN tarjeta_credito SET MASK mask_tarjeta;</code></pre>\n  </li>\n  <li><b>Dynamic Views:</b> Traditional method using built-in functions such as <code>current_user()</code> or <code>is_account_group_member()</code> within the <code>WHERE</code> clause of a standard view.</li>\n</ul>\n\n<h4>Automated Data Lineage</h4>\n<p>Unity Catalog automatically records <b>table- and column-level data lineage</b> at runtime for any query executed in Databricks, with no need for additional libraries or code instrumentation. It facilitates regulatory compliance audits (GDPR/CCPA) and visual impact analysis for schema changes.</p>\n"
+      }
+    ],
+    "questions": [
+      {
+        "id": "dbd-01",
+        "d": 1,
+        "t": "Lakehouse Architecture vs Data Lake/Data Warehouse",
+        "q": "Your financial organization stores terabytes of transactions in a cloud object Data Lake (Parquet format). The analytics team complains about inconsistent reads when ingestion pipelines update data concurrently. In addition, the audit requires deleting records under the right to be forgotten (GDPR), which forces you to manually rewrite entire partitions. What fundamental technical advantage does migrating these tables to `Delta Lake` in the Lakehouse provide to solve both problems?",
+        "o": [
+          "It adds an ACID transaction log (`_delta_log`) that guarantees serializable isolation for concurrent reads and enables row-level `DELETE` statements.",
+          "It converts object storage into a private HDFS transactional cluster with synchronous distributed locks managed by an external highly available Apache ZooKeeper service.",
+          "It automatically duplicates all files into a dedicated relational Data Warehouse cluster to process analytical queries without interacting with the open Data Lake.",
+          "It delegates concurrency control and deletes to secondary indexes created in the RAM of the Databricks driver node during each interactive session."
+        ],
+        "a": 0,
+        "e": "Delta Lake solves the lack of transactions in the traditional Data Lake through its ACID transaction log (`_delta_log`). This log guarantees consistent reads through Optimistic Concurrency Control (OCC) and snapshot isolation, allowing `DELETE`, `UPDATE`, and `MERGE INTO` operations at the record level without manually rewriting entire partitions.",
+        "why": [
+          null,
+          "Delta Lake operates on standard cloud object storage (S3, ADLS, GCS); it does not require HDFS clusters or coordination through Apache ZooKeeper.",
+          "The Lakehouse architecture processes data directly in the open Data Lake; it does not duplicate data into an external proprietary Data Warehouse.",
+          "The transaction log resides in persistent storage (`_delta_log`), not in the volatile memory of the driver node."
+        ]
+      },
+      {
+        "id": "dbd-02",
+        "d": 1,
+        "t": "Medallion Architecture: Bronze Layer",
+        "q": "A data engineer designs the ingestion pipeline for millions of JSON events generated by IoT sensors. Some sensors send unexpected additional fields due to firmware updates, and others present malformed payloads. What is the recommended design for the `Bronze` layer table in a Medallion architecture?",
+        "o": [
+          "Immediately filter and discard any record that does not exactly match the predefined schema to maintain database integrity.",
+          "Ingest the data in append-only mode in its native format or a wide schema, capturing new or malformed fields in `_rescued_data` for auditing.",
+          "Normalize the entities by applying full array unnesting and exhaustive per-sensor deduplication before persisting the records to object storage.",
+          "Run cleansing and hourly aggregation transformations in the micro-batch to write dimensional fact tables directly in precomputed Gold format."
+        ],
+        "a": 1,
+        "e": "The Bronze layer must act as a faithful, auditable historical replica of the data source (append-only). In Databricks, the best practice is to ingest the data in its original format or flexible schema using Auto Loader's `_rescued_data` column to preserve unforeseen fields or corrupt records, allowing the data to be reprocessed after any later validation failure.",
+        "why": [
+          "Discarding data in the Bronze layer destroys historical traceability and makes it impossible to recover information if the schema discrepancy was valid.",
+          null,
+          "Normalization, unnesting, and deduplication are Silver layer transformations, not part of the raw Bronze ingestion layer.",
+          "Hourly aggregations and dimensional models belong to the Gold layer; applying them at initial ingestion skips the refinement and auditing phases."
+        ]
+      },
+      {
+        "id": "dbd-03",
+        "d": 1,
+        "t": "Medallion Architecture: Silver Layer",
+        "q": "In your Lakehouse platform, the `Bronze` layer contains raw events from multiple transactional sources. The data team needs to feed predictive models and business analysts with a unified view of customers. Which set of operations properly characterizes the step from the `Bronze` layer to the `Silver` layer?",
+        "o": [
+          "Build exclusively final aggregation tables with precomputed monthly KPI metrics optimized for executive dashboard visualization tools.",
+          "Replicate the raw files identically without validating data types, to maintain an exact mirror of the source file system of the storage provider.",
+          "Clean records, strictly type columns, resolve nulls, deduplicate keys, and enrich the data to form a clean enterprise view.",
+          "Apply destructive anonymization by removing all primary keys to restrict access to any user who is not a corporate cluster administrator."
+        ],
+        "a": 2,
+        "e": "The Silver (curated) layer is the enterprise source of truth of the Lakehouse. It transforms the raw Bronze data by validating data types, removing duplicates using business keys, resolving critical null values, applying enrichment with master tables, and structuring clean entities on which to build analytics and machine learning.",
+        "why": [
+          "Final aggregated metrics and KPIs belong to the Gold layer; the Silver layer keeps the detailed grain of the business entities.",
+          "An identical mirror without validations is the Bronze layer itself, and lacks the filtering and cleansing characteristic of Silver.",
+          null,
+          "Destructive anonymization of primary keys destroys the referential integrity required in Silver; security is implemented with masks and filters in Unity Catalog."
+        ]
+      },
+      {
+        "id": "dbd-04",
+        "d": 1,
+        "t": "Medallion Architecture: Gold Layer",
+        "q": "The finance department requires a Power BI dashboard to query total daily sales by region and product category, with response times under one second. How should this use case be implemented in the `Gold` layer of the Lakehouse?",
+        "o": [
+          "Configure a direct continuous streaming connection to the raw JSON files of the Bronze layer to reflect sales with millisecond real-time latency.",
+          "Provide an external table over unoptimized compressed CSV text files to reduce disk storage cost in the public cloud.",
+          "Generate business aggregate tables, star-schema dimensional models, or materialized views optimized with `OPTIMIZE` and clustering for analytical queries.",
+          "Consume uncached dynamic views that run complex joins of 15 raw tables and real-time aggregations every time the user opens the report in the BI tool."
+        ],
+        "a": 2,
+        "e": "The Gold layer is designed for high-performance analytical consumption. It stores business-optimized data models (star/snowflake schemas, pre-aggregated fact and dimension tables), compacted with `OPTIMIZE` and organized to minimize data scans, guaranteeing sub-second responses in dashboards and reports.",
+        "why": [
+          "Querying raw Bronze JSON files in real time would generate massive load and unacceptable latencies for a concurrent BI dashboard.",
+          "Unoptimized CSV files lack data skipping statistics (`data skipping`), resulting in slow reads and compute overhead.",
+          null,
+          "Running joins of 15 raw tables on every query generates very high latencies and wastes resources compared with a precomputed Gold table."
+        ]
+      },
+      {
+        "id": "dbd-05",
+        "d": 1,
+        "t": "Delta Lake Internals: _delta_log and Concurrency",
+        "q": "Two Spark processes write simultaneously to the same Delta table. Process A updates customer records in the 'Norte' region and Process B inserts new purchases from the 'Sur' region. How does `Delta Lake` coordinate these concurrent writes without causing heavy locking or inconsistent reads?",
+        "o": [
+          "It uses Optimistic Concurrency Control (OCC) by checking the `_delta_log` transaction log; since they do not collide on the same files, it validates both commits.",
+          "It locks the entire table using a distributed in-memory semaphore, pausing Process B until Process A finishes its commit and releases the execution thread.",
+          "It writes the data of both processes to temporary Parquet files and delegates conflict resolution to a nightly asynchronous database reconciliation cron job.",
+          "It systematically rejects any concurrent write by throwing a `TableAlreadyLockedException` exception upon detecting two active jobs on the compute cluster."
+        ],
+        "a": 0,
+        "e": "Delta Lake uses Optimistic Concurrency Control (OCC). Each transaction records its operations assuming there will be no conflicts. Before performing the atomic commit to the `_delta_log` (using atomic operations such as `put-if-absent`), Delta checks whether another transaction has modified the same files. Since Process A and Process B operate on different regions and files, both commits succeed without global locks.",
+        "why": [
+          null,
+          "Delta Lake does not use heavy full-table locks (pessimistic locking); its OCC model allows concurrent writes if there is no file conflict.",
+          "Delta Lake guarantees immediate transactional consistency on each commit; it does not defer consistency to nightly asynchronous processes.",
+          "Delta does not systematically reject concurrent transactions; it only aborts if there is a real modification conflict on the same data files."
+        ]
+      },
+      {
+        "id": "dbd-06",
+        "d": 1,
+        "t": "Delta Lake: Time Travel and Recovery",
+        "q": "During a manual production update, an analyst accidentally runs an `UPDATE` without a `WHERE` clause, corrupting the price column across the entire `ventas_silver` table. The table has an intact transaction history going back 30 days. What is the fastest and safest way to restore the table to the exact state prior to the error?",
+        "o": [
+          "Atomically restore the table by running `RESTORE TABLE ventas_silver TO VERSION AS OF <previous_version>;`.",
+          "Download the latest manual database backup from a zip file and overwrite the storage bucket folder using terminal bash commands.",
+          "Create a new Databricks cluster and run a full re-ingestion of all historical files from the company's relational source system.",
+          "Run a standard relational database `ROLLBACK TRANSACTION;` command, assuming the interactive session is still open in the current notebook."
+        ],
+        "a": 0,
+        "e": "Delta Lake provides the `RESTORE TABLE <table> TO VERSION AS OF <version>` or `TIMESTAMP AS OF <timestamp>` statement. This statement generates a new commit in the `_delta_log` that points to the valid Parquet files of the previous version, reverting the corruption instantly and atomically without re-ingesting data or moving physical files.",
+        "why": [
+          null,
+          "Manually overwriting files in the bucket corrupts the `_delta_log` transaction log and can cause severe inconsistencies in the catalog.",
+          "Re-ingesting the entire history takes hours or days of unnecessary compute, whereas `RESTORE TABLE` completes in a few seconds using metadata.",
+          "Spark SQL and Delta Lake do not use session-based transactions with `ROLLBACK TRANSACTION`; transactions are committed atomically with each command."
+        ]
+      },
+      {
+        "id": "dbd-07",
+        "d": 1,
+        "t": "Delta Lake: Compaction with OPTIMIZE",
+        "q": "A streaming pipeline writes thousands of small Parquet files (~500 KB each) per hour to an orders Delta table. As a result, analytical queries take several minutes because of the overhead of listing and opening files in object storage. Which maintenance action solves this small-file problem?",
+        "o": [
+          "Run the command `VACUUM pedidos RETAIN 0 HOURS;` to immediately purge all files smaller than 1 MB from cloud object storage.",
+          "Run the command `OPTIMIZE pedidos;` to automatically compact collections of small files into larger files of approximately 1 GB.",
+          "Physically repartition the directory in the operating system using a Python script, dividing the total rows across 100 file system folders.",
+          "Change the storage format from Delta to flat CSV to avoid columnar metadata packaging in reads by the company's business analysts."
+        ],
+        "a": 1,
+        "e": "The `OPTIMIZE` command performs automatic compaction (bin-packing), gathering collections of small files into larger, more efficient Parquet files (up to ~1 GB). This drastically reduces metadata calls to object storage (S3/ADLS/GCS) and speeds up reading for analytical queries.",
+        "why": [
+          "`VACUUM` does not compact files; it purges logically deleted files. Running it with zero retention can also corrupt in-flight transactions.",
+          null,
+          "Manually manipulating files in storage alters the physical structure without updating the `_delta_log`, corrupting the Delta table.",
+          "Migrating to CSV would drastically worsen performance by losing the columnar format, Snappy compression, and data skipping statistics."
+        ]
+      },
+      {
+        "id": "dbd-08",
+        "d": 1,
+        "t": "Physical Optimization: Liquid Clustering vs Z-ORDER",
+        "q": "Your team manages a 50 TB Delta table with frequent queries filtered concurrently by `cliente_id` (high cardinality) and `fecha_pedido` (time series). Traditional date-based partitioning was historically used, but it caused over-partitioning and data skew problems. Which two statements about modern physical organization techniques in Delta Lake are correct? (Choose 2 answers)",
+        "o": [
+          "`Liquid Clustering` (`CLUSTER BY (cliente_id, fecha_pedido)`) simplifies physical design by allowing flexible multidimensional clustering without over-partitioning.",
+          "`Z-ORDER BY` allows dynamically modifying the ordering keys without needing to rewrite or reorder the existing files in the table.",
+          "`Liquid Clustering` supports evolving clustering keys over time without requiring redefining or rewriting the entire historical table.",
+          "Classic physical partitioning by high-cardinality columns such as `cliente_id` is the officially recommended Databricks practice for large tables."
+        ],
+        "a": [
+          0,
+          2
+        ],
+        "e": "`Liquid Clustering` (`CLUSTER BY`) is the recommended physical optimization technology in Databricks. Unlike strict directory-based partitioning, it does not suffer from over-partitioning or skew, and it allows evolving the clustering columns without having to rewrite the table's history. In contrast, `Z-ORDER` requires explicitly re-running `OPTIMIZE ZORDER BY` and does not adapt its keys incrementally.",
+        "why": [
+          null,
+          "`Z-ORDER` does not dynamically adapt its keys; it requires manually re-running the `OPTIMIZE ... ZORDER BY` command to reorganize the data.",
+          null,
+          "Physically partitioning by high-cardinality columns generates millions of micro-folders (over-partitioning), severely degrading performance."
+        ]
+      },
+      {
+        "id": "dbd-09",
+        "d": 1,
+        "t": "Maintenance with VACUUM and Retention",
+        "q": "A data engineer periodically runs the `VACUUM` command on a Delta table to free up space in object storage. A developer suggests running `SET spark.databricks.delta.vacuum.retentionCheck.enabled = false; VACUUM ventas RETAIN 0 HOURS;` after each micro-batch to keep the bucket completely clean. Why is this practice a serious risk in production?",
+        "o": [
+          "Because it permanently deletes old files that may be being read by active concurrent queries and destroys the Time Travel capability.",
+          "Because it permanently disables the Photon engine on the cluster, forcing interpreted, non-vectorized compilation of all subsequent SQL queries in the catalog.",
+          "Because it causes Unity Catalog to automatically revoke the `SELECT` privileges of all user groups on the affected table in the database.",
+          "Because it overwrites the table schema, turning all numeric columns into non-serializable binary types in the underlying Parquet files."
+        ],
+        "a": 0,
+        "e": "Delta Lake keeps files marked as removed (tombstoned) during the safety retention period (by default 7 days or 168 hours). If the safety check is disabled and files are purged with zero retention (`RETAIN 0 HOURS`), any running analytical query that is reading files from previous versions will fail immediately with file-not-found errors (`FileNotFoundException`), in addition to preventing the use of Time Travel.",
+        "why": [
+          null,
+          "`VACUUM` is a disk maintenance operation; it does not affect the Photon execution engine or the query compiler configuration.",
+          "Unity Catalog privileges are managed in the metastore; the physical purge of data files does not alter the assigned RBAC permissions.",
+          "`VACUUM` only deletes physically unreferenced files; it does not modify the logical schema of the columns or their data types."
+        ]
+      },
+      {
+        "id": "dbd-10",
+        "d": 1,
+        "t": "Managed vs External Tables",
+        "q": "An infrastructure team needs to define a table in Databricks called `telemetria_nodos`. They want to ensure that if a user with permissions accidentally runs `DROP TABLE telemetria_nodos;`, the data files in the S3 or ADLS Gen2 bucket remain completely intact. How should this table be declared?",
+        "o": [
+          "As a managed table (`Managed Table`) within the main catalog without specifying any external location clause in the create command.",
+          "As a global temporary table (`GLOBAL TEMP VIEW`) within the system database so that it resides permanently in volatile cluster storage.",
+          "As an external table (`External Table`) by explicitly specifying a storage path with the `LOCATION 's3://bucket/ruta/'` clause.",
+          "As a standard view (`VIEW`) based on a `SELECT * FROM parquet` query with storage managed in the central metastore of the corporate region."
+        ],
+        "a": 2,
+        "e": "In Databricks and Unity Catalog, tables created with the `LOCATION` clause are external tables (`External Tables`). When `DROP TABLE` is run on an external table, only the metadata and the catalog entry are removed, but the physical data files in object storage remain completely intact.",
+        "why": [
+          "In a `Managed Table`, the `DROP TABLE` command removes both the metadata and the physical data files in the bucket.",
+          "A `GLOBAL TEMP VIEW` disappears when the Spark application/cluster terminates and does not durably persist data in the catalog.",
+          null,
+          "A view does not store data by itself; the stated need is to create a persistent table that protects the underlying physical files."
+        ]
+      },
+      {
+        "id": "dbd-11",
+        "d": 1,
+        "t": "Metadata Checkpoints in Delta Lake",
+        "q": "A Delta table has recorded more than 20,000 write transactions over six months. A new engineer wonders why queries do not degrade linearly over time given that they must read tens of thousands of `.json` files in the `_delta_log/` directory. Which internal mechanism prevents this degradation?",
+        "o": [
+          "The Catalyst compiler saves a fixed binary copy of the metadata on the local hard drive of each worker virtual machine in the compute cluster.",
+          "Delta Lake automatically generates a `.checkpoint.parquet` file every 10 transactions, compacting the table's accumulated state up to that point.",
+          "Databricks runs a process that irreversibly deletes all JSON files prior to the latest commit every midnight in storage.",
+          "Reads ignore the `_delta_log` directory and read the data by directly scanning the Parquet files through POSIX calls to the cloud bucket."
+        ],
+        "a": 1,
+        "e": "Every 10 commits (by default), Delta Lake generates a compacted checkpoint file in Parquet format (e.g., `000010.checkpoint.parquet`, `000020.checkpoint.parquet`). When querying the table, the engine only needs to read the latest Parquet checkpoint and the few JSON files after it, reconstructing the full table state in memory almost instantly.",
+        "why": [
+          "Workers do not persist master metadata on their local disks; the state is derived dynamically from the `_delta_log` in object storage.",
+          null,
+          "Delta Lake does not arbitrarily delete earlier JSON files; it keeps them to enable Time Travel according to the configured log retention.",
+          "Scanning the files directly without consulting the `_delta_log` would ignore the transaction records, reading corrupt or deleted data."
+        ]
+      },
+      {
+        "id": "dbd-12",
+        "d": 1,
+        "t": "Compute: Photon Execution Engine",
+        "q": "Your company runs daily pipelines with very heavy Spark SQL queries containing multiple aggregations, filters, and joins over hundreds of millions of rows. You want to reduce query execution times without modifying the SQL code or changing the cluster infrastructure. Which Databricks component provides native vectorized acceleration for this purpose?",
+        "o": [
+          "The `Photon` engine, a native executor developed in C++ that processes vectorized queries in parallel, replacing Spark's JVM runtime.",
+          "The `Serverless SQL Warehouse` service configured exclusively with GPU instances to compile relational queries using CUDA cores.",
+          "The `Koalas` extension that automatically converts all SQL queries into sequential computation operations on a single machine using Pandas.",
+          "The `GraphX` module that transforms relational tables into in-memory distributed graphs to solve filters such as connected paths on the cluster."
+        ],
+        "a": 0,
+        "e": "`Photon` is Databricks' native execution engine written from scratch in C++. It replaces Apache Spark's traditional JVM-based execution engine with a vectorized columnar engine that takes advantage of the instruction-level parallelism (SIMD) of modern hardware, notably accelerating SQL and DataFrame workloads without requiring changes to the query code.",
+        "why": [
+          null,
+          "SQL Warehouses use CPUs and can use Photon; they do not require GPU hardware or CUDA compilation for relational SQL.",
+          "Koalas is a Pandas-compatible API on PySpark; it does not accelerate complex SQL queries or replace the distributed execution engine.",
+          "GraphX is a library for graph computation; it is not an acceleration engine for relational queries or standard ELT pipelines."
+        ]
+      },
+      {
+        "id": "dbd-13",
+        "d": 2,
+        "t": "Spark SQL: Querying Files Directly",
+        "q": "A data analyst needs to quickly inspect the contents of several newly downloaded Parquet files at the path `dbfs:/mnt/landing/pedidos/` without creating a formal table in the metastore or registering persistent metadata. Which Databricks ANSI SQL syntax allows querying these files directly?",
+        "o": [
+          "Run `OPEN FILE 'dbfs:/mnt/landing/pedidos/' FORMAT PARQUET;` to load the content into the development workspace's interactive console.",
+          "Run `SELECT * FROM parquet.`dbfs:/mnt/landing/pedidos/`;` using the format notation and backticks around the path.",
+          "Run `IMPORT TABLE pedidos FROM 'dbfs:/mnt/landing/pedidos/' TYPE PARQUET;` to instantiate a volatile pointer in shared memory.",
+          "Run `READ_PARQUET('dbfs:/mnt/landing/pedidos/')` as a scalar function within a `WHERE` clause in an interactive Python session."
+        ],
+        "a": 1,
+        "e": "Spark SQL supports direct queries on files stored in file systems or buckets using the syntax `SELECT * FROM <format>.`<path>``. This allows exploring data in Parquet, JSON, CSV, Delta, or text formats without having to register tables in the catalog beforehand.",
+        "why": [
+          "The `OPEN FILE` statement does not exist in Spark SQL syntax or in Databricks' ANSI SQL standard.",
+          null,
+          "The `IMPORT TABLE` command is not valid syntax for querying files ad hoc in Spark SQL.",
+          "`READ_PARQUET` is not a Spark SQL scalar function to invoke in WHERE clauses; direct table notation or the DataFrame API is used."
+        ]
+      },
+      {
+        "id": "dbd-14",
+        "d": 2,
+        "t": "Idempotent Ingestion with COPY INTO",
+        "q": "A daily pipeline receives thousands of CSV files in a cloud bucket and must load them into a target Delta table. If the pipeline fails midway and is retried, duplicate records must not be inserted for files that were already processed successfully. Which declarative SQL command provides this incremental, idempotent load guarantee?",
+        "o": [
+          "Use `INSERT INTO delta_destino SELECT * FROM csv.`ruta/`;` relying on the Catalyst optimizer to discard previously read files.",
+          "Run a bash script with `rsync` that moves the processed files to a temporary folder before invoking a `LOAD DATA INPATH` command in the metastore.",
+          "Use the `COPY INTO delta_destino FROM 'ruta/' FILEFORMAT = CSV FORMAT_OPTIONS ('header'='true');` command, which records the files already loaded.",
+          "Run `CREATE OR REPLACE TABLE delta_destino AS SELECT * FROM csv.`ruta/`;` to overwrite the table on each daily pipeline run."
+        ],
+        "a": 2,
+        "e": "The `COPY INTO` command is a declarative, idempotent SQL statement designed to load new files incrementally into Delta tables. It internally records the files already processed in the table metadata; if re-run on the same folder, it automatically skips the files already loaded without duplicating data.",
+        "why": [
+          "`INSERT INTO ... SELECT` blindly inserts all records returned by the query, duplicating data if retried after a partial failure.",
+          "Moving files with bash is fragile, prone to concurrency errors, and provides no ACID transactionality in the database.",
+          null,
+          "`CREATE OR REPLACE TABLE` destroys the previous historical data on each run, preventing incremental accumulation of historical data."
+        ]
+      },
+      {
+        "id": "dbd-15",
+        "d": 2,
+        "t": "Semi-Structured Data: from_json",
+        "q": "An events table in the Bronze layer stores in the `payload_str` column text strings with JSON objects that contain nested fields: `{\"usuario_id\": 102, \"detalles\": {\"ip\": \"192.168.1.1\", \"accion\": \"login\"}}`. You want to extract the `ip` field as a structured column in the Silver layer. What is the appropriate, best-performing method?",
+        "o": [
+          "Apply a regular expression with `regexp_extract()` on the text string to look for alphanumeric character patterns between quotes in the column.",
+          "Write a custom pure Python UDF that invokes the standard library `json.loads()` row by row on each distributed executor in the cluster.",
+          "Split the string by commas and braces using `split()` and get the element at the static position using array indexes in the final projection.",
+          "Define the schema with `STRUCT` and deserialize the column using `from_json(payload_str, 'STRUCT<usuario_id: INT, detalles: STRUCT<ip: STRING, accion: STRING>>')`."
+        ],
+        "a": 3,
+        "e": "`from_json()` is the optimized native Spark SQL function for transforming JSON strings into structured types (`STRUCT` or `ARRAY`). By providing an explicit schema or one inferred with `schema_of_json()`, the Catalyst and Photon engines compile the deserialization to highly efficient native code, allowing nested fields to be accessed using dot notation (`col.detalles.ip`).",
+        "why": [
+          "Regular expressions with `regexp_extract` are slow, brittle against minor changes in the JSON format, and prone to parsing errors.",
+          "A row-by-row Python UDF suffers a severe performance penalty from IPC serialization between the JVM and the Python interpreter.",
+          "Using `split()` assumes a strict positional order in the JSON, which fails as soon as the fields change order or contain internal commas.",
+          null
+        ]
+      },
+      {
+        "id": "dbd-16",
+        "d": 2,
+        "t": "Higher-Order Functions: TRANSFORM",
+        "q": "You have a table with the column `precios_base` of type `ARRAY<DOUBLE>`. You need to apply a 16% tax to each element of the array, generating a new column `precios_con_impuesto` of type `ARRAY<DOUBLE>` with the resulting amounts. Which Spark SQL higher-order function performs this transformation without needing to unnest the array?",
+        "o": [
+          "`TRANSFORM(precios_base, p -> round(p * 1.16, 2))` to apply the lambda function to each element of the array directly in memory.",
+          "`FILTER(precios_base, p -> p * 1.16)` to multiply each value and return the transformed set in a new collection in the catalog.",
+          "`EXPLODE_TRANSFORM(precios_base, p -> p * 1.16)` to temporarily unnest the elements and automatically rebuild the list through an internal collector.",
+          "`MAP_VALUES(precios_base, p -> p * 1.16)` to iterate over the array's numeric indexes and update the underlying records on disk."
+        ],
+        "a": 0,
+        "e": "The higher-order function `TRANSFORM(array, element -> expression)` evaluates an expression or lambda function on each element of an array and returns a new array with the transformed results. This avoids the computational cost of breaking the array apart with `explode()` and then regrouping it with `collect_list()`.",
+        "why": [
+          null,
+          "`FILTER` only evaluates boolean predicates to keep or discard elements; it does not transform the values of the array elements.",
+          "`EXPLODE_TRANSFORM` does not exist in the Spark SQL specification or in Databricks.",
+          "`MAP_VALUES` operates on key-value map data types (`MAP<K, V>`), not on primitive arrays (`ARRAY<T>`)."
+        ]
+      },
+      {
+        "id": "dbd-17",
+        "d": 2,
+        "t": "Higher-Order Functions: FILTER and EXISTS",
+        "q": "In an e-commerce table, each order has an `articulos` column of type `ARRAY<STRUCT<nombre: STRING, categoria: STRING, precio: DOUBLE>>`. You want to filter the table to select only the orders that contain at least one item in the category 'Electrónica' with a price greater than 500 dollars. Which SQL condition in the `WHERE` clause meets the requirement optimally?",
+        "o": [
+          "`WHERE articulos.categoria = 'Electrónica' AND articulos.precio > 500` referencing array fields directly as if they were scalar columns in the table.",
+          "`WHERE EXISTS(articulos, a -> a.categoria = 'Electrónica' AND a.precio > 500)` using the boolean higher-order function.",
+          "`WHERE ARRAY_CONTAINS(articulos.categoria, 'Electrónica') AND MAX(articulos.precio) > 500` combining array and aggregation functions in the query's WHERE clause.",
+          "`WHERE COUNT_IF(articulos, a -> a.categoria = 'Electrónica') >= 1` to count the matches in the array at cluster disk-scan time."
+        ],
+        "a": 1,
+        "e": "The higher-order function `EXISTS(expr, x -> boolean_expression)` returns `true` if at least one array element satisfies the boolean condition defined by the lambda function. It is the cleanest and most efficient solution in Spark SQL for checking predicates on complex arrays without requiring `explode()`.",
+        "why": [
+          "It is not possible to access fields of an `ARRAY<STRUCT>` directly with scalar notation without unnesting or using higher-order functions.",
+          null,
+          "`ARRAY_CONTAINS` only evaluates equality against simple literal elements and cannot evaluate multiple correlated conditions together with price predicates.",
+          "`COUNT_IF` is an aggregate function over table columns, not a higher-order function for nested arrays."
+        ]
+      },
+      {
+        "id": "dbd-18",
+        "d": 2,
+        "t": "Deduplication in Spark SQL",
+        "q": "An ingestion pipeline processes shopping cart events that contain duplicates caused by mobile network retries. The events have the columns `sesion_id`, `producto_id`, `cantidad`, and `timestamp_evento`. You must remove duplicates while keeping only the event with the most recent timestamp for each (`sesion_id`, `producto_id`) pair. Which two techniques in Spark SQL and DataFrames are correct? (Choose 2 answers)",
+        "o": [
+          "Call `df.dropDuplicates([\"sesion_id\", \"producto_id\"])` after first sorting the entire DataFrame with `df.sort(\"timestamp_evento\")`.",
+          "Compute `ROW_NUMBER() OVER (PARTITION BY sesion_id, producto_id ORDER BY timestamp_evento DESC)` in a CTE and filter `WHERE row_num = 1`.",
+          "Use the `GROUP BY sesion_id, producto_id` clause, directly selecting `FIRST(cantidad)` without defining an explicit ordering criterion.",
+          "Use `QUALIFY ROW_NUMBER() OVER (PARTITION BY sesion_id, producto_id ORDER BY timestamp_evento DESC) = 1` directly in the SQL query."
+        ],
+        "a": [
+          1,
+          3
+        ],
+        "e": "To deterministically keep the most recent record, use the window function `ROW_NUMBER() OVER (PARTITION BY ... ORDER BY timestamp DESC)`. In Databricks and Spark SQL, this can be solved with a common table expression (CTE) filtering `row_num = 1`, or directly and elegantly with the `QUALIFY ROW_NUMBER() ... = 1` clause.",
+        "why": [
+          "`dropDuplicates` does not guarantee keeping the most recent row after a distributed sort, because internal partitions can alter the partition order.",
+          null,
+          "`FIRST(cantidad)` without ordering is nondeterministic and can return any arbitrary value across successive executions.",
+          null
+        ]
+      },
+      {
+        "id": "dbd-19",
+        "d": 2,
+        "t": "Atomic Operations: MERGE INTO",
+        "q": "You have a Delta table named `clientes_silver` and a batch of updates in the temporary table `updates_bronze`. You want to update the `email` and `direccion` fields of existing customers and add new customers that do not exist yet. Which SQL statement correctly implements this atomic upsert pattern?",
+        "o": [
+          "Run a bulk `UPDATE` followed by an `INSERT INTO clientes_silver SELECT * FROM updates_bronze WHERE id NOT IN (SELECT id FROM clientes_silver)` in two separate transactions.",
+          "Overwrite the entire partition using the `INSERT OVERWRITE clientes_silver SELECT * FROM updates_bronze` clause in a single catalog transaction.",
+          "`MERGE INTO clientes_silver AS t USING updates_bronze AS s ON t.id = s.id WHEN MATCHED THEN UPDATE SET t.email=s.email, t.direccion=s.direccion WHEN NOT MATCHED THEN INSERT *;`",
+          "Create a temporary view combined with `UNION ALL` and run a physical compaction command with `OPTIMIZE clientes_silver ZORDER BY (id)` on the bucket."
+        ],
+        "a": 2,
+        "e": "The Delta Lake `MERGE INTO` statement allows coordinated Upsert operations (updates and inserts) in a single atomic ACID transaction. It evaluates the match condition (`ON t.id = s.id`) and runs the `WHEN MATCHED` branches to update existing rows and `WHEN NOT MATCHED` to insert new records.",
+        "why": [
+          "Running `UPDATE` followed by `INSERT` makes two independent transactions that can cause race conditions and redundant table scans.",
+          "`INSERT OVERWRITE` overwrites the existing data, deleting all customers that are not present in the current batch of updates.",
+          null,
+          "`UNION ALL` plus `OPTIMIZE` simply accumulates duplicates in the table without updating records or reconciling customer versions."
+        ]
+      },
+      {
+        "id": "dbd-20",
+        "d": 2,
+        "t": "MERGE INTO with Conditional Delete",
+        "q": "An inventory system sends catalog change records. The source table `novedades_stock` includes an `operacion` column with the values 'UPDATE', 'INSERT', or 'DELETE'. You need to synchronize the Delta table `stock_actual`. If the operation is 'DELETE' and the product matches, it must be removed from the target table. How is this logic expressed within a `MERGE INTO` command?",
+        "o": [
+          "Add a `WHEN MATCHED AND s.operacion = 'DELETE' THEN DROP ROW` clause as the first condition of the MERGE statement in the SQL query.",
+          "Create an external database trigger that captures the delete events and makes Databricks REST API calls to process them.",
+          "Run a Python stored procedure that extracts the IDs with 'DELETE' and runs a `for` loop issuing individual `DELETE FROM` statements on the cluster.",
+          "Configure the `WHEN MATCHED AND s.operacion = 'DELETE' THEN DELETE` clause before the standard update clause."
+        ],
+        "a": 3,
+        "e": "Delta Lake supports multiple `WHEN MATCHED` clauses, evaluated in the order they are declared. To handle conditional deletes, declare `WHEN MATCHED AND s.operacion = 'DELETE' THEN DELETE` first, and then `WHEN MATCHED THEN UPDATE SET ...`. This way, the rows flagged for deletion are logically purged from the table in the same atomic transaction.",
+        "why": [
+          "The `DROP ROW` syntax does not exist in the standard SQL `MERGE INTO` statement or in Delta Lake (the `DELETE` keyword is used).",
+          "Databricks does not support traditional OLTP database triggers, and REST calls would add unacceptable latency to the data pipeline.",
+          "A sequential Python loop issuing individual `DELETE` statements generates thousands of unnecessary commits in the `_delta_log` and degrades the cluster.",
+          null
+        ]
+      },
+      {
+        "id": "dbd-21",
+        "d": 2,
+        "t": "UDF Performance: SQL vs Python vs Pandas",
+        "q": "A data engineer needs to compute a custom financial metric over 100 million rows. The function can be implemented as a native SQL UDF, a standard Python UDF (`@udf`), or a vectorized Pandas UDF (`@pandas_udf`). If the calculation can be expressed in standard mathematical expressions, which is the most efficient option?",
+        "o": [
+          "The native `SQL UDF`, because Catalyst and the Photon engine compile it directly to vectorized machine code with no serialization overhead.",
+          "The standard `Python UDF`, because the CPython garbage collector manages the memory of each row more efficiently than the Spark JVM.",
+          "The `Pandas UDF`, because it is always faster than any native SQL function since it runs in vectorized in-memory NumPy micro-batches.",
+          "There is no measurable performance difference among the three alternatives because Catalyst optimizes all the code to identical Java bytecode in the compiler."
+        ],
+        "a": 0,
+        "e": "Native `SQL UDFs` are the most efficient in Databricks because they are fully integrated into the Catalyst optimizer and the vectorized `Photon` execution engine. They do not suffer the IPC serialization overhead (exchange between the JVM and the Python runtime) that affects standard Python UDFs, and they outperform Pandas UDFs by avoiding intermediate conversions.",
+        "why": [
+          null,
+          "Standard Python UDFs suffer extreme row-by-row serialization overhead (Py4J/IPC), making them the slowest alternative in Spark.",
+          "Although Pandas UDFs are much faster than standard Python UDFs, they still incur Arrow serialization costs compared to a native SQL UDF.",
+          "Catalyst cannot optimize inside the Python interpreter in a standard Python UDF; the performance difference is usually 10x to 100x."
+        ]
+      },
+      {
+        "id": "dbd-22",
+        "d": 2,
+        "t": "Handling Dates and Timestamps",
+        "q": "In a billing report, you need to truncate the `timestamp_transaccion` column (TIMESTAMP type) to the first day of the corresponding month at 00:00:00 to perform monthly aggregations. Which function is recommended in Spark SQL for this temporal truncation?",
+        "o": [
+          "`DATE_FORMAT(timestamp_transaccion, 'yyyy-MM')` to convert the timestamp to a text string and then filter it alphabetically in the query.",
+          "`DATE_TRUNC('month', timestamp_transaccion)`, which returns the timestamp adjusted to the start of the specified time unit while preserving the type.",
+          "`TRUNCATE_TIME(timestamp_transaccion, '30 days')`, computing a fixed 30-day subtraction on the timestamp of each record evaluated by the engine.",
+          "`TO_MONTH_START(timestamp_transaccion)`, which mathematically rounds the Unix epoch number to the nearest monthly multiple of seconds at runtime."
+        ],
+        "a": 1,
+        "e": "The Spark SQL `date_trunc(unit, timestamp)` function truncates a timestamp to the specified unit (e.g., `'month'`, `'year'`, `'day'`, `'hour'`), returning a `TIMESTAMP` value at the exact start of the period. This preserves the native data type for efficient comparisons and sorting without converting to text strings.",
+        "why": [
+          "`date_format()` converts the timestamp to `STRING`, which degrades the performance of indexes, temporal comparisons, and data skipping operations.",
+          null,
+          "The `TRUNCATE_TIME` function does not exist in the Spark SQL specification or in Databricks.",
+          "`TO_MONTH_START` is not a Spark SQL function; months have variable lengths (28-31 days) that cannot be computed with fixed multiples."
+        ]
+      },
+      {
+        "id": "dbd-23",
+        "d": 2,
+        "t": "Nested Structures: Accessing STRUCT Fields",
+        "q": "You have a `cliente` column of type `STRUCT<nombre: STRING, direccion: STRUCT<ciudad: STRING, codigo_postal: INT>>`. You want to project the customer's city in a SQL query. Which syntax is valid for accessing the nested `ciudad` field in Databricks SQL?",
+        "o": [
+          "`SELECT cliente->direccion->ciudad FROM ventas;` using arrow-style pointer operators similar to C++-based languages.",
+          "`SELECT EXTRACT_FIELD(cliente, 'direccion.ciudad') FROM ventas;` calling a helper function for inspecting system column metadata.",
+          "`SELECT cliente.direccion.ciudad FROM ventas;` using the standard dot-notation navigation over nested structures.",
+          "`SELECT cliente['direccion']['ciudad']::string FROM ventas;` forcing a key-value map cast over tuple structures in distributed memory."
+        ],
+        "a": 2,
+        "e": "In Spark SQL and Databricks SQL, fields inside a `STRUCT` data type are accessed naturally with dot notation: `column_name.field.subfield`. This syntax is intuitive, ANSI SQL-compliant, and highly optimized by the execution engine.",
+        "why": [
+          "The arrow operator `->` is used in lambda functions (higher-order functions), not to access attributes of a `STRUCT`.",
+          "The `EXTRACT_FIELD` function is not part of the Spark SQL built-in function library.",
+          null,
+          "Bracket indexing with strings (`col['clave']`) is reserved for `MAP` types, not for strongly typed attributes of a `STRUCT`."
+        ]
+      },
+      {
+        "id": "dbd-24",
+        "d": 2,
+        "t": "Unnesting Arrays: explode vs posexplode",
+        "q": "A table contains orders with an `items` column of type `ARRAY<STRING>`. Some orders contain no items (`items` is an empty array or `NULL`). You need to flatten the array so that each item occupies its own row, but without losing the orders that have no items (they must appear with a `NULL` value). Which SQL function should be used?",
+        "o": [
+          "`SELECT pedido_id, explode(items) FROM pedidos;` relying on the engine to automatically keep the rows with null or empty arrays in the result.",
+          "`SELECT pedido_id, posexplode(items) FROM pedidos;` to generate both the integer position and the corresponding element value in each row.",
+          "`SELECT pedido_id, unnest_all(items) FROM pedidos;` calling the standard dimensional flattening function of PostgreSQL databases on the cluster.",
+          "`SELECT pedido_id, explode_outer(items) FROM pedidos;` to ensure the parent rows with null or empty arrays are preserved in the result."
+        ],
+        "a": 3,
+        "e": "`explode_outer(col)` is the variant of `explode()` that preserves rows whose array is `NULL` or empty (`size = 0`). Unlike `explode()`, which silently discards these rows (behavior analogous to an `INNER JOIN`), `explode_outer()` emits a row with a `NULL` value for the flattened column (behavior analogous to a `LEFT OUTER JOIN`).",
+        "why": [
+          "`explode()` automatically discards any row where the array is null or empty, losing the orders without items.",
+          "`posexplode()` adds a position index column but also discards empty or null rows just like standard `explode()`.",
+          "`unnest_all()` is not a Spark SQL function in Databricks.",
+          null
+        ]
+      },
+      {
+        "id": "dbd-25",
+        "d": 2,
+        "t": "View Types: Standard vs Temp vs Global Temp",
+        "q": "A data engineer creates a view for a temporary analysis in an interactive notebook: `CREATE TEMPORARY VIEW vista_temporal AS SELECT * FROM datos_raw;`. Later, a colleague tries to query `vista_temporal` from another cluster and gets a table-not-found error. What is the reason for this behavior?",
+        "o": [
+          "Temporary views (`TEMPORARY VIEW`) have a scope strictly tied to the current Spark session and are not visible from other clusters or sessions.",
+          "The user who created the view did not run the command `GRANT SELECT ON VIEW vista_temporal TO PUBLIC;` in the account's central corporate metastore.",
+          "Temporary views can only query tables in Parquet format and fail if the underlying data is in Delta Lake format in production.",
+          "The second colleague did not enable the property `spark.sql.globalTempViews.crossClusterEnabled = true` in the advanced settings of their compute cluster."
+        ],
+        "a": 0,
+        "e": "In Apache Spark and Databricks, a `TEMPORARY VIEW` exists only within the scope of the Spark session (`SparkSession`) in which it was declared. It is not registered in any persistent catalog or metastore, and it is automatically destroyed when the session ends or the cluster shuts down. It is not accessible from other clusters or from other concurrent sessions.",
+        "why": [
+          null,
+          "Temporary views are not registered in Unity Catalog or the Hive Metastore; therefore, they do not support access-control `GRANT` statements.",
+          "Temporary views can query any format supported by Spark, including Delta, Parquet, CSV, and JSON with no restrictions.",
+          "That Spark configuration property does not exist; session isolation is intrinsic to the lifecycle of a temporary view."
+        ]
+      },
+      {
+        "id": "dbd-26",
+        "d": 2,
+        "t": "Window Functions: RANK vs DENSE_RANK",
+        "q": "In a sales competition, two employees tie for first place with 100 sales each, and the next employee has 90 sales. You want the employee with 90 sales to appear in position 2 of the ranking without gaps in the numbering. Which analytic window function should be used in the SQL query?",
+        "o": [
+          "`ROW_NUMBER() OVER (ORDER BY ventas DESC)` to assign sequential numbers independent of ties in the sales values evaluated by the query.",
+          "`DENSE_RANK() OVER (ORDER BY ventas DESC)` to assign the same rank to tied values without creating jumps in the subsequent numbering.",
+          "`RANK() OVER (ORDER BY ventas DESC)` to compute the positions, leaving a gap equal to the number of tied competitors in the table.",
+          "`PERCENT_RANK() OVER (ORDER BY ventas DESC)` to express each employee's relative position as a percentage of the total staff evaluated."
+        ],
+        "a": 1,
+        "e": "`DENSE_RANK()` assigns the same rank to identical values in the `ORDER BY` clause and continues with the next consecutive integer (1, 1, 2...). In contrast, `RANK()` would leave a gap (1, 1, 3...), and `ROW_NUMBER()` would assign unique, arbitrary sequential values to the tied rows (1, 2, 3).",
+        "why": [
+          "`ROW_NUMBER()` would break the tie by arbitrarily and nondeterministically assigning position 1 to one and position 2 to the other.",
+          null,
+          "`RANK()` would leave a gap after the two-way tie, assigning position 3 to the next employee instead of the required position 2.",
+          "`PERCENT_RANK()` computes a relative decimal fraction between 0 and 1, not an ordinal integer ranking position."
+        ]
+      },
+      {
+        "id": "dbd-27",
+        "d": 2,
+        "t": "Multidimensional Aggregations: ROLLUP and CUBE",
+        "q": "The business analyst team requires a sales report that includes hierarchical cumulative subtotals: first the company grand total, then the subtotals by year, and within each year the subtotals by month and region. Which SQL aggregation clause solves this hierarchy without resorting to multiple `UNION ALL` statements?",
+        "o": [
+          "`GROUP BY region, mes, anio WITH RECURSIVE` to iteratively compute the cumulative totals through an in-memory graph common expression.",
+          "`GROUP BY CUBE (anio, mes, region)` to exhaustively compute all $2^3 = 8$ possible combinations of dimensions regardless of hierarchy.",
+          "`GROUP BY ROLLUP (anio, mes, region)` to generate the aggregated subtotals in strictly hierarchical order from left to right.",
+          "`GROUP BY anio, mes, region ORDER BY TOTALS DESC` forcing the injection of synthetically computed rows in the final sort stage on the cluster."
+        ],
+        "a": 2,
+        "e": "`GROUP BY ROLLUP (a, b, c)` generates progressive hierarchical aggregations considering the order of the declared columns: `(a, b, c)`, `(a, b)`, `(a)`, and the overall grand total `()`. It is the optimal clause for generating reports with hierarchically structured subtotals (e.g., year &rarr; month &rarr; region) in a single aggregation pass.",
+        "why": [
+          "`WITH RECURSIVE` is used for recursive queries over graphs or hierarchical trees of records; it is not a clause for subtotals in `GROUP BY`.",
+          "`CUBE` generates all possible combinations of dimensions, producing unnecessary non-hierarchical subtotals and increasing the computational cost.",
+          null,
+          "`ORDER BY TOTALS` is not a valid clause in Spark SQL for synthesizing aggregated subtotal rows."
+        ]
+      },
+      {
+        "id": "dbd-28",
+        "d": 3,
+        "t": "Structured Streaming: Unbounded Table Model",
+        "q": "A data engineer new to Apache Spark assumes that a Structured Streaming flow requires rewriting the query logic differently from batch processing. What is the fundamental architectural concept of Structured Streaming that unifies both paradigms?",
+        "o": [
+          "It converts the event stream into individual CSV files on disk that are processed by a polling script on the operating system of the driver node.",
+          "It runs a synchronous REST service that stores each event in an external relational database before notifying the catalog subscribers.",
+          "It transforms all the data into directed acyclic graphs in RAM managed by independent CPython threads on the cluster driver.",
+          "It treats the continuous data stream as an unbounded table to which each new batch appends records in append mode."
+        ],
+        "a": 3,
+        "e": "The conceptual model of Spark Structured Streaming treats the continuous data stream as an *unbounded table* that grows continuously as new data arrives. This makes it possible to express streaming queries using exactly the same APIs and Catalyst optimizations as in batch queries.",
+        "why": [
+          "Structured Streaming does not generate temporary CSV files for polling; it processes micro-batches in memory, or continuously, directly into Delta sinks.",
+          "Structured Streaming does not depend on synchronous REST services or intermediate relational databases to coordinate distributed ingestion.",
+          "Spark computation is based on RDDs and DataFrames distributed across JVM executors, not on graphs managed by CPython on the driver.",
+          null
+        ]
+      },
+      {
+        "id": "dbd-29",
+        "d": 3,
+        "t": "Structured Streaming: Output Modes",
+        "q": "A streaming pipeline reads continuous click events and writes directly to a Silver-layer Delta table incrementally, without performing aggregations or groupings. Which output mode (`outputMode`) should be configured in the `DataStreamWriter`?",
+        "o": [
+          "`outputMode(\"append\")` to emit only the new records processed in each micro-batch to the target Delta table.",
+          "`outputMode(\"complete\")` to overwrite the entire table with the consolidated event history in each streaming micro-batch executed.",
+          "`outputMode(\"update\")` to recompute the hash of each row and insert only records that do not already exist in object storage.",
+          "`outputMode(\"snapshot\")` to dump a static copy of the driver node's memory in binary format to the corporate data catalog."
+        ],
+        "a": 0,
+        "e": "The `append` output mode (the default in Structured Streaming) emits only the new rows processed in the current micro-batch to the sink. In queries without aggregations, it is the only supported mode for incremental Delta tables, ensuring continuous and atomic writing of new records.",
+        "why": [
+          null,
+          "`complete` rewrites the entire table on each trigger and is only allowed in queries with aggregations; it would fail on a simple ingestion without groupings.",
+          "`update` emits modified rows and, in streaming without aggregations, behaves equivalently to append, but it does not compute row hashes.",
+          "`snapshot` does not exist as an output mode in Apache Spark Structured Streaming or in Databricks."
+        ]
+      },
+      {
+        "id": "dbd-30",
+        "d": 3,
+        "t": "Structured Streaming: Checkpointing and Fault Tolerance",
+        "q": "A critical Structured Streaming job stops unexpectedly due to a temporary network interruption with cloud storage. When the cluster restarts, the job resumes automatically without duplicating events or losing pending records. Which technical component makes this recovery possible with `exactly-once` guarantees?",
+        "o": [
+          "The transaction log of the SQLite relational database embedded in the ephemeral local disk of the Databricks driver node.",
+          "The checkpoint directory (`checkpointLocation`), which durably persists the logs of offsets read, commits, and streaming state.",
+          "The cluster auto-restart policy that requests all historical events again from the original start timestamp of the transactional source.",
+          "The inter-node replication mechanism of Apache ZooKeeper configured on the worker nodes of the corporate workspace's compute cluster."
+        ],
+        "a": 1,
+        "e": "The `checkpointLocation` directory is the cornerstone of fault tolerance in Structured Streaming. It durably stores in object storage (S3/ADLS/GCS) the logs of offsets read (`offsets/`), the committed batches (`commits/`), and the aggregation state. This allows the engine to restart exactly where it was interrupted, guaranteeing *exactly-once* semantics.",
+        "why": [
+          "Spark does not use SQLite on the driver to store checkpoints; the driver's ephemeral disk is destroyed when the cluster restarts.",
+          null,
+          "Re-requesting all the history from the beginning would violate exactly-once semantics and generate massive duplicates in the sinks.",
+          "Databricks and Spark Structured Streaming do not use Apache ZooKeeper for checkpoint management or offset coordination."
+        ]
+      },
+      {
+        "id": "dbd-31",
+        "d": 3,
+        "t": "Auto Loader: Directory Listing vs File Notification",
+        "q": "Your company ingests 500,000 new files daily into an S3 bucket that already holds more than 10 million historical files. The current pipeline, which uses standard `spark.read`, takes more than an hour just to list the bucket contents before starting to process. Which `Auto Loader` configuration resolves this bottleneck?",
+        "o": [
+          "Set `cloudFiles.useIncrementalListing = false` to force a sequential scan on a single master thread on the driver node of the compute cluster.",
+          "Use `COPY INTO` with the option to force re-indexing of storage folders through POSIX calls to the distributed file system.",
+          "Enable file notification mode (`cloudFiles.useNotifications = true`) using event queues (SNS/SQS) to receive notices.",
+          "Split the bucket into 1,000 subfolders and launch a 1,000-node cluster running an `ls -R` command in parallel through bash scripts on Linux."
+        ],
+        "a": 2,
+        "e": "Auto Loader (`cloudFiles`) offers **File Notification** mode (`cloudFiles.useNotifications = true`), which automatically configures cloud event services (AWS SNS/SQS, Azure Event Grid, GCP Pub/Sub). Instead of listing directories with millions of files (which is slow and costly on storage APIs), Auto Loader reads the notifications directly from the message queue, detecting new files instantly.",
+        "why": [
+          "Disabling incremental listing would force full bucket scans, worsening the performance problem instead of solving it.",
+          "`COPY INTO` on buckets with tens of millions of files also suffers from high file-listing latencies compared to event queues.",
+          null,
+          "Launching 1,000 nodes to run `ls` commands generates prohibitive costs and excessive calls that cause throttling on the S3 API."
+        ]
+      },
+      {
+        "id": "dbd-32",
+        "d": 3,
+        "t": "Auto Loader: Schema Evolution and _rescued_data",
+        "q": "A pipeline with Auto Loader (`format(\"cloudFiles\")`) processes third-party JSON files. The provider often adds new fields without notice and occasionally sends corrupt records where a numeric field contains text. Which two Auto Loader mechanisms make it possible to handle this situation without failing the pipeline or losing data? (Choose 2 answers)",
+        "o": [
+          "Configure `cloudFiles.schemaEvolutionMode = 'addNewColumns'` so that Auto Loader dynamically adds new columns to the table schema.",
+          "Set `cloudFiles.enforceStrictTypes = true` to force records with incorrectly typed data to be silently converted to zero.",
+          "Use `cloudFiles.dropMalformed = true` to immediately delete from storage the files that contain any parsing discrepancy.",
+          "Take advantage of the `_rescued_data` column, which automatically captures any unexpected column or corrupt data in JSON format without breaking ingestion."
+        ],
+        "a": [
+          0,
+          3
+        ],
+        "e": "Auto Loader provides advanced schema-handling capabilities: 1) `cloudFiles.schemaEvolutionMode = 'addNewColumns'` automatically expands the target table schema when it detects new columns in the input files. 2) The special `_rescued_data` column captures any field that does not match the expected schema or that contains malformed values, ensuring no data is lost and allowing anomalies to be audited later.",
+        "why": [
+          null,
+          "`cloudFiles.enforceStrictTypes` is not a valid Auto Loader option, and silently converting to zero would cause undetectable corruption in numeric data.",
+          "Auto Loader does not silently discard files; its design prioritizes no data loss by rescuing anomalies in `_rescued_data`.",
+          null
+        ]
+      },
+      {
+        "id": "dbd-33",
+        "d": 3,
+        "t": "Structured Streaming: Triggers and Trigger.AvailableNow",
+        "q": "A team needs to run an incremental streaming ingestion pipeline once per night. They want it to process all the data that arrived during the day, splitting it efficiently into multiple micro-batches so as not to overload the cluster memory, and then have the cluster shut down automatically. Which trigger (`Trigger`) is the best practice recommended by Databricks?",
+        "o": [
+          "`trigger(continuous = '10 seconds')` to keep the cluster running permanently, passively waiting for new records in the cloud bucket.",
+          "`trigger(processingTime = '1 hour')` to force the engine to pause execution for exactly 60 minutes before processing the current batch.",
+          "`trigger(once = true)` because it is the directive that processes everything in a single massive micro-batch, forcing full consumption of the driver's RAM.",
+          "`trigger(availableNow = true)` to incrementally process all available data in efficient micro-batches and then terminate the stream."
+        ],
+        "a": 3,
+        "e": "`Trigger.AvailableNow` (or `availableNow = true`) is the trigger recommended by Databricks for incremental batch processing. Unlike `Trigger.Once` (which processed everything in a single massive micro-batch and could cause OutOfMemory errors), `AvailableNow` processes all accumulated pending data by splitting it into multiple micro-batches of optimal size according to the configured limits, and ends the run cleanly.",
+        "why": [
+          "`continuous` keeps the cluster running 24/7 with continuous DBU consumption, contradicting the requirement of a nightly run followed by shutdown.",
+          "`processingTime = '1 hour'` runs the stream in an infinite loop every hour without shutting down the cluster after processing the day's data.",
+          "`Trigger.Once` is deprecated in favor of `Trigger.AvailableNow` because it processed all pending data in a single uncontrolled micro-batch.",
+          null
+        ]
+      },
+      {
+        "id": "dbd-34",
+        "d": 3,
+        "t": "Structured Streaming: Watermarking and Late Events",
+        "q": "A streaming query performs aggregations over 10-minute time windows (`window(timestamp, '10 minutes')`) to count orders. If no wait-time limit is configured for late events, the in-memory State Store will grow indefinitely until the cluster's RAM is exhausted (OOM). Which DataFrame API method solves this problem by defining the late-data drop threshold?",
+        "o": [
+          "`withWatermark(\"timestamp\", \"20 minutes\")`, which defines the time threshold beyond which old events are dropped and the state is released.",
+          "`dropOldEvents(delay = \"20 minutes\")`, which physically deletes the delayed records from the object storage system before reading them.",
+          "`setTimeToLive(\"timestamp\", 1200)` to set a Redis-style expiration on each individual key on the worker nodes of the corporate cluster.",
+          "`filter(timestamp > current_timestamp() - interval 20 minutes)` applied statically in the projection clause of the initial streaming query."
+        ],
+        "a": 0,
+        "e": "The **Watermarking** mechanism (`withWatermark(timeColumn, delayThreshold)`) tells the Structured Streaming engine how much time delay to tolerate for out-of-order events. When the watermark advances, the engine drops any event that arrives with a timestamp earlier than the threshold and safely purges the intermediate state from memory, preventing OutOfMemory (OOM) crashes.",
+        "why": [
+          null,
+          "`dropOldEvents` does not exist in the Apache Spark Structured Streaming API or in Databricks.",
+          "`setTimeToLive` is not a Spark function; Structured Streaming manages its state through State Stores (HDFS or RocksDB) governed by watermarks.",
+          "Using `current_timestamp()` in streaming is nondeterministic and does not allow the engine to deduce when to close and emit past aggregation windows."
+        ]
+      },
+      {
+        "id": "dbd-35",
+        "d": 3,
+        "t": "Delta Live Tables: Streaming Tables",
+        "q": "In a Delta Live Tables (DLT) pipeline defined in SQL, you need to create a Bronze-layer table that continuously ingests new log files from a cloud directory using Auto Loader. Which declarative DLT syntax properly defines this table as a strictly incremental ingestion dataset?",
+        "o": [
+          "`CREATE MATERIALIZED VIEW raw_logs AS SELECT * FROM cloud_files('/mnt/raw/', 'json');` to refresh the entire table periodically on each run.",
+          "`CREATE OR REFRESH STREAMING TABLE raw_logs AS SELECT * FROM STREAM read_files('/mnt/raw/', format => 'json');`",
+          "`CREATE TEMPORARY TABLE raw_logs AS SELECT * FROM STREAMING_READ('/mnt/raw/') WITH OPTIONS ('mode'='incremental') in the metadata catalog.",
+          "`CREATE EXTERNAL DELTA TABLE raw_logs LOCATION '/mnt/raw/' AS SELECT * FROM json.`/mnt/raw/` WHERE _is_new = true in the corporate central metastore.`"
+        ],
+        "a": 1,
+        "e": "In Delta Live Tables with SQL, tables designed for purely incremental (append-only) ingestion and processing are defined with the syntax `CREATE OR REFRESH STREAMING TABLE <name> AS SELECT * FROM STREAM <source>`. The `STREAM` keyword tells DLT to consume the source as a continuous incremental flow.",
+        "why": [
+          "A `MATERIALIZED VIEW` recomputes its contents when the sources change; it is not designed for continuous append-only incremental ingestion.",
+          null,
+          "The `STREAMING_READ` syntax and `CREATE TEMPORARY TABLE` are not part of the Delta Live Tables declarative framework.",
+          "`CREATE EXTERNAL DELTA TABLE` with an artificial `_is_new` filter does not use the streaming capabilities or the transactional tracking of DLT."
+        ]
+      },
+      {
+        "id": "dbd-36",
+        "d": 3,
+        "t": "Delta Live Tables: Materialized Views vs Streaming Tables",
+        "q": "You are designing the Gold layer in a Delta Live Tables pipeline. The target table must compute the cumulative total amount and the number of transactions per customer from the Silver table, performing complex aggregations and requiring full consistency against historical data updates. Why should you choose a `Materialized View` instead of a `Streaming Table`?",
+        "o": [
+          "Because Materialized Views do not consume compute DBUs in Databricks, since they are processed entirely within the region's metastore.",
+          "Because Streaming Tables are prohibited by specification from running any `WHERE` clause or applying logical filtering transformations.",
+          "Because Materialized Views recompute and keep the aggregated state consistent when the data sources are modified or deleted.",
+          "Because Streaming Tables can only store a maximum of 10,000 records before requiring a manual physical compaction command on disk."
+        ],
+        "a": 2,
+        "e": "In Delta Live Tables, `Materialized Views` are designed specifically for complex transformations, joins, and aggregations in the Silver/Gold layers. When the source data undergoes modifications, insertions, or deletions, DLT recomputes and synchronizes the Materialized View state to reflect the exact current state of the business, whereas `Streaming Tables` are restricted to append-only incremental flows.",
+        "why": [
+          "Materialized Views consume standard cluster compute billed in DBUs when running the transformation queries.",
+          "Streaming Tables can perfectly well apply `WHERE` clauses, transformations, and projections as long as the source is incremental.",
+          null,
+          "Streaming Tables scale fully to billions of rows; they have no arbitrary limit of 10,000 records."
+        ]
+      },
+      {
+        "id": "dbd-37",
+        "d": 3,
+        "t": "DLT: Quality Expectations (DROP ROW)",
+        "q": "In a Delta Live Tables (DLT) pipeline, the data quality team stipulates the following rule: records with a null `cliente_id` or an `edad` under 18 must be silently dropped without stopping pipeline execution, recording the number of skipped records in the DLT metrics. Which expectation clause meets this requirement?",
+        "o": [
+          "`CONSTRAINT regla_edad CHECK (cliente_id IS NOT NULL AND edad >= 18) ON ERROR SKIP RECORD in the corporate metadata catalog.`",
+          "`EXPECT (cliente_id IS NOT NULL AND edad >= 18) ON VIOLATION ABORT PIPELINE with immediate notification to the on-call operations team.`",
+          "`EXPECT (cliente_id IS NOT NULL AND edad >= 18) ON INVALID DISCARD INTO DLQ isolating non-conforming rows in a secondary audit table.`",
+          "`CONSTRAINT clientes_validos EXPECT (cliente_id IS NOT NULL AND edad >= 18) ON VIOLATION DROP ROW`"
+        ],
+        "a": 3,
+        "e": "Delta Live Tables provides the `ON VIOLATION DROP ROW` clause within the expectation definition (`CONSTRAINT ... EXPECT ... ON VIOLATION DROP ROW`). This action automatically filters out and drops any row that does not satisfy the boolean condition, allowing valid rows to continue to the target table and recording the dropped-row metrics in the DLT Event Log.",
+        "why": [
+          "The `CHECK ... ON ERROR SKIP RECORD` syntax does not exist in the Delta Live Tables declarative specification.",
+          "`ON VIOLATION ABORT PIPELINE` is not a valid clause; to abort execution, `ON VIOLATION FAIL UPDATE` is used.",
+          "`ON INVALID DISCARD INTO DLQ` is not DLT syntax; isolating records in message queues is implemented with table-branching patterns.",
+          null
+        ]
+      },
+      {
+        "id": "dbd-38",
+        "d": 3,
+        "t": "DLT: Quality Expectations (FAIL UPDATE vs Warn)",
+        "q": "A regulatory bank reconciliation pipeline in Delta Live Tables cannot tolerate under any circumstances that the `monto_transferencia` column is negative or null. If a single record violates this condition, the entire pipeline must stop immediately and mark the run as failed to alert the engineers. Which DLT expectation guarantees this behavior?",
+        "o": [
+          "`CONSTRAINT monto_positivo EXPECT (monto_transferencia > 0) ON VIOLATION FAIL UPDATE`",
+          "`EXPECT (monto_transferencia > 0) ON VIOLATION DROP ROW silently dropping the row to continue processing without errors.`",
+          "`CONSTRAINT monto_positivo EXPECT (monto_transferencia > 0) only emitting a warning in the system's quality metrics log.`",
+          "`EXPECT (monto_transferencia > 0) ON ANOMALY RAISE CRITICAL ALERT stopping the network service of the corporate account's compute cluster.`"
+        ],
+        "a": 0,
+        "e": "The `ON VIOLATION FAIL UPDATE` action is the strictest directive in Delta Live Tables expectations. If any processed row violates the boolean condition (`monto_transferencia > 0`), DLT immediately aborts the pipeline update, prevents corrupt data from being persisted, and marks the job run as failed to trigger on-call alerts.",
+        "why": [
+          null,
+          "`ON VIOLATION DROP ROW` would drop the row and continue execution successfully, which violates the strict regulatory requirement.",
+          "Omitting the `ON VIOLATION` clause (the default expectation) only emits a warning in the logs but keeps the record and continues the pipeline.",
+          "`ON ANOMALY RAISE CRITICAL ALERT` is not syntax recognized by the Delta Live Tables declarative compiler."
+        ]
+      },
+      {
+        "id": "dbd-39",
+        "d": 4,
+        "t": "Databricks Workflows: Job vs All-Purpose Compute",
+        "q": "The data engineering team runs a series of daily pipelines scheduled through Databricks Workflows. Currently, all the tasks are configured to run on an existing interactive cluster ('All-Purpose Cluster') that stays on all day. The IT director asks to reduce the monthly DBU bill and isolate the runs. Which architectural change should be applied?",
+        "o": [
+          "Configure the notebooks to run on local clusters on the developers' workstations through SSH tunnels.",
+          "Configure the Workflow tasks to use 'Job Clusters' (ephemeral automated clusters) created and destroyed on each run.",
+          "Increase the number of workers of the current interactive cluster so the tasks finish in fewer minutes and reduce overall usage.",
+          "Migrate the jobs to a standalone virtual machine without Apache Spark, using standard Python scripts run with crontab."
+        ],
+        "a": 1,
+        "e": "`Job Clusters` (automated clusters for jobs) are the mandatory practice for production workloads in Databricks Workflows. Databricks creates them at the start of the job and destroys them immediately when it finishes, ensuring total resource isolation and billing at a significantly reduced DBU rate (~50-60% discount compared to interactive All-Purpose Clusters).",
+        "why": [
+          "Running corporate workloads through SSH tunnels on personal laptops breaks the security, scalability, and availability of the Lakehouse.",
+          null,
+          "Increasing the workers of an All-Purpose interactive cluster that stays active all day drastically increases DBU costs.",
+          "Removing Apache Spark prevents processing large distributed volumes and forfeits the governance and optimization advantages of Databricks."
+        ]
+      },
+      {
+        "id": "dbd-40",
+        "d": 4,
+        "t": "Workflows: Orchestration and TaskValues",
+        "q": "You have a Workflow with two tasks: Task A processes a batch of sales and computes the total number of anomalous records detected; Task B needs to read that numeric count to decide whether to generate an executive report or send an alert email. How are these dynamic parameters communicated between tasks of a DAG in Databricks Workflows?",
+        "o": [
+          "Write the value to a temporary file in `/tmp` of the worker node's local operating system and read it from Task B using shell commands.",
+          "Create a shared-memory message queue using operating system environment variables exported on the interactive cluster.",
+          "Use the task utility `dbutils.jobs.taskValues.set()` in Task A and `dbutils.jobs.taskValues.get()` in Task B.",
+          "Overwrite the source code of Task B's notebook through a Databricks REST API call before its execution starts."
+        ],
+        "a": 2,
+        "e": "`taskValues` is the built-in Databricks Workflows feature for passing small values and metadata between dependent tasks in the same DAG. The sending task calls `dbutils.jobs.taskValues.set(key, value)` and the downstream receiving task retrieves the value with `dbutils.jobs.taskValues.get(taskKey, key)` without requiring intermediate tables or external storage.",
+        "why": [
+          "The local `/tmp` directory is ephemeral and resides on different nodes that can be destroyed between tasks, preventing data sharing.",
+          "Operating system environment variables are not propagated between different clusters or between decoupled tasks of a Workflow.",
+          null,
+          "Modifying notebook source code through the REST API during an ongoing run is an unsafe and discouraged practice."
+        ]
+      },
+      {
+        "id": "dbd-41",
+        "d": 4,
+        "t": "Workflows: Recovery with Repair and Rerun",
+        "q": "A Databricks Workflows job made up of a DAG of 6 chained tasks runs overnight. The first three tasks (ingestion, validation, and filtering) complete successfully after two hours of compute, but the fourth task fails due to a transient connection error with a geolocation service. After fixing the issue in the external service, what is the most efficient way to relaunch the job?",
+        "o": [
+          "Delete the job's run history in the Databricks user interface and schedule a new immediate trigger for the entire pipeline.",
+          "Clone the entire Workflow, creating a duplicate copy in the workspace that contains only the remaining tasks of the graph.",
+          "Rerun the job from the beginning with the 'Run now' button, letting the three initial tasks consume two hours of compute again.",
+          "Use the 'Repair and Rerun' feature on the failed run to rerun only task 4 and its downstream dependent tasks."
+        ],
+        "a": 3,
+        "e": "The **Repair and Rerun** feature of Databricks Workflows lets you relaunch a failed run, processing only the tasks that failed and those that depend on them downstream in the DAG. It respects and preserves the successful results of the previous tasks, saving hours of compute and unnecessary DBU costs.",
+        "why": [
+          "Deleting the history removes the audit trail and does not solve the need to resume processing the flow.",
+          "Manually cloning the Workflow for each failure is inefficient, creates clutter in the workspace, and complicates maintenance.",
+          "Rerunning the entire job from scratch wastes two hours of compute and costs on tasks that already completed successfully.",
+          null
+        ]
+      },
+      {
+        "id": "dbd-42",
+        "d": 4,
+        "t": "Cluster Policies",
+        "q": "Your company's finance department detects cost overruns in the cloud bill because some developers forget to shut down their interactive clusters over the weekend and provision GPU instances for tasks that only require basic SQL. Which two measures implemented through `Cluster Policies` solve these cost governance problems? (Choose 2 answers)",
+        "o": [
+          "Completely disable the Unity Catalog service across the whole workspace so that no one can provision virtual machines.",
+          "Enforce a mandatory maximum value in `autotermination_minutes` (e.g., 20 minutes) to force automatic shutdown after inactivity.",
+          "Restrict the allowed instance families in `node_type_id`, blocking the selection of GPU or excessively costly machine types.",
+          "Configure a bash script that randomly kills Java processes on the driver whenever memory usage exceeds 50 percent."
+        ],
+        "a": [
+          1,
+          2
+        ],
+        "e": "**Cluster Policies** are the central compute governance and FinOps tool in Databricks. They allow administrators to: 1) Enforce an auto-termination rule (`autotermination_minutes`) that shuts down idle clusters after a predefined time. 2) Limit the allowed instance families (`node_type_id`), preventing the provisioning of costly types such as GPUs except in authorized projects.",
+        "why": [
+          "Unity Catalog is the data governance engine and has no relation to forcing virtual machine shutdown.",
+          null,
+          null,
+          "Randomly killing Java processes would cause catastrophic failures and inconsistencies instead of implementing an orderly cost policy."
+        ]
+      },
+      {
+        "id": "dbd-43",
+        "d": 4,
+        "t": "Version Control: Databricks Repos",
+        "q": "A team of 10 data engineers needs to collaborate on the same code repository containing notebooks and modules in `.py` files. They want to work with standard Git flows (creating development branches, pull requests, and testing before merging into the `main` branch) and ensure that production jobs run stable versioned code. Which native Databricks solution provides this integration?",
+        "o": [
+          "Manually export each notebook to a compressed `.dbc` file at the end of the day and email it to the data tech lead.",
+          "Copy the notebook code into a shared Delta table in the Bronze layer and synchronize versions through concurrent `MERGE INTO` statements.",
+          "Install a local Git server on the driver node of the interactive cluster, running a daemon service through Linux terminal commands.",
+          "Use `Databricks Repos`, connecting the workspace with remote Git providers to manage branches, commits, and version control at the user level."
+        ],
+        "a": 3,
+        "e": "`Databricks Repos` integrates the Databricks environment with external Git providers (GitHub, GitLab, Azure DevOps, Bitbucket). It allows developers to work on individual branches, sync changes with `git pull` and `git push`, import modular `.py` modules, and configure production Workflows jobs to point to stable tags or release branches.",
+        "why": [
+          "Manually exporting `.dbc` files by email provides no version control, makes merging difficult, and is prone to serious human error.",
+          "Storing source code in Delta tables as text strings is not a version control system and does not support Git flows.",
+          "Installing a Git server on the driver is not scalable, lacks high availability, and is destroyed when the interactive cluster restarts.",
+          null
+        ]
+      },
+      {
+        "id": "dbd-44",
+        "d": 4,
+        "t": "Monitoring and Alerts in Workflows",
+        "q": "A multi-task bank reconciliation pipeline scheduled in Databricks Workflows is critical for the stock market opening. If the job fails or its duration extends beyond 45 minutes (business SLA), the SRE operations team must receive a high-priority notification in its incident channel. How is this monitoring configured in Databricks Workflows?",
+        "o": [
+          "Create an interactive notebook in a `while True` loop that queries the Databricks REST API every 5 seconds and sends network alerts over a socket.",
+          "Configure job notifications in the Workflows interface, associating a Webhook destination or email for failure events and duration SLA thresholds.",
+          "Visually inspect the Databricks console every morning at 06:00 AM by manually refreshing the page in a web browser.",
+          "Modify the Linux kernel on the worker virtual machines to emit SNMP signals to a local monitoring gateway on the intranet."
+        ],
+        "a": 1,
+        "e": "Databricks Workflows includes native support for **Alerts and Notifications**. It lets you configure notification rules for job events (start, success, failure) and runtime SLA thresholds (e.g., alert if the duration exceeds 45 minutes). Notifications are automatically dispatched to email addresses or system destinations such as Webhooks (Slack, PagerDuty, MS Teams).",
+        "why": [
+          "An infinite loop in a notebook needlessly consumes an entire cluster and adds operational fragility compared to the job's native alerts.",
+          null,
+          "Manual inspection is not scalable, does not provide real-time alerts, and does not guarantee compliance with critical SLAs.",
+          "Modifying the Linux kernel on ephemeral nodes is impractical, violates the managed architecture, and is lost every time the cluster is recreated."
+        ]
+      },
+      {
+        "id": "dbd-45",
+        "d": 4,
+        "t": "CI/CD with Databricks Asset Bundles (DABs)",
+        "q": "Your organization adopts DevOps practices for data and requires that all Delta Live Tables pipelines, Workflows jobs, and associated permissions be defined as code (IaC), automatically tested in GitHub Actions pipelines, and deployed programmatically to development, staging, and production environments. Which official Databricks tool is designed specifically for this workflow?",
+        "o": [
+          "The interactive `dbfs cp` command built into the Linux terminal client to transfer notebooks from one folder to another in the metastore.",
+          "A bash script that generates screenshots of the graphical interface and sends them to the workspace administrators for manual approval.",
+          "`Databricks Asset Bundles (DABs)`, which lets you manage projects as declarative code through YAML files and the Databricks CLI.",
+          "The `pip` package manager to compile the entire corporate workspace as a closed binary wheel distribution of pure Python."
+        ],
+        "a": 2,
+        "e": "`Databricks Asset Bundles (DABs)` is the official Databricks framework for implementing CI/CD and Infrastructure as Code (IaC). It lets you define complete project structures (DLT pipelines, jobs, permissions, compute) in declarative YAML files (`databricks.yml`), validate them with `databricks bundle validate`, and deploy them to multiple environments with `databricks bundle deploy` through CI/CD tools such as GitHub Actions or GitLab CI.",
+        "why": [
+          "`dbfs cp` only copies files to storage; it does not define declarative pipelines, jobs, dependencies, or infrastructure as code.",
+          "Screenshots and manual approvals are the opposite of the CI/CD automation recommended by modern DevOps practices.",
+          null,
+          "`pip` and wheels compile Python code libraries, but they do not orchestrate jobs, DLT pipelines, or infrastructure in Databricks workspaces."
+        ]
+      },
+      {
+        "id": "dbd-46",
+        "d": 4,
+        "t": "Compute Optimization: Autoscaling and Spot Instances",
+        "q": "A daily ETL processing pipeline experiences extreme volume fluctuations: on Mondays it processes 100 million records because of the weekend backlog, but from Tuesday to Friday it processes only 10 million. If a large static cluster is provisioned, budget is wasted during the week; if a small one is provisioned, the Monday pipeline misses its SLA. Which cluster configuration balances cost and performance?",
+        "o": [
+          "Provision a static cluster with 100 fixed dedicated nodes and leave it running permanently to guarantee capacity in the worst possible case.",
+          "Run the pipeline on the driver node exclusively, disabling all worker nodes to avoid Spark's inter-node network cost.",
+          "Purchase a fixed 3-year reservation of cloud compute instances for the interactive cluster regardless of the actual recorded usage.",
+          "Enable cluster autoscaling (`Autoscaling`) with a range of workers (e.g., 2 to 20) and use Spot instances for the secondary workers."
+        ],
+        "a": 3,
+        "e": "Cluster **autoscaling** (`Autoscaling`) lets Databricks dynamically add worker nodes when the workload and the number of Spark stages require it (e.g., the Monday peak) and remove them when demand drops. Combining it with **Spot instances** for the workers (keeping the driver node on an on-demand instance) drastically reduces cloud infrastructure cost.",
+        "why": [
+          "A massive static cluster running continuously generates unacceptable budget waste on low-demand days.",
+          "Running everything on the driver eliminates Spark's distributed parallelism and causes catastrophic out-of-memory (OutOfMemory) failures.",
+          "Fixed 3-year reservations for elastic workloads with occasional peaks do not take advantage of the cloud's intrinsic elasticity and increase the TCO.",
+          null
+        ]
+      },
+      {
+        "id": "dbd-47",
+        "d": 5,
+        "t": "Unity Catalog: 3-Level Namespace",
+        "q": "A data engineer at a multinational corporation needs to unambiguously reference the customers table located in the sales domain of the production environment governed by Unity Catalog. What is the canonical three-level namespace format that must be used in SQL queries?",
+        "o": [
+          "`cluster.database.table` (for example, `etl_cluster_01.ventas.clientes`), identifying the cluster that processes the query in real time.",
+          "`metastore.workspace.table` (for example, `global_ms.workspace_01.clientes`), identifying the regional metastore and the local workspace.",
+          "`bucket.folder.table` (for example, `s3_lakehouse.ventas_curated.clientes`), identifying the physical path in the cloud object storage.",
+          "`catalog.schema.table` (for example, `prod_corp.ventas.clientes`), identifying the catalog, schema (database), and table."
+        ],
+        "a": 3,
+        "e": "Unity Catalog standardizes object resolution through a hierarchical **3-level namespace**: `<catalog>.<schema>.<table>` (or view / volume / model). The first level (`catalog`) usually represents the environment or business domain, the second (`schema` or database) the functional logical grouping, and the third (`table`) the specific data entity.",
+        "why": [
+          "Tables are fully decoupled from compute clusters in Unity Catalog; they are not named after the cluster that runs them.",
+          "The metastore and the workspace are management infrastructure levels; they are not part of the SQL syntax for querying data.",
+          "`bucket.folder.table` describes physical storage paths, whereas Unity Catalog provides a unified logical governance abstraction.",
+          null
+        ]
+      },
+      {
+        "id": "dbd-48",
+        "d": 5,
+        "t": "Unity Catalog: Credentials and External Locations",
+        "q": "The cloud security team strictly prohibits data engineers from having access to AWS IAM access keys or connections with secret text strings in notebooks. However, the engineers must be able to read and write files in the path `s3://empresa-datalake/silver/`. How does Unity Catalog solve this secure access requirement?",
+        "o": [
+          "Configure the AWS credentials in plain text inside a `.bashrc` file on the driver node of each virtual machine in the interactive cluster.",
+          "Ask developers to request a temporary STS token every morning and paste it as a comment in the first cell of the working notebook.",
+          "Create a `Storage Credential` with a managed IAM Role and associate it with an `External Location` that governs the bucket URL in Unity Catalog.",
+          "Open the S3 bucket with public read and write access for the range of the company office's public IP addresses."
+        ],
+        "a": 2,
+        "e": "Unity Catalog decouples cloud authentication through two securable objects: 1) `Storage Credential`, which encapsulates a managed cloud identity (IAM Role on AWS, Managed Identity on Azure, Service Account on GCP) configured by metastore administrators. 2) `External Location`, which combines that credential with a storage URL (`s3://...`). Users are granted SQL permissions on the External Location without seeing or handling credentials.",
+        "why": [
+          "Storing IAM keys in text files on the driver violates all security policies and exposes credentials to any user of the cluster.",
+          "Pasting manual tokens into notebooks is insecure, prone to leaks in Git, and does not meet Unity Catalog's centralized auditing.",
+          null,
+          "Making a bucket public represents a very serious security breach and exposes all confidential corporate data on the internet."
+        ]
+      },
+      {
+        "id": "dbd-49",
+        "d": 5,
+        "t": "Unity Catalog: Granular Security (Row Filters & Column Masks)",
+        "q": "A table contains employee payroll and salaries (`empleados_silver`). The human resources leadership requires that: 1) analysts can only view employees belonging to their own country (`pais_id`); 2) the `salario` field be visible in clear text to the `rrhh_directivos` group, but appear as `NULL` or masked for all other users. Which two Unity Catalog mechanisms make it possible to meet these guidelines without duplicating the physical table? (Choose 2 answers)",
+        "o": [
+          "Apply a `Row Filter` on the table through a SQL function that checks `is_account_group_member()` and dynamically filters the `pais_id` field.",
+          "Apply a `Column Mask` on the `salario` column through a SQL function that obfuscates the value for users who do not belong to the authorized group.",
+          "Create a separate physical cluster for each country and duplicate the Parquet files into 50 different storage buckets in the public cloud.",
+          "Run a nightly script that rewrites the table, permanently removing the salary column from the files in object storage."
+        ],
+        "a": [
+          0,
+          1
+        ],
+        "e": "Unity Catalog provides native granular access control without duplicating data: 1) **Row Filters**: SQL functions that return a boolean to restrict which rows each user can see based on their membership in corporate groups (`ROW FILTER`). 2) **Column Masks**: SQL functions applied to individual columns (`SET MASK`) that conditionally mask or return obfuscated values.",
+        "why": [
+          null,
+          null,
+          "Creating separate clusters and duplicating files into 50 buckets creates a maintenance nightmare, desynchronization, and massive cost overruns.",
+          "Physically deleting the salary column destroys the information and prevents the human resources department from legitimately querying the data."
+        ]
+      },
+      {
+        "id": "dbd-50",
+        "d": 5,
+        "t": "Unity Catalog: Automated Data Lineage",
+        "q": "The regulatory compliance team asks to audit how the `ingreso_neto` metric is calculated in the annual financial report and which source tables feed that specific column. How does the **Data Lineage** feature of Unity Catalog help answer this audit without manually documenting the code?",
+        "o": [
+          "It forces engineers to manually declare each transformation in a shared spreadsheet before approving any code pull request.",
+          "It installs an external agent on each developer's computer to record keystrokes while notebooks are edited in the workspace.",
+          "It runs a static code analyzer that sends the notebook text to a third-party language model to deduce the theoretical relationships.",
+          "It automatically generates table-level and column-level lineage diagrams captured at runtime during the queries executed in Databricks."
+        ],
+        "a": 3,
+        "e": "Unity Catalog automatically captures **data lineage (Data Lineage)** at the table and column level at runtime for any SQL or DataFrame query run on the workspace clusters. This lets auditors and administrators graphically visualize in the user interface the origin of the data, the intermediate transformations, and the destination of each column without requiring manual code instrumentation.",
+        "why": [
+          "Manual documentation in spreadsheets is prone to becoming outdated immediately and does not provide verifiable traceability in audits.",
+          "Capturing keystrokes on user computers is a privacy violation and does not provide technical lineage of the data tables.",
+          "Unity Catalog does not send code to third-party LLMs to guess lineage; it captures it deterministically from Spark's physical execution plan.",
+          null
+        ]
+      }
+    ],
+    "why": {
+      "dbd-01": [
         null,
-        "Delta Lake opera sobre almacenamiento de objetos estándar en la nube (S3, ADLS, GCS); no requiere clústeres HDFS ni coordinación mediante Apache ZooKeeper.",
-        "La arquitectura Lakehouse procesa los datos directamente en el Data Lake abierto; no duplica los datos en un Data Warehouse propietario externo.",
-        "El registro transaccional reside en almacenamiento persistente (`_delta_log`), no en la memoria volátil del nodo driver."
-      ]
-    },
-    {
-      "id": "dbd-02",
-      "d": 1,
-      "t": "Arquitectura Medallion: Capa Bronze",
-      "q": "Un ingeniero de datos diseña el pipeline de ingestión para millones de eventos JSON generados por sensores IoT. Algunos sensores envían campos adicionales inesperados debido a actualizaciones de firmware, y otros presentan cargas malformadas. ¿Cuál es el diseño recomendado para la tabla de la capa `Bronze` en una arquitectura Medallion?",
-      "o": [
-        "Filtrar y descartar de inmediato cualquier registro que no coincida exactamente con el esquema predefinido para mantener la integridad de la base de datos.",
-        "Ingerir los datos en modo append-only en su formato nativo o esquema amplio, capturando campos nuevos o malformados en `_rescued_data` para auditoría.",
-        "Normalizar las entidades aplicando desanidado completo de arrays y deduplicación exhaustiva por sensor antes de persistir los registros en el almacenamiento de objetos.",
-        "Ejecutar transformaciones de limpieza y agregación horaria en el micro-batch para escribir directamente tablas de hechos dimensionales en formato Gold precalculado."
+        "Delta Lake operates on standard cloud object storage (S3, ADLS, GCS); it does not require HDFS clusters or coordination through Apache ZooKeeper.",
+        "The Lakehouse architecture processes data directly in the open Data Lake; it does not duplicate data into an external proprietary Data Warehouse.",
+        "The transaction log resides in persistent storage (`_delta_log`), not in the volatile memory of the driver node."
       ],
-      "a": 1,
-      "e": "La capa Bronze debe actuar como una réplica histórica fiel y auditable del origen de datos (append-only). En Databricks, la mejor práctica es ingerir los datos en su formato original o esquema flexible utilizando la columna `_rescued_data` de Auto Loader para preservar campos imprevistos o registros corruptos, permitiendo re-procesar los datos ante cualquier fallo de validación posterior.",
-      "why": [
-        "Descartar datos en la capa Bronze destruye la trazabilidad histórica y hace imposible recuperar información si la discrepancia de esquema era válida.",
+      "dbd-02": [
+        "Discarding data in the Bronze layer destroys historical traceability and makes it impossible to recover information if the schema discrepancy was valid.",
         null,
-        "La normalización, desanidado y deduplicación son transformaciones propias de la capa Silver, no de la capa de ingestión cruda Bronze.",
-        "Las agregaciones horarias y modelos dimensionales pertenecen a la capa Gold; aplicarlas en la ingesta inicial omite las fases de refinamiento y auditoría."
-      ]
-    },
-    {
-      "id": "dbd-03",
-      "d": 1,
-      "t": "Arquitectura Medallion: Capa Silver",
-      "q": "En tu plataforma Lakehouse, la capa `Bronze` contiene eventos sin procesar de múltiples fuentes transaccionales. El equipo de datos necesita alimentar modelos predictivos y analistas de negocio con una visión unificada de los clientes. ¿Qué conjunto de operaciones caracteriza adecuadamente el paso de la capa `Bronze` a la capa `Silver`?",
-      "o": [
-        "Construir exclusivamente tablas de agregación final con métricas de KPI mensuales precalculadas optimizadas para herramientas de visualización ejecutiva en dashboards.",
-        "Replicar idénticamente los ficheros crudos sin validar tipos de datos para mantener un espejo exacto del sistema de archivos origen del proveedor de almacenamiento.",
-        "Limpiar registros, tipar estrictamente columnas, resolver nulos, deduplicar claves y enriquecer los datos conformando una vista corporativa limpia.",
-        "Aplicar anonimización destructiva eliminando todas las claves primarias para restringir el acceso a cualquier usuario que no sea administrador de clúster corporativo."
+        "Normalization, unnesting, and deduplication are Silver layer transformations, not part of the raw Bronze ingestion layer.",
+        "Hourly aggregations and dimensional models belong to the Gold layer; applying them at initial ingestion skips the refinement and auditing phases."
       ],
-      "a": 2,
-      "e": "La capa Silver (curada) es el punto de verdad corporativo del Lakehouse. Transforma los datos crudos de Bronze validando tipos de datos, eliminando duplicados mediante claves de negocio, resolviendo valores nulos críticos, aplicando enriquecimientos con tablas maestras y estructurando entidades limpias sobre las cuales construir la analítica y el machine learning.",
-      "why": [
-        "Las métricas y KPIs agregados finales corresponden a la capa Gold; la capa Silver mantiene el grano detallado de las entidades de negocio.",
-        "Un espejo idéntico sin validaciones representa la propia capa Bronze, sin aportar el filtrado y limpieza característicos de Silver.",
+      "dbd-03": [
+        "Final aggregated metrics and KPIs belong to the Gold layer; the Silver layer keeps the detailed grain of the business entities.",
+        "An identical mirror without validations is the Bronze layer itself, and lacks the filtering and cleansing characteristic of Silver.",
         null,
-        "La anonimización destructiva de claves primarias destruye la integridad referencial requerida en Silver; la seguridad se implementa con máscaras y filtros en Unity Catalog."
-      ]
-    },
-    {
-      "id": "dbd-04",
-      "d": 1,
-      "t": "Arquitectura Medallion: Capa Gold",
-      "q": "El departamento de finanzas requiere un panel de control en Power BI para consultar las ventas totales diarias por región y categoría de producto, con tiempos de respuesta inferiores a un segundo. ¿Cómo debe implementarse este caso de uso en la capa `Gold` del Lakehouse?",
-      "o": [
-        "Configurar una conexión directa en streaming continuo hacia los ficheros JSON en bruto de la capa Bronze para reflejar ventas con latencia de milisegundos en tiempo real.",
-        "Proveer una tabla externa sobre ficheros de texto CSV comprimidos sin optimizar para reducir el coste de almacenamiento en disco en la nube pública.",
-        "Generar tablas agregadas de negocio, modelos dimensionales en estrella o vistas materializadas optimizadas con `OPTIMIZE` y clustering para consultas analíticas.",
-        "Consumir vistas dinámicas no cacheadas que ejecuten joins complejos de 15 tablas crudas y agregaciones en tiempo real cada vez que el usuario abra el reporte en la herramienta de BI."
+        "Destructive anonymization of primary keys destroys the referential integrity required in Silver; security is implemented with masks and filters in Unity Catalog."
       ],
-      "a": 2,
-      "e": "La capa Gold está diseñada para el consumo analítico de alto rendimiento. En ella se almacenan modelos de datos optimizados para el negocio (esquemas en estrella/copo de nieve, tablas de hechos y dimensiones pre-agregadas), compactadas con `OPTIMIZE` y organizadas para minimizar escaneos de datos, garantizando respuestas subsegundo en dashboards y reportes.",
-      "why": [
-        "Consultar ficheros JSON crudos de Bronze en tiempo real generaría una carga masiva y latencias inaceptables para un dashboard de BI concurrente.",
-        "Los ficheros CSV sin optimizar carecen de estadísticas de salto de datos (`data skipping`), resultando en lecturas lentas y sobrecoste de cómputo.",
+      "dbd-04": [
+        "Querying raw Bronze JSON files in real time would generate massive load and unacceptable latencies for a concurrent BI dashboard.",
+        "Unoptimized CSV files lack data skipping statistics (`data skipping`), resulting in slow reads and compute overhead.",
         null,
-        "Ejecutar joins de 15 tablas crudas en cada consulta genera latencias muy elevadas y desperdicia recursos frente a una tabla Gold precalculada."
-      ]
-    },
-    {
-      "id": "dbd-05",
-      "d": 1,
-      "t": "Delta Lake Internals: _delta_log y Concurrencia",
-      "q": "Dos procesos de Spark escriben simultáneamente sobre la misma tabla Delta. El Proceso A actualiza registros de clientes de la región 'Norte' y el Proceso B inserta nuevas compras de la región 'Sur'. ¿Cómo coordina `Delta Lake` estas escrituras concurrentes sin provocar bloqueos pesados ni lecturas inconsistentes?",
-      "o": [
-        "Utiliza Control de Concurrencia Optimista (OCC) verificando el registro de transacciones `_delta_log`; al no colisionar en los mismos ficheros, valida ambos commits.",
-        "Bloquea la tabla entera mediante un semáforo distribuido en memoria, pausando el Proceso B hasta que el Proceso A termine su commit y libere el hilo de ejecución.",
-        "Escribe los datos de ambos procesos en ficheros Parquet temporales y delega la resolución de conflictos en un cron nocturno de reconciliación asíncrona de base de datos.",
-        "Rechaza sistemáticamente cualquier escritura concurrente lanzando una excepción `TableAlreadyLockedException` al detectar dos jobs activos en el clúster de cómputo."
+        "Running joins of 15 raw tables on every query generates very high latencies and wastes resources compared with a precomputed Gold table."
       ],
-      "a": 0,
-      "e": "Delta Lake utiliza Control de Concurrencia Optimista (OCC). Cada transacción graba sus operaciones asumiendo que no habrá conflictos. Antes de realizar el commit atómico en el `_delta_log` (mediante operaciones atómicas como `put-if-absent`), Delta comprueba si otra transacción ha modificado los mismos archivos. Como el Proceso A y el Proceso B operan sobre regiones y ficheros distintos, ambos commits se confirman exitosamente sin bloqueos globales.",
-      "why": [
+      "dbd-05": [
         null,
-        "Delta Lake no utiliza bloqueos pesados de tabla completa (pessimistic locking); su modelo OCC permite escrituras concurrentes si no hay conflicto de archivos.",
-        "Delta Lake garantiza consistencia transaccional inmediata en cada commit; no difiere la consistencia a procesos nocturnos asíncronos.",
-        "Delta no rechaza sistemáticamente transacciones concurrentes; solo aborta si existe un conflicto real de modificación sobre los mismos ficheros de datos."
-      ]
-    },
-    {
-      "id": "dbd-06",
-      "d": 1,
-      "t": "Delta Lake: Time Travel y Recuperación",
-      "q": "Durante una actualización manual en producción, un analista ejecuta accidentalmente un `UPDATE` sin cláusula `WHERE`, corrompiendo la columna de precios en toda la tabla `ventas_silver`. La tabla tiene historial transaccional intacto desde hace 30 días. ¿Cuál es la forma más rápida y segura de restaurar la tabla al estado exacto previo al error?",
-      "o": [
-        "Restaurar la tabla de forma atómica ejecutando `RESTORE TABLE ventas_silver TO VERSION AS OF <version_previa>;`.",
-        "Descargar el último backup manual de la base de datos desde un archivo zip y sobreescribir la carpeta del bucket de almacenamiento mediante comandos bash de terminal.",
-        "Crear un nuevo clúster de Databricks y ejecutar una re-ingesta completa de todos los archivos históricos desde el sistema origen relacional de la compañía.",
-        "Ejecutar un comando `ROLLBACK TRANSACTION;` estándar de base de datos relacional asumiendo que la sesión interactiva sigue abierta en el notebook actual."
+        "Delta Lake does not use heavy full-table locks (pessimistic locking); its OCC model allows concurrent writes if there is no file conflict.",
+        "Delta Lake guarantees immediate transactional consistency on each commit; it does not defer consistency to nightly asynchronous processes.",
+        "Delta does not systematically reject concurrent transactions; it only aborts if there is a real modification conflict on the same data files."
       ],
-      "a": 0,
-      "e": "Delta Lake cuenta con la sentencia `RESTORE TABLE <tabla> TO VERSION AS OF <version>` o `TIMESTAMP AS OF <timestamp>`. Esta instrucción genera un nuevo commit en el `_delta_log` que apunta a los ficheros Parquet válidos de la versión previa, revirtiendo la corrupción de manera instantánea y atómica sin re-ingestar datos ni mover ficheros físicos.",
-      "why": [
+      "dbd-06": [
         null,
-        "Sobreescribir ficheros manualmente en el bucket corrompe el registro transaccional `_delta_log` y puede generar inconsistencias severas en el catálogo.",
-        "Re-ingestar todo el histórico toma horas o días de cómputo innecesario, mientras que `RESTORE TABLE` completa en pocos segundos mediante metadatos.",
-        "Spark SQL y Delta Lake no utilizan transacciones de sesión basadas en `ROLLBACK TRANSACTION`; las transacciones se confirman de forma atómica en cada comando."
-      ]
-    },
-    {
-      "id": "dbd-07",
-      "d": 1,
-      "t": "Delta Lake: Compactación con OPTIMIZE",
-      "q": "Un pipeline de streaming escribe miles de pequeños archivos Parquet (de ~500 KB cada uno) por hora en una tabla Delta de pedidos. Como consecuencia, las consultas analíticas tardan varios minutos debido a la sobrecarga de listar y abrir ficheros en el almacenamiento de objetos. ¿Qué acción de mantenimiento resuelve este problema de pequeños archivos?",
-      "o": [
-        "Ejecutar el comando `VACUUM pedidos RETAIN 0 HOURS;` para purgar de inmediato todos los archivos de tamaño inferior a 1 MB del almacenamiento de objetos de la nube.",
-        "Ejecutar el comando `OPTIMIZE pedidos;` para compactar automáticamente las colecciones de archivos pequeños en archivos mayores de aproximadamente 1 GB.",
-        "Re-particionar físicamente el directorio en el sistema operativo mediante un script en Python dividiendo el total de filas entre 100 carpetas del sistema de ficheros.",
-        "Cambiar el formato de almacenamiento de Delta a CSV plano para evitar el empaquetado columnar de metadatos en las lecturas de los analistas de negocio de la empresa."
+        "Manually overwriting files in the bucket corrupts the `_delta_log` transaction log and can cause severe inconsistencies in the catalog.",
+        "Re-ingesting the entire history takes hours or days of unnecessary compute, whereas `RESTORE TABLE` completes in a few seconds using metadata.",
+        "Spark SQL and Delta Lake do not use session-based transactions with `ROLLBACK TRANSACTION`; transactions are committed atomically with each command."
       ],
-      "a": 1,
-      "e": "El comando `OPTIMIZE` realiza una compactación automática (bin-packing) reuniendo colecciones de ficheros pequeños en archivos Parquet más grandes y eficientes (de hasta ~1 GB). Esto reduce drásticamente las llamadas de metadatos al almacenamiento de objetos (S3/ADLS/GCS) y acelera la lectura de las consultas analíticas.",
-      "why": [
-        "`VACUUM` no compacta archivos; purga ficheros lógicamente eliminados. Ejecutarlo con retención cero además puede corromper transacciones en vuelo.",
+      "dbd-07": [
+        "`VACUUM` does not compact files; it purges logically deleted files. Running it with zero retention can also corrupt in-flight transactions.",
         null,
-        "Manipular manualmente los archivos en el almacenamiento altera la estructura física sin actualizar el `_delta_log`, corrompiendo la tabla Delta.",
-        "Migrar a CSV empeoraría drásticamente el rendimiento al perder el formato columnar, la compresión Snappy y las estadísticas de data skipping."
-      ]
-    },
-    {
-      "id": "dbd-08",
-      "d": 1,
-      "t": "Optimización Física: Liquid Clustering vs Z-ORDER",
-      "q": "Tu equipo gestiona una tabla Delta de 50 TB con consultas frecuentes filtradas concurrentemente por `cliente_id` (alta cardinalidad) y `fecha_pedido` (serie temporal). Históricamente se utilizó particionamiento tradicional por fecha, pero esto generaba problemas de sobre-particionado y desbalanceo de datos (data skew). ¿Qué dos afirmaciones sobre las técnicas modernas de organización física en Delta Lake son correctas? (Elige 2 respuestas)",
-      "o": [
-        "`Liquid Clustering` (`CLUSTER BY (cliente_id, fecha_pedido)`) simplifica el diseño físico al permitir clustering multidimensional flexible sin sobre-particionar.",
-        "`Z-ORDER BY` permite modificar dinámicamente las claves de ordenación sin necesidad de reescribir ni reordenar los ficheros existentes en la tabla.",
-        "`Liquid Clustering` soporta evolución de claves de clustering a lo largo del tiempo sin requerir redefinir ni reescribir toda la tabla históricamente.",
-        "El particionamiento físico clásico por columnas de alta cardinalidad como `cliente_id` es la práctica oficial recomendada por Databricks para tablas grandes."
+        "Manually manipulating files in storage alters the physical structure without updating the `_delta_log`, corrupting the Delta table.",
+        "Migrating to CSV would drastically worsen performance by losing the columnar format, Snappy compression, and data skipping statistics."
       ],
-      "a": [
-        0,
-        2
-      ],
-      "e": "`Liquid Clustering` (`CLUSTER BY`) es la tecnología de optimización física recomendada en Databricks. A diferencia del particionamiento estricto por directorios, no sufre de particionamiento excesivo ni de skew, y permite evolucionar las columnas de clustering sin tener que reescribir el historial de la tabla. En contraste, `Z-ORDER` requiere re-ejecutar `OPTIMIZE ZORDER BY` explícitamente y no adapta sus claves de forma incremental.",
-      "why": [
+      "dbd-08": [
         null,
-        "`Z-ORDER` no adapta dinámicamente sus claves; requiere re-ejecutar manualmente el comando `OPTIMIZE ... ZORDER BY` para reorganizar los datos.",
+        "`Z-ORDER` does not dynamically adapt its keys; it requires manually re-running the `OPTIMIZE ... ZORDER BY` command to reorganize the data.",
         null,
-        "Particionar físicamente por columnas de alta cardinalidad genera millones de micro-carpetas (over-partitioning), degradando severamente el rendimiento."
-      ]
-    },
-    {
-      "id": "dbd-09",
-      "d": 1,
-      "t": "Mantenimiento con VACUUM y Retención",
-      "q": "Un ingeniero de datos ejecuta periódicamente el comando `VACUUM` sobre una tabla Delta para liberar espacio en el almacenamiento de objetos. Un desarrollador sugiere ejecutar `SET spark.databricks.delta.vacuum.retentionCheck.enabled = false; VACUUM ventas RETAIN 0 HOURS;` después de cada micro-batch para mantener el bucket completamente limpio. ¿Por qué esta práctica representa un grave riesgo en producción?",
-      "o": [
-        "Porque borra permanentemente ficheros antiguos que podrían estar siendo leídos por consultas concurrentes activas y destruye la capacidad de Time Travel.",
-        "Porque desactiva permanentemente el motor Photon en el clúster, forzando la compilación en modo interpretado no vectorizado de todas las consultas SQL posteriores en el catálogo.",
-        "Porque provoca que Unity Catalog revoque automáticamente los privilegios `SELECT` de todos los grupos de usuarios sobre la tabla afectada en la base de datos.",
-        "Porque sobreescribe el esquema de la tabla transformando todas las columnas numéricas en tipos binarios no serializables en los ficheros Parquet subyacentes."
+        "Physically partitioning by high-cardinality columns generates millions of micro-folders (over-partitioning), severely degrading performance."
       ],
-      "a": 0,
-      "e": "Delta Lake mantiene los ficheros marcados como eliminados (tombstoned) durante el periodo de retención de seguridad (por defecto 7 días o 168 horas). Si se desactiva el safety check y se purgan archivos con retención cero (`RETAIN 0 HOURS`), cualquier consulta analítica en ejecución que esté leyendo ficheros de versiones previas fallará de inmediato con errores de fichero no encontrado (`FileNotFoundException`), además de impedir el uso de Time Travel.",
-      "why": [
+      "dbd-09": [
         null,
-        "`VACUUM` es una operación de mantenimiento en disco; no afecta al motor de ejecución Photon ni a la configuración del compilador de consultas.",
-        "Los privilegios de Unity Catalog se gestionan en el metastore; la purga física de archivos de datos no altera los permisos RBAC asignados.",
-        "`VACUUM` solo borra ficheros no referenciados físicamente; no modifica el esquema lógico de las columnas ni sus tipos de datos."
-      ]
-    },
-    {
-      "id": "dbd-10",
-      "d": 1,
-      "t": "Managed vs External Tables",
-      "q": "Un equipo de infraestructura necesita definir una tabla en Databricks llamada `telemetria_nodos`. Quieren asegurarse de que si un usuario con permisos ejecuta accidentalmente `DROP TABLE telemetria_nodos;`, los archivos de datos en el bucket de S3 o ADLS Gen2 permanezcan completamente intactos. ¿Cómo debe declararse esta tabla?",
-      "o": [
-        "Como una tabla administrada (`Managed Table`) dentro del catálogo principal sin especificar ninguna cláusula de ubicación externa en el comando de creación.",
-        "Como una tabla temporal global (`GLOBAL TEMP VIEW`) dentro de la base de datos del sistema para que resida permanentemente en almacenamiento volátil de clúster.",
-        "Como una tabla externa (`External Table`) especificando explícitamente una ruta de almacenamiento con la cláusula `LOCATION 's3://bucket/ruta/'`.",
-        "Como una vista estándar (`VIEW`) basada en una consulta `SELECT * FROM parquet` con almacenamiento gestionado en el metastore central de la región corporativa."
+        "`VACUUM` is a disk maintenance operation; it does not affect the Photon execution engine or the query compiler configuration.",
+        "Unity Catalog privileges are managed in the metastore; the physical purge of data files does not alter the assigned RBAC permissions.",
+        "`VACUUM` only deletes physically unreferenced files; it does not modify the logical schema of the columns or their data types."
       ],
-      "a": 2,
-      "e": "En Databricks y Unity Catalog, las tablas creadas con la cláusula `LOCATION` son tablas externas (`External Tables`). Cuando se ejecuta `DROP TABLE` sobre una tabla externa, únicamente se eliminan los metadatos y el registro en el catálogo, pero los archivos físicos de datos en el almacenamiento de objetos permanecen completamente intactos.",
-      "why": [
-        "En una `Managed Table`, el comando `DROP TABLE` elimina tanto los metadatos como los archivos físicos de datos en el bucket.",
-        "Una `GLOBAL TEMP VIEW` desaparece al terminar la aplicación/clúster de Spark y no persiste datos de manera duradera en el catálogo.",
+      "dbd-10": [
+        "In a `Managed Table`, the `DROP TABLE` command removes both the metadata and the physical data files in the bucket.",
+        "A `GLOBAL TEMP VIEW` disappears when the Spark application/cluster terminates and does not durably persist data in the catalog.",
         null,
-        "Una vista no almacena datos por sí misma; la necesidad planteada es crear una tabla persistente con protección de los ficheros físicos subyacentes."
-      ]
-    },
-    {
-      "id": "dbd-11",
-      "d": 1,
-      "t": "Checkpoints de Metadatos en Delta Lake",
-      "q": "Una tabla Delta ha registrado más de 20 000 transacciones de escritura a lo largo de seis meses. Un nuevo ingeniero se pregunta por qué las consultas no se degradan linealmente con el paso del tiempo al tener que leer decenas de miles de ficheros `.json` en el directorio `_delta_log/`. ¿Qué mecanismo interno evita esta degradación?",
-      "o": [
-        "El compilador Catalyst guarda una copia binaria fija de los metadatos en el disco duro local de cada máquina virtual worker del clúster de cómputo.",
-        "Delta Lake genera automáticamente un fichero `.checkpoint.parquet` cada 10 transacciones, compactando el estado acumulado de la tabla hasta ese punto.",
-        "Databricks ejecuta un proceso que elimina todos los ficheros JSON anteriores al último commit cada medianoche de forma irreversible en almacenamiento.",
-        "Las lecturas ignoran el directorio `_delta_log` y leen los datos haciendo un escaneo directo de los ficheros Parquet mediante llamadas POSIX al bucket de nube."
+        "A view does not store data by itself; the stated need is to create a persistent table that protects the underlying physical files."
       ],
-      "a": 1,
-      "e": "Cada 10 commits (por defecto), Delta Lake genera un archivo de checkpoint compactado en formato Parquet (ej. `000010.checkpoint.parquet`, `000020.checkpoint.parquet`). Al consultar la tabla, el motor solo necesita leer el último checkpoint Parquet y los pocos archivos JSON posteriores a este, reconstruyendo el estado completo de la tabla en memoria de forma casi instantánea.",
-      "why": [
-        "Los workers no persisten metadatos maestros en sus discos locales; el estado se deriva dinámicamente del `_delta_log` en almacenamiento de objetos.",
+      "dbd-11": [
+        "Workers do not persist master metadata on their local disks; the state is derived dynamically from the `_delta_log` in object storage.",
         null,
-        "Delta Lake no borra los JSON anteriores arbitrariamente; los conserva para posibilitar el Time Travel según la retención de log configurada.",
-        "Escanear directamente los ficheros sin consultar el `_delta_log` ignoraría los registros de transacciones, leyendo datos corruptos o eliminados."
-      ]
-    },
-    {
-      "id": "dbd-12",
-      "d": 1,
-      "t": "Cómputo: Motor de Ejecución Photon",
-      "q": "Tu empresa procesa pipelines diarios con consultas Spark SQL muy pesadas que contienen múltiples agregaciones, filtros y uniones sobre cientos de millones de filas. Buscas reducir los tiempos de ejecución de las consultas sin modificar el código SQL ni cambiar la infraestructura de clústeres. ¿Qué componente de Databricks proporciona aceleración nativa vectorizada para este propósito?",
-      "o": [
-        "El motor `Photon`, un ejecutor nativo desarrollado en C++ que procesa consultas vectorizadas de forma paralela sustituyendo el runtime JVM de Spark.",
-        "El servicio `Serverless SQL Warehouse` configurado exclusivamente con instancias de GPU para compilar consultas relacionales mediante núcleos CUDA.",
-        "La extensión `Koalas` que convierte automáticamente todas las consultas SQL en operaciones de cálculo secuencial en una única máquina mediante Pandas.",
-        "El módulo `GraphX` que transforma las tablas relacionales en grafos distribuidos en memoria para resolver filtros como caminos conexos en clúster."
+        "Delta Lake does not arbitrarily delete earlier JSON files; it keeps them to enable Time Travel according to the configured log retention.",
+        "Scanning the files directly without consulting the `_delta_log` would ignore the transaction records, reading corrupt or deleted data."
       ],
-      "a": 0,
-      "e": "`Photon` es el motor de ejecución nativo de Databricks escrito desde cero en C++. Sustituye el motor de ejecución tradicional basado en JVM de Apache Spark por un motor columnar vectorizado que aprovecha el paralelismo a nivel de instrucción (SIMD) del hardware moderno, acelerando notablemente las cargas de trabajo SQL y DataFrame sin requerir cambios en el código de las consultas.",
-      "why": [
+      "dbd-12": [
         null,
-        "Los SQL Warehouses utilizan CPU y pueden usar Photon; no requieren hardware de GPU ni compilación mediante CUDA para SQL relacional.",
-        "Koalas es una API compatible con Pandas en PySpark; no acelera consultas SQL complejas ni reemplaza el motor de ejecución distribuido.",
-        "GraphX es una librería para computación de grafos; no es un motor de aceleración para consultas relacionales o pipelines ELT estándar."
-      ]
-    },
-    {
-      "id": "dbd-13",
-      "d": 2,
-      "t": "Spark SQL: Consulta Directa a Archivos",
-      "q": "Un analista de datos necesita inspeccionar rápidamente el contenido de varios archivos Parquet recién descargados en la ruta `dbfs:/mnt/landing/pedidos/` sin crear una tabla formal en el metastore ni registrar metadatos persistentes. ¿Qué sintaxis ANSI SQL de Databricks permite consultar estos archivos directamente?",
-      "o": [
-        "Ejecutar `OPEN FILE 'dbfs:/mnt/landing/pedidos/' FORMAT PARQUET;` para cargar el contenido en la consola interactiva del workspace de desarrollo.",
-        "Ejecutar `SELECT * FROM parquet.`dbfs:/mnt/landing/pedidos/`;` utilizando la notación de formato y comillas invertidas alrededor de la ruta.",
-        "Ejecutar `IMPORT TABLE pedidos FROM 'dbfs:/mnt/landing/pedidos/' TYPE PARQUET;` para instanciar un puntero volátil en memoria compartida.",
-        "Ejecutar `READ_PARQUET('dbfs:/mnt/landing/pedidos/')` como una función escalar dentro de una cláusula `WHERE` en una sesión interactiva de Python."
+        "SQL Warehouses use CPUs and can use Photon; they do not require GPU hardware or CUDA compilation for relational SQL.",
+        "Koalas is a Pandas-compatible API on PySpark; it does not accelerate complex SQL queries or replace the distributed execution engine.",
+        "GraphX is a library for graph computation; it is not an acceleration engine for relational queries or standard ELT pipelines."
       ],
-      "a": 1,
-      "e": "Spark SQL soporta consultas directas sobre ficheros almacenados en sistemas de archivos o buckets mediante la sintaxis `SELECT * FROM <formato>.`<ruta>``. Esto permite explorar datos en formatos Parquet, JSON, CSV, Delta o texto sin necesidad de registrar previamente tablas en el catálogo.",
-      "why": [
-        "La sentencia `OPEN FILE` no existe en la sintaxis de Spark SQL ni en el estándar ANSI SQL de Databricks.",
+      "dbd-13": [
+        "The `OPEN FILE` statement does not exist in Spark SQL syntax or in Databricks' ANSI SQL standard.",
         null,
-        "El comando `IMPORT TABLE` no es una sintaxis válida para consultar ficheros de forma ad-hoc en Spark SQL.",
-        "`READ_PARQUET` no es una función escalar de Spark SQL para invocar en cláusulas WHERE; se usa notación de tabla directa o la API DataFrame."
-      ]
-    },
-    {
-      "id": "dbd-14",
-      "d": 2,
-      "t": "Ingestión Idempotente con COPY INTO",
-      "q": "Un pipeline diario recibe miles de ficheros CSV en un bucket de nube y debe cargarlos en una tabla Delta de destino. Si el pipeline falla a mitad de ejecución y se reintenta, no deben insertarse registros duplicados de los ficheros que ya fueron procesados exitosamente. ¿Qué comando SQL declarativo ofrece esta garantía de carga incremental e idempotente?",
-      "o": [
-        "Utilizar `INSERT INTO delta_destino SELECT * FROM csv.`ruta/`;` confiando en que el optimizador Catalyst descarte ficheros leídos previamente.",
-        "Ejecutar un script en bash con `rsync` que mueva los archivos procesados a una carpeta temporal antes de invocar un comando `LOAD DATA INPATH` en el metastore.",
-        "Utilizar el comando `COPY INTO delta_destino FROM 'ruta/' FILEFORMAT = CSV FORMAT_OPTIONS ('header'='true');` que registra los ficheros ya cargados.",
-        "Ejecutar `CREATE OR REPLACE TABLE delta_destino AS SELECT * FROM csv.`ruta/`;` para sobreescribir la tabla en cada ejecución diaria del pipeline."
+        "The `IMPORT TABLE` command is not valid syntax for querying files ad hoc in Spark SQL.",
+        "`READ_PARQUET` is not a Spark SQL scalar function to invoke in WHERE clauses; direct table notation or the DataFrame API is used."
       ],
-      "a": 2,
-      "e": "El comando `COPY INTO` es una instrucción SQL declarativa e idempotente diseñada para cargar ficheros nuevos de forma incremental en tablas Delta. Registra internamente los archivos ya procesados en los metadatos de la tabla; si se re-ejecuta sobre la misma carpeta, omite de forma automática los ficheros ya cargados sin duplicar datos.",
-      "why": [
-        "`INSERT INTO ... SELECT` inserta ciegamente todos los registros devueltos por la consulta, duplicando datos si se reintenta tras un fallo parcial.",
-        "Mover archivos mediante bash es frágil, propenso a errores de concurrencia y no proporciona transaccionalidad ACID en la base de datos.",
+      "dbd-14": [
+        "`INSERT INTO ... SELECT` blindly inserts all records returned by the query, duplicating data if retried after a partial failure.",
+        "Moving files with bash is fragile, prone to concurrency errors, and provides no ACID transactionality in the database.",
         null,
-        "`CREATE OR REPLACE TABLE` destruye los datos históricos previos en cada ejecución, impidiendo acumular datos históricos de forma incremental."
-      ]
-    },
-    {
-      "id": "dbd-15",
-      "d": 2,
-      "t": "Datos Semiestructurados: from_json",
-      "q": "Una tabla de eventos en la capa Bronze almacena en la columna `payload_str` cadenas de texto con objetos JSON que contienen campos anidados: `{\"usuario_id\": 102, \"detalles\": {\"ip\": \"192.168.1.1\", \"accion\": \"login\"}}`. Quieres extraer el campo `ip` como una columna estructurada en la capa Silver. ¿Cuál es el método adecuado y de mejor rendimiento?",
-      "o": [
-        "Aplicar una expresión regular con `regexp_extract()` sobre la cadena de texto para buscar patrones de caracteres alfanuméricos entre comillas en la columna.",
-        "Escribir una función personalizada UDF en Python puro que invoque la librería estándar `json.loads()` fila por fila en cada ejecutor distribuido del clúster.",
-        "Dividir la cadena por comas y llaves utilizando `split()` y obtener el elemento en la posición estática mediante índices de array en la proyección final.",
-        "Definir el esquema con `STRUCT` y deserializar la columna mediante `from_json(payload_str, 'STRUCT<usuario_id: INT, detalles: STRUCT<ip: STRING, accion: STRING>>')`."
+        "`CREATE OR REPLACE TABLE` destroys the previous historical data on each run, preventing incremental accumulation of historical data."
       ],
-      "a": 3,
-      "e": "`from_json()` es la función nativa optimizada de Spark SQL para transformar cadenas JSON en tipos estructurados (`STRUCT` o `ARRAY`). Al proveer un esquema explícito o inferido con `schema_of_json()`, el motor Catalyst y Photon compilan la deserialización a código nativo de alta eficiencia, permitiendo acceder a los campos anidados mediante notación de puntos (`col.detalles.ip`).",
-      "why": [
-        "Las expresiones regulares con `regexp_extract` son lentas, frágiles ante cambios menores en el formato del JSON y propensas a errores de parsing.",
-        "Una UDF de Python fila por fila sufre de una penalización severa de rendimiento por serialización IPC entre la JVM y el intérprete Python.",
-        "Usar `split()` asume un orden posicional estricto en el JSON, lo cual falla tan pronto los campos cambian de orden o contienen comas internas.",
+      "dbd-15": [
+        "Regular expressions with `regexp_extract` are slow, brittle against minor changes in the JSON format, and prone to parsing errors.",
+        "A row-by-row Python UDF suffers a severe performance penalty from IPC serialization between the JVM and the Python interpreter.",
+        "Using `split()` assumes a strict positional order in the JSON, which fails as soon as the fields change order or contain internal commas.",
+        null
+      ],
+      "dbd-16": [
+        null,
+        "`FILTER` only evaluates boolean predicates to keep or discard elements; it does not transform the values of the array elements.",
+        "`EXPLODE_TRANSFORM` does not exist in the Spark SQL specification or in Databricks.",
+        "`MAP_VALUES` operates on key-value map data types (`MAP<K, V>`), not on primitive arrays (`ARRAY<T>`)."
+      ],
+      "dbd-17": [
+        "It is not possible to access fields of an `ARRAY<STRUCT>` directly with scalar notation without unnesting or using higher-order functions.",
+        null,
+        "`ARRAY_CONTAINS` only evaluates equality against simple literal elements and cannot evaluate multiple correlated conditions together with price predicates.",
+        "`COUNT_IF` is an aggregate function over table columns, not a higher-order function for nested arrays."
+      ],
+      "dbd-18": [
+        "`dropDuplicates` does not guarantee keeping the most recent row after a distributed sort, because internal partitions can alter the partition order.",
+        null,
+        "`FIRST(cantidad)` without ordering is nondeterministic and can return any arbitrary value across successive executions.",
+        null
+      ],
+      "dbd-19": [
+        "Running `UPDATE` followed by `INSERT` makes two independent transactions that can cause race conditions and redundant table scans.",
+        "`INSERT OVERWRITE` overwrites the existing data, deleting all customers that are not present in the current batch of updates.",
+        null,
+        "`UNION ALL` plus `OPTIMIZE` simply accumulates duplicates in the table without updating records or reconciling customer versions."
+      ],
+      "dbd-20": [
+        "The `DROP ROW` syntax does not exist in the standard SQL `MERGE INTO` statement or in Delta Lake (the `DELETE` keyword is used).",
+        "Databricks does not support traditional OLTP database triggers, and REST calls would add unacceptable latency to the data pipeline.",
+        "A sequential Python loop issuing individual `DELETE` statements generates thousands of unnecessary commits in the `_delta_log` and degrades the cluster.",
+        null
+      ],
+      "dbd-21": [
+        null,
+        "Standard Python UDFs suffer extreme row-by-row serialization overhead (Py4J/IPC), making them the slowest alternative in Spark.",
+        "Although Pandas UDFs are much faster than standard Python UDFs, they still incur Arrow serialization costs compared to a native SQL UDF.",
+        "Catalyst cannot optimize inside the Python interpreter in a standard Python UDF; the performance difference is usually 10x to 100x."
+      ],
+      "dbd-22": [
+        "`date_format()` converts the timestamp to `STRING`, which degrades the performance of indexes, temporal comparisons, and data skipping operations.",
+        null,
+        "The `TRUNCATE_TIME` function does not exist in the Spark SQL specification or in Databricks.",
+        "`TO_MONTH_START` is not a Spark SQL function; months have variable lengths (28-31 days) that cannot be computed with fixed multiples."
+      ],
+      "dbd-23": [
+        "The arrow operator `->` is used in lambda functions (higher-order functions), not to access attributes of a `STRUCT`.",
+        "The `EXTRACT_FIELD` function is not part of the Spark SQL built-in function library.",
+        null,
+        "Bracket indexing with strings (`col['clave']`) is reserved for `MAP` types, not for strongly typed attributes of a `STRUCT`."
+      ],
+      "dbd-24": [
+        "`explode()` automatically discards any row where the array is null or empty, losing the orders without items.",
+        "`posexplode()` adds a position index column but also discards empty or null rows just like standard `explode()`.",
+        "`unnest_all()` is not a Spark SQL function in Databricks.",
+        null
+      ],
+      "dbd-25": [
+        null,
+        "Temporary views are not registered in Unity Catalog or the Hive Metastore; therefore, they do not support access-control `GRANT` statements.",
+        "Temporary views can query any format supported by Spark, including Delta, Parquet, CSV, and JSON with no restrictions.",
+        "That Spark configuration property does not exist; session isolation is intrinsic to the lifecycle of a temporary view."
+      ],
+      "dbd-26": [
+        "`ROW_NUMBER()` would break the tie by arbitrarily and nondeterministically assigning position 1 to one and position 2 to the other.",
+        null,
+        "`RANK()` would leave a gap after the two-way tie, assigning position 3 to the next employee instead of the required position 2.",
+        "`PERCENT_RANK()` computes a relative decimal fraction between 0 and 1, not an ordinal integer ranking position."
+      ],
+      "dbd-27": [
+        "`WITH RECURSIVE` is used for recursive queries over graphs or hierarchical trees of records; it is not a clause for subtotals in `GROUP BY`.",
+        "`CUBE` generates all possible combinations of dimensions, producing unnecessary non-hierarchical subtotals and increasing the computational cost.",
+        null,
+        "`ORDER BY TOTALS` is not a valid clause in Spark SQL for synthesizing aggregated subtotal rows."
+      ],
+      "dbd-28": [
+        "Structured Streaming does not generate temporary CSV files for polling; it processes micro-batches in memory, or continuously, directly into Delta sinks.",
+        "Structured Streaming does not depend on synchronous REST services or intermediate relational databases to coordinate distributed ingestion.",
+        "Spark computation is based on RDDs and DataFrames distributed across JVM executors, not on graphs managed by CPython on the driver.",
+        null
+      ],
+      "dbd-29": [
+        null,
+        "`complete` rewrites the entire table on each trigger and is only allowed in queries with aggregations; it would fail on a simple ingestion without groupings.",
+        "`update` emits modified rows and, in streaming without aggregations, behaves equivalently to append, but it does not compute row hashes.",
+        "`snapshot` does not exist as an output mode in Apache Spark Structured Streaming or in Databricks."
+      ],
+      "dbd-30": [
+        "Spark does not use SQLite on the driver to store checkpoints; the driver's ephemeral disk is destroyed when the cluster restarts.",
+        null,
+        "Re-requesting all the history from the beginning would violate exactly-once semantics and generate massive duplicates in the sinks.",
+        "Databricks and Spark Structured Streaming do not use Apache ZooKeeper for checkpoint management or offset coordination."
+      ],
+      "dbd-31": [
+        "Disabling incremental listing would force full bucket scans, worsening the performance problem instead of solving it.",
+        "`COPY INTO` on buckets with tens of millions of files also suffers from high file-listing latencies compared to event queues.",
+        null,
+        "Launching 1,000 nodes to run `ls` commands generates prohibitive costs and excessive calls that cause throttling on the S3 API."
+      ],
+      "dbd-32": [
+        null,
+        "`cloudFiles.enforceStrictTypes` is not a valid Auto Loader option, and silently converting to zero would cause undetectable corruption in numeric data.",
+        "Auto Loader does not silently discard files; its design prioritizes no data loss by rescuing anomalies in `_rescued_data`.",
+        null
+      ],
+      "dbd-33": [
+        "`continuous` keeps the cluster running 24/7 with continuous DBU consumption, contradicting the requirement of a nightly run followed by shutdown.",
+        "`processingTime = '1 hour'` runs the stream in an infinite loop every hour without shutting down the cluster after processing the day's data.",
+        "`Trigger.Once` is deprecated in favor of `Trigger.AvailableNow` because it processed all pending data in a single uncontrolled micro-batch.",
+        null
+      ],
+      "dbd-34": [
+        null,
+        "`dropOldEvents` does not exist in the Apache Spark Structured Streaming API or in Databricks.",
+        "`setTimeToLive` is not a Spark function; Structured Streaming manages its state through State Stores (HDFS or RocksDB) governed by watermarks.",
+        "Using `current_timestamp()` in streaming is nondeterministic and does not allow the engine to deduce when to close and emit past aggregation windows."
+      ],
+      "dbd-35": [
+        "A `MATERIALIZED VIEW` recomputes its contents when the sources change; it is not designed for continuous append-only incremental ingestion.",
+        null,
+        "The `STREAMING_READ` syntax and `CREATE TEMPORARY TABLE` are not part of the Delta Live Tables declarative framework.",
+        "`CREATE EXTERNAL DELTA TABLE` with an artificial `_is_new` filter does not use the streaming capabilities or the transactional tracking of DLT."
+      ],
+      "dbd-36": [
+        "Materialized Views consume standard cluster compute billed in DBUs when running the transformation queries.",
+        "Streaming Tables can perfectly well apply `WHERE` clauses, transformations, and projections as long as the source is incremental.",
+        null,
+        "Streaming Tables scale fully to billions of rows; they have no arbitrary limit of 10,000 records."
+      ],
+      "dbd-37": [
+        "The `CHECK ... ON ERROR SKIP RECORD` syntax does not exist in the Delta Live Tables declarative specification.",
+        "`ON VIOLATION ABORT PIPELINE` is not a valid clause; to abort execution, `ON VIOLATION FAIL UPDATE` is used.",
+        "`ON INVALID DISCARD INTO DLQ` is not DLT syntax; isolating records in message queues is implemented with table-branching patterns.",
+        null
+      ],
+      "dbd-38": [
+        null,
+        "`ON VIOLATION DROP ROW` would drop the row and continue execution successfully, which violates the strict regulatory requirement.",
+        "Omitting the `ON VIOLATION` clause (the default expectation) only emits a warning in the logs but keeps the record and continues the pipeline.",
+        "`ON ANOMALY RAISE CRITICAL ALERT` is not syntax recognized by the Delta Live Tables declarative compiler."
+      ],
+      "dbd-39": [
+        "Running corporate workloads through SSH tunnels on personal laptops breaks the security, scalability, and availability of the Lakehouse.",
+        null,
+        "Increasing the workers of an All-Purpose interactive cluster that stays active all day drastically increases DBU costs.",
+        "Removing Apache Spark prevents processing large distributed volumes and forfeits the governance and optimization advantages of Databricks."
+      ],
+      "dbd-40": [
+        "The local `/tmp` directory is ephemeral and resides on different nodes that can be destroyed between tasks, preventing data sharing.",
+        "Operating system environment variables are not propagated between different clusters or between decoupled tasks of a Workflow.",
+        null,
+        "Modifying notebook source code through the REST API during an ongoing run is an unsafe and discouraged practice."
+      ],
+      "dbd-41": [
+        "Deleting the history removes the audit trail and does not solve the need to resume processing the flow.",
+        "Manually cloning the Workflow for each failure is inefficient, creates clutter in the workspace, and complicates maintenance.",
+        "Rerunning the entire job from scratch wastes two hours of compute and costs on tasks that already completed successfully.",
+        null
+      ],
+      "dbd-42": [
+        "Unity Catalog is the data governance engine and has no relation to forcing virtual machine shutdown.",
+        null,
+        null,
+        "Randomly killing Java processes would cause catastrophic failures and inconsistencies instead of implementing an orderly cost policy."
+      ],
+      "dbd-43": [
+        "Manually exporting `.dbc` files by email provides no version control, makes merging difficult, and is prone to serious human error.",
+        "Storing source code in Delta tables as text strings is not a version control system and does not support Git flows.",
+        "Installing a Git server on the driver is not scalable, lacks high availability, and is destroyed when the interactive cluster restarts.",
+        null
+      ],
+      "dbd-44": [
+        "An infinite loop in a notebook needlessly consumes an entire cluster and adds operational fragility compared to the job's native alerts.",
+        null,
+        "Manual inspection is not scalable, does not provide real-time alerts, and does not guarantee compliance with critical SLAs.",
+        "Modifying the Linux kernel on ephemeral nodes is impractical, violates the managed architecture, and is lost every time the cluster is recreated."
+      ],
+      "dbd-45": [
+        "`dbfs cp` only copies files to storage; it does not define declarative pipelines, jobs, dependencies, or infrastructure as code.",
+        "Screenshots and manual approvals are the opposite of the CI/CD automation recommended by modern DevOps practices.",
+        null,
+        "`pip` and wheels compile Python code libraries, but they do not orchestrate jobs, DLT pipelines, or infrastructure in Databricks workspaces."
+      ],
+      "dbd-46": [
+        "A massive static cluster running continuously generates unacceptable budget waste on low-demand days.",
+        "Running everything on the driver eliminates Spark's distributed parallelism and causes catastrophic out-of-memory (OutOfMemory) failures.",
+        "Fixed 3-year reservations for elastic workloads with occasional peaks do not take advantage of the cloud's intrinsic elasticity and increase the TCO.",
+        null
+      ],
+      "dbd-47": [
+        "Tables are fully decoupled from compute clusters in Unity Catalog; they are not named after the cluster that runs them.",
+        "The metastore and the workspace are management infrastructure levels; they are not part of the SQL syntax for querying data.",
+        "`bucket.folder.table` describes physical storage paths, whereas Unity Catalog provides a unified logical governance abstraction.",
+        null
+      ],
+      "dbd-48": [
+        "Storing IAM keys in text files on the driver violates all security policies and exposes credentials to any user of the cluster.",
+        "Pasting manual tokens into notebooks is insecure, prone to leaks in Git, and does not meet Unity Catalog's centralized auditing.",
+        null,
+        "Making a bucket public represents a very serious security breach and exposes all confidential corporate data on the internet."
+      ],
+      "dbd-49": [
+        null,
+        null,
+        "Creating separate clusters and duplicating files into 50 buckets creates a maintenance nightmare, desynchronization, and massive cost overruns.",
+        "Physically deleting the salary column destroys the information and prevents the human resources department from legitimately querying the data."
+      ],
+      "dbd-50": [
+        "Manual documentation in spreadsheets is prone to becoming outdated immediately and does not provide verifiable traceability in audits.",
+        "Capturing keystrokes on user computers is a privacy violation and does not provide technical lineage of the data tables.",
+        "Unity Catalog does not send code to third-party LLMs to guess lineage; it captures it deterministically from Spark's physical execution plan.",
         null
       ]
     },
-    {
-      "id": "dbd-16",
-      "d": 2,
-      "t": "Funciones de Orden Superior: TRANSFORM",
-      "q": "Tienes una tabla con la columna `precios_base` de tipo `ARRAY<DOUBLE>`. Necesitas aplicar un impuesto del 16 % a cada elemento del array, generando una nueva columna `precios_con_impuesto` de tipo `ARRAY<DOUBLE>` con los importes resultantes. ¿Qué función de orden superior de Spark SQL realiza esta transformación sin necesidad de desanidar el array?",
-      "o": [
-        "`TRANSFORM(precios_base, p -> round(p * 1.16, 2))` para aplicar la función lambda a cada elemento del array directamente en memoria.",
-        "`FILTER(precios_base, p -> p * 1.16)` para multiplicar cada valor y devolver el conjunto transformado en una colección nueva en el catálogo.",
-        "`EXPLODE_TRANSFORM(precios_base, p -> p * 1.16)` para desanidar temporalmente los elementos y reconstruir la lista automáticamente mediante un recolector interno.",
-        "`MAP_VALUES(precios_base, p -> p * 1.16)` para iterar sobre los índices numéricos del array y actualizar los registros subyacentes en disco."
-      ],
-      "a": 0,
-      "e": "La función de orden superior `TRANSFORM(array, element -> expression)` evalúa una expresión o función lambda sobre cada elemento de un array y devuelve un nuevo array con los resultados transformados. Esto evita el coste computacional de descomponer el array con `explode()` y luego reagruparlo con `collect_list()`.",
-      "why": [
-        null,
-        "`FILTER` solo evalúa predicados booleanos para incluir o descartar elementos; no transforma los valores de los elementos del array.",
-        "`EXPLODE_TRANSFORM` no existe en la especificación de Spark SQL ni en Databricks.",
-        "`MAP_VALUES` opera sobre tipos de datos de mapa clave-valor (`MAP<K, V>`), no sobre arrays primitivos (`ARRAY<T>`)."
-      ]
-    },
-    {
-      "id": "dbd-17",
-      "d": 2,
-      "t": "Funciones de Orden Superior: FILTER y EXISTS",
-      "q": "En una tabla de comercio electrónico, cada pedido tiene una columna `articulos` de tipo `ARRAY<STRUCT<nombre: STRING, categoria: STRING, precio: DOUBLE>>`. Quieres filtrar la tabla para seleccionar únicamente aquellos pedidos donde exista al menos un artículo de la categoría 'Electrónica' con un precio superior a 500 dólares. ¿Qué condición SQL en la cláusula `WHERE` resuelve el requerimiento de forma óptima?",
-      "o": [
-        "`WHERE articulos.categoria = 'Electrónica' AND articulos.precio > 500` invocando directamente campos del array como si fueran columnas escalares en la tabla.",
-        "`WHERE EXISTS(articulos, a -> a.categoria = 'Electrónica' AND a.precio > 500)` utilizando la función de orden superior booleana.",
-        "`WHERE ARRAY_CONTAINS(articulos.categoria, 'Electrónica') AND MAX(articulos.precio) > 500` combinando funciones de array y agregación en el WHERE de la consulta.",
-        "`WHERE COUNT_IF(articulos, a -> a.categoria = 'Electrónica') >= 1` para contar las coincidencias en el array en tiempo de escaneo de disco del clúster."
-      ],
-      "a": 1,
-      "e": "La función de orden superior `EXISTS(expr, x -> boolean_expression)` devuelve `true` si al menos un elemento del array cumple la condición booleana definida por la función lambda. Es la solución más limpia y eficiente en Spark SQL para verificar predicados sobre arrays complejos sin requerir `explode()`.",
-      "why": [
-        "No es posible acceder directamente a campos de un `ARRAY<STRUCT>` mediante notación escalar sin desanidar o usar funciones de orden superior.",
-        null,
-        "`ARRAY_CONTAINS` solo evalúa igualdad de elementos literales simples y no permite evaluar múltiples condiciones correlacionadas con predicados de precio.",
-        "`COUNT_IF` es una función de agregación sobre columnas de una tabla, no una función de orden superior para arrays anidados."
-      ]
-    },
-    {
-      "id": "dbd-18",
-      "d": 2,
-      "t": "Deduplicación en Spark SQL",
-      "q": "Un pipeline de ingesta procesa eventos de carritos de compra que contienen duplicados debido a reintentos en la red móvil. Los eventos tienen columnas `sesion_id`, `producto_id`, `cantidad` y `timestamp_evento`. Se requiere eliminar duplicados conservando exclusivamente el evento con la marca temporal más reciente para cada par (`sesion_id`, `producto_id`). ¿Qué dos técnicas en Spark SQL y DataFrames son correctas para lograrlo? (Elige 2 respuestas)",
-      "o": [
-        "Invocar `df.dropDuplicates([\"sesion_id\", \"producto_id\"])` tras ordenar previamente el DataFrame completo mediante `df.sort(\"timestamp_evento\")`.",
-        "Calcular `ROW_NUMBER() OVER (PARTITION BY sesion_id, producto_id ORDER BY timestamp_evento DESC)` en una CTE y filtrar `WHERE row_num = 1`.",
-        "Utilizar la cláusula `GROUP BY sesion_id, producto_id` seleccionando directamente `FIRST(cantidad)` sin definir un criterio de ordenamiento explícito.",
-        "Utilizar `QUALIFY ROW_NUMBER() OVER (PARTITION BY sesion_id, producto_id ORDER BY timestamp_evento DESC) = 1` directamente en la consulta SQL."
-      ],
-      "a": [
-        1,
-        3
-      ],
-      "e": "Para conservar el registro más reciente de forma determinista, se utiliza la función de ventana `ROW_NUMBER() OVER (PARTITION BY ... ORDER BY timestamp DESC)`. En Databricks y Spark SQL, esto puede resolverse mediante una expresión de tabla común (CTE) filtrando `row_num = 1` o de forma directa y elegante utilizando la cláusula `QUALIFY ROW_NUMBER() ... = 1`.",
-      "why": [
-        "`dropDuplicates` no garantiza conservar la fila más reciente tras un sort distribuido, ya que las particiones internas pueden alterar el orden de partición.",
-        null,
-        "`FIRST(cantidad)` sin ordenamiento es no determinista y puede devolver cualquier valor arbitrario en ejecuciones sucesivas.",
-        null
-      ]
-    },
-    {
-      "id": "dbd-19",
-      "d": 2,
-      "t": "Operaciones Atómicas: MERGE INTO",
-      "q": "Tienes una tabla Delta llamada `clientes_silver` y un lote de actualizaciones en la tabla temporal `updates_bronze`. Deseas actualizar el campo `email` y `direccion` de los clientes existentes y agregar los nuevos clientes que no existan previamente. ¿Qué instrucción SQL implementa este patrón de upsert atómico de manera correcta?",
-      "o": [
-        "Ejecutar un `UPDATE` masivo seguido de un `INSERT INTO clientes_silver SELECT * FROM updates_bronze WHERE id NOT IN (SELECT id FROM clientes_silver)` en dos transacciones separadas.",
-        "Sobreescribir la partición completa utilizando la cláusula `INSERT OVERWRITE clientes_silver SELECT * FROM updates_bronze` en una única transacción de catálogo.",
-        "`MERGE INTO clientes_silver AS t USING updates_bronze AS s ON t.id = s.id WHEN MATCHED THEN UPDATE SET t.email=s.email, t.direccion=s.direccion WHEN NOT MATCHED THEN INSERT *;`",
-        "Crear una vista temporal combinada con `UNION ALL` y ejecutar un comando de compactación física con `OPTIMIZE clientes_silver ZORDER BY (id)` en el bucket."
-      ],
-      "a": 2,
-      "e": "La sentencia `MERGE INTO` de Delta Lake permite realizar operaciones coordinadas de tipo Upsert (actualizaciones e inserciones) en una sola transacción atómica ACID. Evalúa la condición de coincidencia (`ON t.id = s.id`) y ejecuta las ramas `WHEN MATCHED` para actualizar filas existentes y `WHEN NOT MATCHED` para insertar nuevos registros.",
-      "why": [
-        "Ejecutar `UPDATE` seguido de `INSERT` son dos transacciones independientes que pueden generar condiciones de carrera y escaneos de tabla redundantes.",
-        "`INSERT OVERWRITE` sobreescribe los datos existentes, borrando a todos los clientes que no estén presentes en el lote de actualizaciones actual.",
-        null,
-        "`UNION ALL` más `OPTIMIZE` simplemente acumula duplicados en la tabla sin actualizar registros ni reconciliar versiones de clientes."
-      ]
-    },
-    {
-      "id": "dbd-20",
-      "d": 2,
-      "t": "MERGE INTO con Eliminación Condicional",
-      "q": "Un sistema de inventario envía registros de cambios en el catálogo. La tabla de origen `novedades_stock` incluye una columna `operacion` con valores 'UPDATE', 'INSERT' o 'DELETE'. Necesitas sincronizar la tabla Delta `stock_actual`. Si la operación es 'DELETE' y el producto coincide, debe eliminarse de la tabla destino. ¿Cómo se expresa esta lógica dentro de un comando `MERGE INTO`?",
-      "o": [
-        "Añadir una cláusula `WHEN MATCHED AND s.operacion = 'DELETE' THEN DROP ROW` en la primera condición de la sentencia MERGE de la consulta SQL.",
-        "Crear un trigger externo de base de datos que capture los eventos de borrado y ejecute llamadas a la API REST de Databricks para su procesamiento.",
-        "Ejecutar un procedimiento almacenado en Python que extraiga los IDs con 'DELETE' y ejecute un bucle `for` lanzando sentencias `DELETE FROM` individuales en clúster.",
-        "Configurar la cláusula `WHEN MATCHED AND s.operacion = 'DELETE' THEN DELETE` antes de la cláusula de actualización estándar."
-      ],
-      "a": 3,
-      "e": "Delta Lake admite múltiples cláusulas `WHEN MATCHED` evaluadas en orden de declaración. Para manejar borrados condicionales, se declara primero `WHEN MATCHED AND s.operacion = 'DELETE' THEN DELETE`, y posteriormente `WHEN MATCHED THEN UPDATE SET ...`. De esta forma, las filas marcadas para eliminación se purgan lógicamente de la tabla en la misma transacción atómica.",
-      "why": [
-        "La sintaxis `DROP ROW` no existe en la sentencia `MERGE INTO` de SQL estándar ni en Delta Lake (se utiliza la palabra clave `DELETE`).",
-        "Databricks no soporta triggers tradicionales de base de datos OLTP y las llamadas REST añadirían una latencia inasumible al pipeline de datos.",
-        "Un bucle secuencial en Python lanzando sentencias `DELETE` individuales genera miles de commits innecesarios en el `_delta_log` y degrada el clúster.",
-        null
-      ]
-    },
-    {
-      "id": "dbd-21",
-      "d": 2,
-      "t": "Rendimiento de UDFs: SQL vs Python vs Pandas",
-      "q": "Un ingeniero de datos necesita calcular una métrica financiera personalizada sobre 100 millones de filas. Puede implementar la función como una SQL UDF nativa, como una Python UDF estándar (`@udf`) o como una Pandas UDF vectorizada (`@pandas_udf`). Si el cálculo se puede expresar en expresiones matemáticas estándar, ¿cuál es la opción más eficiente?",
-      "o": [
-        "La `SQL UDF` nativa, porque Catalyst y el motor Photon la compilan directamente a código de máquina vectorizado sin sobrecarga de serialización.",
-        "La `Python UDF` estándar, porque el recolector de basura de CPython gestiona la memoria de cada fila de forma más eficiente que la JVM de Spark.",
-        "La `Pandas UDF`, porque siempre es más rápida que cualquier función nativa de SQL al ejecutarse en micro-lotes vectorizados de la librería NumPy en memoria.",
-        "No hay diferencia de rendimiento medible entre las tres alternativas debido a que Catalyst optimiza todo el código a bytecode Java idéntico en el compilador."
-      ],
-      "a": 0,
-      "e": "Las `SQL UDFs` nativas son las más eficientes en Databricks porque están totalmente integradas en el optimizador Catalyst y en el motor de ejecución vectorizado `Photon`. No sufren la sobrecarga de serialización IPC (intercambio entre JVM y el runtime de Python) que afecta a las Python UDFs estándar, y superan a las Pandas UDFs al evitar conversiones intermedias.",
-      "why": [
-        null,
-        "Las Python UDFs estándar sufren un sobrecoste extremo de serialización fila por fila (Py4J/IPC), siendo la alternativa más lenta en Spark.",
-        "Aunque las Pandas UDFs son mucho más rápidas que las Python UDFs estándar, siguen incurriendo en costes de serialización Arrow frente a una SQL UDF nativa.",
-        "Catalyst no puede optimizar dentro del intérprete de Python en una Python UDF estándar; la diferencia de rendimiento suele ser de 10x a 100x."
-      ]
-    },
-    {
-      "id": "dbd-22",
-      "d": 2,
-      "t": "Manejo de Fechas y Marcas Temporales",
-      "q": "En un reporte de facturación se requiere truncar la columna `timestamp_transaccion` (tipo TIMESTAMP) al primer día del mes correspondiente a las 00:00:00 para realizar agregaciones mensuales. ¿Cuál es la función recomendada en Spark SQL para realizar este truncamiento temporal?",
-      "o": [
-        "`DATE_FORMAT(timestamp_transaccion, 'yyyy-MM')` para convertir la marca temporal en una cadena de texto y luego filtrarla alfabéticamente en la consulta.",
-        "`DATE_TRUNC('month', timestamp_transaccion)` que devuelve el timestamp ajustado al inicio de la unidad temporal indicada preservando el tipo.",
-        "`TRUNCATE_TIME(timestamp_transaccion, '30 days')` calculando una resta fija de 30 días sobre la marca temporal en cada registro evaluado por el motor.",
-        "`TO_MONTH_START(timestamp_transaccion)` que redondea matemáticamente el número de época Unix al múltiplo de segundos mensual más cercano en ejecución."
-      ],
-      "a": 1,
-      "e": "La función `date_trunc(unit, timestamp)` de Spark SQL trunca una marca de tiempo a la unidad especificada (ej. `'month'`, `'year'`, `'day'`, `'hour'`), devolviendo un valor de tipo `TIMESTAMP` en el inicio exacto del periodo. Esto preserva el tipo de dato nativo para comparaciones y ordenaciones eficientes sin convertir a cadenas de texto.",
-      "why": [
-        "`date_format()` convierte el timestamp a `STRING`, lo cual degrada el rendimiento de índices, comparaciones temporales y operaciones de salto de datos.",
-        null,
-        "La función `TRUNCATE_TIME` no existe en la especificación de Spark SQL ni en Databricks.",
-        "`TO_MONTH_START` no es una función de Spark SQL; los meses tienen duraciones variables (28-31 días) que no pueden calcularse con múltiplos fijos."
-      ]
-    },
-    {
-      "id": "dbd-23",
-      "d": 2,
-      "t": "Estructuras Anidadas: Acceso a Campos STRUCT",
-      "q": "Tienes una columna `cliente` de tipo `STRUCT<nombre: STRING, direccion: STRUCT<ciudad: STRING, codigo_postal: INT>>`. Deseas proyectar la ciudad del cliente en una consulta SQL. ¿Qué sintaxis es válida para acceder al campo anidado `ciudad` en Databricks SQL?",
-      "o": [
-        "`SELECT cliente->direccion->ciudad FROM ventas;` utilizando operadores de puntero tipo flecha similares a lenguajes basados en C++.",
-        "`SELECT EXTRACT_FIELD(cliente, 'direccion.ciudad') FROM ventas;` invocando una función auxiliar de inspección de metadatos de columnas del sistema.",
-        "`SELECT cliente.direccion.ciudad FROM ventas;` utilizando la notación estándar de navegación por puntos sobre estructuras anidadas.",
-        "`SELECT cliente['direccion']['ciudad']::string FROM ventas;` forzando el casteo de mapa clave-valor sobre estructuras de tupla en memoria distribuida."
-      ],
-      "a": 2,
-      "e": "En Spark SQL y Databricks SQL, los campos dentro de un tipo de datos `STRUCT` se acceden de forma natural mediante la notación de puntos: `nombre_columna.campo.subcampo`. Esta sintaxis es intuitiva, conforme al estándar ANSI SQL y altamente optimizada por el motor de ejecución.",
-      "why": [
-        "El operador de flecha `->` se utiliza en funciones lambda (Higher-Order Functions), no para acceder a atributos de una estructura `STRUCT`.",
-        "La función `EXTRACT_FIELD` no forma parte de la biblioteca de funciones integradas de Spark SQL.",
-        null,
-        "La indexación por corchetes con strings (`col['clave']`) se reserva para tipos `MAP`, no para atributos fuertemente tipados de un `STRUCT`."
-      ]
-    },
-    {
-      "id": "dbd-24",
-      "d": 2,
-      "t": "Desanidado de Arrays: explode vs posexplode",
-      "q": "Una tabla contiene pedidos con una columna `items` de tipo `ARRAY<STRING>`. Algunos pedidos no contienen ningún artículo (`items` es un array vacío o `NULL`). Necesitas aplanar el array de manera que cada artículo ocupe su propia fila, pero sin perder aquellos pedidos que no tienen artículos (deben figurar con valor `NULL`). ¿Qué función SQL debe utilizarse?",
-      "o": [
-        "`SELECT pedido_id, explode(items) FROM pedidos;` confiando en que el motor mantenga automáticamente las filas con arrays nulos o vacíos en el resultado.",
-        "`SELECT pedido_id, posexplode(items) FROM pedidos;` para generar tanto la posición entera como el valor correspondiente del elemento en cada fila.",
-        "`SELECT pedido_id, unnest_all(items) FROM pedidos;` invocando la función estándar de aplanamiento dimensional de bases de datos PostgreSQL en clúster.",
-        "`SELECT pedido_id, explode_outer(items) FROM pedidos;` para asegurar la conservación de las filas padre con arrays nulos o vacíos en el resultado."
-      ],
-      "a": 3,
-      "e": "`explode_outer(col)` es la variante de `explode()` que preserva las filas cuyo array es `NULL` o está vacío (`size = 0`). A diferencia de `explode()`, que descarta silenciosamente estas filas (comportamiento análogo a un `INNER JOIN`), `explode_outer()` emite una fila con valor `NULL` para la columna aplanada (comportamiento análogo a un `LEFT OUTER JOIN`).",
-      "why": [
-        "`explode()` descarta automáticamente cualquier fila donde el array sea nulo o esté vacío, perdiendo los pedidos sin artículos.",
-        "`posexplode()` añade una columna de índice de posición pero también descarta las filas vacías o nulas como `explode()` estándar.",
-        "`unnest_all()` no es una función de Spark SQL en Databricks.",
-        null
-      ]
-    },
-    {
-      "id": "dbd-25",
-      "d": 2,
-      "t": "Tipos de Vistas: Standard vs Temp vs Global Temp",
-      "q": "Un ingeniero de datos crea una vista para un análisis temporal en un notebook interactivo: `CREATE TEMPORARY VIEW vista_temporal AS SELECT * FROM datos_raw;`. Posteriormente, otro colega intenta consultar `vista_temporal` desde otro clúster y recibe un error de tabla no encontrada. ¿Cuál es el motivo de este comportamiento?",
-      "o": [
-        "Las vistas temporales (`TEMPORARY VIEW`) tienen un ámbito estrictamente ligado a la sesión de Spark actual y no son visibles desde otros clústeres ni sesiones.",
-        "El usuario que creó la vista no ejecutó el comando `GRANT SELECT ON VIEW vista_temporal TO PUBLIC;` en el metastore central corporativo de la cuenta.",
-        "Las vistas temporales solo pueden consultar tablas en formato Parquet y fallan si los datos subyacentes se encuentran en formato Delta Lake en producción.",
-        "El segundo colega no activó la propiedad `spark.sql.globalTempViews.crossClusterEnabled = true` en la configuración avanzada de su clúster de cómputo."
-      ],
-      "a": 0,
-      "e": "En Apache Spark y Databricks, una `TEMPORARY VIEW` existe únicamente dentro del ámbito de la sesión de Spark (`SparkSession`) en la que fue declarada. No se registra en ningún catálogo persistente ni metastore, y se destruye automáticamente al terminar la sesión o apagar el clúster. No es accesible desde otros clústeres ni desde otras sesiones concurrentes.",
-      "why": [
-        null,
-        "Las vistas temporales no se registran en Unity Catalog ni Hive Metastore; por tanto, no admiten sentencias `GRANT` de control de acceso.",
-        "Las vistas temporales pueden consultar cualquier formato compatible con Spark, incluyendo Delta, Parquet, CSV y JSON sin ninguna restricción.",
-        "No existe dicha propiedad de configuración de Spark; el aislamiento de sesión es intrínseco al ciclo de vida de una vista temporal."
-      ]
-    },
-    {
-      "id": "dbd-26",
-      "d": 2,
-      "t": "Funciones de Ventana: RANK vs DENSE_RANK",
-      "q": "En una competición de ventas, dos empleados empatan en el primer puesto con 100 ventas cada uno, y el siguiente empleado tiene 90 ventas. Quieres que el empleado con 90 ventas figure en la posición 2 del ranking sin dejar huecos en la numeración. ¿Qué función de ventana analítica debe utilizarse en la consulta SQL?",
-      "o": [
-        "`ROW_NUMBER() OVER (ORDER BY ventas DESC)` para asignar números correlativos independientes de los empates en los valores de venta evaluados por la consulta.",
-        "`DENSE_RANK() OVER (ORDER BY ventas DESC)` para asignar el mismo rango a los valores empatados sin generar saltos en la numeración posterior.",
-        "`RANK() OVER (ORDER BY ventas DESC)` para calcular las posiciones dejando el hueco correspondiente al número de competidores empatados en la tabla.",
-        "`PERCENT_RANK() OVER (ORDER BY ventas DESC)` para expresar la posición relativa de cada empleado como un porcentaje sobre el total de la plantilla evaluada."
-      ],
-      "a": 1,
-      "e": "`DENSE_RANK()` asigna el mismo rango a valores idénticos en la cláusula `ORDER BY` y continúa con el número entero inmediatamente siguiente (1, 1, 2...). En contraste, `RANK()` dejaría un hueco (1, 1, 3...), y `ROW_NUMBER()` asignaría valores secuenciales únicos y arbitrarios a los empatados (1, 2, 3).",
-      "why": [
-        "`ROW_NUMBER()` rompería el empate asignando a uno la posición 1 y al otro la posición 2 de forma arbitraria y no determinista.",
-        null,
-        "`RANK()` dejaría un hueco tras el empate doble, asignando la posición 3 al siguiente empleado en lugar de la posición 2 requerida.",
-        "`PERCENT_RANK()` calcula una fracción decimal relativa entre 0 y 1, no un número de posición entero ordinal de ranking."
-      ]
-    },
-    {
-      "id": "dbd-27",
-      "d": 2,
-      "t": "Agregaciones Multidimensionales: ROLLUP y CUBE",
-      "q": "El equipo de analistas de negocio requiere un reporte de ventas que incluya subtotales acumulados jerárquicos: primero el total general de la empresa, luego los subtotales por año, y dentro de cada año los subtotales por mes y región. ¿Qué cláusula de agregación SQL resuelve esta jerarquía sin recurrir a múltiples sentencias `UNION ALL`?",
-      "o": [
-        "`GROUP BY region, mes, anio WITH RECURSIVE` para calcular iterativamente los acumulados mediante una expresión común de grafo en memoria.",
-        "`GROUP BY CUBE (anio, mes, region)` para calcular exhaustivamente todas las $2^3 = 8$ combinaciones posibles de dimensiones sin importar jerarquía.",
-        "`GROUP BY ROLLUP (anio, mes, region)` para generar los subtotales agregados en orden estrictamente jerárquico de izquierda a derecha.",
-        "`GROUP BY anio, mes, region ORDER BY TOTALS DESC` forzando la inyección de filas calculadas sintéticamente en la etapa de ordenación final en clúster."
-      ],
-      "a": 2,
-      "e": "`GROUP BY ROLLUP (a, b, c)` genera agregaciones jerárquicas progresivas considerando el orden de las columnas declaradas: `(a, b, c)`, `(a, b)`, `(a)` y el gran total general `()`. Es la cláusula óptima para generar reportes con subtotales estructurados jerárquicamente (ej. año &rarr; mes &rarr; región) en una sola pasada de agregación.",
-      "why": [
-        "`WITH RECURSIVE` se usa para consultas recursivas en grafos o árboles jerárquicos de registros; no es una cláusula para subtotales en `GROUP BY`.",
-        "`CUBE` genera todas las combinaciones posibles de dimensiones, produciendo subtotales no jerárquicos innecesarios y aumentando el coste computacional.",
-        null,
-        "`ORDER BY TOTALS` no es una cláusula válida en Spark SQL para sintetizar filas de subtotales agregados."
-      ]
-    },
-    {
-      "id": "dbd-28",
-      "d": 3,
-      "t": "Structured Streaming: Modelo de Tabla Ilimitada",
-      "q": "Un ingeniero de datos nuevo en Apache Spark asume que un flujo de Structured Streaming requiere reescribir la lógica de consultas de forma diferente a un procesamiento por lotes (batch). ¿Cuál es el concepto arquitectónico fundamental de Structured Streaming que unifica ambos paradigmas?",
-      "o": [
-        "Convierte el flujo de eventos en archivos CSV individuales en disco que se procesan mediante un script de polling en el sistema operativo del nodo driver.",
-        "Ejecuta un servicio REST síncrono que almacena cada evento en una base de datos relacional externa antes de notificar a los suscriptores del catálogo.",
-        "Transforma todos los datos en grafos dirigidos no cíclicos en memoria RAM gestionados por hilos independientes de CPython en el driver del clúster.",
-        "Trata el flujo de datos continuo como una tabla ilimitada (unbounded table) sobre la que cada nuevo lote añade registros en modo append."
-      ],
-      "a": 3,
-      "e": "El modelo conceptual de Spark Structured Streaming trata el flujo de datos continuo como una tabla ilimitada (*unbounded table*) que crece continuamente a medida que llegan nuevos datos. Esto permite expresar consultas de streaming utilizando exactamente las mismas APIs y optimizaciones Catalyst que en consultas por lotes (batch).",
-      "why": [
-        "Structured Streaming no genera archivos CSV temporales para polling; procesa micro-lotes en memoria o continuo directamente hacia sumideros Delta.",
-        "Structured Streaming no depende de servicios REST síncronos ni bases de datos relacionales intermedias para coordinar la ingesta distribuida.",
-        "El cómputo de Spark se basa en RDDs y DataFrames distribuidos en ejecutores JVM, no en grafos gestionados por CPython en el driver.",
-        null
-      ]
-    },
-    {
-      "id": "dbd-29",
-      "d": 3,
-      "t": "Structured Streaming: Modos de Salida (Output Modes)",
-      "q": "Un pipeline de streaming lee eventos de clics continuos y escribe directamente en una tabla Delta de la capa Silver en modo incremental sin realizar agregaciones ni agrupaciones. ¿Qué modo de salida (`outputMode`) debe configurarse en el `DataStreamWriter`?",
-      "o": [
-        "`outputMode(\"append\")` para emitir exclusivamente los nuevos registros procesados en cada micro-lote hacia la tabla Delta de destino.",
-        "`outputMode(\"complete\")` para sobreescribir la tabla completa con el historial consolidado de eventos en cada micro-lote de streaming ejecutado.",
-        "`outputMode(\"update\")` para recalcular el hash de cada fila e insertar únicamente registros que no existan previamente en el almacenamiento de objetos.",
-        "`outputMode(\"snapshot\")` para volcar una copia estática de la memoria del nodo driver en formato binario hacia el catálogo corporativo de datos."
-      ],
-      "a": 0,
-      "e": "El modo de salida `append` (por defecto en Structured Streaming) emite únicamente las filas nuevas procesadas en el micro-lote actual hacia el sumidero (sink). En consultas sin agregaciones, es el único modo soportado para tablas Delta incrementales, asegurando una escritura continua y atómica de nuevos registros.",
-      "why": [
-        null,
-        "`complete` reescribe toda la tabla en cada trigger y solo está permitido en consultas con agregaciones; fallaría en una ingesta simple sin agrupaciones.",
-        "`update` emite filas modificadas y en streaming sin agregaciones tiene un comportamiento equivalente a append, pero no calcula hashes de fila.",
-        "`snapshot` no existe como modo de salida en Apache Spark Structured Streaming ni en Databricks."
-      ]
-    },
-    {
-      "id": "dbd-30",
-      "d": 3,
-      "t": "Structured Streaming: Checkpointing y Tolerancia a Fallos",
-      "q": "Un trabajo de Structured Streaming crítico se detiene inesperadamente debido a una interrupción temporal de red con el almacenamiento de nube. Al reiniciar el clúster, el trabajo se reanuda automáticamente sin duplicar eventos ni perder registros pendientes. ¿Qué componente técnico hace posible esta recuperación con garantías `exactly-once`?",
-      "o": [
-        "El registro de transacciones de la base de datos relacional SQLite embebida en el disco local efímero del nodo driver de Databricks.",
-        "El directorio de checkpoint (`checkpointLocation`) que persiste de forma duradera los logs de offsets leídos, commits y estado del streaming.",
-        "La política de auto-reinicio del clúster que vuelve a solicitar todos los eventos históricos desde el timestamp de inicio original del origen transaccional.",
-        "El mecanismo de replicación inter-nodo de Apache ZooKeeper configurado en los nodos trabajadores del clúster de cómputo del workspace corporativo."
-      ],
-      "a": 1,
-      "e": "El directorio `checkpointLocation` es el pilar de la tolerancia a fallos en Structured Streaming. Almacena de forma duradera en almacenamiento de objetos (S3/ADLS/GCS) los registros de offsets leídos (`offsets/`), los commits confirmados (`commits/`) y el estado de agregaciones. Esto permite al motor reiniciar exactamente donde se interrumpió garantizando semántica *exactly-once*.",
-      "why": [
-        "Spark no utiliza SQLite en el driver para guardar checkpoints; el disco efímero del driver se destruye al reiniciar el clúster.",
-        null,
-        "Re-solicitar todo el histórico desde el inicio violaría la semántica exactly-once y generaría duplicados masivos en los sumideros.",
-        "Databricks y Spark Structured Streaming no utilizan Apache ZooKeeper para la gestión de checkpoints ni para la coordinación de offsets."
-      ]
-    },
-    {
-      "id": "dbd-31",
-      "d": 3,
-      "t": "Auto Loader: Directory Listing vs File Notification",
-      "q": "Tu empresa ingiere diariamente 500 000 archivos nuevos en un bucket S3 que ya acumula más de 10 millones de ficheros históricos. El pipeline actual que utiliza `spark.read` estándar tarda más de una hora solo en listar el contenido del bucket antes de comenzar a procesar. ¿Qué configuración de `Auto Loader` resuelve este cuello de botella?",
-      "o": [
-        "Configurar `cloudFiles.useIncrementalListing = false` para forzar un escaneo secuencial en un único hilo maestro en el nodo driver del clúster de cómputo.",
-        "Utilizar `COPY INTO` con la opción de forzar re-indexación de carpetas de almacenamiento mediante llamadas POSIX al sistema de ficheros distribuido.",
-        "Habilitar el modo de notificación de archivos (`cloudFiles.useNotifications = true`) utilizando colas de eventos (SNS/SQS) para recibir avisos.",
-        "Dividir el bucket en 1 000 sub-carpetas y lanzar un clúster de 1 000 nodos ejecutando un comando `ls -R` en paralelo mediante scripts de bash en Linux."
-      ],
-      "a": 2,
-      "e": "Auto Loader (`cloudFiles`) ofrece el modo **File Notification** (`cloudFiles.useNotifications = true`), que configura automáticamente servicios de eventos en la nube (AWS SNS/SQS, Azure Event Grid, GCP Pub/Sub). En lugar de listar directorios con millones de ficheros (lo cual es lento y costoso en APIs de almacenamiento), Auto Loader lee los avisos directamente de la cola de mensajes, detectando archivos nuevos al instante.",
-      "why": [
-        "Desactivar el listado incremental forzaría escaneos completos del bucket, empeorando el problema de rendimiento en lugar de resolverlo.",
-        "`COPY INTO` en buckets con decenas de millones de archivos también sufre de latencias elevadas en el listado de archivos frente a colas de eventos.",
-        null,
-        "Lanzar 1 000 nodos para ejecutar comandos `ls` genera costes prohibitivos y llamadas excesivas que provocan throttling en la API de S3."
-      ]
-    },
-    {
-      "id": "dbd-32",
-      "d": 3,
-      "t": "Auto Loader: Evolución de Esquemas y _rescued_data",
-      "q": "Un pipeline con Auto Loader (`format(\"cloudFiles\")`) procesa ficheros JSON de terceros. El proveedor suele añadir campos nuevos sin previo aviso y, en ocasiones, envía registros corruptos donde un campo numérico contiene texto. ¿Qué dos mecanismos de Auto Loader permiten gestionar esta situación sin fallar el pipeline ni perder datos? (Elige 2 respuestas)",
-      "o": [
-        "Configurar `cloudFiles.schemaEvolutionMode = 'addNewColumns'` para que Auto Loader agregue dinámicamente nuevas columnas al esquema de la tabla.",
-        "Establecer `cloudFiles.enforceStrictTypes = true` para forzar que los registros con datos de tipo incorrecto se conviertan a cero de forma silenciosa.",
-        "Utilizar `cloudFiles.dropMalformed = true` para eliminar de inmediato del almacenamiento los ficheros que contengan cualquier discrepancia de parsing.",
-        "Aprovechar la columna `_rescued_data`, que captura automáticamente cualquier columna inesperada o dato corrupto en formato JSON sin romper la ingesta."
-      ],
-      "a": [
-        0,
-        3
-      ],
-      "e": "Auto Loader proporciona capacidades avanzadas de manejo de esquemas: 1) `cloudFiles.schemaEvolutionMode = 'addNewColumns'` amplía automáticamente el esquema de la tabla destino cuando detecta columnas nuevas en los archivos de entrada. 2) La columna especial `_rescued_data` captura cualquier campo que no coincida con el esquema esperado o que contenga valores malformados, asegurando que no se pierdan datos y permitiendo auditar anomalías posteriormente.",
-      "why": [
-        null,
-        "`cloudFiles.enforceStrictTypes` no es una opción válida de Auto Loader y convertir silenciosamente a cero provocaría corrupción no detectable en datos numéricos.",
-        "Auto Loader no descarta ficheros silenciosamente; su diseño prioriza la no pérdida de datos rescatando anomalías en `_rescued_data`.",
-        null
-      ]
-    },
-    {
-      "id": "dbd-33",
-      "d": 3,
-      "t": "Structured Streaming: Triggers y Trigger.AvailableNow",
-      "q": "Un equipo necesita ejecutar un pipeline de ingesta incremental en streaming una sola vez por noche. Quieren que procese todos los datos que hayan llegado durante el día dividiéndolos eficientemente en múltiples micro-lotes para no saturar la memoria del clúster, y que luego el clúster se apague automáticamente. ¿Qué disparador (`Trigger`) es la mejor práctica recomendada por Databricks?",
-      "o": [
-        "`trigger(continuous = '10 seconds')` para mantener el clúster encendido permanentemente en espera pasiva de nuevos registros en el bucket de nube.",
-        "`trigger(processingTime = '1 hour')` para obligar al motor a pausar la ejecución exactamente durante 60 minutos antes de procesar el lote en curso.",
-        "`trigger(once = true)` porque es la directiva que procesa todo en un único micro-lote masivo forzando el consumo total de la memoria RAM del driver.",
-        "`trigger(availableNow = true)` para procesar incrementalmente todos los datos disponibles en micro-lotes eficientes y terminar el stream."
-      ],
-      "a": 3,
-      "e": "`Trigger.AvailableNow` (o `availableNow = true`) es el disparador recomendado por Databricks para procesamiento incremental por lotes. A diferencia de `Trigger.Once` (que procesaba todo en un único micro-lote masivo pudiendo causar errores de OutOfMemory), `AvailableNow` procesa todos los datos pendientes acumulados dividiéndolos en múltiples micro-lotes de tamaño óptimo según los límites configurados, y termina la ejecución limpiamente.",
-      "why": [
-        "`continuous` mantiene el clúster encendido 24/7 con consumo continuo de DBUs, contradiciendo el requisito de ejecución nocturna y apagado.",
-        "`processingTime = '1 hour'` ejecuta el stream en bucle infinito cada hora sin apagar el clúster al procesar los datos del día.",
-        "`Trigger.Once` está en desuso frente a `Trigger.AvailableNow` porque procesaba todos los datos pendientes en un solo micro-lote descontrolado.",
-        null
-      ]
-    },
-    {
-      "id": "dbd-34",
-      "d": 3,
-      "t": "Structured Streaming: Watermarking y Eventos Tardíos",
-      "q": "Una consulta de streaming realiza agregaciones en ventanas temporales de 10 minutos (`window(timestamp, '10 minutes')`) para contar pedidos. Si no se configura un límite de tiempo de espera para eventos tardíos, el State Store en memoria crecerá indefinidamente hasta agotar la RAM del clúster (OOM). ¿Qué método de la API DataFrame resuelve este problema definiendo el umbral de descarte de datos tardíos?",
-      "o": [
-        "`withWatermark(\"timestamp\", \"20 minutes\")` que define el umbral temporal a partir del cual los eventos antiguos son descartados y el estado liberado.",
-        "`dropOldEvents(delay = \"20 minutes\")` que elimina físicamente los registros retrasados del sistema de almacenamiento de objetos antes de leerlos.",
-        "`setTimeToLive(\"timestamp\", 1200)` para marcar una caducidad de estilo Redis sobre cada clave individual en los nodos trabajadores del clúster corporativo.",
-        "`filter(timestamp > current_timestamp() - interval 20 minutes)` aplicado estáticamente en la cláusula de proyección de la consulta inicial en streaming."
-      ],
-      "a": 0,
-      "e": "El mecanismo de **Watermarking** (`withWatermark(timeColumn, delayThreshold)`) le indica al motor de Structured Streaming cuánto retraso temporal debe tolerar para eventos desordenados. Cuando la marca de agua avanza, el motor descarta cualquier evento que llegue con una marca de tiempo anterior al umbral y purga de forma segura el estado intermedio de la memoria, previniendo caídas por OutOfMemory (OOM).",
-      "why": [
-        null,
-        "`dropOldEvents` no existe en la API de Apache Spark Structured Streaming ni en Databricks.",
-        "`setTimeToLive` no es una función de Spark; Structured Streaming gestiona su estado mediante State Stores (HDFS o RocksDB) gobernados por watermarks.",
-        "Usar `current_timestamp()` en streaming no es determinista y no permite al motor deducir cuándo cerrar y emitir ventanas de agregación pasadas."
-      ]
-    },
-    {
-      "id": "dbd-35",
-      "d": 3,
-      "t": "Delta Live Tables: Streaming Tables",
-      "q": "En un pipeline de Delta Live Tables (DLT) definido en SQL, necesitas crear una tabla en la capa Bronze que ingiera continuamente nuevos ficheros de registro desde un directorio en la nube usando Auto Loader. ¿Qué sintaxis declarativa de DLT define adecuadamente esta tabla como un dataset de ingesta estrictamente incremental?",
-      "o": [
-        "`CREATE MATERIALIZED VIEW raw_logs AS SELECT * FROM cloud_files('/mnt/raw/', 'json');` para refrescar la tabla entera periódicamente en cada ejecución.",
-        "`CREATE OR REFRESH STREAMING TABLE raw_logs AS SELECT * FROM STREAM read_files('/mnt/raw/', format => 'json');`",
-        "`CREATE TEMPORARY TABLE raw_logs AS SELECT * FROM STREAMING_READ('/mnt/raw/') WITH OPTIONS ('mode'='incremental') en el catálogo de metadatos.",
-        "`CREATE EXTERNAL DELTA TABLE raw_logs LOCATION '/mnt/raw/' AS SELECT * FROM json.`/mnt/raw/` WHERE _is_new = true en el metastore central corporativo.`"
-      ],
-      "a": 1,
-      "e": "En Delta Live Tables con SQL, las tablas diseñadas para ingestión y procesamiento puramente incremental (append-only) se definen con la sintaxis `CREATE OR REFRESH STREAMING TABLE <nombre> AS SELECT * FROM STREAM <fuente>`. La palabra clave `STREAM` le indica a DLT que debe consumir la fuente como un flujo continuo incremental.",
-      "why": [
-        "Una `MATERIALIZED VIEW` recalcula su contenido ante cambios en las fuentes, no está diseñada para ingestión incremental continua append-only.",
-        null,
-        "La sintaxis `STREAMING_READ` y `CREATE TEMPORARY TABLE` no forman parte del framework declarativo de Delta Live Tables.",
-        "`CREATE EXTERNAL DELTA TABLE` con un filtro artificial `_is_new` no utiliza las capacidades de streaming ni el tracking transaccional de DLT."
-      ]
-    },
-    {
-      "id": "dbd-36",
-      "d": 3,
-      "t": "Delta Live Tables: Materialized Views vs Streaming Tables",
-      "q": "Estás diseñando la capa Gold en un pipeline de Delta Live Tables. La tabla de destino requiere calcular el importe total acumulado y el número de transacciones por cliente a partir de la tabla Silver, realizando agregaciones complejas y requiriendo consistencia completa ante actualizaciones históricas de datos. ¿Por qué se debe elegir una `Materialized View` en lugar de una `Streaming Table`?",
-      "o": [
-        "Porque las Materialized Views no consumen unidades DBU de cómputo en Databricks al ser procesadas enteramente dentro del metastore de la región.",
-        "Porque las Streaming Tables tienen prohibido por especificación ejecutar cualquier cláusula `WHERE` o aplicar transformaciones de filtrado lógico.",
-        "Porque las Materialized Views recalculan y mantienen el estado agregado coherente ante modificaciones y borrados en las fuentes de datos.",
-        "Porque las Streaming Tables solo pueden almacenar un máximo de 10 000 registros antes de requerir un comando manual de compactación física en disco."
-      ],
-      "a": 2,
-      "e": "En Delta Live Tables, las `Materialized Views` están diseñadas específicamente para transformaciones complejas, uniones (joins) y agregaciones en capas Silver/Gold. Cuando los datos de origen sufren modificaciones, inserciones o eliminaciones, DLT recalcula y sincroniza el estado de la Materialized View para reflejar el estado actual exacto del negocio, mientras que las `Streaming Tables` están restringidas a flujos incrementales de solo adición (*append-only*).",
-      "why": [
-        "Las Materialized Views consumen cómputo de clúster estándar facturado en DBUs al ejecutar las consultas de transformación.",
-        "Las Streaming Tables pueden aplicar perfectamente cláusulas `WHERE`, transformaciones y proyecciones siempre que la fuente sea incremental.",
-        null,
-        "Las Streaming Tables son completamente escalables a miles de millones de filas; no tienen ningún límite arbitrario de 10 000 registros."
-      ]
-    },
-    {
-      "id": "dbd-37",
-      "d": 3,
-      "t": "DLT: Expectativas de Calidad (DROP ROW)",
-      "q": "En una canalización de Delta Live Tables (DLT), el equipo de calidad de datos estipula la siguiente regla: los registros con un `cliente_id` nulo o una `edad` menor a 18 años deben ser descartados silenciosamente sin detener la ejecución del pipeline, registrando el número de registros omitidos en las métricas de DLT. ¿Qué cláusula de expectativa cumple este requisito?",
-      "o": [
-        "`CONSTRAINT regla_edad CHECK (cliente_id IS NOT NULL AND edad >= 18) ON ERROR SKIP RECORD en el catálogo corporativo de metadatos.`",
-        "`EXPECT (cliente_id IS NOT NULL AND edad >= 18) ON VIOLATION ABORT PIPELINE con notificación inmediata al equipo de operaciones de guardia.`",
-        "`EXPECT (cliente_id IS NOT NULL AND edad >= 18) ON INVALID DISCARD INTO DLQ aislando filas no conformes en una tabla secundaria de auditoría.`",
-        "`CONSTRAINT clientes_validos EXPECT (cliente_id IS NOT NULL AND edad >= 18) ON VIOLATION DROP ROW`"
-      ],
-      "a": 3,
-      "e": "Delta Live Tables proporciona la cláusula `ON VIOLATION DROP ROW` dentro de la definición de expectativas (`CONSTRAINT ... EXPECT ... ON VIOLATION DROP ROW`). Esta acción filtra y descarta de forma automática cualquier fila que no satisfaga la condición booleana, permitiendo que las filas válidas continúen hacia la tabla destino y registrando las métricas de filas descartadas en el Event Log de DLT.",
-      "why": [
-        "La sintaxis `CHECK ... ON ERROR SKIP RECORD` no existe en la especificación declarativa de Delta Live Tables.",
-        "`ON VIOLATION ABORT PIPELINE` no es una cláusula válida; para abortar la ejecución se utiliza `ON VIOLATION FAIL UPDATE`.",
-        "`ON INVALID DISCARD INTO DLQ` no es sintaxis de DLT; el aislamiento de registros en colas de mensajes se implementa con patrones de bifurcación de tablas.",
-        null
-      ]
-    },
-    {
-      "id": "dbd-38",
-      "d": 3,
-      "t": "DLT: Expectativas de Calidad (FAIL UPDATE vs Warn)",
-      "q": "Un pipeline regulatorio de conciliación bancaria en Delta Live Tables no puede tolerar bajo ninguna circunstancia que la columna `monto_transferencia` sea negativa o nula. Si un solo registro viola esta condición, todo el pipeline debe detenerse de inmediato y marcar la ejecución en estado de error para alertar a los ingenieros. ¿Qué expectativa de DLT garantiza este comportamiento?",
-      "o": [
-        "`CONSTRAINT monto_positivo EXPECT (monto_transferencia > 0) ON VIOLATION FAIL UPDATE`",
-        "`EXPECT (monto_transferencia > 0) ON VIOLATION DROP ROW descartando silenciosamente la fila para continuar el procesamiento sin errores.`",
-        "`CONSTRAINT monto_positivo EXPECT (monto_transferencia > 0) emitiendo únicamente una advertencia en el registro de métricas de calidad del sistema.`",
-        "`EXPECT (monto_transferencia > 0) ON ANOMALY RAISE CRITICAL ALERT deteniendo el servicio de red del clúster de cómputo de la cuenta corporativa.`"
-      ],
-      "a": 0,
-      "e": "La acción `ON VIOLATION FAIL UPDATE` es la directiva más estricta en las expectativas de Delta Live Tables. Si cualquier fila procesada incumple la condición booleana (`monto_transferencia > 0`), DLT aborta inmediatamente la actualización del pipeline, previene la persistencia de datos corruptos y marca la ejecución del job en estado fallido para activar alertas de guardia.",
-      "why": [
-        null,
-        "`ON VIOLATION DROP ROW` descartaría la fila y continuaría la ejecución exitosamente, lo cual viola el requisito regulatorio estricto.",
-        "Omitir la cláusula `ON VIOLATION` (expectativa por defecto) solo emite una advertencia en los logs pero conserva el registro y continúa el pipeline.",
-        "`ON ANOMALY RAISE CRITICAL ALERT` no es una sintaxis reconocida por el compilador declarativo de Delta Live Tables."
-      ]
-    },
-    {
-      "id": "dbd-39",
-      "d": 4,
-      "t": "Databricks Workflows: Cómputo Job vs All-Purpose",
-      "q": "El equipo de ingeniería de datos ejecuta una serie de pipelines diarios programados mediante Databricks Workflows. Actualmente, todas las tareas están configuradas para ejecutarse sobre un clúster interactivo existente ('All-Purpose Cluster') que permanece encendido todo el día. El director de TI solicita reducir la factura mensual de DBUs y aislar las ejecuciones. ¿Qué cambio arquitectónico debe aplicarse?",
-      "o": [
-        "Configurar los notebooks para que se ejecuten en clústeres locales en las estaciones de trabajo de los desarrolladores mediante túneles SSH.",
-        "Configurar las tareas del Workflow para que utilicen 'Job Clusters' (clústeres automatizados efímeros) creados y destruidos en cada ejecución.",
-        "Aumentar el número de workers del clúster interactivo actual para que las tareas terminen en menos minutos y reduzcan el uso global.",
-        "Migrar los trabajos a una máquina virtual standalone sin Apache Spark utilizando scripts de Python estándar ejecutados con crontab."
-      ],
-      "a": 1,
-      "e": "Los `Job Clusters` (clústeres automatizados para trabajos) son la práctica mandatoria para cargas de producción en Databricks Workflows. Databricks los crea al inicio del trabajo y los destruye inmediatamente al finalizar, garantizando aislamiento total de recursos y facturando a una tarifa DBU significativamente reducida (~50-60 % de descuento respecto a los All-Purpose Clusters interactivos).",
-      "why": [
-        "Ejecutar cargas corporativas mediante túneles SSH en portátiles personales rompe la seguridad, escalabilidad y disponibilidad del Lakehouse.",
-        null,
-        "Aumentar los workers de un clúster interactivo All-Purpose que permanece activo todo el día incrementa drásticamente los costes de DBU.",
-        "Eliminar Apache Spark impide procesar grandes volúmenes distribuidos y descarta las ventajas de gobernanza y optimización de Databricks."
-      ]
-    },
-    {
-      "id": "dbd-40",
-      "d": 4,
-      "t": "Workflows: Orquestación y TaskValues",
-      "q": "Tienes un Workflow con dos tareas: la Tarea A procesa un lote de ventas y calcula el número total de registros anómalos detectados; la Tarea B necesita leer ese conteo numérico para decidir si genera un reporte ejecutivo o envía un correo de alerta. ¿Cómo se comunican estos parámetros dinámicos entre tareas de un DAG en Databricks Workflows?",
-      "o": [
-        "Escribir el valor en un archivo temporal en `/tmp` del sistema operativo local del nodo worker y leerlo desde la Tarea B mediante comandos shell.",
-        "Crear una cola de mensajes en memoria compartida mediante variables de entorno del sistema operativo exportadas en el clúster interactivo.",
-        "Utilizar la utilidad de tareas `dbutils.jobs.taskValues.set()` en la Tarea A y `dbutils.jobs.taskValues.get()` en la Tarea B.",
-        "Sobreescribir el código fuente del notebook de la Tarea B mediante una llamada a la API REST de Databricks antes de que inicie su ejecución."
-      ],
-      "a": 2,
-      "e": "`taskValues` es la funcionalidad integrada de Databricks Workflows para pasar pequeños valores y metadatos entre tareas dependientes de un mismo DAG. La tarea emisora invoca `dbutils.jobs.taskValues.set(key, value)` y la tarea receptora downstream recupera el valor mediante `dbutils.jobs.taskValues.get(taskKey, key)` sin requerir tablas intermedias ni almacenamiento externo.",
-      "why": [
-        "El directorio `/tmp` local es efímero y reside en nodos distintos que pueden destruirse entre tareas, impidiendo compartir datos.",
-        "Las variables de entorno del sistema operativo no se propagan entre clústeres distintos ni entre tareas desacopladas de un Workflow.",
-        null,
-        "Modificar el código fuente de los notebooks mediante la API REST durante la ejecución en curso es una práctica insegura y desaconsejada."
-      ]
-    },
-    {
-      "id": "dbd-41",
-      "d": 4,
-      "t": "Workflows: Recuperación con Repair and Rerun",
-      "q": "Un trabajo de Databricks Workflows compuesto por un grafo DAG de 6 tareas encadenadas se ejecuta durante la noche. Las tres primeras tareas (ingesta, validación y filtrado) se completan exitosamente tras dos horas de cómputo, pero la cuarta tarea falla debido a un error de conexión transitorio con un servicio de geolocalización. Tras corregir la incidencia en el servicio externo, ¿cuál es la forma más eficiente de relanzar el trabajo?",
-      "o": [
-        "Borrar el historial de ejecuciones del job en la interfaz de usuario de Databricks y programar un nuevo trigger inmediato para toda la canalización.",
-        "Clonar el Workflow completo creando una copia duplicada en el espacio de trabajo que contenga únicamente las tareas restantes del grafo.",
-        "Re-ejecutar el trabajo desde el inicio con el botón 'Run now', permitiendo que las tres tareas iniciales vuelvan a consumir dos horas de cómputo.",
-        "Utilizar la funcionalidad 'Repair and Rerun' en la corrida fallida para re-ejecutar exclusivamente la tarea 4 y sus tareas dependientes aguas abajo."
-      ],
-      "a": 3,
-      "e": "La característica **Repair and Rerun** (Reparar y re-ejecutar) de Databricks Workflows permite relanzar una ejecución fallida procesando únicamente las tareas que fallaron y aquellas que dependen de ellas aguas abajo en el DAG. Respeta y conserva los resultados exitosos de las tareas previas, ahorrando horas de cómputo y costes innecesarios de DBU.",
-      "why": [
-        "Borrar el historial elimina la trazabilidad de auditoría y no resuelve la necesidad de reanudar el procesamiento del flujo.",
-        "Clonar manualmente el Workflow para cada fallo es ineficiente, genera desorden en el workspace y complica el mantenimiento.",
-        "Re-ejecutar el trabajo completo desde cero desperdicia dos horas de cómputo y costes en tareas que ya finalizaron exitosamente.",
-        null
-      ]
-    },
-    {
-      "id": "dbd-42",
-      "d": 4,
-      "t": "Políticas de Clúster (Cluster Policies)",
-      "q": "El departamento financiero de tu empresa detecta sobrecostes en la factura de la nube debido a que algunos desarrolladores olvidan apagar sus clústeres interactivos durante los fines de semana y aprovisionan instancias con GPUs para tareas que solo requieren SQL básico. ¿Qué dos medidas implementadas mediante `Cluster Policies` resuelven estos problemas de gobernanza de costes? (Elige 2 respuestas)",
-      "o": [
-        "Desactivar por completo el servicio de Unity Catalog en todo el workspace para que nadie pueda aprovisionar máquinas virtuales.",
-        "Imponer un valor máximo obligatorio en `autotermination_minutes` (ej. 20 minutos) para forzar el apagado automático tras inactividad.",
-        "Restringir las familias de instancias permitidas en `node_type_id`, bloqueando la selección de tipos de máquinas de GPU o de coste excesivo.",
-        "Configurar un script en bash que mate aleatoriamente procesos Java en el driver cada vez que el uso de memoria supere el 50 por ciento."
-      ],
-      "a": [
-        1,
-        2
-      ],
-      "e": "Las **Cluster Policies** (Políticas de Clúster) son la herramienta central de gobernanza de cómputo y FinOps en Databricks. Permiten a los administradores: 1) Forzar una regla de auto-terminación (`autotermination_minutes`) que apague clústeres inactivos tras un tiempo predefinido. 2) Limitar las familias de instancias permitidas (`node_type_id`), impidiendo el aprovisionamiento de tipos costosos como GPUs salvo en proyectos autorizados.",
-      "why": [
-        "Unity Catalog es el motor de gobernanza de datos y no tiene relación con forzar el apagado de máquinas virtuales.",
-        null,
-        null,
-        "Matar procesos Java de forma aleatoria causaría fallos catastróficos e inconsistencias en lugar de implementar una política de costes ordenada."
-      ]
-    },
-    {
-      "id": "dbd-43",
-      "d": 4,
-      "t": "Control de Versiones: Databricks Repos",
-      "q": "Un equipo de 10 ingenieros de datos necesita colaborar en un mismo repositorio de código que contiene notebooks y módulos en ficheros `.py`. Desean trabajar con flujos de Git estándar (crear ramas de desarrollo, pull requests y pruebas antes de fusionar a la rama `main`) y asegurar que los jobs de producción ejecuten código versionado estable. ¿Qué solución nativa de Databricks proporciona esta integración?",
-      "o": [
-        "Exportar manualmente cada notebook a un fichero comprimido `.dbc` al final de la jornada y enviarlo por correo electrónico al líder técnico de datos.",
-        "Copiar el código de los notebooks en una tabla Delta común en la capa Bronze y sincronizar versiones mediante sentencias `MERGE INTO` concurrentes.",
-        "Instalar un servidor local de Git en el nodo driver del clúster interactivo ejecutando un servicio daemon mediante comandos de terminal de Linux.",
-        "Utilizar `Databricks Repos`, conectando el workspace con proveedores Git remotos para gestionar ramas, commits y control de versiones a nivel de usuario."
-      ],
-      "a": 3,
-      "e": "`Databricks Repos` integra el entorno de Databricks con proveedores Git externos (GitHub, GitLab, Azure DevOps, Bitbucket). Permite a los desarrolladores trabajar en ramas individuales, sincronizar cambios con `git pull` y `git push`, importar módulos `.py` modulares y configurar trabajos productivos de Workflows para que apunten a tags o ramas de release estables.",
-      "why": [
-        "Exportar manualmente ficheros `.dbc` por correo no provee control de versiones, dificulta el merge y es susceptible a fallos humanos graves.",
-        "Guardar código fuente dentro de tablas Delta como cadenas de texto no es un sistema de control de versiones y no soporta flujos Git.",
-        "Instalar un servidor Git en el driver no es escalable, carece de alta disponibilidad y se destruye al reiniciar el clúster interactivo.",
-        null
-      ]
-    },
-    {
-      "id": "dbd-44",
-      "d": 4,
-      "t": "Monitoreo y Alertas en Workflows",
-      "q": "Un pipeline multi-tarea de conciliación bancaria programado en Databricks Workflows es crítico para la apertura del mercado bursátil. Si el trabajo falla o su duración se extiende más allá de 45 minutos (SLA de negocio), el equipo de operaciones SRE debe recibir una notificación de alta prioridad en su canal de incidentes. ¿Cómo se configura este monitoreo en Databricks Workflows?",
-      "o": [
-        "Crear un notebook interactivo en un bucle `while True` que consulte la API REST de Databricks cada 5 segundos y envíe alertas de red por socket.",
-        "Configurar notificaciones del job en la interfaz de Workflows, asociando un destino Webhook o correo para eventos de fallo y umbrales de SLA de duración.",
-        "Inspeccionar visualmente la consola de Databricks cada mañana a las 06:00 AM refrescando manualmente la página en un navegador web.",
-        "Modificar el kernel de Linux en las máquinas virtuales worker para emitir señales SNMP hacia una pasarela de monitorización local en la intranet."
-      ],
-      "a": 1,
-      "e": "Databricks Workflows incluye soporte nativo para **Alertas y Notificaciones**. Permite configurar reglas de notificación ante eventos del job (inicio, éxito, fallo) y umbrales de SLA de tiempo de ejecución (ej. alertar si la duración supera 45 minutos). Las notificaciones se despachan automáticamente a direcciones de correo electrónico o destinos de sistema como Webhooks (Slack, PagerDuty, MS Teams).",
-      "why": [
-        "Un bucle infinito en un notebook consume un clúster entero de forma innecesaria y añade fragilidad operativa frente a las alertas nativas del job.",
-        null,
-        "La inspección manual no es escalable, no proporciona alertas en tiempo real y no garantiza el cumplimiento de SLAs críticos.",
-        "Modificar el kernel de Linux en nodos efímeros es impracticable, viola la arquitectura administrada y se pierde en cada recreación del clúster."
-      ]
-    },
-    {
-      "id": "dbd-45",
-      "d": 4,
-      "t": "CI/CD con Databricks Asset Bundles (DABs)",
-      "q": "Tu organización adopta prácticas de DevOps para datos y requiere que todos los pipelines de Delta Live Tables, trabajos de Workflows y permisos asociados se definan como código (IaC), se testen automáticamente en pipelines de GitHub Actions y se desplieguen programáticamente en entornos de desarrollo, staging y producción. ¿Qué herramienta oficial de Databricks está diseñada específicamente para este flujo?",
-      "o": [
-        "El comando interactivo `dbfs cp` integrado en el cliente de terminal de Linux para transferir notebooks de una carpeta a otra en el metastore.",
-        "Un script en bash que genere capturas de pantalla de la interfaz gráfica y las envíe a los administradores del workspace para aprobación manual.",
-        "`Databricks Asset Bundles (DABs)`, que permite gestionar proyectos como código declarativo mediante ficheros YAML y la CLI de Databricks.",
-        "El gestor de paquetes `pip` para compilar todo el workspace corporativo como una distribución wheel binaria cerrada de Python puro."
-      ],
-      "a": 2,
-      "e": "`Databricks Asset Bundles (DABs)` es el marco oficial de Databricks para implementar CI/CD e Infraestructura como Código (IaC). Permite definir estructuras completas de proyectos (pipelines DLT, jobs, permisos, cómputo) en ficheros declarativos YAML (`databricks.yml`), validarlos con `databricks bundle validate` y desplegarlos en múltiples entornos con `databricks bundle deploy` a través de herramientas CI/CD como GitHub Actions o GitLab CI.",
-      "why": [
-        "`dbfs cp` solo copia ficheros al almacenamiento; no define pipelines declarativos, jobs, dependencias ni infraestructura como código.",
-        "Las capturas de pantalla y aprobaciones manuales son el opuesto de la automatización CI/CD recomendada por las prácticas modernas de DevOps.",
-        null,
-        "`pip` y wheels compilan librerías de código Python, pero no orquestan jobs, pipelines DLT ni infraestructura en los workspaces de Databricks."
-      ]
-    },
-    {
-      "id": "dbd-46",
-      "d": 4,
-      "t": "Optimización de Cómputo: Autoscaling y Spot Instances",
-      "q": "Un pipeline de procesamiento ETL diario experimenta fluctuaciones de volumen extremas: los lunes procesa 100 millones de registros debido a la acumulación del fin de semana, pero de martes a viernes solo procesa 10 millones. Si se aprovisiona un clúster estático grande, se desperdicia presupuesto durante la semana; si se aprovisiona uno pequeño, el pipeline de los lunes incumple el SLA. ¿Qué configuración de clúster equilibra coste y rendimiento?",
-      "o": [
-        "Aprovisionar un clúster estático con 100 nodos dedicados fijos y dejarlo encendido permanentemente para garantizar capacidad en el peor caso posible.",
-        "Ejecutar el pipeline en el nodo driver exclusivamente desactivando todos los nodos trabajadores para evitar el coste de red inter-nodo de Spark.",
-        "Contratar una reserva fija de instancias de cómputo en la nube por 3 años para el clúster interactivo independientemente del uso real registrado.",
-        "Habilitar el autoescalado de clúster (`Autoscaling`) con un rango de workers (ej. 2 a 20) y utilizar instancias Spot para los workers secundarios."
-      ],
-      "a": 3,
-      "e": "El **autoescalado de clústeres** (`Autoscaling`) permite a Databricks añadir dinámicamente nodos trabajadores cuando la carga de trabajo y el número de etapas de Spark lo requieren (ej. el pico del lunes) y reducirlos cuando la demanda desciende. Combinarlo con **instancias Spot** para los workers (manteniendo el nodo driver en instancia bajo demanda) reduce drásticamente el coste de infraestructura en la nube.",
-      "why": [
-        "Un clúster estático masivo encendido continuamente genera un desperdicio presupuestario inaceptable durante los días de baja demanda.",
-        "Ejecutar todo en el driver elimina el paralelismo distribuido de Spark y provoca fallos catastróficos por falta de memoria (OutOfMemory).",
-        "Las reservas fijas a 3 años para cargas elásticas con picos puntuales no aprovechan la elasticidad intrínseca de la nube y aumentan el TCO.",
-        null
-      ]
-    },
-    {
-      "id": "dbd-47",
-      "d": 5,
-      "t": "Unity Catalog: Espacio de Nombres de 3 Niveles",
-      "q": "Un ingeniero de datos en una corporación multinacional necesita referenciar de forma inequívoca la tabla de clientes ubicada en el dominio de ventas del entorno de producción gobernado por Unity Catalog. ¿Cuál es el formato canónico del espacio de nombres de tres niveles que debe utilizarse en las consultas SQL?",
-      "o": [
-        "`cluster.database.table` (por ejemplo, `etl_cluster_01.ventas.clientes`), identificando el clúster que procesa la consulta en tiempo real.",
-        "`metastore.workspace.table` (por ejemplo, `global_ms.workspace_01.clientes`), identificando el metastore de región y el workspace local.",
-        "`bucket.folder.table` (por ejemplo, `s3_lakehouse.ventas_curated.clientes`), identificando la ruta física del almacenamiento de objetos de la nube.",
-        "`catalog.schema.table` (por ejemplo, `prod_corp.ventas.clientes`), identificando catálogo, esquema (base de datos) y tabla."
-      ],
-      "a": 3,
-      "e": "Unity Catalog estandariza la resolución de objetos mediante un **espacio de nombres de 3 niveles** jerárquico: `<catalogo>.<esquema>.<tabla>` (o vista / volumen / modelo). El primer nivel (`catalog`) suele representar el entorno o dominio de negocio, el segundo (`schema` o base de datos) la agrupación lógica funcional, y el tercero (`table`) la entidad de datos concreta.",
-      "why": [
-        "Las tablas están completamente desacopladas de los clústeres de cómputo en Unity Catalog; no se nombran según el clúster que las ejecuta.",
-        "El metastore y el workspace son niveles de infraestructura de gestión; no forman parte de la sintaxis SQL de consulta de datos.",
-        "`bucket.folder.table` describe rutas de almacenamiento físico, mientras que Unity Catalog provee una abstracción lógica unificada de gobernanza.",
-        null
-      ]
-    },
-    {
-      "id": "dbd-48",
-      "d": 5,
-      "t": "Unity Catalog: Credenciales y External Locations",
-      "q": "El equipo de seguridad de la nube prohíbe terminantemente que los ingenieros de datos tengan acceso a claves de acceso de AWS IAM o conexiones con cadenas de texto secretas en los notebooks. Sin embargo, los ingenieros deben poder leer y escribir ficheros en la ruta `s3://empresa-datalake/silver/`. ¿Cómo resuelve Unity Catalog este requerimiento de acceso seguro?",
-      "o": [
-        "Configurar las credenciales de AWS en texto plano dentro de un fichero `.bashrc` en el nodo driver de cada máquina virtual del clúster interactivo.",
-        "Pedir a los desarrolladores que soliciten un token temporal de STS cada mañana y lo peguen como comentario en la primera celda del notebook de trabajo.",
-        "Crear una `Storage Credential` con un IAM Role administrado y asociarla a una `External Location` que gobierna la URL del bucket en Unity Catalog.",
-        "Abrir el bucket de S3 con acceso público de lectura y escritura para el rango de direcciones IP públicas de la oficina de la empresa."
-      ],
-      "a": 2,
-      "e": "Unity Catalog desacopla la autenticación de la nube mediante dos objetos securizables: 1) `Storage Credential`, que encapsula una identidad de nube administrada (IAM Role en AWS, Managed Identity en Azure, Service Account en GCP) configurada por administradores del metastore. 2) `External Location`, que combina esa credencial con una URL de almacenamiento (`s3://...`). Los usuarios reciben permisos SQL sobre la External Location sin ver ni manipular credenciales.",
-      "why": [
-        "Guardar claves de IAM en ficheros de texto en el driver viola todas las políticas de seguridad y expone credenciales a cualquier usuario del clúster.",
-        "Pegar tokens manuales en notebooks es inseguro, propenso a fugas en Git y no cumple con la auditoría centralizada de Unity Catalog.",
-        null,
-        "Hacer un bucket público representa una brecha de seguridad gravísima y expone todos los datos corporativos confidenciales en internet."
-      ]
-    },
-    {
-      "id": "dbd-49",
-      "d": 5,
-      "t": "Unity Catalog: Seguridad Granular (Row Filters & Column Masks)",
-      "q": "Una tabla contiene nóminas y salarios de empleados (`empleados_silver`). La dirección de recursos humanos exige que: 1) los analistas solo puedan visualizar los empleados pertenecientes a su propio país (`pais_id`); 2) el campo `salario` sea visible en texto claro para el grupo `rrhh_directivos`, pero aparezca como `NULL` o enmascarado para el resto de usuarios. ¿Qué dos mecanismos de Unity Catalog permiten cumplir estas directrices sin duplicar la tabla física? (Elige 2 respuestas)",
-      "o": [
-        "Aplicar un `Row Filter` en la tabla mediante una función SQL que verifique `is_account_group_member()` y filtre el campo `pais_id` dinámicamente.",
-        "Aplicar un `Column Mask` sobre la columna `salario` mediante una función SQL que ofusque el valor para usuarios que no pertenezcan al grupo autorizado.",
-        "Crear un clúster físico independiente para cada país y duplicar los archivos Parquet en 50 buckets de almacenamiento distintos en la nube pública.",
-        "Ejecutar un script nocturno que reescriba la tabla eliminando permanentemente la columna salario de los ficheros del almacenamiento de objetos."
-      ],
-      "a": [
-        0,
-        1
-      ],
-      "e": "Unity Catalog proporciona control de acceso granular nativo sin duplicar datos: 1) **Row Filters**: funciones SQL que devuelven un booleano para restringir qué filas puede ver cada usuario según su membresía en grupos corporativos (`ROW FILTER`). 2) **Column Masks**: funciones SQL aplicadas a columnas individuales (`SET MASK`) que enmascaran o devuelven valores ofuscados condicionalmente.",
-      "why": [
-        null,
-        null,
-        "Crear clústeres separados y duplicar archivos en 50 buckets genera una pesadilla de mantenimiento, desincronización y sobrecostes masivos.",
-        "Eliminar físicamente la columna salario destruye la información e impide que el departamento de recursos humanos consulte los datos legítimamente."
-      ]
-    },
-    {
-      "id": "dbd-50",
-      "d": 5,
-      "t": "Unity Catalog: Linaje de Datos Automatizado",
-      "q": "El equipo de cumplimiento normativo solicita auditar cómo se calcula la métrica `ingreso_neto` en el reporte financiero anual y qué tablas de origen alimentan esa columna específica. ¿Cómo ayuda la funcionalidad de **Data Lineage** de Unity Catalog a responder esta auditoría sin necesidad de documentar manualmente el código?",
-      "o": [
-        "Obliga a los ingenieros a declarar manualmente cada transformación en una hoja de cálculo compartida antes de aprobar cualquier pull request de código.",
-        "Instala un agente externo en cada ordenador de los desarrolladores para registrar las pulsaciones de teclado durante la edición de notebooks en el workspace.",
-        "Ejecuta un analizador estático de código que envía el texto de los notebooks a un modelo de lenguaje de terceros para deducir las relaciones teóricas.",
-        "Genera automáticamente diagramas de linaje a nivel de tabla y columna capturados en tiempo de ejecución durante las consultas ejecutadas en Databricks."
-      ],
-      "a": 3,
-      "e": "Unity Catalog captura automáticamente el **linaje de datos (Data Lineage)** a nivel de tabla y columna en tiempo de ejecución para cualquier consulta SQL o DataFrame ejecutada en los clústeres del workspace. Esto permite a los auditores y administradores visualizar de forma gráfica en la interfaz de usuario el origen de los datos, las transformaciones intermedias y el destino de cada columna sin requerir instrumentación manual de código.",
-      "why": [
-        "La documentación manual en hojas de cálculo es propensa a quedar desactualizada de inmediato y no provee trazabilidad verificable en auditorías.",
-        "Capturar pulsaciones de teclado en ordenadores de usuarios es una violación de privacidad y no proporciona linaje técnico de las tablas de datos.",
-        "Unity Catalog no envía código a LLMs de terceros para adivinar el linaje; lo captura de forma determinista del plan de ejecución físico de Spark.",
-        null
-      ]
-    }
-  ],
-  "why": {
-    "dbd-01": [
-      null,
-      "Delta Lake opera sobre almacenamiento de objetos estándar en la nube (S3, ADLS, GCS); no requiere clústeres HDFS ni coordinación mediante Apache ZooKeeper.",
-      "La arquitectura Lakehouse procesa los datos directamente en el Data Lake abierto; no duplica los datos en un Data Warehouse propietario externo.",
-      "El registro transaccional reside en almacenamiento persistente (`_delta_log`), no en la memoria volátil del nodo driver."
-    ],
-    "dbd-02": [
-      "Descartar datos en la capa Bronze destruye la trazabilidad histórica y hace imposible recuperar información si la discrepancia de esquema era válida.",
-      null,
-      "La normalización, desanidado y deduplicación son transformaciones propias de la capa Silver, no de la capa de ingestión cruda Bronze.",
-      "Las agregaciones horarias y modelos dimensionales pertenecen a la capa Gold; aplicarlas en la ingesta inicial omite las fases de refinamiento y auditoría."
-    ],
-    "dbd-03": [
-      "Las métricas y KPIs agregados finales corresponden a la capa Gold; la capa Silver mantiene el grano detallado de las entidades de negocio.",
-      "Un espejo idéntico sin validaciones representa la propia capa Bronze, sin aportar el filtrado y limpieza característicos de Silver.",
-      null,
-      "La anonimización destructiva de claves primarias destruye la integridad referencial requerida en Silver; la seguridad se implementa con máscaras y filtros en Unity Catalog."
-    ],
-    "dbd-04": [
-      "Consultar ficheros JSON crudos de Bronze en tiempo real generaría una carga masiva y latencias inaceptables para un dashboard de BI concurrente.",
-      "Los ficheros CSV sin optimizar carecen de estadísticas de salto de datos (`data skipping`), resultando en lecturas lentas y sobrecoste de cómputo.",
-      null,
-      "Ejecutar joins de 15 tablas crudas en cada consulta genera latencias muy elevadas y desperdicia recursos frente a una tabla Gold precalculada."
-    ],
-    "dbd-05": [
-      null,
-      "Delta Lake no utiliza bloqueos pesados de tabla completa (pessimistic locking); su modelo OCC permite escrituras concurrentes si no hay conflicto de archivos.",
-      "Delta Lake garantiza consistencia transaccional inmediata en cada commit; no difiere la consistencia a procesos nocturnos asíncronos.",
-      "Delta no rechaza sistemáticamente transacciones concurrentes; solo aborta si existe un conflicto real de modificación sobre los mismos ficheros de datos."
-    ],
-    "dbd-06": [
-      null,
-      "Sobreescribir ficheros manualmente en el bucket corrompe el registro transaccional `_delta_log` y puede generar inconsistencias severas en el catálogo.",
-      "Re-ingestar todo el histórico toma horas o días de cómputo innecesario, mientras que `RESTORE TABLE` completa en pocos segundos mediante metadatos.",
-      "Spark SQL y Delta Lake no utilizan transacciones de sesión basadas en `ROLLBACK TRANSACTION`; las transacciones se confirman de forma atómica en cada comando."
-    ],
-    "dbd-07": [
-      "`VACUUM` no compacta archivos; purga ficheros lógicamente eliminados. Ejecutarlo con retención cero además puede corromper transacciones en vuelo.",
-      null,
-      "Manipular manualmente los archivos en el almacenamiento altera la estructura física sin actualizar el `_delta_log`, corrompiendo la tabla Delta.",
-      "Migrar a CSV empeoraría drásticamente el rendimiento al perder el formato columnar, la compresión Snappy y las estadísticas de data skipping."
-    ],
-    "dbd-08": [
-      null,
-      "`Z-ORDER` no adapta dinámicamente sus claves; requiere re-ejecutar manualmente el comando `OPTIMIZE ... ZORDER BY` para reorganizar los datos.",
-      null,
-      "Particionar físicamente por columnas de alta cardinalidad genera millones de micro-carpetas (over-partitioning), degradando severamente el rendimiento."
-    ],
-    "dbd-09": [
-      null,
-      "`VACUUM` es una operación de mantenimiento en disco; no afecta al motor de ejecución Photon ni a la configuración del compilador de consultas.",
-      "Los privilegios de Unity Catalog se gestionan en el metastore; la purga física de archivos de datos no altera los permisos RBAC asignados.",
-      "`VACUUM` solo borra ficheros no referenciados físicamente; no modifica el esquema lógico de las columnas ni sus tipos de datos."
-    ],
-    "dbd-10": [
-      "En una `Managed Table`, el comando `DROP TABLE` elimina tanto los metadatos como los archivos físicos de datos en el bucket.",
-      "Una `GLOBAL TEMP VIEW` desaparece al terminar la aplicación/clúster de Spark y no persiste datos de manera duradera en el catálogo.",
-      null,
-      "Una vista no almacena datos por sí misma; la necesidad planteada es crear una tabla persistente con protección de los ficheros físicos subyacentes."
-    ],
-    "dbd-11": [
-      "Los workers no persisten metadatos maestros en sus discos locales; el estado se deriva dinámicamente del `_delta_log` en almacenamiento de objetos.",
-      null,
-      "Delta Lake no borra los JSON anteriores arbitrariamente; los conserva para posibilitar el Time Travel según la retención de log configurada.",
-      "Escanear directamente los ficheros sin consultar el `_delta_log` ignoraría los registros de transacciones, leyendo datos corruptos o eliminados."
-    ],
-    "dbd-12": [
-      null,
-      "Los SQL Warehouses utilizan CPU y pueden usar Photon; no requieren hardware de GPU ni compilación mediante CUDA para SQL relacional.",
-      "Koalas es una API compatible con Pandas en PySpark; no acelera consultas SQL complejas ni reemplaza el motor de ejecución distribuido.",
-      "GraphX es una librería para computación de grafos; no es un motor de aceleración para consultas relacionales o pipelines ELT estándar."
-    ],
-    "dbd-13": [
-      "La sentencia `OPEN FILE` no existe en la sintaxis de Spark SQL ni en el estándar ANSI SQL de Databricks.",
-      null,
-      "El comando `IMPORT TABLE` no es una sintaxis válida para consultar ficheros de forma ad-hoc en Spark SQL.",
-      "`READ_PARQUET` no es una función escalar de Spark SQL para invocar en cláusulas WHERE; se usa notación de tabla directa o la API DataFrame."
-    ],
-    "dbd-14": [
-      "`INSERT INTO ... SELECT` inserta ciegamente todos los registros devueltos por la consulta, duplicando datos si se reintenta tras un fallo parcial.",
-      "Mover archivos mediante bash es frágil, propenso a errores de concurrencia y no proporciona transaccionalidad ACID en la base de datos.",
-      null,
-      "`CREATE OR REPLACE TABLE` destruye los datos históricos previos en cada ejecución, impidiendo acumular datos históricos de forma incremental."
-    ],
-    "dbd-15": [
-      "Las expresiones regulares con `regexp_extract` son lentas, frágiles ante cambios menores en el formato del JSON y propensas a errores de parsing.",
-      "Una UDF de Python fila por fila sufre de una penalización severa de rendimiento por serialización IPC entre la JVM y el intérprete Python.",
-      "Usar `split()` asume un orden posicional estricto en el JSON, lo cual falla tan pronto los campos cambian de orden o contienen comas internas.",
-      null
-    ],
-    "dbd-16": [
-      null,
-      "`FILTER` solo evalúa predicados booleanos para incluir o descartar elementos; no transforma los valores de los elementos del array.",
-      "`EXPLODE_TRANSFORM` no existe en la especificación de Spark SQL ni en Databricks.",
-      "`MAP_VALUES` opera sobre tipos de datos de mapa clave-valor (`MAP<K, V>`), no sobre arrays primitivos (`ARRAY<T>`)."
-    ],
-    "dbd-17": [
-      "No es posible acceder directamente a campos de un `ARRAY<STRUCT>` mediante notación escalar sin desanidar o usar funciones de orden superior.",
-      null,
-      "`ARRAY_CONTAINS` solo evalúa igualdad de elementos literales simples y no permite evaluar múltiples condiciones correlacionadas con predicados de precio.",
-      "`COUNT_IF` es una función de agregación sobre columnas de una tabla, no una función de orden superior para arrays anidados."
-    ],
-    "dbd-18": [
-      "`dropDuplicates` no garantiza conservar la fila más reciente tras un sort distribuido, ya que las particiones internas pueden alterar el orden de partición.",
-      null,
-      "`FIRST(cantidad)` sin ordenamiento es no determinista y puede devolver cualquier valor arbitrario en ejecuciones sucesivas.",
-      null
-    ],
-    "dbd-19": [
-      "Ejecutar `UPDATE` seguido de `INSERT` son dos transacciones independientes que pueden generar condiciones de carrera y escaneos de tabla redundantes.",
-      "`INSERT OVERWRITE` sobreescribe los datos existentes, borrando a todos los clientes que no estén presentes en el lote de actualizaciones actual.",
-      null,
-      "`UNION ALL` más `OPTIMIZE` simplemente acumula duplicados en la tabla sin actualizar registros ni reconciliar versiones de clientes."
-    ],
-    "dbd-20": [
-      "La sintaxis `DROP ROW` no existe en la sentencia `MERGE INTO` de SQL estándar ni en Delta Lake (se utiliza la palabra clave `DELETE`).",
-      "Databricks no soporta triggers tradicionales de base de datos OLTP y las llamadas REST añadirían una latencia inasumible al pipeline de datos.",
-      "Un bucle secuencial en Python lanzando sentencias `DELETE` individuales genera miles de commits innecesarios en el `_delta_log` y degrada el clúster.",
-      null
-    ],
-    "dbd-21": [
-      null,
-      "Las Python UDFs estándar sufren un sobrecoste extremo de serialización fila por fila (Py4J/IPC), siendo la alternativa más lenta en Spark.",
-      "Aunque las Pandas UDFs son mucho más rápidas que las Python UDFs estándar, siguen incurriendo en costes de serialización Arrow frente a una SQL UDF nativa.",
-      "Catalyst no puede optimizar dentro del intérprete de Python en una Python UDF estándar; la diferencia de rendimiento suele ser de 10x a 100x."
-    ],
-    "dbd-22": [
-      "`date_format()` convierte el timestamp a `STRING`, lo cual degrada el rendimiento de índices, comparaciones temporales y operaciones de salto de datos.",
-      null,
-      "La función `TRUNCATE_TIME` no existe en la especificación de Spark SQL ni en Databricks.",
-      "`TO_MONTH_START` no es una función de Spark SQL; los meses tienen duraciones variables (28-31 días) que no pueden calcularse con múltiplos fijos."
-    ],
-    "dbd-23": [
-      "El operador de flecha `->` se utiliza en funciones lambda (Higher-Order Functions), no para acceder a atributos de una estructura `STRUCT`.",
-      "La función `EXTRACT_FIELD` no forma parte de la biblioteca de funciones integradas de Spark SQL.",
-      null,
-      "La indexación por corchetes con strings (`col['clave']`) se reserva para tipos `MAP`, no para atributos fuertemente tipados de un `STRUCT`."
-    ],
-    "dbd-24": [
-      "`explode()` descarta automáticamente cualquier fila donde el array sea nulo o esté vacío, perdiendo los pedidos sin artículos.",
-      "`posexplode()` añade una columna de índice de posición pero también descarta las filas vacías o nulas como `explode()` estándar.",
-      "`unnest_all()` no es una función de Spark SQL en Databricks.",
-      null
-    ],
-    "dbd-25": [
-      null,
-      "Las vistas temporales no se registran en Unity Catalog ni Hive Metastore; por tanto, no admiten sentencias `GRANT` de control de acceso.",
-      "Las vistas temporales pueden consultar cualquier formato compatible con Spark, incluyendo Delta, Parquet, CSV y JSON sin ninguna restricción.",
-      "No existe dicha propiedad de configuración de Spark; el aislamiento de sesión es intrínseco al ciclo de vida de una vista temporal."
-    ],
-    "dbd-26": [
-      "`ROW_NUMBER()` rompería el empate asignando a uno la posición 1 y al otro la posición 2 de forma arbitraria y no determinista.",
-      null,
-      "`RANK()` dejaría un hueco tras el empate doble, asignando la posición 3 al siguiente empleado en lugar de la posición 2 requerida.",
-      "`PERCENT_RANK()` calcula una fracción decimal relativa entre 0 y 1, no un número de posición entero ordinal de ranking."
-    ],
-    "dbd-27": [
-      "`WITH RECURSIVE` se usa para consultas recursivas en grafos o árboles jerárquicos de registros; no es una cláusula para subtotales en `GROUP BY`.",
-      "`CUBE` genera todas las combinaciones posibles de dimensiones, produciendo subtotales no jerárquicos innecesarios y aumentando el coste computacional.",
-      null,
-      "`ORDER BY TOTALS` no es una cláusula válida en Spark SQL para sintetizar filas de subtotales agregados."
-    ],
-    "dbd-28": [
-      "Structured Streaming no genera archivos CSV temporales para polling; procesa micro-lotes en memoria o continuo directamente hacia sumideros Delta.",
-      "Structured Streaming no depende de servicios REST síncronos ni bases de datos relacionales intermedias para coordinar la ingesta distribuida.",
-      "El cómputo de Spark se basa en RDDs y DataFrames distribuidos en ejecutores JVM, no en grafos gestionados por CPython en el driver.",
-      null
-    ],
-    "dbd-29": [
-      null,
-      "`complete` reescribe toda la tabla en cada trigger y solo está permitido en consultas con agregaciones; fallaría en una ingesta simple sin agrupaciones.",
-      "`update` emite filas modificadas y en streaming sin agregaciones tiene un comportamiento equivalente a append, pero no calcula hashes de fila.",
-      "`snapshot` no existe como modo de salida en Apache Spark Structured Streaming ni en Databricks."
-    ],
-    "dbd-30": [
-      "Spark no utiliza SQLite en el driver para guardar checkpoints; el disco efímero del driver se destruye al reiniciar el clúster.",
-      null,
-      "Re-solicitar todo el histórico desde el inicio violaría la semántica exactly-once y generaría duplicados masivos en los sumideros.",
-      "Databricks y Spark Structured Streaming no utilizan Apache ZooKeeper para la gestión de checkpoints ni para la coordinación de offsets."
-    ],
-    "dbd-31": [
-      "Desactivar el listado incremental forzaría escaneos completos del bucket, empeorando el problema de rendimiento en lugar de resolverlo.",
-      "`COPY INTO` en buckets con decenas de millones de archivos también sufre de latencias elevadas en el listado de archivos frente a colas de eventos.",
-      null,
-      "Lanzar 1 000 nodos para ejecutar comandos `ls` genera costes prohibitivos y llamadas excesivas que provocan throttling en la API de S3."
-    ],
-    "dbd-32": [
-      null,
-      "`cloudFiles.enforceStrictTypes` no es una opción válida de Auto Loader y convertir silenciosamente a cero provocaría corrupción no detectable en datos numéricos.",
-      "Auto Loader no descarta ficheros silenciosamente; su diseño prioriza la no pérdida de datos rescatando anomalías en `_rescued_data`.",
-      null
-    ],
-    "dbd-33": [
-      "`continuous` mantiene el clúster encendido 24/7 con consumo continuo de DBUs, contradiciendo el requisito de ejecución nocturna y apagado.",
-      "`processingTime = '1 hour'` ejecuta el stream en bucle infinito cada hora sin apagar el clúster al procesar los datos del día.",
-      "`Trigger.Once` está en desuso frente a `Trigger.AvailableNow` porque procesaba todos los datos pendientes en un solo micro-lote descontrolado.",
-      null
-    ],
-    "dbd-34": [
-      null,
-      "`dropOldEvents` no existe en la API de Apache Spark Structured Streaming ni en Databricks.",
-      "`setTimeToLive` no es una función de Spark; Structured Streaming gestiona su estado mediante State Stores (HDFS o RocksDB) gobernados por watermarks.",
-      "Usar `current_timestamp()` en streaming no es determinista y no permite al motor deducir cuándo cerrar y emitir ventanas de agregación pasadas."
-    ],
-    "dbd-35": [
-      "Una `MATERIALIZED VIEW` recalcula su contenido ante cambios en las fuentes, no está diseñada para ingestión incremental continua append-only.",
-      null,
-      "La sintaxis `STREAMING_READ` y `CREATE TEMPORARY TABLE` no forman parte del framework declarativo de Delta Live Tables.",
-      "`CREATE EXTERNAL DELTA TABLE` con un filtro artificial `_is_new` no utiliza las capacidades de streaming ni el tracking transaccional de DLT."
-    ],
-    "dbd-36": [
-      "Las Materialized Views consumen cómputo de clúster estándar facturado en DBUs al ejecutar las consultas de transformación.",
-      "Las Streaming Tables pueden aplicar perfectamente cláusulas `WHERE`, transformaciones y proyecciones siempre que la fuente sea incremental.",
-      null,
-      "Las Streaming Tables son completamente escalables a miles de millones de filas; no tienen ningún límite arbitrario de 10 000 registros."
-    ],
-    "dbd-37": [
-      "La sintaxis `CHECK ... ON ERROR SKIP RECORD` no existe en la especificación declarativa de Delta Live Tables.",
-      "`ON VIOLATION ABORT PIPELINE` no es una cláusula válida; para abortar la ejecución se utiliza `ON VIOLATION FAIL UPDATE`.",
-      "`ON INVALID DISCARD INTO DLQ` no es sintaxis de DLT; el aislamiento de registros en colas de mensajes se implementa con patrones de bifurcación de tablas.",
-      null
-    ],
-    "dbd-38": [
-      null,
-      "`ON VIOLATION DROP ROW` descartaría la fila y continuaría la ejecución exitosamente, lo cual viola el requisito regulatorio estricto.",
-      "Omitir la cláusula `ON VIOLATION` (expectativa por defecto) solo emite una advertencia en los logs pero conserva el registro y continúa el pipeline.",
-      "`ON ANOMALY RAISE CRITICAL ALERT` no es una sintaxis reconocida por el compilador declarativo de Delta Live Tables."
-    ],
-    "dbd-39": [
-      "Ejecutar cargas corporativas mediante túneles SSH en portátiles personales rompe la seguridad, escalabilidad y disponibilidad del Lakehouse.",
-      null,
-      "Aumentar los workers de un clúster interactivo All-Purpose que permanece activo todo el día incrementa drásticamente los costes de DBU.",
-      "Eliminar Apache Spark impide procesar grandes volúmenes distribuidos y descarta las ventajas de gobernanza y optimización de Databricks."
-    ],
-    "dbd-40": [
-      "El directorio `/tmp` local es efímero y reside en nodos distintos que pueden destruirse entre tareas, impidiendo compartir datos.",
-      "Las variables de entorno del sistema operativo no se propagan entre clústeres distintos ni entre tareas desacopladas de un Workflow.",
-      null,
-      "Modificar el código fuente de los notebooks mediante la API REST durante la ejecución en curso es una práctica insegura y desaconsejada."
-    ],
-    "dbd-41": [
-      "Borrar el historial elimina la trazabilidad de auditoría y no resuelve la necesidad de reanudar el procesamiento del flujo.",
-      "Clonar manualmente el Workflow para cada fallo es ineficiente, genera desorden en el workspace y complica el mantenimiento.",
-      "Re-ejecutar el trabajo completo desde cero desperdicia dos horas de cómputo y costes en tareas que ya finalizaron exitosamente.",
-      null
-    ],
-    "dbd-42": [
-      "Unity Catalog es el motor de gobernanza de datos y no tiene relación con forzar el apagado de máquinas virtuales.",
-      null,
-      null,
-      "Matar procesos Java de forma aleatoria causaría fallos catastróficos e inconsistencias en lugar de implementar una política de costes ordenada."
-    ],
-    "dbd-43": [
-      "Exportar manualmente ficheros `.dbc` por correo no provee control de versiones, dificulta el merge y es susceptible a fallos humanos graves.",
-      "Guardar código fuente dentro de tablas Delta como cadenas de texto no es un sistema de control de versiones y no soporta flujos Git.",
-      "Instalar un servidor Git en el driver no es escalable, carece de alta disponibilidad y se destruye al reiniciar el clúster interactivo.",
-      null
-    ],
-    "dbd-44": [
-      "Un bucle infinito en un notebook consume un clúster entero de forma innecesaria y añade fragilidad operativa frente a las alertas nativas del job.",
-      null,
-      "La inspección manual no es escalable, no proporciona alertas en tiempo real y no garantiza el cumplimiento de SLAs críticos.",
-      "Modificar el kernel de Linux en nodos efímeros es impracticable, viola la arquitectura administrada y se pierde en cada recreación del clúster."
-    ],
-    "dbd-45": [
-      "`dbfs cp` solo copia ficheros al almacenamiento; no define pipelines declarativos, jobs, dependencias ni infraestructura como código.",
-      "Las capturas de pantalla y aprobaciones manuales son el opuesto de la automatización CI/CD recomendada por las prácticas modernas de DevOps.",
-      null,
-      "`pip` y wheels compilan librerías de código Python, pero no orquestan jobs, pipelines DLT ni infraestructura en los workspaces de Databricks."
-    ],
-    "dbd-46": [
-      "Un clúster estático masivo encendido continuamente genera un desperdicio presupuestario inaceptable durante los días de baja demanda.",
-      "Ejecutar todo en el driver elimina el paralelismo distribuido de Spark y provoca fallos catastróficos por falta de memoria (OutOfMemory).",
-      "Las reservas fijas a 3 años para cargas elásticas con picos puntuales no aprovechan la elasticidad intrínseca de la nube y aumentan el TCO.",
-      null
-    ],
-    "dbd-47": [
-      "Las tablas están completamente desacopladas de los clústeres de cómputo en Unity Catalog; no se nombran según el clúster que las ejecuta.",
-      "El metastore y el workspace son niveles de infraestructura de gestión; no forman parte de la sintaxis SQL de consulta de datos.",
-      "`bucket.folder.table` describe rutas de almacenamiento físico, mientras que Unity Catalog provee una abstracción lógica unificada de gobernanza.",
-      null
-    ],
-    "dbd-48": [
-      "Guardar claves de IAM en ficheros de texto en el driver viola todas las políticas de seguridad y expone credenciales a cualquier usuario del clúster.",
-      "Pegar tokens manuales en notebooks es inseguro, propenso a fugas en Git y no cumple con la auditoría centralizada de Unity Catalog.",
-      null,
-      "Hacer un bucket público representa una brecha de seguridad gravísima y expone todos los datos corporativos confidenciales en internet."
-    ],
-    "dbd-49": [
-      null,
-      null,
-      "Crear clústeres separados y duplicar archivos en 50 buckets genera una pesadilla de mantenimiento, desincronización y sobrecostes masivos.",
-      "Eliminar físicamente la columna salario destruye la información e impide que el departamento de recursos humanos consulte los datos legítimamente."
-    ],
-    "dbd-50": [
-      "La documentación manual en hojas de cálculo es propensa a quedar desactualizada de inmediato y no provee trazabilidad verificable en auditorías.",
-      "Capturar pulsaciones de teclado en ordenadores de usuarios es una violación de privacidad y no proporciona linaje técnico de las tablas de datos.",
-      "Unity Catalog no envía código a LLMs de terceros para adivinar el linaje; lo captura de forma determinista del plan de ejecución físico de Spark.",
-      null
+    "glossary": [
+      {
+        "term": "Delta Lake",
+        "cat": "Lakehouse & Delta",
+        "d": 1,
+        "def": "Open storage layer that brings ACID transactions, versioning (Time Travel), and scalable metadata to Data Lakes based on Apache Parquet.",
+        "tip": "It guarantees serializability and optimistic concurrency control (OCC) directly on cloud object storage."
+      },
+      {
+        "term": "_delta_log",
+        "cat": "Lakehouse & Delta",
+        "d": 1,
+        "def": "Internal Delta Lake metadata directory that stores the atomic commit log in JSON files and compacted checkpoints in Parquet format every 10 transactions.",
+        "tip": "It allows the exact state of the table to be reconstructed in memory without performing costly file listings in the cloud bucket."
+      },
+      {
+        "term": "Medallion Architecture",
+        "cat": "Lakehouse & Delta",
+        "d": 1,
+        "def": "Architectural design pattern in the Lakehouse structured in three progressive quality layers: Bronze (raw), Silver (cleaned and enriched), and Gold (business aggregate).",
+        "tip": "Bronze should always be append-only and keep the data without destructive business transformations for auditing and reprocessing."
+      },
+      {
+        "term": "Liquid Clustering",
+        "cat": "Lakehouse & Delta",
+        "d": 1,
+        "def": "Modern physical data management mechanism in Delta Lake that replaces rigid physical partitioning and Z-Order by dynamically reorganizing data with CLUSTER BY.",
+        "tip": "It avoids over-partitioning and data skew, allowing the clustering columns to be redefined without having to rewrite the entire table."
+      },
+      {
+        "term": "OPTIMIZE & Z-ORDER",
+        "cat": "Lakehouse & Delta",
+        "d": 1,
+        "def": "Delta Lake maintenance command that compacts small files (bin-packing of ~1 GB) and multidimensionally sorts the data for data skipping.",
+        "tip": "Z-ORDER is only effective on high-cardinality columns commonly used in WHERE filters; it should not be applied to very low-cardinality columns."
+      },
+      {
+        "term": "VACUUM",
+        "cat": "Lakehouse & Delta",
+        "d": 1,
+        "def": "Garbage collection command in Delta Lake that physically purges the Parquet files marked as deleted that exceed the configured retention period.",
+        "tip": "The default retention period is 7 days (168 hours); running it with zero retention breaks Time Travel and risks corrupting concurrent reads."
+      },
+      {
+        "term": "Time Travel",
+        "cat": "Lakehouse & Delta",
+        "d": 1,
+        "def": "Native Delta Lake capability to query or restore historical snapshots of a table using version numbers or timestamps.",
+        "tip": "It is invoked with VERSION AS OF or TIMESTAMP AS OF, and a table is reverted to a previous state with RESTORE TABLE."
+      },
+      {
+        "term": "Managed vs External Tables",
+        "cat": "Lakehouse & Delta",
+        "d": 1,
+        "def": "Table differentiation in Databricks: Managed manages both the metadata and the physical files; External stores the data in an external path through the LOCATION clause.",
+        "tip": "Running DROP TABLE on a Managed table deletes the physical data from the bucket; on an External Table the files remain intact."
+      },
+      {
+        "term": "COPY INTO",
+        "cat": "ELT & Spark",
+        "d": 2,
+        "def": "Idempotent Databricks SQL statement that incrementally and in batches loads new files from cloud storage into a Delta table.",
+        "tip": "It internally tracks the files already processed, avoiding duplicates on reruns without the need to maintain manual tracking scripts."
+      },
+      {
+        "term": "Higher-Order Functions",
+        "cat": "ELT & Spark",
+        "d": 2,
+        "def": "Spark SQL functions (TRANSFORM, FILTER, EXISTS, AGGREGATE) that operate directly on collections and nested arrays without requiring them to be broken apart.",
+        "tip": "They avoid the use of explode() and massive network shuffles, notably speeding up the processing of nested structures."
+      },
+      {
+        "term": "from_json",
+        "cat": "ELT & Spark",
+        "d": 2,
+        "def": "Spark SQL function that deserializes a JSON-formatted text column into a strongly typed structure (STRUCT or ARRAY) from a given schema.",
+        "tip": "Combine it with schema_of_json() to dynamically infer schemas from samples without writing them manually."
+      },
+      {
+        "term": "MERGE INTO",
+        "cat": "ELT & Spark",
+        "d": 2,
+        "def": "Atomic SQL statement that allows coordinated insert, update, and delete operations (Upsert) between source and target tables in a single transaction.",
+        "tip": "It supports conditional clauses such as WHEN MATCHED AND condition THEN DELETE and WHEN NOT MATCHED THEN INSERT."
+      },
+      {
+        "term": "Pandas UDF (Vectorized)",
+        "cat": "ELT & Spark",
+        "d": 2,
+        "def": "User-defined function in Python that uses Apache Arrow to exchange batches of columnar in-memory data with the Spark executor.",
+        "tip": "It provides up to 100 times higher performance than standard Python UDFs, which process row by row with high IPC cost."
+      },
+      {
+        "term": "Auto Loader (cloudFiles)",
+        "cat": "Streaming & DLT",
+        "d": 3,
+        "def": "Databricks incremental ingestion engine for processing millions of new files in cloud storage without listing entire directories.",
+        "tip": "It supports Directory Listing and File Notification modes (SNS/SQS, Event Grid) with automatic schema inference and evolution."
+      },
+      {
+        "term": "_rescued_data",
+        "cat": "Streaming & DLT",
+        "d": 3,
+        "def": "Special column automatically generated by Auto Loader that stores in JSON format any field that is new or incompatible with the expected schema.",
+        "tip": "It prevents the silent loss of corrupt or unexpected records, allowing ingestion to continue without fatal failures."
+      },
+      {
+        "term": "Delta Live Tables (DLT)",
+        "cat": "Streaming & DLT",
+        "d": 3,
+        "def": "Declarative Databricks framework for building reliable data pipelines in SQL or Python with automatic dependency and quality management.",
+        "tip": "It automates orchestration, checkpoint maintenance, cluster scaling, and metrics capture in the Event Log."
+      },
+      {
+        "term": "Streaming Table (DLT)",
+        "cat": "Streaming & DLT",
+        "d": 3,
+        "def": "Managed table in Delta Live Tables designed to process continuous or growing data streams in a strictly incremental (append-only) manner.",
+        "tip": "It is declared with CREATE OR REFRESH STREAMING TABLE and reads from streaming sources with the STREAM() function."
+      },
+      {
+        "term": "Materialized View (DLT)",
+        "cat": "Streaming & DLT",
+        "d": 3,
+        "def": "Persisted view in Delta Live Tables whose results are precomputed and automatically refreshed to reflect the current state of the sources.",
+        "tip": "Ideal for the Gold layer, business aggregations, and complex joins where full analytical consistency is required."
+      },
+      {
+        "term": "Data Quality Expectations",
+        "cat": "Streaming & DLT",
+        "d": 3,
+        "def": "Declarative data quality constraints in DLT applied in flight through EXPECT, ON VIOLATION DROP ROW, and ON VIOLATION FAIL UPDATE.",
+        "tip": "They let you govern data integrity by defining whether non-conforming rows generate warnings, are dropped, or abort the pipeline."
+      },
+      {
+        "term": "Watermarking (Structured Streaming)",
+        "cat": "Streaming & DLT",
+        "d": 3,
+        "def": "Mechanism in Structured Streaming for defining the tolerable lateness limit for out-of-order events and purging the in-memory State Store.",
+        "tip": "Without watermarking, streaming aggregation queries in Append mode would accumulate state indefinitely, causing OutOfMemory errors."
+      },
+      {
+        "term": "Job Cluster (Automated)",
+        "cat": "Workflows",
+        "d": 4,
+        "def": "Ephemeral cluster provisioned exclusively by Databricks Workflows for running a job and destroyed when it finishes.",
+        "tip": "It bills at a noticeably lower DBU rate (~50-60% savings) and guarantees total isolation in production compared to All-Purpose clusters."
+      },
+      {
+        "term": "Repair and Rerun",
+        "cat": "Workflows",
+        "d": 4,
+        "def": "Databricks Workflows feature that lets you resume a multi-task job by running only the failed tasks and their downstream dependencies.",
+        "tip": "It avoids the cost and delay of recomputing upstream tasks that already completed successfully in the previous run."
+      },
+      {
+        "term": "Cluster Policy",
+        "cat": "Workflows",
+        "d": 4,
+        "def": "Set of administrative rules that restricts the cluster types, instance families, auto-termination, and tags allowed to users.",
+        "tip": "Essential for financial governance (FinOps), preventing the accidental creation of oversized clusters or clusters without automatic shutdown."
+      },
+      {
+        "term": "Three-Level Namespace",
+        "cat": "Unity Catalog",
+        "d": 5,
+        "def": "Canonical hierarchical object resolution structure in Unity Catalog with the format catalog.schema.table (or view / volume / model).",
+        "tip": "It lets you organize data by corporate domains or environments (dev/staging/prod) centralized in a single regional metastore."
+      },
+      {
+        "term": "Row Filters & Column Masks",
+        "cat": "Unity Catalog",
+        "d": 5,
+        "def": "Granular access-control SQL functions in Unity Catalog that filter rows or mask columns dynamically based on the user's identity.",
+        "tip": "They avoid the proliferation of redundant views to ensure compliance with privacy regulations such as GDPR and HIPAA."
+      }
     ]
-  },
-  "glossary": [
-    {
-      "term": "Delta Lake",
-      "cat": "Lakehouse & Delta",
-      "d": 1,
-      "def": "Capa de almacenamiento abierta que aporta transacciones ACID, control de versiones (Time Travel) y metadatos escalables sobre Data Lakes basados en Apache Parquet.",
-      "tip": "Garantiza serializabilidad y control de concurrencia optimista (OCC) directamente sobre almacenamiento de objetos en la nube."
-    },
-    {
-      "term": "_delta_log",
-      "cat": "Lakehouse & Delta",
-      "d": 1,
-      "def": "Directorio interno de metadatos de Delta Lake que almacena el commit log atómico en ficheros JSON y checkpoints compactados en formato Parquet cada 10 transacciones.",
-      "tip": "Permite reconstruir el estado exacto de la tabla en memoria sin realizar costosos listados de ficheros en el bucket de nube."
-    },
-    {
-      "term": "Medallion Architecture",
-      "cat": "Lakehouse & Delta",
-      "d": 1,
-      "def": "Patrón de diseño arquitectónico en el Lakehouse estructurado en tres capas progresivas de calidad: Bronze (crudo), Silver (limpio y enriquecido) y Gold (agregado de negocio).",
-      "tip": "Bronze siempre debe ser append-only y conservar los datos sin transformaciones destructivas de negocio para auditoría y reprocesamiento."
-    },
-    {
-      "term": "Liquid Clustering",
-      "cat": "Lakehouse & Delta",
-      "d": 1,
-      "def": "Mecanismo moderno de gestión física de datos en Delta Lake que sustituye el particionamiento físico rígido y Z-Order reorganizando los datos dinámicamente con CLUSTER BY.",
-      "tip": "Evita el sobre-particionado y el sesgo de datos (skew), permitiendo redefinir las columnas de clustering sin tener que reescribir la tabla completa."
-    },
-    {
-      "term": "OPTIMIZE & Z-ORDER",
-      "cat": "Lakehouse & Delta",
-      "d": 1,
-      "def": "Comando de mantenimiento de Delta Lake que compacta ficheros pequeños (bin-packing de ~1 GB) y ordena multidimensionalmente los datos para salto de datos (data skipping).",
-      "tip": "Z-ORDER solo es efectivo en columnas con alta cardinalidad comúnmente utilizadas en filtros WHERE; no debe aplicarse a columnas de muy baja cardinalidad."
-    },
-    {
-      "term": "VACUUM",
-      "cat": "Lakehouse & Delta",
-      "d": 1,
-      "def": "Comando de recolección de basura en Delta Lake que purga físicamente los ficheros Parquet marcados como eliminados que superan el periodo de retención configurado.",
-      "tip": "El periodo de retención por defecto es de 7 días (168 horas); ejecutarlo con retención cero rompe el Time Travel y arriesga corromper lecturas concurrentes."
-    },
-    {
-      "term": "Time Travel",
-      "cat": "Lakehouse & Delta",
-      "d": 1,
-      "def": "Capacidad nativa de Delta Lake para consultar o restaurar instantáneas históricas de una tabla mediante números de versión o marcas temporales.",
-      "tip": "Se invoca con VERSION AS OF o TIMESTAMP AS OF, y se revierte una tabla al estado anterior con RESTORE TABLE."
-    },
-    {
-      "term": "Managed vs External Tables",
-      "cat": "Lakehouse & Delta",
-      "d": 1,
-      "def": "Diferenciación de tablas en Databricks: Managed gestiona tanto metadatos como ficheros físicos; External almacena los datos en una ruta externa mediante la cláusula LOCATION.",
-      "tip": "Al ejecutar DROP TABLE sobre una tabla Managed se borran los datos físicos del bucket; en una External Table los ficheros permanecen intactos."
-    },
-    {
-      "term": "COPY INTO",
-      "cat": "ELT & Spark",
-      "d": 2,
-      "def": "Instrucción SQL idempotente de Databricks que carga de forma incremental y por lotes nuevos ficheros desde almacenamiento de nube a una tabla Delta.",
-      "tip": "Registra internamente los ficheros ya procesados, evitando duplicados en re-ejecuciones sin necesidad de mantener scripts de tracking manual."
-    },
-    {
-      "term": "Higher-Order Functions",
-      "cat": "ELT & Spark",
-      "d": 2,
-      "def": "Funciones de Spark SQL (TRANSFORM, FILTER, EXISTS, AGGREGATE) que operan directamente sobre colecciones y arrays anidados sin requerir descomponerlos.",
-      "tip": "Evitan el uso de explode() y shuffles de red masivos, acelerando notablemente el rendimiento en el tratamiento de estructuras anidadas."
-    },
-    {
-      "term": "from_json",
-      "cat": "ELT & Spark",
-      "d": 2,
-      "def": "Función de Spark SQL que deserializa una columna de texto con formato JSON a una estructura fuertemente tipada (STRUCT o ARRAY) a partir de un esquema dado.",
-      "tip": "Combínala con schema_of_json() para inferir dinámicamente esquemas de muestra sin escribirlos manualmente."
-    },
-    {
-      "term": "MERGE INTO",
-      "cat": "ELT & Spark",
-      "d": 2,
-      "def": "Sentencia SQL atómica que permite realizar operaciones coordinadas de inserción, actualización y borrado (Upsert) entre tablas de origen y destino en una sola transacción.",
-      "tip": "Soporta cláusulas condicionales como WHEN MATCHED AND condicion THEN DELETE y WHEN NOT MATCHED THEN INSERT."
-    },
-    {
-      "term": "Pandas UDF (Vectorized)",
-      "cat": "ELT & Spark",
-      "d": 2,
-      "def": "Función definida por el usuario en Python que utiliza Apache Arrow para intercambiar lotes de datos en memoria columnar con el ejecutor Spark.",
-      "tip": "Proporciona un rendimiento hasta 100 veces superior a las UDFs estándar de Python que procesan fila por fila con alto coste IPC."
-    },
-    {
-      "term": "Auto Loader (cloudFiles)",
-      "cat": "Streaming & DLT",
-      "d": 3,
-      "def": "Motor de ingestión incremental de Databricks para procesar millones de nuevos ficheros en almacenamiento de nube sin listar directorios enteros.",
-      "tip": "Soporta modos Directory Listing y File Notification (SNS/SQS, Event Grid) con inferencia y evolución automática de esquemas."
-    },
-    {
-      "term": "_rescued_data",
-      "cat": "Streaming & DLT",
-      "d": 3,
-      "def": "Columna especial generada automáticamente por Auto Loader que almacena en formato JSON cualquier campo nuevo o incompatible con el esquema esperado.",
-      "tip": "Evita la pérdida silenciosa de registros corruptos o inesperados, permitiendo que la ingestión continúe sin fallos fatales."
-    },
-    {
-      "term": "Delta Live Tables (DLT)",
-      "cat": "Streaming & DLT",
-      "d": 3,
-      "def": "Framework declarativo de Databricks para construir canalizaciones de datos fiables en SQL o Python con gestión automática de dependencias y calidad.",
-      "tip": "Automatiza la orquestación, el mantenimiento de checkpoints, el escalado de clústeres y la captura de métricas en el Event Log."
-    },
-    {
-      "term": "Streaming Table (DLT)",
-      "cat": "Streaming & DLT",
-      "d": 3,
-      "def": "Tabla gestionada en Delta Live Tables diseñada para procesar flujos de datos continuos o crecientes de forma estrictamente incremental (append-only).",
-      "tip": "Se declara con CREATE OR REFRESH STREAMING TABLE y lee de fuentes streaming con la función STREAM()."
-    },
-    {
-      "term": "Materialized View (DLT)",
-      "cat": "Streaming & DLT",
-      "d": 3,
-      "def": "Vista persistida en Delta Live Tables cuyos resultados se precalculan y refrescan automáticamente para reflejar el estado actual de las fuentes.",
-      "tip": "Ideal para la capa Gold, agregaciones de negocio y joins complejos donde se requiere consistencia analítica completa."
-    },
-    {
-      "term": "Data Quality Expectations",
-      "cat": "Streaming & DLT",
-      "d": 3,
-      "def": "Restricciones declarativas de calidad de datos en DLT aplicadas en vuelo mediante EXPECT, ON VIOLATION DROP ROW y ON VIOLATION FAIL UPDATE.",
-      "tip": "Permiten gobernar la integridad de datos definiendo si las filas no conformes generan advertencias, se descartan o abortan el pipeline."
-    },
-    {
-      "term": "Watermarking (Structured Streaming)",
-      "cat": "Streaming & DLT",
-      "d": 3,
-      "def": "Mecanismo en Structured Streaming para definir el límite temporal de retraso tolerable para eventos desordenados y purgar el State Store en memoria.",
-      "tip": "Sin watermarking, las consultas con agregaciones en streaming en modo Append acumularían estado indefinidamente provocando errores OutOfMemory."
-    },
-    {
-      "term": "Job Cluster (Automated)",
-      "cat": "Workflows",
-      "d": 4,
-      "def": "Clúster efímero aprovisionado exclusivamente por Databricks Workflows para la ejecución de un trabajo y destruido al finalizar.",
-      "tip": "Factura a una tarifa DBU sensiblemente menor (~50-60 % de ahorro) y garantiza aislamiento total en producción frente a clústeres All-Purpose."
-    },
-    {
-      "term": "Repair and Rerun",
-      "cat": "Workflows",
-      "d": 4,
-      "def": "Funcionalidad de Databricks Workflows que permite reanudar un trabajo multi-tarea ejecutando únicamente las tareas fallidas y sus dependencias aguas abajo.",
-      "tip": "Evita el sobrecoste y retraso de recomputar tareas ascendentes que ya finalizaron exitosamente en la corrida previa."
-    },
-    {
-      "term": "Cluster Policy",
-      "cat": "Workflows",
-      "d": 4,
-      "def": "Conjunto de reglas administrativas que restringe los tipos de clúster, familias de instancias, auto-terminación y etiquetas permitidas a los usuarios.",
-      "tip": "Esencial para el gobierno financiero (FinOps), impidiendo la creación accidental de clústeres sobredimensionados o sin apagado automático."
-    },
-    {
-      "term": "Three-Level Namespace",
-      "cat": "Unity Catalog",
-      "d": 5,
-      "def": "Estructura jerárquica canónica de resolución de objetos en Unity Catalog con el formato catalog.schema.table (o view / volume / model).",
-      "tip": "Permite organizar los datos por dominios corporativos o entornos (dev/staging/prod) centralizados en un único metastore regional."
-    },
-    {
-      "term": "Row Filters & Column Masks",
-      "cat": "Unity Catalog",
-      "d": 5,
-      "def": "Funciones SQL de control de acceso granular en Unity Catalog que filtran filas o enmascaran columnas dinámicamente según la identidad del usuario.",
-      "tip": "Evitan la proliferación de vistas redundantes para garantizar el cumplimiento de normativas de privacidad como GDPR y HIPAA."
-    }
-  ]
-};
+  };
 })(window);

@@ -1,1266 +1,1265 @@
 /* =========================================================================
-   data/databricks-genai/exam.js — Databricks Certified Generative AI Engineer Associate
-   50 preguntas en los 5 dominios oficiales con explicación por opción errónea (WHY)
+   data/databricks-genai/exam.js — Databricks · Generative AI Engineer Associate (English)
    ========================================================================= */
 (function (w) {
   w.EXAMS = w.EXAMS || {};
   w.EXAMS["databricks-genai"] = {
-  "id": "databricks-genai",
-  "appId": "databricks-genai",
-  "provider": "Databricks",
-  "badge": "Databricks · GenAI Eng",
-  "icon": "🧱",
-  "color": "#ff3621",
-  "featured": true,
-  "title": "Databricks · Generative AI Engineer Associate",
-  "subtitle": "Mosaic AI Vector Search, Model Serving, RAG, MLflow Evaluation y Unity Catalog Governance",
-  "passingScore": 70,
-  "domains": {
-    "1": "Diseño de Aplicaciones GenAI (14 %)",
-    "2": "Desarrollo de Aplicaciones y Chunking (14 %)",
-    "3": "Preparación de Datos y Vector Search (30 %)",
-    "4": "Despliegue con Mosaic AI Model Serving (22 %)",
-    "5": "Evaluación con MLflow y Gobernanza (20 %)"
-  },
-  "shortDomains": {
-    "1": "Diseño",
-    "2": "RAG & Chains",
-    "3": "Vector Search",
-    "4": "Model Serving",
-    "5": "MLflow & UC"
-  },
-  "topics": [
-    {
-      "id": "dbg-t-1-1",
-      "d": 1,
-      "title": "1.1 · Arquitecturas GenAI: RAG vs Fine-Tuning vs Pre-training vs Prompt Engineering",
-      "html": "<table class=\"keytable\">\n<tr><th>Enfoque Arquitectónico</th><th>Cuándo elegirlo</th><th>Frescura del dato & Citas</th><th>Coste & Latencia</th></tr>\n<tr><td><b>Prompt Engineering / Few-Shot</b></td><td>Tareas de razonamiento general, clasificación rápida o extracción sobre textos cortos que caben en el contexto inmediato.</td><td>Estática según fecha de corte del modelo base; sin citas automáticas de bases de datos externas.</td><td>Coste bajo por llamada; latencia mínima sin infraestructura dedicada.</td></tr>\n<tr><td><b>RAG (Retrieval-Augmented Generation)</b></td><td>Respuestas fundamentadas sobre bases de conocimiento cambiantes, manuales corporativos, políticas internas o datos privados.</td><td>Datos actualizados en tiempo real mediante sincronización con Delta Lake; citas textuales precisas y auditables.</td><td>Coste moderado (Vector Search + LLM); latencia gobernada por el retrieval (~15-50 ms) más la inferencia.</td></tr>\n<tr><td><b>Fine-Tuning (PEFT / LoRA / Full)</b></td><td>Adaptación de tono/estilo, seguimiento de sintaxis propietaria, tareas especializadas de clasificación o tareas de salida estructurada.</td><td>Los pesos congelan el conocimiento; no garantiza exactitud factual ni citas dinámicas sin un componente RAG adicional.</td><td>Coste elevado de entrenamiento; inferencia requiere cómputo dedicado en Model Serving.</td></tr>\n<tr><td><b>Pre-training / Continued Pre-training</b></td><td>Creación de modelos de dominio altamente especializado (biomédico, legal ultra-específico) o idiomas con baja representación.</td><td>Conocimiento embebido en los parámetros del modelo; requiere repetición periódica muy costosa para actualizarse.</td><td>Coste financiero y de cómputo extremadamente alto (cientos de GPUs A100/H100 durante semanas).</td></tr>\n</table>"
+    "id": "databricks-genai",
+    "appId": "databricks-genai",
+    "provider": "Databricks",
+    "badge": "Databricks · GenAI Eng",
+    "icon": "🧱",
+    "color": "#ff3621",
+    "featured": true,
+    "title": "Databricks · Generative AI Engineer Associate",
+    "subtitle": "Mosaic AI Vector Search, Model Serving, RAG, MLflow Evaluation, and Unity Catalog Governance",
+    "passingScore": 70,
+    "domains": {
+      "1": "GenAI Application Design (14%)",
+      "2": "Application Development and Chunking (14%)",
+      "3": "Data Preparation and Vector Search (30%)",
+      "4": "Deployment with Mosaic AI Model Serving (22%)",
+      "5": "Evaluation with MLflow and Governance (20%)"
     },
-    {
-      "id": "dbg-t-1-2",
-      "d": 1,
-      "title": "1.2 · Selección de Modelos Fundacionales, Embeddings y Patrones de Orquestación",
-      "html": "<table class=\"keytable\">\n<tr><th>Componente</th><th>Opciones en Databricks</th><th>Criterios de Elección</th></tr>\n<tr><td><b>Foundation Models (LLMs)</b></td><td>DBRX, Llama-3 (8B, 70B), Mistral/Mixtral, APIs externas (OpenAI GPT-4, Anthropic Claude vía AI Gateway).</td><td>Trade-off entre calidad de razonamiento, latencia p95, tamaño de ventana de contexto (8k a 128k+) y soberanía/privacidad de datos.</td></tr>\n<tr><td><b>Modelos de Embeddings</b></td><td>BGE-large-en, BGE-multilingual, GTE-large, text-embedding-ada-002, endpoints de embeddings personalizados.</td><td>Dimensión del vector (384, 768, 1024, 1536), longitud máxima de secuencia de entrada y soporte multilingüe nativo.</td></tr>\n<tr><td><b>Orquestación de Cadenas</b></td><td>LangChain, LlamaIndex, MLflow PyFunc / ResponsesAgent nativo de Databricks.</td><td>Complejidad del flujo conversacional, soporte de herramientas (Tool Calling), modularidad y facilidad de empaquetado en MLflow.</td></tr>\n<tr><td><b>Almacén Vectorial</b></td><td>Mosaic AI Vector Search (Delta Sync Index vs Direct Vector Access).</td><td>Integración nativa con Unity Catalog, gobernanza de datos, seguridad a nivel de fila y sincronización automática vía Change Data Feed.</td></tr>\n</table>"
+    "shortDomains": {
+      "1": "Design",
+      "2": "RAG & Chains",
+      "3": "Vector Search",
+      "4": "Model Serving",
+      "5": "MLflow & UC"
     },
-    {
-      "id": "dbg-t-2-1",
-      "d": 2,
-      "title": "2.1 · Chunking y Tokenización: Estrategias, Overlap y Ventanas de Contexto",
-      "html": "<table class=\"keytable\">\n<tr><th>Estrategia de Chunking</th><th>Mecanismo</th><th>Casos de Uso Ideales</th><th>Riesgo / Desventaja</th></tr>\n<tr><td><b>Fixed-size Chunking</b></td><td>Corta el texto cada N caracteres o tokens sin analizar estructura lingüística.</td><td>Prototipado rápido y textos planos sin jerarquías ni párrafos definidos.</td><td>Corta palabras o frases por la mitad; pierde contexto semántico en las fronteras de corte.</td></tr>\n<tr><td><b>Recursive Character Chunking</b></td><td>Intenta dividir por delimitadores jerárquicos (`\n\n`, `\n`, ` `, `\"\"`) hasta alcanzar el tamaño objetivo.</td><td>Documentos en prosa, manuales de usuario, artículos extensos y documentación técnica general.</td><td>Puede generar fragmentos de tamaño irregular si los párrafos son extremadamente largos.</td></tr>\n<tr><td><b>Document-specific (Markdown / HTML)</b></td><td>Divide respetando encabezados H1, H2, H3, tags HTML o bloques de código delimitados.</td><td>Archivos README, especificaciones Markdown, documentación de APIs y páginas web estructuradas.</td><td>Requiere analizadores sintácticos específicos y esquemas de documentos consistentes.</td></tr>\n<tr><td><b>Semantic Chunking</b></td><td>Calcula la distancia entre embeddings de oraciones consecutivas y corta cuando la similitud cae abruptamente.</td><td>Textos con cambios temáticos sutiles donde los saltos de párrafo no reflejan cambios semánticos.</td><td>Alto coste computacional durante la fase de preparación al requerir vectorizar cada oración previa.</td></tr>\n<tr><td><b>Chunk Overlap (Solapamiento)</b></td><td>Comparte entre el 10 % y 20 % del texto de frontera entre dos chunks adyacentes consecutivos.</td><td>Imprescindible en casi todas las estrategias de chunking para evitar la fragmentación de hechos clave.</td><td>Incrementa ligeramente el volumen total de tokens indexados y almacenados en Vector Search.</td></tr>\n</table>"
-    },
-    {
-      "id": "dbg-t-2-2",
-      "d": 2,
-      "title": "2.2 · Técnicas Avanzadas de RAG: Re-ranking, HyDE, RRF y Multi-turn Chains",
-      "html": "<table class=\"keytable\">\n<tr><th>Técnica Avanzada</th><th>Cómo Funciona</th><th>Problema que Resuelve</th></tr>\n<tr><td><b>Cross-Encoder Re-ranking</b></td><td>Un modelo (e.g. BGE-reranker) procesa la consulta y el fragmento juntos evaluando atención cruzada completa sobre los top-N candidatos.</td><td>Elimina falsos positivos del bi-encoder inicial recuperando los mejores K fragmentos con precisión muy superior.</td></tr>\n<tr><td><b>HyDE (Hypothetical Document Embeddings)</b></td><td>Un LLM genera un documento hipotético ideal a partir de la consulta del usuario; luego se busca en Vector Search usando el embedding de dicho documento.</td><td>Brecha léxica y semántica cuando la consulta es corta o abstracta y no comparte vocabulario con los textos indexados.</td></tr>\n<tr><td><b>Reciprocal Rank Fusion (RRF)</b></td><td>Combina y normaliza las posiciones ordenadas de múltiples recuperadores (e.g. denso + disperso) con la fórmula `RRF_Score = sum(1 / (60 + rank))`.</td><td>Discrepancia entre escalas de similitud vectorial y puntuaciones BM25 al fusionar resultados de búsqueda híbrida.</td></tr>\n<tr><td><b>Context Reordering (Lost in the Middle)</b></td><td>Reordena los chunks recuperados colocando los de mayor relevancia al principio y al final del contexto del prompt.</td><td>Mitiga el sesgo posicional de los LLMs que tienden a ignorar información ubicada en el medio de la ventana de contexto.</td></tr>\n</table>"
-    },
-    {
-      "id": "dbg-t-3-1",
-      "d": 3,
-      "title": "3.1 · Mosaic AI Vector Search: Delta Sync Index vs Direct Vector Access",
-      "html": "<table class=\"keytable\">\n<tr><th>Tipo de Índice</th><th>Fuente de Datos</th><th>Cálculo de Embeddings</th><th>Mantenimiento & Casos de Uso</th></tr>\n<tr><td><b>Delta Sync: Managed Embeddings</b></td><td>Tabla Delta registrada en Unity Catalog.</td><td>Databricks gestiona la vectorización automática usando un endpoint de Model Serving.</td><td>Ideal para flujos serverless sin pipeline de inferencia externo; sincronización automática vía CDF.</td></tr>\n<tr><td><b>Delta Sync: Self-managed Embeddings</b></td><td>Tabla Delta registrada en Unity Catalog con columna `ARRAY<FLOAT>`.</td><td>El usuario calcula previamente los embeddings (e.g. en un job Spark o DLT) y los escribe en Delta.</td><td>Control total sobre el modelo de embeddings, pipelines personalizados o embeddings precalculados en batch.</td></tr>\n<tr><td><b>Direct Vector Access Index</b></td><td>Sin tabla Delta subyacente obligatoria.</td><td>El usuario envía directamente vectores y metadatos mediante llamadas REST API (`upsert_data`).</td><td>Aplicaciones externas que requieren insertar o actualizar vectores en tiempo real sin pasar por Delta Lake.</td></tr>\n<tr><td><b>Sync Mode: Continuous vs Triggered</b></td><td>Aplica a índices Delta Sync.</td><td><b>Continuous</b> mantiene streaming continuo (baja latencia); <b>Triggered</b> corre en micro-batch programado.</td><td>Continuous minimiza retraso de indexación pero tiene mayor coste; Triggered optimiza costes para cargas batch.</td></tr>\n</table>"
-    },
-    {
-      "id": "dbg-t-3-2",
-      "d": 3,
-      "title": "3.2 · Búsqueda Híbrida (Dense + BM25), Filtros de Metadatos y Change Data Feed",
-      "html": "<table class=\"keytable\">\n<tr><th>Capacidad Técnica</th><th>Detalle de Implementación</th><th>Clave de Examen</th></tr>\n<tr><td><b>Hybrid Search</b></td><td>Combina similitud de vectores densos (semántica profunda) con búsqueda de texto disperso BM25 (palabras clave exactas).</td><td>Indispensable cuando las consultas contienen códigos de error, números de pieza, SKUs o nombres propios junto con lenguaje natural.</td></tr>\n<tr><td><b>Metadata Filtering (`filters_json`)</b></td><td>Pre-filtrado de vectores evaluando condiciones SQL sobre columnas indexadas (`country = 'ES'`, `category IN (...)`).</td><td>Pre-filtrado reduce el espacio de búsqueda en memoria; columnas no indexadas obligan a un post-filtrado lento en Delta.</td></tr>\n<tr><td><b>Change Data Feed (CDF)</b></td><td>`delta.enableChangeDataFeed = true` en la tabla Delta de origen.</td><td>Requisito obligatorio para Delta Sync Index; permite capturar INSERT, UPDATE y DELETE de forma incremental.</td></tr>\n<tr><td><b>Primary Key Requirement</b></td><td>La tabla Delta origen debe tener una `PRIMARY KEY` definida y no nula.</td><td>Obligatorio para que Vector Search pueda identificar unívocamente cada vector y aplicar actualizaciones y borrados.</td></tr>\n</table>"
-    },
-    {
-      "id": "dbg-t-4-1",
-      "d": 4,
-      "title": "4.1 · Mosaic AI Model Serving: Provisioned Throughput, Serverless y External Models",
-      "html": "<table class=\"keytable\">\n<tr><th>Modalidad de Serving</th><th>Mecanismo de Facturación</th><th>Garantía de Rendimiento</th><th>Cuándo Utilizarla</th></tr>\n<tr><td><b>Pay-per-token (Foundation Models)</b></td><td>Pago exacto por tokens de entrada y tokens de salida generados.</td><td>Capacidad compartida; sujeto a límites de tasa (rate limits) bajo alta concurrencia.</td><td>Cargas de trabajo exploratorias, desarrollo, entornos no productivos o tráfico muy variable y esporádico.</td></tr>\n<tr><td><b>Provisioned Throughput</b></td><td>Tarifa fija por hora por Unidad de Modelo (Model Unit / MU) reservada.</td><td>Concurrencia dedicada garantizada; latencia determinista sin bloqueos por rate limit externo.</td><td>Aplicaciones de producción en tiempo real con tráfico continuo, SLA estricto y alto volumen de peticiones.</td></tr>\n<tr><td><b>External Models (AI Gateway)</b></td><td>Facturación por el proveedor externo (OpenAI, Anthropic) o unificada.</td><td>Gobernada por el proveedor externo; Databricks añade caching, guardrails, fallback y auditoría unificada.</td><td>Empresas que combinan modelos propietarios de OpenAI/Anthropic con modelos open source bajo una sola API.</td></tr>\n<tr><td><b>Custom Models (MLflow PyFunc)</b></td><td>Instancias de cómputo serverless escalables (CPU/GPU) según concurrencia.</td><td>Escalado automático hasta cero (`scale_to_zero`); latencia sujeta a cold starts si está configurado en 0.</td><td>Despliegue de cadenas RAG empaquetadas, clasificadores de Scikit-Learn o modelos fine-tuneados propios.</td></tr>\n</table>"
-    },
-    {
-      "id": "dbg-t-4-2",
-      "d": 4,
-      "title": "4.2 · AI Gateway: Guardrails, Rate Limiting, Redacción PII y Enrutamiento Fallback",
-      "html": "<table class=\"keytable\">\n<tr><th>Característica de AI Gateway</th><th>Función Principal</th><th>Impacto en Arquitectura y Seguridad</th></tr>\n<tr><td><b>Guardrails de Seguridad</b></td><td>Detección y redacción de datos personales (PII) y filtros de toxicidad y jailbreak en prompts y respuestas.</td><td>Evita que información confidencial llegue a proveedores externos y bloquea ataques de inyección de prompt.</td></tr>\n<tr><td><b>Rate Limiting</b></td><td>Establece cuotas máximas de peticiones por minuto (RPM) y tokens por minuto (TPM) por usuario o equipo.</td><td>Previene consumos descontrolados, protege contra ataques DoS y controla los costes operativos de inferencia.</td></tr>\n<tr><td><b>Fallback Routing</b></td><td>Enruta automáticamente a un modelo secundario si el primario devuelve códigos de error 429, 500 o 503.</td><td>Maximiza la resiliencia y disponibilidad del sistema ante interrupciones de proveedores externos.</td></tr>\n<tr><td><b>Auditoría y Atribución de Costes</b></td><td>Registra cada llamada con su identificador de usuario y tokens consumidos.</td><td>Facilita el reparto interno de costes (chargeback) entre departamentos corporativos.</td></tr>\n</table>"
-    },
-    {
-      "id": "dbg-t-5-1",
-      "d": 5,
-      "title": "5.1 · MLflow GenAI Evaluation: LLM-as-a-Judge, Faithfulness, Relevance y Tracing",
-      "html": "<table class=\"keytable\">\n<tr><th>Métrica / Herramienta</th><th>Qué Mide / Propósito</th><th>Cálculo / Rúbrica en `mlflow.evaluate()`</th></tr>\n<tr><td><b>Faithfulness (Groundedness)</b></td><td>Detecta alucinaciones evaluando si las afirmaciones de la respuesta provienen del contexto recuperado.</td><td>LLM-as-a-judge analiza cada afirmación de la respuesta frente a los fragmentos de contexto aportados.</td></tr>\n<tr><td><b>Answer Relevance</b></td><td>Evalúa si la respuesta generada responde directamente a la consulta del usuario.</td><td>LLM-as-a-judge califica la relevancia y concisión de la respuesta con respecto al prompt inicial.</td></tr>\n<tr><td><b>Context Precision & Recall</b></td><td><b>Precision:</b> fragmentos útiles ordenados arriba. <b>Recall:</b> toda la información requerida fue recuperada.</td><td>Evalúa la calidad del retriever; Context Recall suele requerir una respuesta de referencia (ground truth).</td></tr>\n<tr><td><b>MLflow Tracing (`mlflow.trace`)</b></td><td>Observabilidad en tiempo de ejecución: árbol de spans con latencias, tokens y llamadas intermedias.</td><td>Instrumentación con OpenTelemetry para auditar cada paso (retrieval, prompt formatting, LLM call).</td></tr>\n</table>"
-    },
-    {
-      "id": "dbg-t-5-2",
-      "d": 5,
-      "title": "5.2 · Gobernanza con Unity Catalog: Inference Tables, Review App y Linaje End-to-End",
-      "html": "<table class=\"keytable\">\n<tr><th>Componente de Gobernanza</th><th>Rol en el Ciclo de Vida GenAI</th><th>Beneficio Operativo y Cumplimiento</th></tr>\n<tr><td><b>Inference Tables</b></td><td>Captura asíncrona de peticiones entrantes, respuestas generadas, latencias y metadatos en tablas Delta.</td><td>Permite monitoreo continuo con Lakehouse Monitoring, auditoría de cumplimiento y detección de data drift.</td></tr>\n<tr><td><b>Review App (Agent Evaluation)</b></td><td>Interfaz web para que expertos de negocio prueben agentes y proporcionen feedback humano (thumbs up/down).</td><td>Genera datasets de evaluación de referencia (golden datasets) curados directamente por humanos.</td></tr>\n<tr><td><b>Unity Catalog End-to-End Lineage</b></td><td>Grafo visual que conecta tablas Delta origen, índices vectoriales, modelos registrados y endpoints de serving.</td><td>Auditoría regulatoria inmediata ante solicitudes de derecho al olvido (RGPD) o cambios en fuentes de datos.</td></tr>\n<tr><td><b>Control de Acceso Granular</b></td><td>Permisos `USE CATALOG`, `USE SCHEMA`, `SELECT` y filtros de fila/columna en tablas e índices vectoriales.</td><td>Garantiza que los usuarios sólo puedan recuperar información para la cual tienen autorización formal en Unity Catalog.</td></tr>\n</table>"
-    }
-  ],
-  "questions": [
-    {
-      "id": "dbg-01",
-      "d": 1,
-      "t": "RAG vs Fine-Tuning",
-      "q": "Una aseguradora multinacional requiere implementar un asistente conversacional para sus peritos que consulte condiciones de pólizas y normativas internas que se actualizan cada dos semanas. Las respuestas deben citar textualmente la cláusula de origen para fines de auditoría legal. ¿Qué enfoque arquitectónico es el más adecuado y por qué?",
-      "o": [
-        "Implementar RAG con `Mosaic AI Vector Search`, permitiendo sincronizar cambios en Delta Lake sin reentrenar y garantizando citas y trazabilidad legal.",
-        "Realizar Fine-Tuning de un modelo de código abierto con LoRA en Databricks para memorizar los textos de pólizas dentro de los pesos neuronales.",
-        "Ejecutar Continued Pre-training de un modelo Llama-3 en clústeres GPU con millones de pólizas para que adquiera conocimiento normativo estático.",
-        "Aplicar Prompt Engineering básico con Few-Shot incrustando el manual completo de 60.000 páginas en el system prompt de cada llamada a la API."
-      ],
-      "a": 0,
-      "e": "RAG es la arquitectura idónea cuando la base de conocimiento cambia frecuentemente (cada dos semanas) y se exige trazabilidad y citas exactas hacia las fuentes originales. Fine-Tuning y Pre-training congelan la información en los pesos neuronales (knowledge cutoff) y son propensos a alucinaciones sin ofrecer citas directas auditables."
-    },
-    {
-      "id": "dbg-02",
-      "d": 1,
-      "t": "Selección de Modelos",
-      "q": "Una plataforma de comercio electrónico necesita procesar 2 millones de consultas diarias de clasificación de intención de compra con un SLA estricto de latencia p95 < 60 ms y presupuesto controlado. La tarea consiste únicamente en categorizar el texto en una de 12 clases predefinidas. ¿Qué estrategia de modelo ofrece el mejor equilibrio entre coste, latencia y rendimiento?",
-      "o": [
-        "Desplegar un modelo fundacional de 70B parámetros en Foundation Model APIs con facturación pay-per-token para aprovechar su capacidad de razonamiento general.",
-        "Entrenar y desplegar un modelo clasificador pequeño (SLM / encoder como DeBERTa o RoBERTa) optimizado mediante fine-tuning en `Mosaic AI Model Serving`.",
-        "Construir un flujo RAG multi-etapa con Vector Search que recupere ejemplos de clasificaciones previas para alimentar un modelo gigante en cada inferencia.",
-        "Configurar un agente multi-paso con LangChain y tres llamadas recursivas a modelos externos mediante `AI Gateway` para verificar la coherencia lógica."
-      ],
-      "a": 1,
-      "e": "Para tareas de clasificación pura sobre un conjunto cerrado de clases con altísimo volumen (2M peticiones/día) y latencia ultra-baja (<60 ms), un modelo clasificador pequeño (SLM/encoder) fine-tuneado y servido en Model Serving es infinitamente más rápido, económico y determinista que invocar LLMs generativos masivos o arquitecturas RAG."
-    },
-    {
-      "id": "dbg-03",
-      "d": 1,
-      "t": "Modelos de Embeddings",
-      "q": "Al diseñar una canalización RAG sobre documentación técnica y contractual redactada indistintamente en español, portugués e inglés, un arquitecto debe seleccionar el modelo de embeddings para el índice de `Mosaic AI Vector Search`. ¿Qué conjunto de criterios técnicos debe priorizarse?",
-      "o": [
-        "Seleccionar exclusivamente el modelo con la mayor dimensión vectorial posible (ej. 4096) asumiendo que mayor dimensionalidad compensa la falta de datos multilingües.",
-        "Utilizar la última capa oculta de un modelo generativo autorregresivo gigante como DBRX extrayendo tensores brutos durante cada consulta interactiva de búsqueda.",
-        "Evaluar el soporte multilingüe, la ventana de tokens (ej. 512 u 8192) y el trade-off entre dimensión vectorial, latencia y precisión.",
-        "Escoger un modelo entrenado únicamente en inglés y anteponer un servicio de traducción automática en tiempo real previo a cada cálculo de embedding vectorial."
-      ],
-      "a": 2,
-      "e": "La selección del modelo de embeddings debe sopesar el soporte multilingüe nativo (para alinear representaciones semánticas en español, portugués e inglés en el mismo espacio vectorial), la longitud máxima de tokens admitida por fragmento, y la dimensionalidad del vector que impacta directamente en el consumo de memoria, latencia de búsqueda y precisión."
-    },
-    {
-      "id": "dbg-04",
-      "d": 1,
-      "t": "RAG vs Extended Context",
-      "q": "Un equipo debate entre utilizar una ventana de contexto extendida (ej. 1M tokens) enviando toda la biblioteca técnica en cada prompt frente a implementar una arquitectura RAG con `Mosaic AI Vector Search`. ¿En qué escenario Vector Search es rotundamente superior a Context Augmented Generation (CAG)?",
-      "o": [
-        "Cuando el corpus completo no supera los 10.000 tokens en total y se consulta únicamente una vez por semana por un único usuario en un entorno de desarrollo local.",
-        "Cuando la tarea requiere comparar el estilo narrativo completo de dos novelas literarias de 70.000 palabras en una sola pasada de análisis estructural global.",
-        "Cuando se requiere un modelo sin conexión a bases de datos ni redes corporativas operando exclusivamente en memoria volátil de una estación de trabajo.",
-        "Cuando el volumen documental alcanza gigabytes o terabytes, el tráfico de consultas concurrentes es alto y se busca optimizar latencia y coste por token."
-      ],
-      "a": 3,
-      "e": "Cuando el volumen documental es masivo (GB o TB) y el tráfico es continuo, enviar cientos de miles de tokens en cada petición resulta económicamente inviable y genera latencias de segundos o minutos. Vector Search recupera selectivamente sólo los fragmentos pertinentes (unos pocos miles de tokens), minimizando coste y tiempo de procesamiento."
-    },
-    {
-      "id": "dbg-05",
-      "d": 1,
-      "t": "Seguridad y Guardrails",
-      "q": "Una entidad bancaria desplegará un asistente RAG interno con acceso a estados financieros confidenciales. Durante el análisis de amenazas, se identifican riesgos de inyección indirecta de prompts y fugas de datos hacia empleados no autorizados. ¿Qué DOS medidas arquitectónicas deben implementarse en Databricks? (Elige 2 respuestas)",
-      "o": [
-        "Configurar guardrails en `AI Gateway` para detectar patrones de jailbreak, evaluar toxicidad y redactar información de identificación personal (PII).",
-        "Aplicar controles de acceso a nivel de fila y columna en `Unity Catalog` sobre las tablas Delta fuente y los índices de `Mosaic AI Vector Search`.",
-        "Desactivar por completo el registro de auditoría en las `Inference Tables` para evitar que los auditores examinen los textos maliciosos de los atacantes.",
-        "Elevar la temperatura de muestreo del modelo a 1.0 en `Mosaic AI Model Serving` para que las respuestas ante ataques sean estocásticas e inconsistentes."
-      ],
-      "a": [
-        0,
-        1
-      ],
-      "e": "La combinación de guardrails en `AI Gateway` (para interceptar ataques de prompt injection, lenguaje malicioso y redactar PII antes y después de la inferencia) junto con el gobierno granular de `Unity Catalog` (filtros de fila/columna y permisos `SELECT` sobre tablas Delta e índices vectoriales) establece una defensa en profundidad robusta para aplicaciones GenAI corporativas."
-    },
-    {
-      "id": "dbg-06",
-      "d": 1,
-      "t": "Costes de Model Serving",
-      "q": "Un equipo de ingeniería proyecta un tráfico constante y predecible de 160 peticiones por segundo durante las 24 horas del día para un modelo Llama-3-70B en producción. Al evaluar las modalidades de `Mosaic AI Model Serving`, ¿por qué la modalidad `Provisioned Throughput` es la opción más adecuada frente a `Pay-per-token`?",
-      "o": [
-        "Porque reserva unidades dedicadas de cómputo (Model Units) garantizando concurrencia, latencia determinista y coste menor ante alto tráfico.",
-        "Porque la modalidad `Pay-per-token` no admite modelos con más de 7 mil millones de parámetros y sólo funciona con modelos pequeños de clasificación en Spark.",
-        "Porque la modalidad `Provisioned Throughput` exime al equipo de pasar por las políticas de gobierno, autenticación granular y linaje estricto de `Unity Catalog`.",
-        "Porque `Provisioned Throughput` reentrena continuamente los pesos neuronales del modelo con cada lote de peticiones entrantes sin ningún coste adicional de infraestructura."
-      ],
-      "a": 0,
-      "e": "`Provisioned Throughput` aprovisiona capacidad de procesamiento dedicada (medida en Model Units), lo que previene errores de saturación (HTTP 429) por concurrencia compartida, ofrece latencia estable y predecible, y resulta económicamente mucho más rentable que `Pay-per-token` cuando el volumen de peticiones es sostenido y elevado."
-    },
-    {
-      "id": "dbg-07",
-      "d": 1,
-      "t": "Residencia de Datos y Cumplimiento",
-      "q": "Un hospital universitario debe procesar historiales clínicos altamente sensibles cumpliendo normativas estrictas de soberanía de datos que prohíben que los textos clínicos salgan del perímetro cloud gestionado de la empresa o se envíen a APIs de terceros. ¿Qué arquitectura en Databricks cumple con este requerimiento?",
-      "o": [
-        "Configurar `AI Gateway` para redirigir las peticiones hacia la API pública multitenant de un proveedor SaaS externo en otra región geográfica no regulada.",
-        "Desplegar un modelo fundacional abierto (ej. Llama-3 o Mistral) en `Mosaic AI Model Serving` ejecutándose dentro del plano de datos del cliente sin salida a internet.",
-        "Transmitir los historiales clínicos cifrados en Base64 en el cuerpo del prompt hacia un servicio web público sin acuerdos formales de confidencialidad médica.",
-        "Almacenar los historiales en un bucket público de almacenamiento sin Unity Catalog y permitir consultas vectoriales abiertas desde cualquier IP pública de internet."
-      ],
-      "a": 1,
-      "e": "Desplegar modelos open source en `Mosaic AI Model Serving` garantiza que los pesos y la inferencia se ejecuten dentro del entorno gestionado de Databricks (data plane / control plane corporativo), cumpliendo con las políticas de soberanía y privacidad sin enviar datos de pacientes a proveedores SaaS externos."
-    },
-    {
-      "id": "dbg-08",
-      "d": 2,
-      "t": "Estrategias de Chunking",
-      "q": "Un ingeniero de datos procesa especificaciones técnicas de maquinaria estructuradas en Markdown con secciones jerárquicas (#, ##, ###) y tablas detalladas. Al aplicar fragmentación por tamaño fijo, las tablas y subtítulos quedan partidos por la mitad, degradando la calidad de las respuestas en RAG. ¿Qué técnica de chunking resuelve este problema?",
-      "o": [
-        "Utilizar un `CharacterTextSplitter` con límite rígido de 256 caracteres y solapamiento nulo para forzar cortes estrictamente uniformes en cualquier tipo de texto técnico.",
-        "Convertir todo el documento a una única línea continua de texto plano eliminando saltos de línea y formateo antes de generar un único vector para el archivo completo.",
-        "Aplicar un `RecursiveCharacterTextSplitter` configurado con separadores jerárquicos de Markdown (`\\n## `, `\\n### `, `\\n\\n`, `\\n`, ` `).",
-        "Generar un único chunk masivo de 120.000 palabras por manual técnico y omitir por completo cualquier proceso de segmentación o partición estructural del contenido."
-      ],
-      "a": 2,
-      "e": "`RecursiveCharacterTextSplitter` (o MarkdownHeaderTextSplitter) respeta la jerarquía del documento intentando dividir primero por delimitadores mayores (encabezados de sección Markdown, párrafos) antes de fragmentar por líneas o palabras. Esto mantiene intactas las secciones lógicas, títulos y tablas dentro del mismo bloque contextual."
-    },
-    {
-      "id": "dbg-09",
-      "d": 2,
-      "t": "Chunk Overlap",
-      "q": "En un sistema RAG sobre contratos comerciales, se observa que cuando una cláusula indemnizatoria relevante coincide exactamente con el límite de corte entre dos fragmentos, el LLM emite respuestas incompletas o alucinadas. Al inspeccionar la configuración del divisor de texto, se detecta `chunk_size = 512` y `chunk_overlap = 0`. ¿Cuál es la corrección recomendada?",
-      "o": [
-        "Reducir el `chunk_size` a 32 tokens manteniendo `chunk_overlap = 0` para generar fragmentos atómicos que aíslen cada palabra clave por separado.",
-        "Eliminar los fragmentos pares de la base de datos conservando únicamente los fragmentos impares para evitar redundancias de lectura en el índice.",
-        "Incrementar el tamaño del chunk a 80.000 tokens sin overlap forzando al modelo de embeddings a ignorar el 90 % del texto por truncamiento.",
-        "Configurar un `chunk_overlap` de entre el 10 % y 20 % del tamaño del fragmento (ej. 50 a 100 tokens) para asegurar continuidad en las fronteras."
-      ],
-      "a": 3,
-      "e": "Configurar un solapamiento (overlap) de entre el 10 % y 20 % del tamaño del chunk asegura que las oraciones o cláusulas ubicadas en los extremos divisorios no pierdan su significado contextual, ya que quedan capturadas íntegramente en al menos uno de los dos fragmentos vecinos."
-    },
-    {
-      "id": "dbg-10",
-      "d": 2,
-      "t": "Re-ranking con Cross-Encoder",
-      "q": "Un buscador RAG empresarial utiliza un bi-encoder para recuperar los 50 fragmentos más similares en `Mosaic AI Vector Search`. Sin embargo, con frecuencia fragmentos irrelevantes que contienen palabras coincidentes pero significado opuesto desplazan a las respuestas correctas. ¿Qué patrón de recuperación en dos fases soluciona esta deficiencia?",
-      "o": [
-        "Incorporar una segunda fase de re-ranking con un cross-encoder (ej. `BGE-reranker`) sobre los top-50 para reordenar y seleccionar los 5 mejores chunks.",
-        "Reemplazar el índice de Vector Search por una consulta relacional estándar en SQL utilizando el operador de coincidencia de patrones `WHERE columna_texto LIKE '%query%'`.",
-        "Ejecutar un segundo bi-encoder idéntico al primero con los mismos pesos vectoriales y promediar aritméticamente todas las distancias euclidianas calculadas previamente.",
-        "Invertir el orden posicional de los 50 fragmentos recuperados para que los fragmentos de menor similitud bi-encoder aparezcan en la cima del prompt de contexto entregado."
-      ],
-      "a": 0,
-      "e": "El patrón de dos fases (Two-Stage Retrieval) combina la velocidad y escalabilidad de un bi-encoder (para filtrar millones de vectores y quedarse con los top-50 candidatos) con la alta precisión semántica de un cross-encoder (que evalúa la atención cruzada profunda entre consulta y fragmento para reordenar y seleccionar los top-5 finales con mínima latencia añadida)."
-    },
-    {
-      "id": "dbg-11",
-      "d": 2,
-      "t": "HyDE (Hypothetical Document Embeddings)",
-      "q": "Los empleados de una empresa formulan consultas muy breves y abstractas como '¿vacaciones por matrimonio?', mientras que los reglamentos laborales internos describen los beneficios utilizando términos jurídicos como 'permisos retribuidos extraordinarios por nupcias'. ¿Qué técnica de recuperación resuelve esta discrepancia léxica?",
-      "o": [
-        "Concatenar la consulta del usuario directamente en una sentencia SQL sin sanitizar para buscar coincidencias literales de caracteres en Delta Lake.",
-        "`HyDE` (Hypothetical Document Embeddings), generando primero un documento hipotético con un LLM y buscando vectores con su embedding.",
-        "Eliminar todas las vocales de la consulta del usuario para comprimir el texto antes de pasarlo al endpoint de embeddings de Databricks.",
-        "Aplicar clasificación Zero-Shot con un clasificador determinista y descartar por completo el texto de la consulta original del empleado."
-      ],
-      "a": 1,
-      "e": "`HyDE` utiliza un LLM para generar un documento hipotético de respuesta a partir de la pregunta del usuario. Aunque el documento hipotético contenga datos factuales no verificados, su vocabulario y estructura semántica se asemejan mucho más a los documentos reales indexados en Vector Search que la breve pregunta inicial, logrando un retrieval mucho más certero."
-    },
-    {
-      "id": "dbg-12",
-      "d": 2,
-      "t": "Registro en MLflow",
-      "q": "Un desarrollador de IA crea una cadena conversacional RAG en Databricks combinando LangChain con `Mosaic AI Vector Search`. Para registrar y desplegar adecuadamente la cadena en `Mosaic AI Model Serving`, ¿qué DOS prácticas son obligatorias según el estándar de MLflow? (Elige 2 respuestas)",
-      "o": [
-        "Registrar el modelo con `mlflow.langchain.log_model()` especificando el entorno de dependencias (`pip_requirements` o `conda_env`) y artefactos.",
-        "Declarar explícitamente una firma de modelo (`model signature`) en MLflow que defina el esquema de tipos de entrada y salida esperados.",
-        "Guardar el modelo exportando los archivos `.pkl` de Python en un directorio temporal `/tmp` del nodo driver del clúster interactivo.",
-        "Hardcodear los tokens de acceso personal (PAT) del desarrollador en el código fuente de la cadena para agilizar la autenticación con Vector Search."
-      ],
-      "a": [
-        0,
-        1
-      ],
-      "e": "Para que un modelo de LangChain sea desplegable de forma reproducible en `Mosaic AI Model Serving`, debe registrarse con `mlflow.langchain.log_model()` indicando claramente sus dependencias de librerías, y contar con una firma (`signature`) que defina formalmente la estructura de entrada (ej. campo `query` o lista de `messages`) y salida, permitiendo validaciones automáticas de esquema."
-    },
-    {
-      "id": "dbg-13",
-      "d": 2,
-      "t": "Tool Calling y Salidas Estructuradas",
-      "q": "Un asistente virtual de soporte debe consultar el estado de envíos o cancelar pedidos invocando APIs corporativas existentes. Al utilizar un modelo fundacional en Databricks con capacidad de Function Calling (Tool Calling), ¿cómo deben definirse las herramientas y procesarse las peticiones del modelo?",
-      "o": [
-        "Incrustar ejecutables binarios de Windows dentro del cuerpo del prompt para que el contenedor de Model Serving los ejecute directamente en su sistema operativo base.",
-        "Solicitar al LLM que genere código SQL arbitrario de eliminación de tablas y ejecutarlo automáticamente con rol de superusuario en el catálogo central de Unity Catalog.",
-        "Declarar las herramientas mediante schemas JSON formales con nombre, descripción detallada y parámetros tipados, ejecutando la función al recibir `tool_calls` del modelo.",
-        "Desactivar el parser de JSON del modelo y forzarlo a responder únicamente con texto libre sin ningún tipo de delimitación de argumentos ni esquemas computacionales."
-      ],
-      "a": 2,
-      "e": "Tool Calling requiere proporcionar al LLM un catálogo de herramientas descritas en formato JSON Schema (especificando tipos, campos obligatorios y descripciones claras). Cuando el LLM decide que necesita invocar una herramienta, genera un payload JSON estructurado con el nombre de la función y los argumentos que el código de la aplicación cliente ejecuta de forma controlada."
-    },
-    {
-      "id": "dbg-14",
-      "d": 2,
-      "t": "Context Window y Lost in the Middle",
-      "q": "Al evaluar un pipeline RAG que inyecta 25 fragmentos recuperados en el prompt de un LLM, se evidencia que el modelo responde con precisión si la respuesta está en el primer o último fragmento, pero ignora sistemáticamente la información ubicada en los fragmentos 11 a 15 (efecto 'Lost in the Middle'). ¿Qué técnica de ordenación de contexto mitiga este fenómeno?",
-      "o": [
-        "Duplicar todos los fragmentos centrales 8 veces de forma consecutiva para saturar artificialmente la memoria del modelo durante la inferencia en tiempo de ejecución.",
-        "Truncar arbitrariamente el contexto eliminando el 90 % de los fragmentos recuperados dejando únicamente 2 oraciones para todo el documento técnico analizado.",
-        "Reentrenar los pesos del transformador mediante fine-tuning para anular por completo la atención posicional de las capas de multi-head attention del modelo.",
-        "Reordenar los fragmentos recuperados situando los de mayor relevancia en los extremos (al principio y al final) y los de menor relevancia al centro."
-      ],
-      "a": 3,
-      "e": "Los transformadores sufren del sesgo de atención en forma de U ('Lost in the Middle'): prestan mayor atención a la información situada al inicio y al final del contexto del prompt. Reordenar los fragmentos para que los documentos con mayor puntuación de similitud queden ubicados en el encabezado y en el cierre del bloque de contexto maximiza la probabilidad de que el LLM los considere."
-    },
-    {
-      "id": "dbg-15",
-      "d": 3,
-      "t": "Delta Sync vs Direct Access",
-      "q": "Un equipo de analistas gestiona una base de conocimiento de 8 millones de artículos almacenada en una tabla Delta de Unity Catalog sujeta a constantes inserciones, modificaciones y bajas por parte de pipelines ETL en streaming. Desean que el índice vectorial se mantenga sincronizado automáticamente sin desarrollar código de reconciliación manual. ¿Qué tipo de índice de `Mosaic AI Vector Search` debe utilizarse?",
-      "o": [
-        "`Delta Sync Index`, que rastrea automáticamente las operaciones de la tabla Delta de origen aprovechando Change Data Feed (CDF).",
-        "`Direct Vector Access Index`, enviando llamadas REST manuales fila por fila desde scripts periódicos programados en cron de Linux.",
-        "Una tabla externa en Elasticsearch alojada fuera del perímetro de gobernanza de Unity Catalog sin sincronización de permisos.",
-        "Un escaneo exhaustivo de tabla completa en Apache Spark calculando distancias euclidianas en memoria distribuida ante cada consulta individual."
-      ],
-      "a": 0,
-      "e": "`Delta Sync Index` se vincula directamente a una tabla Delta gobernada en Unity Catalog y consume su Change Data Feed (CDF) para procesar de forma automática, continua o por micro-batch, cualquier inserción, actualización o eliminación de registros, manteniendo el índice vectorial al día sin intervención manual."
-    },
-    {
-      "id": "dbg-16",
-      "d": 3,
-      "t": "Managed vs Self-managed Embeddings",
-      "q": "Al configurar un `Delta Sync Index` en `Mosaic AI Vector Search`, el ingeniero debe elegir entre la modalidad `Managed Embeddings` y `Self-managed Embeddings`. ¿Cuál es la diferencia operativa fundamental entre ambas opciones?",
-      "o": [
-        "En `Self-managed Embeddings`, Databricks asume automáticamente toda la infraestructura y no permite que el usuario use modelos de embedding propios ni personalizados.",
-        "En `Managed Embeddings`, Databricks calcula y actualiza los embeddings desde una columna de texto con un endpoint; en `Self-managed`, el usuario provee los vectores.",
-        "`Managed Embeddings` sólo admite tablas almacenadas en formato CSV plano, mientras que `Self-managed` requiere bases de datos relacionales externas montadas por JDBC.",
-        "En `Self-managed Embeddings`, el índice no admite búsquedas por similitud vectorial y sólo ejecuta filtros deterministas basados en expresiones regulares de texto."
-      ],
-      "a": 1,
-      "e": "En `Managed Embeddings`, Databricks se encarga de llamar a un endpoint de Model Serving (modelo de embeddings) para generar y mantener los vectores a partir de la columna de texto especificada. En `Self-managed Embeddings`, el usuario es responsable de calcular la columna de vectores (tipo `ARRAY<FLOAT>`) antes de que los datos lleguen al índice de Vector Search."
-    },
-    {
-      "id": "dbg-17",
-      "d": 3,
-      "t": "Requisitos de Delta Sync Index",
-      "q": "Un ingeniero intenta crear un `Delta Sync Index` sobre una tabla Delta en Unity Catalog, pero la interfaz de Databricks arroja un error de validación impidiendo completar la operación. Al revisar la configuración de la tabla, ¿cuáles son los DOS requisitos estructurales obligatorios que la tabla origen debe cumplir?",
-      "o": [
-        "Tener un tamaño total inferior a 10 megabytes y estar particionada obligatoriamente por día y hora en el sistema de almacenamiento de archivos de la nube corporativa.",
-        "Estar registrada en el metastore legacy de Hive y tener desactivadas todas las propiedades de transacciones ACID y control de versiones de Delta Lake.",
-        "Tener habilitada la propiedad `delta.enableChangeDataFeed = true` y contar con una clave primaria (`PRIMARY KEY`) explícita y no nula.",
-        "Contener exclusivamente columnas numéricas sin admitir ningún campo de tipo texto ni identificadores alfanuméricos dentro de la estructura de la tabla."
-      ],
-      "a": 2,
-      "e": "Para que un `Delta Sync Index` pueda sincronizar cambios de forma incremental y consistente, la tabla Delta origen en Unity Catalog debe tener habilitado el Change Data Feed (`delta.enableChangeDataFeed = true`) y poseer una `PRIMARY KEY` definida, lo que permite al motor rastrear qué vector exacto insertar, actualizar o eliminar."
-    },
-    {
-      "id": "dbg-18",
-      "d": 3,
-      "t": "Sync Mode: Continuous vs Triggered",
-      "q": "Una aplicación financiera de trading algorítmico requiere que las noticias corporativas ingresadas en una tabla Delta queden disponibles para búsqueda semántica en Vector Search con una latencia inferior a 60 segundos tras su inserción. Al configurar el `Delta Sync Index`, ¿qué modo de sincronización debe seleccionarse y cuál es su contrapartida?",
-      "o": [
-        "Modo `Triggered`, que apaga la infraestructura de indexación inmediatamente pero genera latencias de sincronización de varios días entre actualizaciones de la tabla.",
-        "Modo `Manual Snapshot`, que exige que un analista presione un botón en la interfaz gráfica de Databricks para cada noticia individual que se registre en el sistema.",
-        "Modo `Read-Only`, que congela la tabla Delta e impide la entrada de nuevas noticias para garantizar que no existan discrepancias entre el almacenamiento y el vector.",
-        "Modo `Continuous`, que ejecuta un pipeline de streaming continuo manteniendo el índice al día en tiempo casi real pero con un mayor coste de cómputo."
-      ],
-      "a": 3,
-      "e": "El modo `Continuous` mantiene un pipeline de streaming activo que procesa inmediatamente los eventos del Change Data Feed, logrando latencias de actualización de segundos, ideal para aplicaciones en tiempo real. Su contrapartida es un coste continuo de infraestructura frente al modo `Triggered`, que procesa cambios en lotes periódicos y apaga los recursos al terminar."
-    },
-    {
-      "id": "dbg-19",
-      "d": 3,
-      "t": "Hybrid Search",
-      "q": "Un catálogo de repuestos de aviación recibe consultas de mantenimiento que combinan descripciones en lenguaje natural ('falla de junta tórica en válvula hidráulica') con números de serie y códigos exactos ('MS28775-224'). Los usuarios reportan que las búsquedas vectoriales puras a menudo confunden el código de pieza con otros similares. ¿Qué capacidad de `Mosaic AI Vector Search` resuelve esta limitación?",
-      "o": [
-        "`Hybrid Search`, combinando búsqueda vectorial densa con búsqueda léxica dispersa (BM25 / full-text) y fusionando los resultados de forma ponderada.",
-        "Reducir las dimensiones de los embeddings a 4 valores para que los números de serie se codifiquen mediante coordenadas espaciales simples.",
-        "Eliminar los códigos de serie y números de pieza de la base de datos documental para evitar que interfieran con la similitud semántica.",
-        "Utilizar búsqueda KNN exacta realizando un cálculo de producto punto sobre todos los registros en un único hilo de CPU."
-      ],
-      "a": 0,
-      "e": "`Hybrid Search` combina lo mejor de dos mundos: la búsqueda vectorial densa (que captura la semántica profunda de frases como 'falla de junta tórica') junto con la búsqueda dispersa BM25 / texto completo (que empareja con exactitud absoluta códigos alfanuméricos como 'MS28775-224'), combinando ambas puntuaciones para devolver el orden óptimo."
-    },
-    {
-      "id": "dbg-20",
-      "d": 3,
-      "t": "Filtros de Metadatos",
-      "q": "Una firma jurídica internacional gestiona jurisprudencia de múltiples jurisdicciones. Al consultar el índice de `Mosaic AI Vector Search`, la aplicación debe restringir las respuestas exclusivamente a documentos donde la columna `jurisdiction` sea 'España' y el campo `year` sea mayor o igual a 2021. ¿Cómo debe implementarse este filtro en la llamada de búsqueda?",
-      "o": [
-        "Recuperar los 100.000 vectores más cercanos en el cliente web y realizar un filtrado en memoria utilizando una lista por comprensión de Python en el servidor web.",
-        "Pasar la condición estructurada mediante el parámetro `filters_json` en la API de búsqueda vectorial para realizar un pre-filtrado optimizado en el índice.",
-        "Crear un clúster Spark independiente para cada consulta individual y ejecutar una reindexación completa de los documentos correspondientes a esos criterios temporales.",
-        "Añadir el texto 'España 2021' 50 veces al final de la consulta del usuario esperando que el modelo vectorial interprete la restricción temporal automáticamente."
-      ],
-      "a": 1,
-      "e": "`Mosaic AI Vector Search` admite el parámetro `filters_json` en su API de consulta (`similarity_search`), permitiendo aplicar filtros booleanos y relacionales sobre las columnas de metadatos indexadas. Este pre-filtrado reduce el espacio de búsqueda vectorial en memoria antes de computar vecinos más cercanos, garantizando baja latencia y exactitud."
-    },
-    {
-      "id": "dbg-21",
-      "d": 3,
-      "t": "Sizing de Endpoints de Vector Search",
-      "q": "Un equipo de arquitectura planifica un endpoint de `Mosaic AI Vector Search` para una base de conocimiento de 30 millones de vectores con una demanda esperada de 400 consultas por segundo (QPS). ¿Qué aspecto de dimensionamiento y escalado debe tenerse en cuenta para asegurar la disponibilidad del servicio?",
-      "o": [
-        "Los endpoints de Vector Search son exclusivamente estáticos y limitados a un máximo estricto de 50.000 vectores por catálogo en cualquier workspace de Databricks.",
-        "Los índices vectoriales se ejecutan íntegramente dentro del navegador web de los usuarios mediante WebAssembly sin consumir cómputo en la nube de Databricks.",
-        "Seleccionar el tipo de endpoint adecuado considerando la capacidad en millones de vectores y el escalado de unidades para tolerar los picos de QPS requeridos.",
-        "El servicio sólo puede escalar si se reinicia manualmente el metastore de Unity Catalog durante una ventana de mantenimiento semanal programada por el administrador."
-      ],
-      "a": 2,
-      "e": "Los endpoints de `Mosaic AI Vector Search` disponen de tipos y capacidades específicas (orientadas a volumen de vectores en memoria y rendimiento de throughput). Dimensionar adecuadamente el endpoint y permitir el auto-escalado de capacidad es fundamental para soportar 30M de vectores y picos de 400 QPS con latencias sub-segundo estables."
-    },
-    {
-      "id": "dbg-22",
-      "d": 3,
-      "t": "Gobernanza y Permisos en Unity Catalog",
-      "q": "Una aplicación web externa autenticada mediante una Service Principal necesita ejecutar consultas de búsqueda semántica sobre un índice de `Mosaic AI Vector Search` registrado en Unity Catalog. ¿Cuáles son los privilegios mínimos requeridos que deben otorgarse a dicha Service Principal?",
-      "o": [
-        "Otorgar el rol de `ACCOUNT ADMIN` a nivel de cuenta cloud para que la aplicación tenga acceso total a la facturación y gestión global de usuarios de Databricks.",
-        "Asignar permisos de escritura destructiva `MODIFY` y privilegios `CREATE TABLE` en todos los esquemas del catálogo corporativo de datos de la empresa.",
-        "Desactivar Unity Catalog en el workspace para que la autenticación sea totalmente anónima y no requiera ningún tipo de credencial ni validación de seguridad.",
-        "Conceder `USE CATALOG` en el catálogo, `USE SCHEMA` en el esquema, y privilegio `SELECT` sobre el índice vectorial y la tabla Delta asociada."
-      ],
-      "a": 3,
-      "e": "Bajo el modelo de seguridad de Unity Catalog, para leer o consultar cualquier objeto (incluyendo tablas e índices vectoriales) se requiere la jerarquía de permisos de lectura: `USE CATALOG` en el catálogo contenedor, `USE SCHEMA` en el esquema, y `SELECT` sobre el índice de Vector Search y su tabla Delta de origen."
-    },
-    {
-      "id": "dbg-23",
-      "d": 3,
-      "t": "Cumplimiento RGPD y Borrado en Delta Sync",
-      "q": "En cumplimiento del derecho al olvido (RGPD), un cliente solicita la supresión de sus registros. Un analista ejecuta `DELETE FROM clientes_docs WHERE cliente_id = 'C-8842'` en la tabla Delta conectada a un `Delta Sync Index`. ¿Qué DOS elementos garantizan que los vectores asociados desaparezcan de los resultados de búsqueda de Vector Search? (Elige 2 respuestas)",
-      "o": [
-        "Que la tabla Delta tenga activado el Change Data Feed (CDF), registrando el evento de eliminación para su propagación al índice.",
-        "Que el pipeline de sincronización del índice procese los cambios (de forma continua o en la próxima ejecución programada del modo triggered).",
-        "Que se destruya y se vuelva a aprovisionar el endpoint completo de Vector Search cada vez que se ejecute una sentencia de borrado en Delta Lake.",
-        "Que se invoque inmediatamente un comando `VACUUM` con retención de cero horas sobre la tabla antes de que el sincronizador de vectores lea los logs."
-      ],
-      "a": [
-        0,
-        1
-      ],
-      "e": "En un `Delta Sync Index`, los borrados en la tabla Delta origen se capturan a través del Change Data Feed (CDF), donde la fila eliminada se marca como `_change_type = 'delete'`. Cuando el pipeline del índice procesa dicho cambio (continuo o triggered), localiza el vector mediante la clave primaria y lo suprime del índice vectorial sin requerir recrear el endpoint."
-    },
-    {
-      "id": "dbg-24",
-      "d": 3,
-      "t": "Métricas de Distancia Vectorial",
-      "q": "Al definir un índice de búsqueda en `Mosaic AI Vector Search` con embeddings que han sido rigurosamente normalizados a norma unitaria (L2 = 1.0), el equipo debate si configurar `Cosine Similarity` o `Dot Product` como métrica de similitud. ¿Cuál es la relación matemática y de rendimiento entre ambas métricas?",
-      "o": [
-        "Con vectores normalizados, el producto punto es idéntico a la similitud coseno y resulta más eficiente al omitir el cálculo de normas.",
-        "El producto punto sólo puede calcularse si los vectores contienen valores enteros positivos entre 0 y 255 y no admite números en coma flotante de precisión simple.",
-        "La similitud coseno invierte la polaridad geométrica de las distancias euclidianas produciendo únicamente valores imaginarios complejos en espacios multidimensionales.",
-        "El producto punto exige que los vectores sean ortogonales entre sí antes de iniciar la búsqueda y genera divisiones por cero en vectores paralelos orientados al origen."
-      ],
-      "a": 0,
-      "e": "La fórmula de la similitud coseno es `dot(u, v) / (||u|| * ||v||)`. Cuando los vectores están previamente normalizados a norma unitaria (`||u|| = ||v|| = 1`), el denominador es 1 y la expresión se simplifica exactamente a `dot(u, v)`. Computar el producto punto puro ahorra el cálculo en tiempo real de las normas euclidianas, acelerando las búsquedas."
-    },
-    {
-      "id": "dbg-25",
-      "d": 3,
-      "t": "Optimización Delta para Vector Search",
-      "q": "Una tabla Delta con 200 millones de filas experimenta lecturas lentas y alto consumo de I/O cuando el motor de `Delta Sync Index` consulta los registros modificados. ¿Qué comando de optimización física de Delta Lake debe ejecutarse sobre la tabla para compactar archivos pequeños y optimizar la lectura por clave primaria?",
-      "o": [
-        "Ejecutar `DROP TABLE` seguido de una recreación en formato de texto plano TSV sin índices ni metadatos en un disco local conectado al nodo conductor del clúster.",
-        "Ejecutar `OPTIMIZE table_name ZORDER BY (primary_key_col)` (o habilitar Liquid Clustering) para organizar físicamente los datos en archivos Parquet optimizados.",
-        "Deshabilitar las transacciones ACID y convertir la tabla Delta a una colección desestructurada de documentos JSON sin particiones ni control de concurrencia.",
-        "Dividir la tabla en 200 millones de archivos individuales de 50 bytes para forzar un paralelismo masivo en el sistema de almacenamiento distribuido en la nube."
-      ],
-      "a": 1,
-      "e": "El comando `OPTIMIZE` compacta los archivos pequeños de Delta Lake en archivos Parquet más grandes (~1 GB) y la cláusula `ZORDER BY` (o el moderno `Liquid Clustering`) organiza físicamente los datos co-localizando valores similares de las columnas seleccionadas. Esto minimiza drásticamente la cantidad de datos leídos por el sincronizador de Vector Search."
-    },
-    {
-      "id": "dbg-26",
-      "d": 3,
-      "t": "Columna Fuente en Managed Embeddings",
-      "q": "Al configurar un `Delta Sync Index` con `Managed Embeddings` en `Mosaic AI Vector Search`, ¿cuál es el requisito formal que debe cumplir la columna que contiene el texto de origen a vectorizar (`source_text`) en la tabla Delta?",
-      "o": [
-        "Debe ser de tipo `BINARY` conteniendo la serialización Pickle de objetos de Python generados en el nodo driver del clúster durante la ingesta de datos.",
-        "Debe contener una matriz bidimensional de enteros de 64 bits con valores hash generados por un algoritmo criptográfico SHA-512 sin información de texto plano.",
-        "Debe ser de tipo `STRING`, no admitir valores nulos en las filas a indexar y almacenar el contenido textual a vectorizar.",
-        "Debe nombrarse obligatoriamente `raw_unstructured_text_payload` o de lo contrario el esquema de Unity Catalog rechazará la creación del índice vectorial."
-      ],
-      "a": 2,
-      "e": "En la modalidad `Managed Embeddings`, la columna fuente debe ser estrictamente de tipo `STRING` y contener texto legible no nulo. Databricks toma el contenido de esta columna y lo envía al endpoint de embeddings configurado para generar y persistir automáticamente la representación vectorial en el índice."
-    },
-    {
-      "id": "dbg-27",
-      "d": 3,
-      "t": "Evolución de Metadatos en Vector Search",
-      "q": "Un equipo de datos añade una nueva columna de metadatos llamada `department_code` a la tabla Delta origen de un `Delta Sync Index` en producción. Desean que los desarrolladores puedan filtrar búsquedas por este nuevo atributo. ¿Cómo se incorpora esta nueva columna al índice vectorial?",
-      "o": [
-        "Es imposible añadir columnas a un índice existente y la única alternativa es borrar el metastore corporativo de Unity Catalog y crearlo desde cero de forma manual.",
-        "La tabla Delta se bloquea de forma permanente y ya no permite inserciones de nuevas filas hasta que se desmonte y vuelva a montar el almacenamiento cloud subyacente.",
-        "Se debe exportar la tabla completa a una base de datos NoSQL externa para reconstruir manualmente los índices invertidos en la infraestructura de otro proveedor.",
-        "Se actualiza la especificación del índice vectorial en Vector Search para incluir la nueva columna en la lista de sincronización de metadatos."
-      ],
-      "a": 3,
-      "e": "Los índices de `Mosaic AI Vector Search` permiten actualizar su definición para incluir nuevas columnas de la tabla Delta origen como columnas adicionales de sincronización de metadatos. Tras actualizar la especificación, el pipeline de sincronización propaga los nuevos atributos sin requerir recrear el metastore ni interrumpir la tabla origen."
-    },
-    {
-      "id": "dbg-28",
-      "d": 3,
-      "t": "Latencia y Pre-filtrado de Metadatos",
-      "q": "Durante una auditoría de rendimiento de un índice de `Mosaic AI Vector Search`, el equipo observa que la latencia media salta de 18 ms a 340 ms al aplicar un filtro sobre el campo `cost_center`. Al investigar la definición del índice, se descubre que `cost_center` no fue incluida en las columnas sincronizadas del índice. ¿A qué se debe esta degradación?",
-      "o": [
-        "Al no estar indexada en memoria del endpoint, el motor debe realizar un post-filtrado leyendo datos de la tabla Delta tras la búsqueda vectorial.",
-        "A que el endpoint de Vector Search se apaga automáticamente y se reinicia en frío cada vez que detecta un nombre de columna desconocido en la consulta enviada.",
-        "A que el protocolo HTTP/2 no soporta el envío de filtros estructurados en JSON cuando los nombres de las claves de búsqueda superan los 8 caracteres de longitud.",
-        "A que las consultas sobre atributos no indexados se reenvían por correo electrónico a un administrador de sistemas para su resolución manual asistida."
-      ],
-      "a": 0,
-      "e": "Cuando un filtro se aplica sobre columnas que están incluidas en el índice vectorial, el motor realiza un pre-filtrado ultrarrápido directamente en memoria durante el cálculo de vecinos más cercanos. Si la columna no está indexada en el endpoint, el sistema debe recuperar muchos más candidatos y hacer un post-filtrado accediendo a la tabla Delta subyacente, disparando la latencia de consulta."
-    },
-    {
-      "id": "dbg-29",
-      "d": 3,
-      "t": "Troubleshooting de Sincronización FAILED",
-      "q": "El pipeline de un `Delta Sync Index` con `Managed Embeddings` entra en estado `FAILED` interrumpiendo la actualización del índice. En la pestaña de diagnóstico del Vector Search Manager, se visualiza el error: `Model Serving endpoint 'bge-large-serving' unavailable or returned HTTP 500`. ¿Cuál es la causa raíz y la acción correctiva inmediata?",
-      "o": [
-        "La tabla Delta origen superó los 1.000 registros y Unity Catalog bloqueó la sincronización por exceder la cuota comunitaria gratuita asignada a la suscripción del cliente.",
-        "El endpoint de Model Serving que genera los embeddings para el índice falló o fue modificado; debe restaurarse dicho endpoint y reiniciar la sincronización.",
-        "El usuario que creó el índice cerró su navegador web, interrumpiendo la ejecución del proceso batch en segundo plano de Databricks que actualizaba las tablas.",
-        "Se debe cambiar el dialecto SQL de Databricks a Transact-SQL y recrear todas las tablas en una base de datos relacional local montada en disco duro tradicional."
-      ],
-      "a": 1,
-      "e": "En `Managed Embeddings`, el pipeline de sincronización invoca continuamente el endpoint de Model Serving para computar los vectores de las filas nuevas o modificadas. Si ese endpoint de embeddings se detiene, se elimina, o devuelve errores HTTP 500 por sobrecarga, el pipeline de Vector Search no puede calcular los embeddings y pasa a estado `FAILED`. La solución es verificar y estabilizar el endpoint de serving."
-    },
-    {
-      "id": "dbg-30",
-      "d": 4,
-      "t": "Tipos de Modelos en Model Serving",
-      "q": "Una empresa de software empresarial necesita desplegar en producción tres componentes de inferencia: un LLM de código abierto (Mistral-7B), una cadena RAG personalizada construida con LangChain y empaquetada con MLflow, y el modelo GPT-4o de OpenAI. ¿Cómo cubre `Mosaic AI Model Serving` estas tres necesidades?",
-      "o": [
-        "Model Serving solo admite modelos tradicionales de regresión logística y no tiene capacidades para servir modelos generativos ni APIs externas de proveedores terceros.",
-        "Exige compilar los tres modelos en código binario C++ nativo y desplegarlos en clústeres Kubernetes independientes autogestionados por el equipo de infraestructura.",
-        "Provee Foundation Model APIs para Mistral-7B, soporte de Custom Models (MLflow PyFunc) para la cadena RAG, y External Models para gobernar GPT-4o.",
-        "Obliga a convertir todos los modelos a formato ONNX y ejecutarlos exclusivamente dentro de consultas SQL batch programadas en Databricks SQL Serverless."
-      ],
-      "a": 2,
-      "e": "`Mosaic AI Model Serving` es una plataforma integral que admite: 1) Foundation Model APIs (modelos abiertos como Llama-3, Mistral, DBRX listos para usar serverless), 2) Custom Models (modelos propios o cadenas LangChain/LlamaIndex registradas con MLflow PyFunc), y 3) External Models (modelos propietarios externos como OpenAI o Anthropic bajo una API unificada y gobernada con AI Gateway)."
-    },
-    {
-      "id": "dbg-31",
-      "d": 4,
-      "t": "Provisioned Throughput vs Pay-per-token",
-      "q": "Una aplicación bancaria de asistencia financiera experimenta picos imprevistos de 500 solicitudes por segundo en un endpoint de Foundation Model. Al utilizar la modalidad `Pay-per-token`, los clientes reciben frecuentes errores `HTTP 429 Too Many Requests` debido a los límites de concurrencia compartida de la plataforma. ¿Qué cambio arquitectónico garantiza capacidad dedicada y elimina estos bloqueos?",
-      "o": [
-        "Reducir el timeout de la aplicación a 5 milisegundos para que las peticiones se descarten de inmediato antes de que el servidor web de serving comience a procesarlas.",
-        "Desplegar el modelo en un notebook interactivo de Databricks y compartir la URL pública del clúster interactivo con todos los usuarios finales de la organización.",
-        "Implementar un bucle infinito de reintentos síncronos en el cliente sin backoff exponencial hasta saturar completamente las conexiones de la red corporativa.",
-        "Migrar el endpoint a `Provisioned Throughput`, asignando las Unidades de Modelo (Model Units) necesarias para absorber el tráfico pico con capacidad dedicada garantizada."
-      ],
-      "a": 3,
-      "e": "La modalidad `Provisioned Throughput` reserva infraestructura de cómputo dedicada (Model Units) para el endpoint del cliente. Al contar con recursos garantizados y no compartidos con otros inquilinos del workspace, se eliminan los errores HTTP 429 causados por límites de tasa compartidos y se asegura una latencia predecible bajo alto volumen de tráfico."
-    },
-    {
-      "id": "dbg-32",
-      "d": 4,
-      "t": "Seguridad de External Models",
-      "q": "Al configurar un endpoint de `External Models` en `Mosaic AI Model Serving` para consultar modelos de Anthropic Claude o Azure OpenAI, ¿cuál es la mejor práctica de seguridad de Databricks para almacenar y suministrar las claves de API privadas requeridas por el proveedor?",
-      "o": [
-        "Almacenar las claves en Databricks Secrets (o secretos de Unity Catalog) y referenciar la ruta del secreto en la configuración del endpoint.",
-        "Escribir la clave de API en texto plano dentro de una celda comentada en un notebook interactivo visible para todos los desarrolladores de la organización.",
-        "Crear un archivo `.txt` con la clave en la raíz de DBFS (`/dbfs/api_keys.txt`) otorgando permisos de lectura pública a cualquier usuario del workspace corporativo.",
-        "Pasar la clave de API como un parámetro de texto en la cabecera del prompt del usuario final en cada llamada HTTP interactiva enviada desde el navegador."
-      ],
-      "a": 0,
-      "e": "Para proteger credenciales de acceso a proveedores externos, Databricks exige almacenar las claves en Databricks Secrets o secretos integrados en Unity Catalog. Al configurar el endpoint de `External Models`, se referencia el secreto mediante `{{secrets/scope/key}}`, permitiendo que el servicio de inferencia acceda a la clave de forma segura sin exponerla en texto plano ni en los logs."
-    },
-    {
-      "id": "dbg-33",
-      "d": 4,
-      "t": "Arquitectura de AI Gateway",
-      "q": "Una multinacional implementa `Mosaic AI Gateway` como punto de entrada unificado para todas las aplicaciones y microservicios que consumen modelos de lenguaje en la organización. ¿Cuál es el principal valor arquitectónico de esta solución frente al acceso directo a APIs de proveedores?",
-      "o": [
-        "Actúa como un compilador en tiempo real que traduce automáticamente código antiguo de Scala a Python 3 durante la fase de inferencia de modelos en la nube.",
-        "Centraliza gobernanza, auditoría, políticas de guardrails, control de costes, rate limiting y resiliencia sin modificar el código de los clientes.",
-        "Sustituye por completo al catálogo de datos de Unity Catalog y elimina las restricciones de permisos sobre todas las tablas Delta registradas en el Lakehouse.",
-        "Desactiva las conexiones a internet del workspace forzando a que los modelos se ejecuten en cintas magnéticas de copia de seguridad fuera de línea."
-      ],
-      "a": 1,
-      "e": "`Mosaic AI Gateway` desacopla las aplicaciones consumidoras de los proveedores subyacentes de modelos de IA, actuando como un intermediario inteligente gestionado que aplica de manera uniforme auditoría de consultas, control de gastos, límites de tasa (rate limiting), filtros de seguridad (guardrails) y enrutamiento con conmutación por error (fallback), simplificando la gobernanza corporativa."
-    },
-    {
-      "id": "dbg-34",
-      "d": 4,
-      "t": "Guardrails en AI Gateway",
-      "q": "Un departamento de atención al ciudadano despliega un asistente conversacional. Por motivos regulatorios, el sistema debe garantizar que ningún número de tarjeta bancaria, documento nacional de identidad o dato médico sensible se envíe a modelos externos, y además debe rechazar mensajes con contenido ofensivo. ¿Qué funcionalidad de `AI Gateway` automatiza este requerimiento?",
-      "o": [
-        "Activar la compresión gzip en la capa de transporte HTTP para reducir el tamaño del payload JSON en un 40 % sin alterar el contenido textual transmitido.",
-        "Configurar reglas manuales de cortafuegos de red iptables en el sistema operativo del nodo conductor de un clúster Spark interactivo de desarrollo.",
-        "Habilitar Guardrails en `AI Gateway`, configurando filtros para detección y redacción de PII y políticas de moderación de toxicidad.",
-        "Solicitar a los usuarios que firmen un documento en papel prometiendo no escribir datos personales en la ventana del navegador web al usar el asistente."
-      ],
-      "a": 2,
-      "e": "Los `Guardrails` de `Mosaic AI Gateway` permiten definir políticas automáticas de seguridad que analizan las peticiones y respuestas en tiempo real. Pueden detectar y enmascarar automáticamente información de identificación personal (PII como números de tarjeta, DNI o teléfonos) y bloquear mensajes que superen umbrales de toxicidad, garantizando el cumplimiento normativo sin código adicional."
-    },
-    {
-      "id": "dbg-35",
-      "d": 4,
-      "t": "Políticas de Rate Limiting",
-      "q": "Para evitar que una aplicación defectuosa en bucle infinito o un usuario malintencionado agoten la cuota de gasto mensual en un endpoint servido a través de `AI Gateway`, ¿cuáles DOS políticas de límite de tasa (`Rate Limits`) se pueden configurar a nivel de endpoint o token? (Elige 2 respuestas)",
-      "o": [
-        "Límite de peticiones por minuto (Requests Per Minute - RPM) para restringir el número total de llamadas a la API en una ventana temporal.",
-        "Límite de tokens por minuto (Tokens Per Minute - TPM) para controlar el volumen total de entrada y salida procesado por el modelo.",
-        "Límite de caracteres por función en los scripts de Python del repositorio de control de versiones Git del equipo.",
-        "Límite de temperatura estocástica forzando a que ningún modelo pueda utilizar valores de temperatura superiores a 0.01."
-      ],
-      "a": [
-        0,
-        1
-      ],
-      "e": "`AI Gateway` permite configurar cuotas de límite de tasa basadas en: 1) Requests Per Minute (RPM), controlando la frecuencia de solicitudes para prevenir saturación de conexiones, y 2) Tokens Per Minute (TPM), restringiendo el volumen masivo de tokens procesados para mantener el presupuesto financiero bajo control estricto."
-    },
-    {
-      "id": "dbg-36",
-      "d": 4,
-      "t": "Fallback Routing en AI Gateway",
-      "q": "Una aplicación médica de triaje de emergencias utiliza un endpoint de `External Models` que invoca una API externa de última generación como modelo primario. Si el proveedor externo experimenta una degradación de servicio y comienza a responder con errores `HTTP 503` o `HTTP 429`, la aplicación debe conmutar inmediatamente a un modelo secundario sin intervención manual. ¿Qué mecanismo de `AI Gateway` implementa este comportamiento?",
-      "o": [
-        "Replicar todo el código de la aplicación cliente en 10 servidores físicos diferentes conectados en anillo de fibra óptica para balancear peticiones HTTP.",
-        "Desconectar el balanceador de carga del sistema para que los clientes acumulen peticiones en una cola de espera indefinida en el servidor de aplicaciones.",
-        "Enviar una alerta por buscapersonas al equipo de guardia nocturna para que editen la variable de entorno del cliente en los servidores de producción.",
-        "`Fallback Routing`, configurando una ruta de respaldo priorizada a la que redirigir el tráfico automáticamente ante fallos del modelo primario."
-      ],
-      "a": 3,
-      "e": "`Fallback Routing` en `AI Gateway` permite configurar una lista ordenada de modelos alternativos. Si el endpoint primario falla o devuelve errores de sobrecarga o indisponibilidad (ej. HTTP 429, 500 o 503), Gateway intercepta el error de forma transparente y reenvía la petición al modelo de respaldo definido, asegurando una alta disponibilidad ininterrumpida para servicios críticos."
-    },
-    {
-      "id": "dbg-37",
-      "d": 4,
-      "t": "Streaming con Server-Sent Events (SSE)",
-      "q": "En una interfaz web de asistente conversacional construida sobre `Mosaic AI Model Serving`, los usuarios se quejan de que la pantalla permanece en blanco durante 5 segundos y luego aparece el párrafo completo de golpe. Para mejorar drásticamente la percepción de fluidez y el Time To First Token (TTFT), ¿qué parámetro de inferencia debe activarse en el endpoint y en el cliente?",
-      "o": [
-        "Activar la generación en streaming mediante Server-Sent Events enviando el parámetro `stream=True` en la petición a la API de serving para recibir tokens continuos.",
-        "Aumentar el tamaño del batch a 64 peticiones agrupadas para que el servidor acumule múltiples preguntas antes de generar cualquier texto de respuesta.",
-        "Desactivar las unidades de procesamiento gráfico (GPU) del endpoint para que la inferencia se ejecute en un único hilo de CPU de bajo consumo energético.",
-        "Empaquetar la respuesta del modelo en un archivo comprimido RAR protegido con clave criptográfica antes de transferirla al cliente web por HTTP."
-      ],
-      "a": 0,
-      "e": "Configurar `stream=True` permite al endpoint de `Mosaic AI Model Serving` transmitir los tokens generados de forma progresiva a través de una conexión persistente utilizando Server-Sent Events (SSE). El cliente puede ir renderizando cada palabra o token en la pantalla a medida que se produce, reduciendo el Time To First Token percibido a unos pocos milisegundos."
-    },
-    {
-      "id": "dbg-38",
-      "d": 4,
-      "t": "Despliegue de Modelos Personalizados con MLflow",
-      "q": "Al desplegar una cadena RAG personalizada construida con `MLflow PyFunc` en `Mosaic AI Model Serving`, el endpoint falla durante la fase de inicialización con el error `ModuleNotFoundError: No module named 'langchain_community'`. ¿Cómo debe solucionar el ingeniero este problema para garantizar un entorno reproducible?",
-      "o": [
-        "Instalar la librería en la computadora portátil del desarrollador y reiniciar la sesión de trabajo local de VS Code esperando que se sincronice en la nube.",
-        "Declarar explícitamente `langchain_community` en el parámetro `pip_requirements` o `conda_env` al invocar `mlflow.pyfunc.log_model()`.",
-        "Conectar por SSH al contenedor de serving de Databricks y ejecutar manualmente `sudo apt-get install python3-langchain` en la línea de comandos del host.",
-        "Eliminar todas las referencias a librerías externas y reescribir la cadena completa en código ensamblador sin dependencias de paquetes de terceros."
-      ],
-      "a": 1,
-      "e": "Cuando `Mosaic AI Model Serving` despliega un modelo empaquetado con MLflow, aprovisiona un contenedor limpio donde instala las dependencias declaradas en el artefacto del modelo. Especificar las dependencias exactas en `pip_requirements` (o `conda_env`) durante la llamada `log_model()` garantiza que el contenedor de inferencia instale todas las librerías necesarias de forma automática y aislada."
-    },
-    {
-      "id": "dbg-39",
-      "d": 4,
-      "t": "Autoscaling y Scale to Zero",
-      "q": "Un departamento de innovación dispone de 12 modelos experimentales fine-tuneados para pruebas ocasionales de I+D. Cada modelo se consulta un promedio de dos veces por semana. Para optimizar el presupuesto y evitar pagar por infraestructura GPU ocia las 24 horas del día, ¿qué configuración de autoscaling debe aplicarse en los endpoints de `Mosaic AI Model Serving`?",
-      "o": [
-        "Fijar la concurrencia mínima en 4 instancias dedicadas permanentes para asegurar que nunca se produzca un arranque en frío bajo ninguna circunstancia operativa.",
-        "Eliminar y volver a entrenar los 12 modelos cada noche mediante un script automatizado para liberar memoria en el clúster interactivo de la organización.",
-        "Configurar `Scale to Zero`, estableciendo el tamaño mínimo de cómputo en 0 unidades para apagar los recursos en periodos de inactividad.",
-        "Apagar la conexión de red del workspace de Databricks fuera del horario laboral de lunes a viernes interrumpiendo todas las tareas de la empresa."
-      ],
-      "a": 2,
-      "e": "`Scale to Zero` permite que los endpoints de `Mosaic AI Model Serving` desaprovisionen automáticamente sus recursos de cómputo tras un periodo de inactividad, reduciendo el coste de ejecución a exactamente cero cuando no hay tráfico. Al recibir una nueva petición, el servicio realiza un cold start aprovisionando los recursos automáticamente."
-    },
-    {
-      "id": "dbg-40",
-      "d": 4,
-      "t": "Traffic Splitting y Despliegues Canary",
-      "q": "Se ha desarrollado una nueva versión (v2) de una cadena RAG con un prompt optimizado y un índice vectorial más reciente. Para evaluar su estabilidad en producción sin poner en riesgo la experiencia de todos los usuarios, el equipo desea dirigir el 90 % de las peticiones a la versión probada v1 y el 10 % a la versión candidata v2. ¿Cómo se implementa este patrón en `Mosaic AI Model Serving`?",
-      "o": [
-        "Publicar dos URLs distintas en un canal público de Slack y pedir amablemente a los clientes que el 10 % de ellos elija la segunda opción de forma manual.",
-        "Configurar un script en Bash que reinicie aleatoriamente el servidor web cada 10 peticiones para alternar de versión en cada caída controlada del servicio.",
-        "Desactivar el endpoint durante una hora al día para forzar a los usuarios a probar la versión experimental bajo presión en sus entornos de trabajo.",
-        "Configurar `Traffic Splitting` en el endpoint de serving, asignando un peso de tráfico del 90 % a la entidad v1 y 10 % a la versión v2."
-      ],
-      "a": 3,
-      "e": "`Mosaic AI Model Serving` soporta despliegues de múltiples entidades servidas dentro de un mismo endpoint con enrutamiento ponderado (`Traffic Splitting`). Esto permite implementar despliegues tipo Canary o pruebas A/B gestionando porcentajes de tráfico (ej. 90/10) detrás de una única URL estable de endpoint, supervisando el comportamiento de la nueva versión con riesgo mínimo."
-    },
-    {
-      "id": "dbg-41",
-      "d": 5,
-      "t": "MLflow GenAI Evaluation con LLM-as-a-Judge",
-      "q": "Un equipo de IA debe evaluar el rendimiento de un asistente conversacional sobre un conjunto de 5.000 preguntas complejas de clientes reales. El equipo no dispone de respuestas ideales de referencia escritas por humanos (ground truth) para la mayoría de las preguntas. ¿Qué enfoque metodológico habilitado en `mlflow.evaluate()` permite realizar esta evaluación rigurosa a escala?",
-      "o": [
-        "Utilizar `LLM-as-a-Judge`, empleando un modelo evaluador de alta capacidad que aplique rúbricas formales de calidad sobre las salidas generadas.",
-        "Comparar las respuestas generadas contando únicamente el número de consonantes y asignando mayor puntuación a los textos más extensos del reporte analítico.",
-        "Asignar una calificación fija de 5 estrellas a todas las respuestas asumiendo que los modelos de lenguaje modernos no cometen errores factuales jamás.",
-        "Evaluar el modelo midiendo la temperatura en grados Celsius de los procesadores del centro de datos durante la inferencia intensiva de las preguntas."
-      ],
-      "a": 0,
-      "e": "Cuando no se dispone de un ground truth exhaustivo, `mlflow.evaluate()` soporta el paradigma `LLM-as-a-Judge`. En este esquema, un modelo de alta capacidad (como GPT-4 o DBRX) evalúa las respuestas generadas contra rúbricas estructuradas para métricas como `faithfulness`, `answer_relevance` y `toxicity`, permitiendo validar miles de casos con alta correlación con el juicio humano."
-    },
-    {
-      "id": "dbg-42",
-      "d": 5,
-      "t": "Métrica de Faithfulness (Groundedness)",
-      "q": "Al ejecutar una batería de evaluación con `mlflow.evaluate()` sobre una canalización RAG, el reporte arroja una puntuación deficiente en la métrica de `Faithfulness` (Fidelidad o Groundedness). ¿Qué falla específica en el comportamiento del sistema refleja esta métrica?",
-      "o": [
-        "Indica que el usuario formuló preguntas con faltas de ortografía o en un idioma no reconocido por el sistema de autenticación del portal de usuarios.",
-        "Indica que la respuesta contiene afirmaciones factuales no respaldadas por los fragmentos de contexto recuperados (alucinaciones del modelo).",
-        "Indica que la conexión de red entre el endpoint de serving y el metastore de Unity Catalog tardó más de 500 ms en completarse con éxito.",
-        "Indica que el tamaño del archivo binario del modelo registrado en MLflow excede el espacio en disco asignado al workspace corporativo del cliente."
-      ],
-      "a": 1,
-      "e": "La métrica `Faithfulness` mide en qué grado las afirmaciones presentes en la respuesta generada se derivan directamente de la información contenida en el contexto recuperado. Una puntuación baja de fidelidad es el indicador directo de que el modelo está alucinando información no fundamentada en los documentos aportados."
-    },
-    {
-      "id": "dbg-43",
-      "d": 5,
-      "t": "Métrica de Answer Relevance",
-      "q": "Durante la evaluación de un agente conversacional con `mlflow.evaluate()`, se observa el siguiente comportamiento: para la pregunta '¿Cómo restablezco mi contraseña?', el modelo responde con un texto impecable de tres páginas explicando detalladamente la historia del cifrado RSA y la biografía de Alan Turing. ¿Qué combinación de métricas reflejará este problema?",
-      "o": [
-        "`Faithfulness` muy baja y `Answer Relevance` muy alta, porque el texto inventa la biografía de Alan Turing sin consultar el contexto documental provisto.",
-        "Ambas métricas arrojarán un valor perfecto de 1.0 porque el texto generado es gramaticalmente elegante y carece de errores sintácticos en su redacción.",
-        "`Faithfulness` alta (si la historia estaba en el contexto), pero `Answer Relevance` muy baja al omitir por completo la respuesta a la duda concreta formulada.",
-        "`Context Recall` perfecto y `Faithfulness` nula porque el usuario no ingresó un token de sesión válido en la cabecera HTTP de la petición web enviada."
-      ],
-      "a": 2,
-      "e": "`Answer Relevance` evalúa si la respuesta generada atiende de manera directa y pertinente a la intención de la pregunta planteada por el usuario. Si el modelo proporciona información perfectamente verídica y fundamentada en los documentos (alta `Faithfulness`), pero que no responde en absoluto a la duda del usuario (cómo cambiar la contraseña), `Answer Relevance` se desploma."
-    },
-    {
-      "id": "dbg-44",
-      "d": 5,
-      "t": "Context Precision vs Context Recall",
-      "q": "Un ingeniero evalúa exclusivamente el componente de recuperación (retriever) de un sistema RAG utilizando `mlflow.evaluate()`. ¿Cuál es la distinción técnica fundamental entre las métricas `Context Precision` y `Context Recall`?",
-      "o": [
-        "`Context Precision` mide el número total de palabras recuperadas; `Context Recall` mide el tiempo en milisegundos del endpoint de Vector Search en responder.",
-        "`Context Precision` se calcula únicamente para modelos de visión artificial; `Context Recall` se aplica exclusivamente a señales de audio de alta frecuencia.",
-        "Ambas métricas son matemáticamente idénticas y el nombre depende de si el workspace de Databricks está configurado en inglés o en español en la consola.",
-        "`Context Precision` evalúa si los fragmentos útiles están ordenados arriba; `Context Recall` mide si se recuperó toda la información requerida."
-      ],
-      "a": 3,
-      "e": "En la evaluación del retriever: `Context Precision` evalúa la calidad del ranking, penalizando que fragmentos irrelevantes aparezcan en las primeras posiciones antes que los fragmentos útiles. `Context Recall` evalúa la exhaustividad, midiendo si el conjunto total de fragmentos recuperados contiene todos los hechos necesarios (comparados contra una respuesta de referencia o ground truth) para responder la consulta."
-    },
-    {
-      "id": "dbg-45",
-      "d": 5,
-      "t": "Mosaic AI Agent Review App",
-      "q": "En el marco de la gobernanza de aplicaciones GenAI en Databricks, se despliega la `Mosaic AI Agent Evaluation Review App`. ¿Cuáles DOS capacidades fundamentales aporta esta aplicación para la validación y curación del comportamiento del modelo por parte de expertos de negocio? (Elige 2 respuestas)",
-      "o": [
-        "Ofrecer una interfaz gráfica interactiva para que revisores humanos prueben el agente, califiquen respuestas (thumbs up/down) y editen correcciones.",
-        "Almacenar sistemáticamente el feedback y las correcciones de los revisores en tablas Delta de Unity Catalog para enriquecer datasets de referencia.",
-        "Modificar en caliente los pesos binarios de las capas de atención del modelo en la memoria GPU de los nodos de inferencia.",
-        "Desconectar automáticamente de la red corporativa a los revisores que emitan calificaciones desfavorables sobre las respuestas del agente."
-      ],
-      "a": [
-        0,
-        1
-      ],
-      "e": "La `Review App` de Mosaic AI Agent Evaluation proporciona una interfaz web intuitiva para que expertos humanos (médicos, peritos, analistas) interactúen con la cadena RAG o agente, califiquen la calidad de las respuestas y aporten correcciones textuales. Todo este feedback se registra automáticamente en tablas Delta gestionadas en Unity Catalog, facilitando la construcción de golden datasets para evaluación continua."
-    },
-    {
-      "id": "dbg-46",
-      "d": 5,
-      "t": "MLflow Tracing para Observabilidad",
-      "q": "Un equipo de ingeniería investiga una degradación intermitente de latencia en una cadena RAG compuesta que invoca un retriever vectorial y una API externa de validación de crédito. Al instrumentar la aplicación con `MLflow Tracing` (`mlflow.trace`), ¿qué información visual y diagnóstica obtienen en la UI de MLflow?",
-      "o": [
-        "Un árbol jerárquico de spans que desglosa la latencia, entradas, salidas, prompts y consumo de tokens de cada paso de la cadena.",
-        "El volcado hexadecimal de los registros de la memoria caché de nivel 1 de los procesadores del servidor de base de datos relacional central.",
-        "Una lista con los números de teléfono personales y claves de acceso de los usuarios que consultaron el sistema durante la última semana de pruebas.",
-        "Un diagrama estático que oculta los tiempos de respuesta y reemplaza las trazas de ejecución por números aleatorios sin utilidad analítica."
-      ],
-      "a": 0,
-      "e": "`MLflow Tracing` (basado en estándares de OpenTelemetry) captura una traza jerárquica de la ejecución del modelo o agente. En la interfaz de MLflow se visualiza un gráfico en cascada (waterfall) de spans donde se puede examinar el tiempo exacto consumido por la búsqueda en Vector Search, el formateo del prompt, las llamadas intermedias a herramientas y la llamada final al LLM con su desglose de tokens de entrada y salida."
-    },
-    {
-      "id": "dbg-47",
-      "d": 5,
-      "t": "Inference Tables en Model Serving",
-      "q": "Para satisfacer las exigencias de auditoría regulatoria de IA y monitoreo de deriva en producción, un arquitecto activa las `Inference Tables` en un endpoint de `Mosaic AI Model Serving`. ¿Cómo opera este mecanismo y dónde se persisten los datos capturados?",
-      "o": [
-        "Envía copias de seguridad de las peticiones en archivos CSV comprimidos a una cuenta de correo electrónico externa mediante protocolo SMTP tradicional.",
-        "Registra de forma asíncrona las solicitudes entrantes, respuestas generadas, latencias y metadatos en una tabla Delta gestionada en Unity Catalog.",
-        "Sobrescribe el contenido de la tabla de inferencias cada 60 segundos borrando el historial previo para no consumir espacio en disco en la cuenta cloud.",
-        "Bloquea la ejecución del endpoint hasta que un administrador revise y apruebe manualmente cada petición entrante en una consola de comandos local."
-      ],
-      "a": 1,
-      "e": "Las `Inference Tables` capturan de manera totalmente transparente, asíncrona y sin penalizar la latencia del endpoint, cada payload de petición recibido, la respuesta generada por el modelo, los códigos de estado, latencias y metadatos asociados. Esta información se persiste directamente en una tabla Delta en Unity Catalog, habilitando auditorías, monitoreo con Lakehouse Monitoring y reentrenamientos."
-    },
-    {
-      "id": "dbg-48",
-      "d": 5,
-      "t": "Linaje End-to-End en Unity Catalog",
-      "q": "Durante una auditoría externa de cumplimiento del RGPD, se exige demostrar qué datos exactos de entrenamiento o indexación se utilizaron para generar una respuesta controvertida producida por un asistente conversacional. ¿Cómo permite `Unity Catalog` verificar esta trazabilidad?",
-      "o": [
-        "Obligando a los científicos de datos a imprimir en papel el historial de comandos de Git y presentarlo ante un notario público para certificación oficial.",
-        "El linaje de Unity Catalog sólo admite tablas relacionales tradicionales y carece de soporte para modelos de lenguaje o índices vectoriales de IA.",
-        "Conectando el linaje entre tablas Delta fuente, índices de Vector Search, modelos registrados en MLflow e Inference Tables del endpoint.",
-        "Eliminando de forma irreversible todos los registros del workspace para que los auditores no encuentren discrepancias de información en los sistemas."
-      ],
-      "a": 2,
-      "e": "`Unity Catalog` ofrece linaje de datos de extremo a extremo (End-to-End Lineage). Permite rastrear visual y programáticamente la relación de dependencia completa: desde las tablas Delta de origen donde residían los documentos, pasando por el pipeline de sincronización del `Delta Sync Index`, el artefacto del modelo registrado en el catálogo de modelos, hasta el endpoint de serving y sus `Inference Tables` asociadas."
-    },
-    {
-      "id": "dbg-49",
-      "d": 5,
-      "t": "Métricas Personalizadas con make_genai_metric",
-      "q": "Una compañía de telecomunicaciones desea evaluar si las respuestas de su asistente virtual cumplen con la directiva corporativa de 'mantener un tono profesional, empático y evitar tecnicismos incomprensibles para el usuario final'. ¿Cómo se define esta métrica cualitativa en `mlflow.evaluate()`?",
-      "o": [
-        "Escribiendo un script en Bash que cuente cuántas veces aparece la palabra 'gracias' en la salida de texto generada por el endpoint del asistente.",
-        "Modificando la memoria BIOS de los servidores de la nube para alterar el comportamiento probabilístico de los números aleatorios generados en runtime.",
-        "Configurando un cortafuegos que bloquee cualquier paquete HTTP de respuesta que contenga más de 50 palabras en total en la respuesta entregada.",
-        "Utilizando `mlflow.metrics.genai.make_genai_metric()`, especificando nombre, criterios de evaluación, escala y ejemplos para el LLM juez."
-      ],
-      "a": 3,
-      "e": "`mlflow.metrics.genai.make_genai_metric()` permite crear métricas personalizadas evaluadas por un LLM juez. El desarrollador define el nombre de la métrica, la rúbrica con los criterios detallados de evaluación (ej. empatía, profesionalismo, ausencia de jerga excesiva), la escala de puntuación (ej. 1 a 5) y ejemplos de calibración con pocas muestras (few-shot), permitiendo evaluar aspectos cualitativos de forma consistente."
-    },
-    {
-      "id": "dbg-50",
-      "d": 5,
-      "t": "Lakehouse Monitoring sobre Inference Tables",
-      "q": "Un equipo de operaciones de IA mantiene un asistente RAG en producción y desea supervisar continuamente la deriva de conceptos (concept drift), variaciones en la longitud de las respuestas y anomalías en las tasas de error a lo largo de las semanas sin programar pipelines ETL manuales. ¿Qué solución nativa de Databricks se integra con las `Inference Tables` para este fin?",
-      "o": [
-        "Un script en lenguaje AWK ejecutándose en un bucle continuo en la terminal de la laptop personal de uno de los ingenieros del equipo de operaciones.",
-        "Desactivar por completo las tablas de inferencias para evitar el consumo de espacio de almacenamiento en el catálogo corporativo de Unity Catalog.",
-        "Instalar un servidor Apache Tomcat independiente que reciba capturas de pantalla de los teléfonos móviles de los clientes que utilizan la aplicación.",
-        "`Databricks Lakehouse Monitoring`, configurando un monitor de calidad sobre la tabla Delta de inferencias para generar métricas y alertas."
-      ],
-      "a": 3,
-      "e": "`Databricks Lakehouse Monitoring` se integra de forma directa con las `Inference Tables` de Model Serving. Al asociar un monitor a la tabla Delta de inferencias, Databricks calcula automáticamente estadísticas agregadas temporales, métricas de deriva en entradas y salidas, variaciones en latencias y tasas de error, publicando tableros de control y disparando alertas ante anomalías sin requerir código ETL manual."
-    }
-  ],
-  "why": {
-    "dbg-01": [
-      null,
-      "`Fine-Tuning` ajusta el estilo, tono o sintaxis del modelo pero no garantiza exactitud factual ante datos dinámicos, introduce alucinaciones y no proporciona citas textuales directas auditables.",
-      "`Continued Pre-training` es extremadamente costoso computacionalmente, requiere semanas de cálculo en clústeres GPU y congela los datos en los pesos, resultando inviable para normativas que cambian quincenalmente.",
-      "`Prompt Engineering` simple es inviable porque un manual de 60.000 páginas desborda con creces la ventana de contexto de los modelos actuales y generaría un coste por token y una latencia inasumibles."
+    "topics": [
+      {
+        "id": "dbg-t-1-1",
+        "d": 1,
+        "title": "1.1 · GenAI Architectures: RAG vs Fine-Tuning vs Pre-training vs Prompt Engineering",
+        "html": "<table class=\"keytable\">\n<tr><th>Architectural Approach</th><th>When to Choose It</th><th>Data Freshness & Citations</th><th>Cost & Latency</th></tr>\n<tr><td><b>Prompt Engineering / Few-Shot</b></td><td>General reasoning tasks, quick classification, or extraction over short texts that fit in the immediate context.</td><td>Static, based on the base model's cutoff date; no automatic citations from external databases.</td><td>Low cost per call; minimal latency with no dedicated infrastructure.</td></tr>\n<tr><td><b>RAG (Retrieval-Augmented Generation)</b></td><td>Grounded answers over changing knowledge bases, corporate manuals, internal policies, or private data.</td><td>Data kept up to date in near real time through synchronization with Delta Lake; precise, auditable verbatim citations.</td><td>Moderate cost (Vector Search + LLM); latency governed by retrieval (~15-50 ms) plus inference.</td></tr>\n<tr><td><b>Fine-Tuning (PEFT / LoRA / Full)</b></td><td>Adapting tone/style, following proprietary syntax, specialized classification tasks, or structured-output tasks.</td><td>The weights freeze knowledge; it does not guarantee factual accuracy or dynamic citations without an additional RAG component.</td><td>High training cost; inference requires dedicated compute in Model Serving.</td></tr>\n<tr><td><b>Pre-training / Continued Pre-training</b></td><td>Building highly specialized domain models (biomedical, ultra-specific legal) or low-resource languages.</td><td>Knowledge embedded in the model parameters; requires very costly periodic repetition to stay current.</td><td>Extremely high financial and compute cost (hundreds of A100/H100 GPUs for weeks).</td></tr>\n</table>"
+      },
+      {
+        "id": "dbg-t-1-2",
+        "d": 1,
+        "title": "1.2 · Foundation Model Selection, Embeddings, and Orchestration Patterns",
+        "html": "<table class=\"keytable\">\n<tr><th>Component</th><th>Options in Databricks</th><th>Selection Criteria</th></tr>\n<tr><td><b>Foundation Models (LLMs)</b></td><td>DBRX, Llama-3 (8B, 70B), Mistral/Mixtral, external APIs (OpenAI GPT-4, Anthropic Claude via AI Gateway).</td><td>Trade-off among reasoning quality, p95 latency, context window size (8k to 128k+), and data sovereignty/privacy.</td></tr>\n<tr><td><b>Embedding Models</b></td><td>BGE-large-en, BGE-multilingual, GTE-large, text-embedding-ada-002, custom embedding endpoints.</td><td>Vector dimension (384, 768, 1024, 1536), maximum input sequence length, and native multilingual support.</td></tr>\n<tr><td><b>Chain Orchestration</b></td><td>LangChain, LlamaIndex, MLflow PyFunc / Databricks-native ResponsesAgent.</td><td>Complexity of the conversational flow, tool support (Tool Calling), modularity, and ease of packaging in MLflow.</td></tr>\n<tr><td><b>Vector Store</b></td><td>Mosaic AI Vector Search (Delta Sync Index vs Direct Vector Access).</td><td>Native integration with Unity Catalog, data governance, row-level security, and automatic synchronization via Change Data Feed.</td></tr>\n</table>"
+      },
+      {
+        "id": "dbg-t-2-1",
+        "d": 2,
+        "title": "2.1 · Chunking and Tokenization: Strategies, Overlap, and Context Windows",
+        "html": "<table class=\"keytable\">\n<tr><th>Chunking Strategy</th><th>Mechanism</th><th>Ideal Use Cases</th><th>Risk / Drawback</th></tr>\n<tr><td><b>Fixed-size Chunking</b></td><td>Cuts the text every N characters or tokens without analyzing linguistic structure.</td><td>Quick prototyping and plain texts with no defined hierarchies or paragraphs.</td><td>Cuts words or sentences in half; loses semantic context at the cut boundaries.</td></tr>\n<tr><td><b>Recursive Character Chunking</b></td><td>Tries to split by hierarchical delimiters (`\n\n`, `\n`, ` `, `\"\"`) until reaching the target size.</td><td>Prose documents, user manuals, long articles, and general technical documentation.</td><td>Can produce irregularly sized fragments if paragraphs are extremely long.</td></tr>\n<tr><td><b>Document-specific (Markdown / HTML)</b></td><td>Splits while respecting H1, H2, H3 headings, HTML tags, or delimited code blocks.</td><td>README files, Markdown specifications, API documentation, and structured web pages.</td><td>Requires specific parsers and consistent document schemas.</td></tr>\n<tr><td><b>Semantic Chunking</b></td><td>Computes the distance between embeddings of consecutive sentences and cuts when similarity drops sharply.</td><td>Texts with subtle topic shifts where paragraph breaks do not reflect semantic changes.</td><td>High computational cost during the preparation phase because every preceding sentence must be vectorized.</td></tr>\n<tr><td><b>Chunk Overlap</b></td><td>Shares 10% to 20% of the boundary text between two consecutive adjacent chunks.</td><td>Essential in almost all chunking strategies to avoid fragmenting key facts.</td><td>Slightly increases the total volume of tokens indexed and stored in Vector Search.</td></tr>\n</table>"
+      },
+      {
+        "id": "dbg-t-2-2",
+        "d": 2,
+        "title": "2.2 · Advanced RAG Techniques: Re-ranking, HyDE, RRF, and Multi-turn Chains",
+        "html": "<table class=\"keytable\">\n<tr><th>Advanced Technique</th><th>How It Works</th><th>Problem It Solves</th></tr>\n<tr><td><b>Cross-Encoder Re-ranking</b></td><td>A model (e.g. BGE-reranker) processes the query and the chunk together, evaluating full cross-attention over the top-N candidates.</td><td>Eliminates false positives from the initial bi-encoder by retrieving the best K chunks with far higher precision.</td></tr>\n<tr><td><b>HyDE (Hypothetical Document Embeddings)</b></td><td>An LLM generates an ideal hypothetical document from the user's query; Vector Search is then queried using that document's embedding.</td><td>Lexical and semantic gap when the query is short or abstract and does not share vocabulary with the indexed texts.</td></tr>\n<tr><td><b>Reciprocal Rank Fusion (RRF)</b></td><td>Combines and normalizes the ranked positions from multiple retrievers (e.g. dense + sparse) with the formula `RRF_Score = sum(1 / (60 + rank))`.</td><td>Mismatch between vector similarity scales and BM25 scores when merging hybrid search results.</td></tr>\n<tr><td><b>Context Reordering (Lost in the Middle)</b></td><td>Reorders the retrieved chunks, placing the most relevant ones at the beginning and end of the prompt context.</td><td>Mitigates the positional bias of LLMs, which tend to ignore information located in the middle of the context window.</td></tr>\n</table>"
+      },
+      {
+        "id": "dbg-t-3-1",
+        "d": 3,
+        "title": "3.1 · Mosaic AI Vector Search: Delta Sync Index vs Direct Vector Access",
+        "html": "<table class=\"keytable\">\n<tr><th>Index Type</th><th>Data Source</th><th>Embedding Computation</th><th>Maintenance & Use Cases</th></tr>\n<tr><td><b>Delta Sync: Managed Embeddings</b></td><td>Delta table registered in Unity Catalog.</td><td>Databricks manages automatic vectorization using a Model Serving endpoint.</td><td>Ideal for serverless flows without an external inference pipeline; automatic synchronization via CDF.</td></tr>\n<tr><td><b>Delta Sync: Self-managed Embeddings</b></td><td>Delta table registered in Unity Catalog with an `ARRAY<FLOAT>` column.</td><td>The user precomputes the embeddings (e.g. in a Spark or DLT job) and writes them to Delta.</td><td>Full control over the embedding model, custom pipelines, or embeddings precomputed in batch.</td></tr>\n<tr><td><b>Direct Vector Access Index</b></td><td>No underlying Delta table required.</td><td>The user sends vectors and metadata directly through REST API calls (`upsert_data`).</td><td>External applications that need to insert or update vectors in real time without going through Delta Lake.</td></tr>\n<tr><td><b>Sync Mode: Continuous vs Triggered</b></td><td>Applies to Delta Sync indexes.</td><td><b>Continuous</b> maintains continuous streaming (low latency); <b>Triggered</b> runs in scheduled micro-batches.</td><td>Continuous minimizes indexing delay but has a higher cost; Triggered optimizes costs for batch workloads.</td></tr>\n</table>"
+      },
+      {
+        "id": "dbg-t-3-2",
+        "d": 3,
+        "title": "3.2 · Hybrid Search (Dense + BM25), Metadata Filters, and Change Data Feed",
+        "html": "<table class=\"keytable\">\n<tr><th>Technical Capability</th><th>Implementation Detail</th><th>Exam Key</th></tr>\n<tr><td><b>Hybrid Search</b></td><td>Combines dense vector similarity (deep semantics) with BM25 sparse text search (exact keywords).</td><td>Essential when queries contain error codes, part numbers, SKUs, or proper names alongside natural language.</td></tr>\n<tr><td><b>Metadata Filtering (`filters_json`)</b></td><td>Vector pre-filtering by evaluating SQL conditions on indexed columns (`country = 'ES'`, `category IN (...)`).</td><td>Pre-filtering reduces the in-memory search space; non-indexed columns force slow post-filtering in Delta.</td></tr>\n<tr><td><b>Change Data Feed (CDF)</b></td><td>`delta.enableChangeDataFeed = true` on the source Delta table.</td><td>Mandatory requirement for Delta Sync Index; allows INSERT, UPDATE, and DELETE to be captured incrementally.</td></tr>\n<tr><td><b>Primary Key Requirement</b></td><td>The source Delta table must have a defined, non-null `PRIMARY KEY`.</td><td>Mandatory so that Vector Search can uniquely identify each vector and apply updates and deletes.</td></tr>\n</table>"
+      },
+      {
+        "id": "dbg-t-4-1",
+        "d": 4,
+        "title": "4.1 · Mosaic AI Model Serving: Provisioned Throughput, Serverless, and External Models",
+        "html": "<table class=\"keytable\">\n<tr><th>Serving Mode</th><th>Billing Mechanism</th><th>Performance Guarantee</th><th>When to Use It</th></tr>\n<tr><td><b>Pay-per-token (Foundation Models)</b></td><td>Exact payment for input tokens and generated output tokens.</td><td>Shared capacity; subject to rate limits under high concurrency.</td><td>Exploratory workloads, development, non-production environments, or highly variable, sporadic traffic.</td></tr>\n<tr><td><b>Provisioned Throughput</b></td><td>Fixed hourly rate per reserved Model Unit (MU).</td><td>Guaranteed dedicated concurrency; deterministic latency with no blocking from external rate limits.</td><td>Real-time production applications with continuous traffic, strict SLAs, and a high volume of requests.</td></tr>\n<tr><td><b>External Models (AI Gateway)</b></td><td>Billed by the external provider (OpenAI, Anthropic) or unified.</td><td>Governed by the external provider; Databricks adds caching, guardrails, fallback, and unified auditing.</td><td>Companies that combine proprietary OpenAI/Anthropic models with open source models under a single API.</td></tr>\n<tr><td><b>Custom Models (MLflow PyFunc)</b></td><td>Scalable serverless compute instances (CPU/GPU) based on concurrency.</td><td>Automatic scaling down to zero (`scale_to_zero`); latency subject to cold starts if set to 0.</td><td>Deploying packaged RAG chains, Scikit-Learn classifiers, or your own fine-tuned models.</td></tr>\n</table>"
+      },
+      {
+        "id": "dbg-t-4-2",
+        "d": 4,
+        "title": "4.2 · AI Gateway: Guardrails, Rate Limiting, PII Redaction, and Fallback Routing",
+        "html": "<table class=\"keytable\">\n<tr><th>AI Gateway Feature</th><th>Main Function</th><th>Impact on Architecture and Security</th></tr>\n<tr><td><b>Security Guardrails</b></td><td>Detection and redaction of personal data (PII) and toxicity and jailbreak filters on prompts and responses.</td><td>Prevents confidential information from reaching external providers and blocks prompt injection attacks.</td></tr>\n<tr><td><b>Rate Limiting</b></td><td>Sets maximum quotas of requests per minute (RPM) and tokens per minute (TPM) per user or team.</td><td>Prevents uncontrolled consumption, protects against DoS attacks, and controls inference operating costs.</td></tr>\n<tr><td><b>Fallback Routing</b></td><td>Automatically routes to a secondary model if the primary returns error codes 429, 500, or 503.</td><td>Maximizes system resilience and availability during external provider outages.</td></tr>\n<tr><td><b>Auditing and Cost Attribution</b></td><td>Logs each call with its user identifier and tokens consumed.</td><td>Facilitates internal cost allocation (chargeback) among corporate departments.</td></tr>\n</table>"
+      },
+      {
+        "id": "dbg-t-5-1",
+        "d": 5,
+        "title": "5.1 · MLflow GenAI Evaluation: LLM-as-a-Judge, Faithfulness, Relevance, and Tracing",
+        "html": "<table class=\"keytable\">\n<tr><th>Metric / Tool</th><th>What It Measures / Purpose</th><th>Calculation / Rubric in `mlflow.evaluate()`</th></tr>\n<tr><td><b>Faithfulness (Groundedness)</b></td><td>Detects hallucinations by evaluating whether the claims in the response come from the retrieved context.</td><td>LLM-as-a-judge analyzes each claim in the response against the supplied context chunks.</td></tr>\n<tr><td><b>Answer Relevance</b></td><td>Evaluates whether the generated response directly answers the user's query.</td><td>LLM-as-a-judge rates the relevance and conciseness of the response with respect to the initial prompt.</td></tr>\n<tr><td><b>Context Precision & Recall</b></td><td><b>Precision:</b> useful chunks ranked at the top. <b>Recall:</b> all the required information was retrieved.</td><td>Evaluates retriever quality; Context Recall usually requires a reference answer (ground truth).</td></tr>\n<tr><td><b>MLflow Tracing (`mlflow.trace`)</b></td><td>Runtime observability: span tree with latencies, tokens, and intermediate calls.</td><td>OpenTelemetry instrumentation to audit each step (retrieval, prompt formatting, LLM call).</td></tr>\n</table>"
+      },
+      {
+        "id": "dbg-t-5-2",
+        "d": 5,
+        "title": "5.2 · Governance with Unity Catalog: Inference Tables, Review App, and End-to-End Lineage",
+        "html": "<table class=\"keytable\">\n<tr><th>Governance Component</th><th>Role in the GenAI Lifecycle</th><th>Operational and Compliance Benefit</th></tr>\n<tr><td><b>Inference Tables</b></td><td>Asynchronous capture of incoming requests, generated responses, latencies, and metadata in Delta tables.</td><td>Enables continuous monitoring with Lakehouse Monitoring, compliance auditing, and data drift detection.</td></tr>\n<tr><td><b>Review App (Agent Evaluation)</b></td><td>Web interface for business experts to test agents and provide human feedback (thumbs up/down).</td><td>Generates reference evaluation datasets (golden datasets) curated directly by humans.</td></tr>\n<tr><td><b>Unity Catalog End-to-End Lineage</b></td><td>Visual graph connecting source Delta tables, vector indexes, registered models, and serving endpoints.</td><td>Immediate regulatory auditing for right-to-be-forgotten requests (GDPR) or changes in data sources.</td></tr>\n<tr><td><b>Granular Access Control</b></td><td>`USE CATALOG`, `USE SCHEMA`, `SELECT` permissions and row/column filters on tables and vector indexes.</td><td>Ensures users can only retrieve information they are formally authorized to access in Unity Catalog.</td></tr>\n</table>"
+      }
     ],
-    "dbg-02": [
-      "Usar un LLM gigante de 70B para clasificación simple sobre 12 clases genera una latencia sustancialmente superior a 60 ms y un coste financiero desproporcionado ante 2 millones de peticiones diarias.",
-      null,
-      "RAG multi-etapa añade latencia de búsqueda vectorial (~20-40 ms) e inferencia generativa (~200-500 ms), incumpliendo holgadamente el SLA de 60 ms y encareciendo la solución.",
-      "Un agente multi-paso con llamadas recursivas añade múltiples viajes de red sobre la API, elevando la latencia por encima de varios segundos por solicitud de clasificación."
+    "questions": [
+      {
+        "id": "dbg-01",
+        "d": 1,
+        "t": "RAG vs Fine-Tuning",
+        "q": "A multinational insurance company needs to implement a conversational assistant for its adjusters that queries policy terms and internal regulations that are updated every two weeks. The answers must quote the source clause verbatim for legal audit purposes. Which architectural approach is the most suitable and why?",
+        "o": [
+          "Implement RAG with `Mosaic AI Vector Search`, allowing changes in Delta Lake to be synchronized without retraining and ensuring citations and legal traceability.",
+          "Fine-tune an open source model with LoRA on Databricks to memorize the policy texts within the neural weights.",
+          "Run Continued Pre-training of a Llama-3 model on GPU clusters with millions of policies so that it acquires static regulatory knowledge.",
+          "Apply basic Prompt Engineering with Few-Shot, embedding the entire 60,000-page manual in the system prompt of every API call."
+        ],
+        "a": 0,
+        "e": "RAG is the ideal architecture when the knowledge base changes frequently (every two weeks) and traceability and exact citations to the original sources are required. Fine-Tuning and Pre-training freeze the information in the neural weights (knowledge cutoff) and are prone to hallucinations without offering direct auditable citations."
+      },
+      {
+        "id": "dbg-02",
+        "d": 1,
+        "t": "Model Selection",
+        "q": "An e-commerce platform needs to process 2 million daily purchase-intent classification queries with a strict p95 latency SLA < 60 ms and a controlled budget. The task consists only of categorizing the text into one of 12 predefined classes. Which model strategy offers the best balance of cost, latency, and performance?",
+        "o": [
+          "Deploy a 70B-parameter foundation model on Foundation Model APIs with pay-per-token billing to take advantage of its general reasoning capability.",
+          "Train and deploy a small classifier model (SLM / encoder such as DeBERTa or RoBERTa) optimized through fine-tuning on `Mosaic AI Model Serving`.",
+          "Build a multi-stage RAG flow with Vector Search that retrieves examples of previous classifications to feed a giant model on every inference.",
+          "Configure a multi-step agent with LangChain and three recursive calls to external models through `AI Gateway` to verify logical consistency."
+        ],
+        "a": 1,
+        "e": "For pure classification tasks over a closed set of classes with very high volume (2M requests/day) and ultra-low latency (<60 ms), a small classifier model (SLM/encoder) fine-tuned and served on Model Serving is vastly faster, cheaper, and more deterministic than invoking massive generative LLMs or RAG architectures."
+      },
+      {
+        "id": "dbg-03",
+        "d": 1,
+        "t": "Embedding Models",
+        "q": "When designing a RAG pipeline over technical and contractual documentation written interchangeably in Spanish, Portuguese, and English, an architect must select the embedding model for the `Mosaic AI Vector Search` index. Which set of technical criteria should be prioritized?",
+        "o": [
+          "Select only the model with the highest possible vector dimension (e.g., 4096), assuming that higher dimensionality compensates for the lack of multilingual data.",
+          "Use the last hidden layer of a giant autoregressive generative model such as DBRX, extracting raw tensors during every interactive search query.",
+          "Evaluate multilingual support, the token window (e.g., 512 or 8192), and the trade-off among vector dimension, latency, and accuracy.",
+          "Choose a model trained only on English and place a real-time machine translation service before every vector embedding computation."
+        ],
+        "a": 2,
+        "e": "Embedding model selection must weigh native multilingual support (to align semantic representations in Spanish, Portuguese, and English in the same vector space), the maximum token length supported per chunk, and the vector dimensionality, which directly impacts memory consumption, search latency, and accuracy."
+      },
+      {
+        "id": "dbg-04",
+        "d": 1,
+        "t": "RAG vs Extended Context",
+        "q": "A team debates between using an extended context window (e.g., 1M tokens), sending the entire technical library in every prompt, versus implementing a RAG architecture with `Mosaic AI Vector Search`. In which scenario is Vector Search decisively superior to Context Augmented Generation (CAG)?",
+        "o": [
+          "When the entire corpus does not exceed 10,000 tokens in total and is queried only once a week by a single user in a local development environment.",
+          "When the task requires comparing the full narrative style of two 70,000-word literary novels in a single global structural analysis pass.",
+          "When a model is required with no connection to databases or corporate networks, operating exclusively in the volatile memory of a workstation.",
+          "When the document volume reaches gigabytes or terabytes, concurrent query traffic is high, and the goal is to optimize latency and cost per token."
+        ],
+        "a": 3,
+        "e": "When the document volume is massive (GB or TB) and traffic is continuous, sending hundreds of thousands of tokens in every request is economically unviable and produces latencies of seconds or minutes. Vector Search selectively retrieves only the relevant chunks (a few thousand tokens), minimizing cost and processing time."
+      },
+      {
+        "id": "dbg-05",
+        "d": 1,
+        "t": "Security and Guardrails",
+        "q": "A bank will deploy an internal RAG assistant with access to confidential financial statements. During threat analysis, risks of indirect prompt injection and data leaks to unauthorized employees are identified. Which TWO architectural measures should be implemented in Databricks? (Choose 2 answers)",
+        "o": [
+          "Configure guardrails in `AI Gateway` to detect jailbreak patterns, evaluate toxicity, and redact personally identifiable information (PII).",
+          "Apply row-level and column-level access controls in `Unity Catalog` on the source Delta tables and the `Mosaic AI Vector Search` indexes.",
+          "Completely disable the audit log in the `Inference Tables` so that auditors do not examine the attackers' malicious texts.",
+          "Raise the model's sampling temperature to 1.0 in `Mosaic AI Model Serving` so that responses to attacks are stochastic and inconsistent."
+        ],
+        "a": [
+          0,
+          1
+        ],
+        "e": "The combination of guardrails in `AI Gateway` (to intercept prompt injection attacks and malicious language, and to redact PII before and after inference) together with the granular governance of `Unity Catalog` (row/column filters and `SELECT` permissions on Delta tables and vector indexes) establishes a robust defense in depth for enterprise GenAI applications."
+      },
+      {
+        "id": "dbg-06",
+        "d": 1,
+        "t": "Model Serving Costs",
+        "q": "An engineering team projects constant, predictable traffic of 160 requests per second, 24 hours a day, for a Llama-3-70B model in production. When evaluating the `Mosaic AI Model Serving` modes, why is `Provisioned Throughput` the most suitable option compared to `Pay-per-token`?",
+        "o": [
+          "Because it reserves dedicated compute units (Model Units), guaranteeing concurrency, deterministic latency, and lower cost under high traffic.",
+          "Because `Pay-per-token` mode does not support models with more than 7 billion parameters and only works with small classification models on Spark.",
+          "Because `Provisioned Throughput` mode exempts the team from the governance policies, granular authentication, and strict lineage of `Unity Catalog`.",
+          "Because `Provisioned Throughput` continuously retrains the model's neural weights with each batch of incoming requests at no additional infrastructure cost."
+        ],
+        "a": 0,
+        "e": "`Provisioned Throughput` provisions dedicated processing capacity (measured in Model Units), which prevents saturation errors (HTTP 429) caused by shared concurrency, offers stable and predictable latency, and is far more cost-effective than `Pay-per-token` when the request volume is sustained and high."
+      },
+      {
+        "id": "dbg-07",
+        "d": 1,
+        "t": "Data Residency and Compliance",
+        "q": "A university hospital must process highly sensitive clinical records while complying with strict data sovereignty regulations that prohibit clinical texts from leaving the company's managed cloud perimeter or being sent to third-party APIs. Which architecture in Databricks meets this requirement?",
+        "o": [
+          "Configure `AI Gateway` to redirect requests to the public multitenant API of an external SaaS provider in another, unregulated geographic region.",
+          "Deploy an open foundation model (e.g., Llama-3 or Mistral) on `Mosaic AI Model Serving` running inside the customer's data plane with no internet egress.",
+          "Transmit the clinical records encrypted in Base64 in the prompt body to a public web service without formal medical confidentiality agreements.",
+          "Store the records in a public storage bucket without Unity Catalog and allow open vector queries from any public IP on the internet."
+        ],
+        "a": 1,
+        "e": "Deploying open source models on `Mosaic AI Model Serving` ensures that the weights and inference run inside the managed Databricks environment (corporate data plane / control plane), meeting sovereignty and privacy policies without sending patient data to external SaaS providers."
+      },
+      {
+        "id": "dbg-08",
+        "d": 2,
+        "t": "Chunking Strategies",
+        "q": "A data engineer processes machinery technical specifications structured in Markdown with hierarchical sections (#, ##, ###) and detailed tables. When fixed-size chunking is applied, the tables and subtitles are split in half, degrading the quality of RAG answers. Which chunking technique solves this problem?",
+        "o": [
+          "Use a `CharacterTextSplitter` with a rigid limit of 256 characters and zero overlap to force strictly uniform cuts on any type of technical text.",
+          "Convert the entire document into a single continuous line of plain text, removing line breaks and formatting before generating a single vector for the whole file.",
+          "Apply a `RecursiveCharacterTextSplitter` configured with hierarchical Markdown separators (`\\n## `, `\\n### `, `\\n\\n`, `\\n`, ` `).",
+          "Generate a single massive chunk of 120,000 words per technical manual and skip any segmentation or structural partitioning of the content entirely."
+        ],
+        "a": 2,
+        "e": "`RecursiveCharacterTextSplitter` (or MarkdownHeaderTextSplitter) respects the document hierarchy by trying to split first on higher-level delimiters (Markdown section headings, paragraphs) before splitting by lines or words. This keeps logical sections, titles, and tables intact within the same contextual block."
+      },
+      {
+        "id": "dbg-09",
+        "d": 2,
+        "t": "Chunk Overlap",
+        "q": "In a RAG system over commercial contracts, it is observed that when a relevant indemnity clause falls exactly on the cut boundary between two chunks, the LLM produces incomplete or hallucinated answers. When inspecting the text splitter configuration, `chunk_size = 512` and `chunk_overlap = 0` are found. What is the recommended fix?",
+        "o": [
+          "Reduce `chunk_size` to 32 tokens while keeping `chunk_overlap = 0` to generate atomic fragments that isolate each keyword separately.",
+          "Delete the even-numbered chunks from the database, keeping only the odd-numbered chunks to avoid read redundancies in the index.",
+          "Increase the chunk size to 80,000 tokens with no overlap, forcing the embedding model to ignore 90% of the text through truncation.",
+          "Configure a `chunk_overlap` of between 10% and 20% of the chunk size (e.g., 50 to 100 tokens) to ensure continuity at the boundaries."
+        ],
+        "a": 3,
+        "e": "Configuring an overlap of between 10% and 20% of the chunk size ensures that sentences or clauses located at the dividing edges do not lose their contextual meaning, since they are captured in full in at least one of the two neighboring chunks."
+      },
+      {
+        "id": "dbg-10",
+        "d": 2,
+        "t": "Cross-Encoder Re-ranking",
+        "q": "An enterprise RAG search engine uses a bi-encoder to retrieve the 50 most similar chunks in `Mosaic AI Vector Search`. However, irrelevant chunks that contain matching words but opposite meaning frequently displace the correct answers. Which two-stage retrieval pattern solves this deficiency?",
+        "o": [
+          "Add a second re-ranking stage with a cross-encoder (e.g., `BGE-reranker`) over the top-50 to reorder and select the 5 best chunks.",
+          "Replace the Vector Search index with a standard SQL relational query using the pattern-matching operator `WHERE columna_texto LIKE '%query%'`.",
+          "Run a second bi-encoder identical to the first with the same vector weights and arithmetically average all the previously computed Euclidean distances.",
+          "Reverse the positional order of the 50 retrieved chunks so that the chunks with the lowest bi-encoder similarity appear at the top of the delivered context prompt."
+        ],
+        "a": 0,
+        "e": "The two-stage pattern (Two-Stage Retrieval) combines the speed and scalability of a bi-encoder (to filter millions of vectors and keep the top-50 candidates) with the high semantic precision of a cross-encoder (which evaluates deep cross-attention between the query and the chunk to reorder and select the final top-5 with minimal added latency)."
+      },
+      {
+        "id": "dbg-11",
+        "d": 2,
+        "t": "HyDE (Hypothetical Document Embeddings)",
+        "q": "Employees at a company ask very short, abstract queries such as 'vacation for marriage?', while the internal labor regulations describe the benefits using legal terms such as 'extraordinary paid leave for nuptials'. Which retrieval technique solves this lexical mismatch?",
+        "o": [
+          "Concatenate the user's query directly into an unsanitized SQL statement to search for literal character matches in Delta Lake.",
+          "`HyDE` (Hypothetical Document Embeddings), first generating a hypothetical document with an LLM and searching for vectors using its embedding.",
+          "Remove all vowels from the user's query to compress the text before passing it to the Databricks embeddings endpoint.",
+          "Apply Zero-Shot classification with a deterministic classifier and discard the employee's original query text entirely."
+        ],
+        "a": 1,
+        "e": "`HyDE` uses an LLM to generate a hypothetical answer document from the user's question. Even if the hypothetical document contains unverified factual data, its vocabulary and semantic structure are much closer to the real documents indexed in Vector Search than the brief initial question, achieving much more accurate retrieval."
+      },
+      {
+        "id": "dbg-12",
+        "d": 2,
+        "t": "Logging in MLflow",
+        "q": "An AI developer builds a conversational RAG chain in Databricks combining LangChain with `Mosaic AI Vector Search`. To properly log and deploy the chain on `Mosaic AI Model Serving`, which TWO practices are mandatory according to the MLflow standard? (Choose 2 answers)",
+        "o": [
+          "Log the model with `mlflow.langchain.log_model()`, specifying the dependency environment (`pip_requirements` or `conda_env`) and artifacts.",
+          "Explicitly declare a model signature (`model signature`) in MLflow that defines the schema of the expected input and output types.",
+          "Save the model by exporting Python `.pkl` files to a temporary `/tmp` directory on the driver node of the interactive cluster.",
+          "Hardcode the developer's personal access tokens (PAT) in the chain's source code to streamline authentication with Vector Search."
+        ],
+        "a": [
+          0,
+          1
+        ],
+        "e": "For a LangChain model to be reproducibly deployable on `Mosaic AI Model Serving`, it must be logged with `mlflow.langchain.log_model()` clearly indicating its library dependencies, and have a signature (`signature`) that formally defines the input structure (e.g., a `query` field or a list of `messages`) and output, enabling automatic schema validation."
+      },
+      {
+        "id": "dbg-13",
+        "d": 2,
+        "t": "Tool Calling and Structured Outputs",
+        "q": "A virtual support assistant must check shipment status or cancel orders by invoking existing corporate APIs. When using a foundation model in Databricks with Function Calling (Tool Calling) capability, how should the tools be defined and the model's requests processed?",
+        "o": [
+          "Embed Windows executable binaries inside the prompt body so that the Model Serving container runs them directly on its base operating system.",
+          "Ask the LLM to generate arbitrary SQL code that drops tables and run it automatically with a superuser role in the central Unity Catalog catalog.",
+          "Declare the tools through formal JSON schemas with a name, detailed description, and typed parameters, executing the function upon receiving `tool_calls` from the model.",
+          "Disable the model's JSON parser and force it to respond only with free text without any kind of argument delimitation or computational schemas."
+        ],
+        "a": 2,
+        "e": "Tool Calling requires providing the LLM with a catalog of tools described in JSON Schema format (specifying types, required fields, and clear descriptions). When the LLM decides it needs to invoke a tool, it generates a structured JSON payload with the function name and the arguments that the client application code executes in a controlled manner."
+      },
+      {
+        "id": "dbg-14",
+        "d": 2,
+        "t": "Context Window and Lost in the Middle",
+        "q": "When evaluating a RAG pipeline that injects 25 retrieved chunks into an LLM prompt, it becomes evident that the model answers accurately if the answer is in the first or last chunk, but systematically ignores the information located in chunks 11 to 15 (the 'Lost in the Middle' effect). Which context-ordering technique mitigates this phenomenon?",
+        "o": [
+          "Duplicate all the middle chunks 8 times consecutively to artificially saturate the model's memory during runtime inference.",
+          "Arbitrarily truncate the context by removing 90% of the retrieved chunks, leaving only 2 sentences for the entire technical document analyzed.",
+          "Retrain the transformer weights through fine-tuning to completely nullify the positional attention of the model's multi-head attention layers.",
+          "Reorder the retrieved chunks, placing the most relevant ones at the extremes (at the beginning and end) and the least relevant ones in the middle."
+        ],
+        "a": 3,
+        "e": "Transformers suffer from a U-shaped attention bias ('Lost in the Middle'): they pay more attention to information located at the beginning and end of the prompt context. Reordering the chunks so that the documents with the highest similarity scores sit at the head and at the close of the context block maximizes the probability that the LLM will consider them."
+      },
+      {
+        "id": "dbg-15",
+        "d": 3,
+        "t": "Delta Sync vs Direct Access",
+        "q": "A team of analysts manages a knowledge base of 8 million articles stored in a Unity Catalog Delta table subject to constant inserts, updates, and deletions by streaming ETL pipelines. They want the vector index to stay automatically synchronized without developing manual reconciliation code. Which type of `Mosaic AI Vector Search` index should be used?",
+        "o": [
+          "`Delta Sync Index`, which automatically tracks the operations of the source Delta table by leveraging Change Data Feed (CDF).",
+          "`Direct Vector Access Index`, sending manual REST calls row by row from periodic scripts scheduled in Linux cron.",
+          "An external Elasticsearch table hosted outside the Unity Catalog governance perimeter without permission synchronization.",
+          "An exhaustive full-table scan in Apache Spark computing Euclidean distances in distributed memory on every individual query."
+        ],
+        "a": 0,
+        "e": "`Delta Sync Index` is linked directly to a governed Delta table in Unity Catalog and consumes its Change Data Feed (CDF) to automatically process, continuously or by micro-batch, any record insert, update, or delete, keeping the vector index up to date without manual intervention."
+      },
+      {
+        "id": "dbg-16",
+        "d": 3,
+        "t": "Managed vs Self-managed Embeddings",
+        "q": "When configuring a `Delta Sync Index` in `Mosaic AI Vector Search`, the engineer must choose between the `Managed Embeddings` and `Self-managed Embeddings` modes. What is the fundamental operational difference between the two options?",
+        "o": [
+          "In `Self-managed Embeddings`, Databricks automatically takes over all the infrastructure and does not allow the user to use their own or custom embedding models.",
+          "In `Managed Embeddings`, Databricks computes and updates the embeddings from a text column using an endpoint; in `Self-managed`, the user provides the vectors.",
+          "`Managed Embeddings` only supports tables stored in flat CSV format, whereas `Self-managed` requires external relational databases mounted via JDBC.",
+          "In `Self-managed Embeddings`, the index does not support vector similarity searches and only runs deterministic filters based on text regular expressions."
+        ],
+        "a": 1,
+        "e": "In `Managed Embeddings`, Databricks takes care of calling a Model Serving endpoint (embedding model) to generate and maintain the vectors from the specified text column. In `Self-managed Embeddings`, the user is responsible for computing the vector column (type `ARRAY<FLOAT>`) before the data reaches the Vector Search index."
+      },
+      {
+        "id": "dbg-17",
+        "d": 3,
+        "t": "Delta Sync Index Requirements",
+        "q": "An engineer tries to create a `Delta Sync Index` on a Delta table in Unity Catalog, but the Databricks interface throws a validation error that prevents completing the operation. When reviewing the table configuration, what are the TWO mandatory structural requirements that the source table must meet?",
+        "o": [
+          "Have a total size under 10 megabytes and be mandatorily partitioned by day and hour in the corporate cloud file storage system.",
+          "Be registered in the legacy Hive metastore and have all Delta Lake ACID transaction and versioning properties disabled.",
+          "Have the property `delta.enableChangeDataFeed = true` enabled and have an explicit, non-null primary key (`PRIMARY KEY`).",
+          "Contain only numeric columns, with no text fields or alphanumeric identifiers allowed within the table structure."
+        ],
+        "a": 2,
+        "e": "For a `Delta Sync Index` to synchronize changes incrementally and consistently, the source Delta table in Unity Catalog must have Change Data Feed enabled (`delta.enableChangeDataFeed = true`) and have a defined `PRIMARY KEY`, which allows the engine to track exactly which vector to insert, update, or delete."
+      },
+      {
+        "id": "dbg-18",
+        "d": 3,
+        "t": "Sync Mode: Continuous vs Triggered",
+        "q": "An algorithmic trading financial application requires that corporate news entered into a Delta table be available for semantic search in Vector Search with a latency of under 60 seconds after insertion. When configuring the `Delta Sync Index`, which sync mode should be selected and what is its trade-off?",
+        "o": [
+          "`Triggered` mode, which shuts down the indexing infrastructure immediately but produces synchronization latencies of several days between table updates.",
+          "`Manual Snapshot` mode, which requires an analyst to press a button in the Databricks graphical interface for each individual news item registered in the system.",
+          "`Read-Only` mode, which freezes the Delta table and prevents new news from entering to ensure there are no discrepancies between the storage and the vector.",
+          "`Continuous` mode, which runs a continuous streaming pipeline keeping the index up to date in near real time but at a higher compute cost."
+        ],
+        "a": 3,
+        "e": "`Continuous` mode keeps an active streaming pipeline that immediately processes Change Data Feed events, achieving update latencies of seconds, ideal for real-time applications. Its trade-off is a continuous infrastructure cost compared to `Triggered` mode, which processes changes in periodic batches and shuts down the resources when finished."
+      },
+      {
+        "id": "dbg-19",
+        "d": 3,
+        "t": "Hybrid Search",
+        "q": "An aviation spare-parts catalog receives maintenance queries that combine natural language descriptions ('O-ring failure in hydraulic valve') with exact serial numbers and codes ('MS28775-224'). Users report that pure vector searches often confuse the part code with similar ones. Which `Mosaic AI Vector Search` capability resolves this limitation?",
+        "o": [
+          "`Hybrid Search`, combining dense vector search with sparse lexical search (BM25 / full-text) and merging the results in a weighted manner.",
+          "Reduce the embedding dimensions to 4 values so that serial numbers are encoded as simple spatial coordinates.",
+          "Remove the serial codes and part numbers from the document database to prevent them from interfering with semantic similarity.",
+          "Use exact KNN search, performing a dot product calculation over all records on a single CPU thread."
+        ],
+        "a": 0,
+        "e": "`Hybrid Search` combines the best of both worlds: dense vector search (which captures the deep semantics of phrases such as 'O-ring failure') together with BM25 / full-text sparse search (which matches alphanumeric codes such as 'MS28775-224' with absolute exactness), combining both scores to return the optimal ordering."
+      },
+      {
+        "id": "dbg-20",
+        "d": 3,
+        "t": "Metadata Filters",
+        "q": "An international law firm manages case law from multiple jurisdictions. When querying the `Mosaic AI Vector Search` index, the application must restrict the responses exclusively to documents where the `jurisdiction` column is 'Spain' and the `year` field is greater than or equal to 2021. How should this filter be implemented in the search call?",
+        "o": [
+          "Retrieve the 100,000 closest vectors on the web client and perform in-memory filtering using a Python list comprehension on the web server.",
+          "Pass the structured condition through the `filters_json` parameter in the vector search API to perform optimized pre-filtering in the index.",
+          "Create a separate Spark cluster for each individual query and run a full reindexing of the documents matching those time criteria.",
+          "Append the text 'Spain 2021' 50 times at the end of the user's query, hoping the vector model interprets the temporal restriction automatically."
+        ],
+        "a": 1,
+        "e": "`Mosaic AI Vector Search` supports the `filters_json` parameter in its query API (`similarity_search`), allowing boolean and relational filters to be applied to the indexed metadata columns. This pre-filtering reduces the in-memory vector search space before computing nearest neighbors, ensuring low latency and accuracy."
+      },
+      {
+        "id": "dbg-21",
+        "d": 3,
+        "t": "Vector Search Endpoint Sizing",
+        "q": "An architecture team is planning a `Mosaic AI Vector Search` endpoint for a knowledge base of 30 million vectors with an expected demand of 400 queries per second (QPS). Which sizing and scaling aspect must be considered to ensure service availability?",
+        "o": [
+          "Vector Search endpoints are exclusively static and limited to a strict maximum of 50,000 vectors per catalog in any Databricks workspace.",
+          "Vector indexes run entirely inside users' web browsers via WebAssembly without consuming any Databricks cloud compute.",
+          "Select the appropriate endpoint type considering capacity in millions of vectors and unit scaling to tolerate the required QPS peaks.",
+          "The service can only scale if the Unity Catalog metastore is manually restarted during a weekly maintenance window scheduled by the administrator."
+        ],
+        "a": 2,
+        "e": "`Mosaic AI Vector Search` endpoints come in specific types and capacities (oriented to in-memory vector volume and throughput performance). Properly sizing the endpoint and allowing capacity autoscaling is essential to support 30M vectors and peaks of 400 QPS with stable sub-second latencies."
+      },
+      {
+        "id": "dbg-22",
+        "d": 3,
+        "t": "Governance and Permissions in Unity Catalog",
+        "q": "An external web application authenticated through a Service Principal needs to run semantic search queries against a `Mosaic AI Vector Search` index registered in Unity Catalog. What are the minimum required privileges that must be granted to that Service Principal?",
+        "o": [
+          "Grant the `ACCOUNT ADMIN` role at the cloud account level so the application has full access to billing and global Databricks user management.",
+          "Assign destructive `MODIFY` write permissions and `CREATE TABLE` privileges on all schemas of the company's corporate data catalog.",
+          "Disable Unity Catalog in the workspace so that authentication is fully anonymous and requires no credentials or security validation.",
+          "Grant `USE CATALOG` on the catalog, `USE SCHEMA` on the schema, and the `SELECT` privilege on the vector index and the associated Delta table."
+        ],
+        "a": 3,
+        "e": "Under the Unity Catalog security model, reading or querying any object (including tables and vector indexes) requires the read permission hierarchy: `USE CATALOG` on the containing catalog, `USE SCHEMA` on the schema, and `SELECT` on the Vector Search index and its source Delta table."
+      },
+      {
+        "id": "dbg-23",
+        "d": 3,
+        "t": "GDPR Compliance and Deletes in Delta Sync",
+        "q": "In compliance with the right to be forgotten (GDPR), a customer requests the deletion of their records. An analyst runs `DELETE FROM clientes_docs WHERE cliente_id = 'C-8842'` on the Delta table connected to a `Delta Sync Index`. Which TWO elements ensure that the associated vectors disappear from the Vector Search results? (Choose 2 answers)",
+        "o": [
+          "That the Delta table has Change Data Feed (CDF) enabled, recording the delete event for propagation to the index.",
+          "That the index synchronization pipeline processes the changes (continuously or on the next scheduled run in triggered mode).",
+          "That the entire Vector Search endpoint is destroyed and reprovisioned every time a delete statement is run in Delta Lake.",
+          "That a `VACUUM` command with zero-hour retention is immediately invoked on the table before the vector synchronizer reads the logs."
+        ],
+        "a": [
+          0,
+          1
+        ],
+        "e": "In a `Delta Sync Index`, deletes in the source Delta table are captured through the Change Data Feed (CDF), where the deleted row is marked as `_change_type = 'delete'`. When the index pipeline processes that change (continuous or triggered), it locates the vector through the primary key and removes it from the vector index without requiring the endpoint to be recreated."
+      },
+      {
+        "id": "dbg-24",
+        "d": 3,
+        "t": "Vector Distance Metrics",
+        "q": "When defining a search index in `Mosaic AI Vector Search` with embeddings that have been rigorously normalized to unit norm (L2 = 1.0), the team debates whether to configure `Cosine Similarity` or `Dot Product` as the similarity metric. What is the mathematical and performance relationship between the two metrics?",
+        "o": [
+          "With normalized vectors, the dot product is identical to cosine similarity and is more efficient because it skips the norm calculation.",
+          "The dot product can only be computed if the vectors contain positive integer values between 0 and 255 and does not support single-precision floating-point numbers.",
+          "Cosine similarity inverts the geometric polarity of Euclidean distances, producing only complex imaginary values in multidimensional spaces.",
+          "The dot product requires the vectors to be orthogonal to each other before the search starts and produces divisions by zero on parallel vectors oriented toward the origin."
+        ],
+        "a": 0,
+        "e": "The cosine similarity formula is `dot(u, v) / (||u|| * ||v||)`. When the vectors are pre-normalized to unit norm (`||u|| = ||v|| = 1`), the denominator is 1 and the expression simplifies exactly to `dot(u, v)`. Computing the pure dot product saves the real-time calculation of the Euclidean norms, speeding up searches."
+      },
+      {
+        "id": "dbg-25",
+        "d": 3,
+        "t": "Delta Optimization for Vector Search",
+        "q": "A Delta table with 200 million rows experiences slow reads and high I/O consumption when the `Delta Sync Index` engine queries the modified records. Which Delta Lake physical optimization command should be run on the table to compact small files and optimize reads by primary key?",
+        "o": [
+          "Run `DROP TABLE` followed by a recreation in plain-text TSV format with no indexes or metadata on a local disk attached to the cluster's driver node.",
+          "Run `OPTIMIZE table_name ZORDER BY (primary_key_col)` (or enable Liquid Clustering) to physically organize the data into optimized Parquet files.",
+          "Disable ACID transactions and convert the Delta table into an unstructured collection of JSON documents with no partitions or concurrency control.",
+          "Split the table into 200 million individual files of 50 bytes to force massive parallelism in the distributed cloud storage system."
+        ],
+        "a": 1,
+        "e": "The `OPTIMIZE` command compacts small Delta Lake files into larger Parquet files (~1 GB) and the `ZORDER BY` clause (or the modern `Liquid Clustering`) physically organizes the data by co-locating similar values of the selected columns. This drastically minimizes the amount of data read by the Vector Search synchronizer."
+      },
+      {
+        "id": "dbg-26",
+        "d": 3,
+        "t": "Source Column in Managed Embeddings",
+        "q": "When configuring a `Delta Sync Index` with `Managed Embeddings` in `Mosaic AI Vector Search`, what is the formal requirement that the column containing the source text to be vectorized (`source_text`) must meet in the Delta table?",
+        "o": [
+          "It must be of type `BINARY`, containing the Pickle serialization of Python objects generated on the cluster driver node during data ingestion.",
+          "It must contain a two-dimensional array of 64-bit integers with hash values generated by a SHA-512 cryptographic algorithm with no plain-text information.",
+          "It must be of type `STRING`, must not allow null values in the rows to be indexed, and must store the text content to be vectorized.",
+          "It must be named `raw_unstructured_text_payload` or else the Unity Catalog schema will reject the creation of the vector index."
+        ],
+        "a": 2,
+        "e": "In `Managed Embeddings` mode, the source column must be strictly of type `STRING` and contain readable, non-null text. Databricks takes the content of this column and sends it to the configured embeddings endpoint to automatically generate and persist the vector representation in the index."
+      },
+      {
+        "id": "dbg-27",
+        "d": 3,
+        "t": "Metadata Evolution in Vector Search",
+        "q": "A data team adds a new metadata column called `department_code` to the source Delta table of a `Delta Sync Index` in production. They want developers to be able to filter searches by this new attribute. How is this new column incorporated into the vector index?",
+        "o": [
+          "It is impossible to add columns to an existing index, and the only alternative is to delete the corporate Unity Catalog metastore and manually create it from scratch.",
+          "The Delta table is permanently locked and no longer allows inserts of new rows until the underlying cloud storage is unmounted and mounted again.",
+          "The entire table must be exported to an external NoSQL database to manually rebuild the inverted indexes on another provider's infrastructure.",
+          "The vector index specification in Vector Search is updated to include the new column in the metadata synchronization list."
+        ],
+        "a": 3,
+        "e": "`Mosaic AI Vector Search` indexes allow their definition to be updated to include new columns from the source Delta table as additional metadata synchronization columns. After the specification is updated, the synchronization pipeline propagates the new attributes without requiring the metastore to be recreated or the source table to be interrupted."
+      },
+      {
+        "id": "dbg-28",
+        "d": 3,
+        "t": "Latency and Metadata Pre-filtering",
+        "q": "During a performance audit of a `Mosaic AI Vector Search` index, the team observes that average latency jumps from 18 ms to 340 ms when applying a filter on the `cost_center` field. When investigating the index definition, it is discovered that `cost_center` was not included in the index's synchronized columns. What causes this degradation?",
+        "o": [
+          "Because it is not indexed in the endpoint's memory, the engine must perform post-filtering by reading data from the Delta table after the vector search.",
+          "Because the Vector Search endpoint automatically shuts down and cold-restarts every time it detects an unknown column name in the submitted query.",
+          "Because the HTTP/2 protocol does not support sending structured JSON filters when the search key names exceed 8 characters in length.",
+          "Because queries on non-indexed attributes are forwarded by email to a system administrator for assisted manual resolution."
+        ],
+        "a": 0,
+        "e": "When a filter is applied on columns that are included in the vector index, the engine performs ultra-fast pre-filtering directly in memory during the nearest-neighbor computation. If the column is not indexed in the endpoint, the system must retrieve many more candidates and post-filter by accessing the underlying Delta table, driving up query latency."
+      },
+      {
+        "id": "dbg-29",
+        "d": 3,
+        "t": "Troubleshooting FAILED Sync",
+        "q": "The pipeline of a `Delta Sync Index` with `Managed Embeddings` enters the `FAILED` state, interrupting the index update. In the Vector Search Manager diagnostics tab, the following error is displayed: `Model Serving endpoint 'bge-large-serving' unavailable or returned HTTP 500`. What is the root cause and the immediate corrective action?",
+        "o": [
+          "The source Delta table exceeded 1,000 records and Unity Catalog blocked synchronization for exceeding the free community quota assigned to the customer's subscription.",
+          "The Model Serving endpoint that generates the embeddings for the index failed or was modified; that endpoint must be restored and the synchronization restarted.",
+          "The user who created the index closed their web browser, interrupting the execution of the Databricks background batch process that updated the tables.",
+          "The Databricks SQL dialect must be changed to Transact-SQL and all the tables recreated in a local relational database mounted on a traditional hard drive."
+        ],
+        "a": 1,
+        "e": "In `Managed Embeddings`, the synchronization pipeline continuously invokes the Model Serving endpoint to compute the vectors for new or modified rows. If that embeddings endpoint stops, is deleted, or returns HTTP 500 errors due to overload, the Vector Search pipeline cannot compute the embeddings and moves to the `FAILED` state. The solution is to verify and stabilize the serving endpoint."
+      },
+      {
+        "id": "dbg-30",
+        "d": 4,
+        "t": "Model Types in Model Serving",
+        "q": "An enterprise software company needs to deploy three inference components to production: an open source LLM (Mistral-7B), a custom RAG chain built with LangChain and packaged with MLflow, and OpenAI's GPT-4o model. How does `Mosaic AI Model Serving` cover these three needs?",
+        "o": [
+          "Model Serving only supports traditional logistic regression models and has no capability to serve generative models or external APIs from third-party providers.",
+          "It requires compiling all three models into native C++ binary code and deploying them on separate Kubernetes clusters self-managed by the infrastructure team.",
+          "It provides Foundation Model APIs for Mistral-7B, Custom Models support (MLflow PyFunc) for the RAG chain, and External Models to govern GPT-4o.",
+          "It forces all models to be converted to ONNX format and run exclusively within scheduled batch SQL queries on Databricks SQL Serverless."
+        ],
+        "a": 2,
+        "e": "`Mosaic AI Model Serving` is a comprehensive platform that supports: 1) Foundation Model APIs (open models such as Llama-3, Mistral, DBRX ready to use serverless), 2) Custom Models (your own models or LangChain/LlamaIndex chains registered with MLflow PyFunc), and 3) External Models (external proprietary models such as OpenAI or Anthropic under a unified API governed with AI Gateway)."
+      },
+      {
+        "id": "dbg-31",
+        "d": 4,
+        "t": "Provisioned Throughput vs Pay-per-token",
+        "q": "A financial assistance banking application experiences unexpected peaks of 500 requests per second on a Foundation Model endpoint. When using `Pay-per-token` mode, customers receive frequent `HTTP 429 Too Many Requests` errors due to the platform's shared concurrency limits. Which architectural change guarantees dedicated capacity and eliminates these blocks?",
+        "o": [
+          "Reduce the application timeout to 5 milliseconds so that requests are dropped immediately before the serving web server starts processing them.",
+          "Deploy the model in an interactive Databricks notebook and share the interactive cluster's public URL with all end users of the organization.",
+          "Implement an infinite loop of synchronous retries on the client with no exponential backoff until the corporate network connections are completely saturated.",
+          "Migrate the endpoint to `Provisioned Throughput`, assigning the Model Units needed to absorb peak traffic with guaranteed dedicated capacity."
+        ],
+        "a": 3,
+        "e": "`Provisioned Throughput` mode reserves dedicated compute infrastructure (Model Units) for the customer's endpoint. Because the resources are guaranteed and not shared with other tenants of the workspace, HTTP 429 errors caused by shared rate limits are eliminated and predictable latency is ensured under high traffic volume."
+      },
+      {
+        "id": "dbg-32",
+        "d": 4,
+        "t": "External Models Security",
+        "q": "When configuring an `External Models` endpoint in `Mosaic AI Model Serving` to query Anthropic Claude or Azure OpenAI models, what is the Databricks security best practice for storing and supplying the private API keys required by the provider?",
+        "o": [
+          "Store the keys in Databricks Secrets (or Unity Catalog secrets) and reference the secret path in the endpoint configuration.",
+          "Write the API key in plain text inside a commented cell in an interactive notebook visible to all developers in the organization.",
+          "Create a `.txt` file with the key at the DBFS root (`/dbfs/api_keys.txt`), granting public read permissions to any user in the corporate workspace.",
+          "Pass the API key as a text parameter in the header of the end user's prompt in every interactive HTTP call sent from the browser."
+        ],
+        "a": 0,
+        "e": "To protect access credentials for external providers, Databricks requires storing the keys in Databricks Secrets or secrets integrated into Unity Catalog. When configuring the `External Models` endpoint, the secret is referenced with `{{secrets/scope/key}}`, allowing the inference service to access the key securely without exposing it in plain text or in the logs."
+      },
+      {
+        "id": "dbg-33",
+        "d": 4,
+        "t": "AI Gateway Architecture",
+        "q": "A multinational deploys `Mosaic AI Gateway` as the unified entry point for all the applications and microservices that consume language models in the organization. What is the main architectural value of this solution compared to direct access to provider APIs?",
+        "o": [
+          "It acts as a real-time compiler that automatically translates legacy Scala code to Python 3 during the model inference phase in the cloud.",
+          "It centralizes governance, auditing, guardrail policies, cost control, rate limiting, and resilience without modifying the clients' code.",
+          "It completely replaces the Unity Catalog data catalog and removes the permission restrictions on all the Delta tables registered in the Lakehouse.",
+          "It disables the workspace's internet connections, forcing models to run on offline magnetic backup tapes."
+        ],
+        "a": 1,
+        "e": "`Mosaic AI Gateway` decouples consuming applications from the underlying AI model providers, acting as a managed intelligent intermediary that uniformly applies query auditing, spend control, rate limiting, security filters (guardrails), and routing with failover (fallback), simplifying corporate governance."
+      },
+      {
+        "id": "dbg-34",
+        "d": 4,
+        "t": "Guardrails in AI Gateway",
+        "q": "A citizen services department deploys a conversational assistant. For regulatory reasons, the system must guarantee that no bank card number, national ID number, or sensitive medical data is sent to external models, and it must also reject messages with offensive content. Which `AI Gateway` feature automates this requirement?",
+        "o": [
+          "Enable gzip compression at the HTTP transport layer to reduce the JSON payload size by 40% without altering the transmitted text content.",
+          "Configure manual iptables network firewall rules on the operating system of the driver node of an interactive development Spark cluster.",
+          "Enable Guardrails in `AI Gateway`, configuring filters for PII detection and redaction and toxicity moderation policies.",
+          "Ask users to sign a paper document promising not to type personal data into the web browser window when using the assistant."
+        ],
+        "a": 2,
+        "e": "The `Guardrails` of `Mosaic AI Gateway` let you define automatic security policies that analyze requests and responses in real time. They can automatically detect and mask personally identifiable information (PII such as card numbers, national IDs, or phone numbers) and block messages that exceed toxicity thresholds, ensuring regulatory compliance without additional code."
+      },
+      {
+        "id": "dbg-35",
+        "d": 4,
+        "t": "Rate Limiting Policies",
+        "q": "To prevent a faulty application stuck in an infinite loop or a malicious user from exhausting the monthly spending quota on an endpoint served through `AI Gateway`, which TWO rate limit policies (`Rate Limits`) can be configured at the endpoint or token level? (Choose 2 answers)",
+        "o": [
+          "Requests Per Minute (RPM) limit to restrict the total number of API calls within a time window.",
+          "Tokens Per Minute (TPM) limit to control the total volume of input and output processed by the model.",
+          "Character-per-function limit in the Python scripts of the team's Git version control repository.",
+          "Stochastic temperature limit, forcing that no model can use temperature values higher than 0.01."
+        ],
+        "a": [
+          0,
+          1
+        ],
+        "e": "`AI Gateway` lets you configure rate limit quotas based on: 1) Requests Per Minute (RPM), controlling the request frequency to prevent connection saturation, and 2) Tokens Per Minute (TPM), restricting the massive volume of tokens processed to keep the financial budget under strict control."
+      },
+      {
+        "id": "dbg-36",
+        "d": 4,
+        "t": "Fallback Routing in AI Gateway",
+        "q": "A medical emergency triage application uses an `External Models` endpoint that invokes a state-of-the-art external API as its primary model. If the external provider experiences a service degradation and starts responding with `HTTP 503` or `HTTP 429` errors, the application must switch immediately to a secondary model without manual intervention. Which `AI Gateway` mechanism implements this behavior?",
+        "o": [
+          "Replicate all the client application code on 10 different physical servers connected in a fiber-optic ring to balance HTTP requests.",
+          "Disconnect the system's load balancer so that clients accumulate requests in an indefinite waiting queue on the application server.",
+          "Send a pager alert to the overnight on-call team so they edit the client's environment variable on the production servers.",
+          "`Fallback Routing`, configuring a prioritized backup route to which traffic is automatically redirected when the primary model fails."
+        ],
+        "a": 3,
+        "e": "`Fallback Routing` in `AI Gateway` lets you configure an ordered list of alternative models. If the primary endpoint fails or returns overload or unavailability errors (e.g., HTTP 429, 500, or 503), Gateway transparently intercepts the error and forwards the request to the defined backup model, ensuring uninterrupted high availability for critical services."
+      },
+      {
+        "id": "dbg-37",
+        "d": 4,
+        "t": "Streaming with Server-Sent Events (SSE)",
+        "q": "In a conversational assistant web interface built on `Mosaic AI Model Serving`, users complain that the screen stays blank for 5 seconds and then the entire paragraph appears all at once. To drastically improve the perception of fluidity and the Time To First Token (TTFT), which inference parameter must be enabled on the endpoint and the client?",
+        "o": [
+          "Enable streaming generation through Server-Sent Events by sending the parameter `stream=True` in the request to the serving API to receive continuous tokens.",
+          "Increase the batch size to 64 grouped requests so that the server accumulates multiple questions before generating any response text.",
+          "Disable the endpoint's graphics processing units (GPUs) so that inference runs on a single low-power CPU thread.",
+          "Package the model's response in a RAR compressed file protected with a cryptographic key before transferring it to the web client over HTTP."
+        ],
+        "a": 0,
+        "e": "Setting `stream=True` allows the `Mosaic AI Model Serving` endpoint to transmit the generated tokens progressively over a persistent connection using Server-Sent Events (SSE). The client can render each word or token on screen as it is produced, reducing the perceived Time To First Token to just a few milliseconds."
+      },
+      {
+        "id": "dbg-38",
+        "d": 4,
+        "t": "Deploying Custom Models with MLflow",
+        "q": "When deploying a custom RAG chain built with `MLflow PyFunc` on `Mosaic AI Model Serving`, the endpoint fails during the initialization phase with the error `ModuleNotFoundError: No module named 'langchain_community'`. How should the engineer fix this problem to ensure a reproducible environment?",
+        "o": [
+          "Install the library on the developer's laptop and restart the local VS Code work session, hoping it syncs to the cloud.",
+          "Explicitly declare `langchain_community` in the `pip_requirements` or `conda_env` parameter when calling `mlflow.pyfunc.log_model()`.",
+          "SSH into the Databricks serving container and manually run `sudo apt-get install python3-langchain` on the host command line.",
+          "Remove all references to external libraries and rewrite the entire chain in assembly code with no third-party package dependencies."
+        ],
+        "a": 1,
+        "e": "When `Mosaic AI Model Serving` deploys a model packaged with MLflow, it provisions a clean container where it installs the dependencies declared in the model artifact. Specifying the exact dependencies in `pip_requirements` (or `conda_env`) during the `log_model()` call ensures that the inference container installs all the necessary libraries automatically and in isolation."
+      },
+      {
+        "id": "dbg-39",
+        "d": 4,
+        "t": "Autoscaling and Scale to Zero",
+        "q": "An innovation department has 12 fine-tuned experimental models for occasional R&D testing. Each model is queried an average of twice a week. To optimize the budget and avoid paying for idle GPU infrastructure 24 hours a day, which autoscaling configuration should be applied to the `Mosaic AI Model Serving` endpoints?",
+        "o": [
+          "Set the minimum concurrency to 4 permanent dedicated instances to ensure that a cold start never occurs under any operating circumstance.",
+          "Delete and retrain all 12 models every night with an automated script to free up memory on the organization's interactive cluster.",
+          "Configure `Scale to Zero`, setting the minimum compute size to 0 units to shut down resources during idle periods.",
+          "Shut down the Databricks workspace's network connection outside working hours from Monday to Friday, interrupting all of the company's tasks."
+        ],
+        "a": 2,
+        "e": "`Scale to Zero` allows `Mosaic AI Model Serving` endpoints to automatically deprovision their compute resources after a period of inactivity, reducing the running cost to exactly zero when there is no traffic. When a new request arrives, the service performs a cold start, provisioning the resources automatically."
+      },
+      {
+        "id": "dbg-40",
+        "d": 4,
+        "t": "Traffic Splitting and Canary Deployments",
+        "q": "A new version (v2) of a RAG chain has been developed with an optimized prompt and a more recent vector index. To evaluate its stability in production without putting the experience of all users at risk, the team wants to route 90% of the requests to the proven version v1 and 10% to the candidate version v2. How is this pattern implemented in `Mosaic AI Model Serving`?",
+        "o": [
+          "Publish two different URLs in a public Slack channel and kindly ask 10% of customers to manually choose the second option.",
+          "Configure a Bash script that randomly restarts the web server every 10 requests to alternate versions on each controlled service crash.",
+          "Deactivate the endpoint for one hour a day to force users to try the experimental version under pressure in their work environments.",
+          "Configure `Traffic Splitting` on the serving endpoint, assigning a traffic weight of 90% to the v1 entity and 10% to the v2 version."
+        ],
+        "a": 3,
+        "e": "`Mosaic AI Model Serving` supports deployments of multiple served entities within a single endpoint with weighted routing (`Traffic Splitting`). This enables Canary-style deployments or A/B tests by managing traffic percentages (e.g., 90/10) behind a single stable endpoint URL, monitoring the new version's behavior with minimal risk."
+      },
+      {
+        "id": "dbg-41",
+        "d": 5,
+        "t": "MLflow GenAI Evaluation with LLM-as-a-Judge",
+        "q": "An AI team must evaluate the performance of a conversational assistant on a set of 5,000 complex questions from real customers. The team does not have ideal human-written reference answers (ground truth) for most of the questions. Which methodological approach enabled in `mlflow.evaluate()` makes it possible to perform this rigorous evaluation at scale?",
+        "o": [
+          "Use `LLM-as-a-Judge`, employing a high-capacity evaluator model that applies formal quality rubrics to the generated outputs.",
+          "Compare the generated responses by counting only the number of consonants and assigning a higher score to the longer texts in the analytical report.",
+          "Assign a fixed 5-star rating to all responses, assuming modern language models never make factual errors.",
+          "Evaluate the model by measuring the temperature in degrees Celsius of the data center processors during intensive inference of the questions."
+        ],
+        "a": 0,
+        "e": "When no exhaustive ground truth is available, `mlflow.evaluate()` supports the `LLM-as-a-Judge` paradigm. In this scheme, a high-capacity model (such as GPT-4 or DBRX) evaluates the generated responses against structured rubrics for metrics such as `faithfulness`, `answer_relevance`, and `toxicity`, making it possible to validate thousands of cases with high correlation with human judgment."
+      },
+      {
+        "id": "dbg-42",
+        "d": 5,
+        "t": "Faithfulness (Groundedness) Metric",
+        "q": "When running an evaluation suite with `mlflow.evaluate()` on a RAG pipeline, the report shows a poor score on the `Faithfulness` (Groundedness) metric. What specific failure in the system's behavior does this metric reflect?",
+        "o": [
+          "It indicates that the user asked questions with spelling mistakes or in a language not recognized by the user portal's authentication system.",
+          "It indicates that the response contains factual claims not supported by the retrieved context chunks (model hallucinations).",
+          "It indicates that the network connection between the serving endpoint and the Unity Catalog metastore took more than 500 ms to complete successfully.",
+          "It indicates that the size of the model binary file registered in MLflow exceeds the disk space allocated to the customer's corporate workspace."
+        ],
+        "a": 1,
+        "e": "The `Faithfulness` metric measures the degree to which the claims in the generated response derive directly from the information contained in the retrieved context. A low faithfulness score is a direct indicator that the model is hallucinating information not grounded in the supplied documents."
+      },
+      {
+        "id": "dbg-43",
+        "d": 5,
+        "t": "Answer Relevance Metric",
+        "q": "During the evaluation of a conversational agent with `mlflow.evaluate()`, the following behavior is observed: for the question 'How do I reset my password?', the model responds with an impeccable three-page text explaining in detail the history of RSA encryption and the biography of Alan Turing. Which combination of metrics will reflect this problem?",
+        "o": [
+          "Very low `Faithfulness` and very high `Answer Relevance`, because the text invents Alan Turing's biography without consulting the supplied document context.",
+          "Both metrics will yield a perfect value of 1.0 because the generated text is grammatically elegant and free of syntax errors in its wording.",
+          "High `Faithfulness` (if the history was in the context), but very low `Answer Relevance` because it completely omits the answer to the specific question asked.",
+          "Perfect `Context Recall` and zero `Faithfulness` because the user did not enter a valid session token in the HTTP header of the submitted web request."
+        ],
+        "a": 2,
+        "e": "`Answer Relevance` evaluates whether the generated response addresses the intent of the user's question directly and pertinently. If the model provides perfectly truthful information grounded in the documents (high `Faithfulness`) that does not answer the user's question at all (how to change the password), `Answer Relevance` collapses."
+      },
+      {
+        "id": "dbg-44",
+        "d": 5,
+        "t": "Context Precision vs Context Recall",
+        "q": "An engineer evaluates only the retrieval component (retriever) of a RAG system using `mlflow.evaluate()`. What is the fundamental technical distinction between the `Context Precision` and `Context Recall` metrics?",
+        "o": [
+          "`Context Precision` measures the total number of words retrieved; `Context Recall` measures the time in milliseconds for the Vector Search endpoint to respond.",
+          "`Context Precision` is computed only for computer vision models; `Context Recall` applies exclusively to high-frequency audio signals.",
+          "Both metrics are mathematically identical and the name depends on whether the Databricks workspace is set to English or Spanish in the console.",
+          "`Context Precision` evaluates whether the useful chunks are ranked at the top; `Context Recall` measures whether all the required information was retrieved."
+        ],
+        "a": 3,
+        "e": "In retriever evaluation: `Context Precision` evaluates ranking quality, penalizing irrelevant chunks that appear in the top positions ahead of useful chunks. `Context Recall` evaluates completeness, measuring whether the total set of retrieved chunks contains all the facts needed (compared against a reference answer or ground truth) to answer the query."
+      },
+      {
+        "id": "dbg-45",
+        "d": 5,
+        "t": "Mosaic AI Agent Review App",
+        "q": "Within the framework of GenAI application governance in Databricks, the `Mosaic AI Agent Evaluation Review App` is deployed. Which TWO fundamental capabilities does this application provide for the validation and curation of the model's behavior by business experts? (Choose 2 answers)",
+        "o": [
+          "Provide an interactive graphical interface for human reviewers to test the agent, rate responses (thumbs up/down), and edit corrections.",
+          "Systematically store the reviewers' feedback and corrections in Unity Catalog Delta tables to enrich reference datasets.",
+          "Hot-modify the binary weights of the model's attention layers in the GPU memory of the inference nodes.",
+          "Automatically disconnect from the corporate network the reviewers who give unfavorable ratings to the agent's responses."
+        ],
+        "a": [
+          0,
+          1
+        ],
+        "e": "The Mosaic AI Agent Evaluation `Review App` provides an intuitive web interface for human experts (doctors, adjusters, analysts) to interact with the RAG chain or agent, rate the quality of the responses, and provide textual corrections. All of this feedback is automatically recorded in managed Delta tables in Unity Catalog, making it easier to build golden datasets for continuous evaluation."
+      },
+      {
+        "id": "dbg-46",
+        "d": 5,
+        "t": "MLflow Tracing for Observability",
+        "q": "An engineering team investigates an intermittent latency degradation in a composite RAG chain that invokes a vector retriever and an external credit validation API. When instrumenting the application with `MLflow Tracing` (`mlflow.trace`), what visual and diagnostic information do they get in the MLflow UI?",
+        "o": [
+          "A hierarchical tree of spans that breaks down the latency, inputs, outputs, prompts, and token consumption of each step in the chain.",
+          "The hexadecimal dump of the L1 cache records of the processors of the central relational database server.",
+          "A list of the personal phone numbers and access keys of the users who queried the system during the last week of testing.",
+          "A static diagram that hides response times and replaces execution traces with random numbers of no analytical use."
+        ],
+        "a": 0,
+        "e": "`MLflow Tracing` (based on OpenTelemetry standards) captures a hierarchical trace of the model or agent execution. The MLflow interface displays a waterfall chart of spans where you can examine the exact time consumed by the Vector Search lookup, prompt formatting, intermediate tool calls, and the final LLM call with its breakdown of input and output tokens."
+      },
+      {
+        "id": "dbg-47",
+        "d": 5,
+        "t": "Inference Tables in Model Serving",
+        "q": "To satisfy AI regulatory audit requirements and drift monitoring in production, an architect enables `Inference Tables` on a `Mosaic AI Model Serving` endpoint. How does this mechanism work and where is the captured data persisted?",
+        "o": [
+          "It sends backup copies of the requests as compressed CSV files to an external email account through the traditional SMTP protocol.",
+          "It asynchronously logs incoming requests, generated responses, latencies, and metadata to a managed Delta table in Unity Catalog.",
+          "It overwrites the contents of the inference table every 60 seconds, deleting the previous history so as not to consume disk space in the cloud account.",
+          "It blocks the endpoint's execution until an administrator manually reviews and approves each incoming request in a local command console."
+        ],
+        "a": 1,
+        "e": "`Inference Tables` capture, completely transparently, asynchronously, and without penalizing endpoint latency, every request payload received, the response generated by the model, the status codes, latencies, and associated metadata. This information is persisted directly in a Delta table in Unity Catalog, enabling audits, monitoring with Lakehouse Monitoring, and retraining."
+      },
+      {
+        "id": "dbg-48",
+        "d": 5,
+        "t": "End-to-End Lineage in Unity Catalog",
+        "q": "During an external GDPR compliance audit, it is required to demonstrate exactly which training or indexing data was used to generate a controversial response produced by a conversational assistant. How does `Unity Catalog` make it possible to verify this traceability?",
+        "o": [
+          "By forcing data scientists to print out the Git command history on paper and present it to a notary public for official certification.",
+          "Unity Catalog lineage only supports traditional relational tables and lacks support for language models or AI vector indexes.",
+          "By connecting the lineage between source Delta tables, Vector Search indexes, models registered in MLflow, and the endpoint's Inference Tables.",
+          "By irreversibly deleting all records in the workspace so that auditors do not find information discrepancies in the systems."
+        ],
+        "a": 2,
+        "e": "`Unity Catalog` offers End-to-End Lineage. It makes it possible to visually and programmatically trace the full dependency chain: from the source Delta tables where the documents resided, through the `Delta Sync Index` synchronization pipeline, the model artifact registered in the model catalog, to the serving endpoint and its associated `Inference Tables`."
+      },
+      {
+        "id": "dbg-49",
+        "d": 5,
+        "t": "Custom Metrics with make_genai_metric",
+        "q": "A telecommunications company wants to evaluate whether its virtual assistant's responses comply with the corporate directive to 'maintain a professional, empathetic tone and avoid technical jargon incomprehensible to the end user'. How is this qualitative metric defined in `mlflow.evaluate()`?",
+        "o": [
+          "By writing a Bash script that counts how many times the word 'thanks' appears in the text output generated by the assistant's endpoint.",
+          "By modifying the BIOS memory of the cloud servers to alter the probabilistic behavior of the random numbers generated at runtime.",
+          "By configuring a firewall that blocks any HTTP response packet that contains more than 50 words in total in the delivered response.",
+          "By using `mlflow.metrics.genai.make_genai_metric()`, specifying the name, evaluation criteria, scale, and examples for the judge LLM."
+        ],
+        "a": 3,
+        "e": "`mlflow.metrics.genai.make_genai_metric()` lets you create custom metrics evaluated by a judge LLM. The developer defines the metric name, the rubric with the detailed evaluation criteria (e.g., empathy, professionalism, absence of excessive jargon), the scoring scale (e.g., 1 to 5), and few-shot calibration examples, making it possible to evaluate qualitative aspects consistently."
+      },
+      {
+        "id": "dbg-50",
+        "d": 5,
+        "t": "Lakehouse Monitoring on Inference Tables",
+        "q": "An AI operations team maintains a RAG assistant in production and wants to continuously monitor concept drift, variations in response length, and anomalies in error rates over the weeks without scheduling manual ETL pipelines. Which native Databricks solution integrates with `Inference Tables` for this purpose?",
+        "o": [
+          "An AWK script running in a continuous loop in the terminal of one of the operations team engineers' personal laptops.",
+          "Completely disable inference tables to avoid consuming storage space in the corporate Unity Catalog catalog.",
+          "Install a standalone Apache Tomcat server that receives screenshots from the mobile phones of the customers who use the application.",
+          "`Databricks Lakehouse Monitoring`, configuring a quality monitor on the inference Delta table to generate metrics and alerts."
+        ],
+        "a": 3,
+        "e": "`Databricks Lakehouse Monitoring` integrates directly with Model Serving `Inference Tables`. By attaching a monitor to the inference Delta table, Databricks automatically computes temporal aggregate statistics, drift metrics on inputs and outputs, variations in latencies and error rates, publishing dashboards and triggering alerts on anomalies without requiring manual ETL code."
+      }
     ],
-    "dbg-03": [
-      "Una mayor dimensión vectorial no implica mejor rendimiento semántico si el modelo no fue entrenado con datos multilingües, e incrementa innecesariamente el consumo de memoria y la latencia del índice.",
-      "Los LLMs autorregresivos generativos no están entrenados para producir representaciones de similitud densa comparativa como los encoders dedicados (e.g. BGE), y su inferencia es lenta y costosa.",
-      null,
-      "La traducción automática en tiempo de ejecución añade latencia adicional considerable, introduce posibles errores de traducción léxica y eleva los costes operativos de la solución."
-    ],
-    "dbg-04": [
-      "Para un corpus minúsculo de 10.000 tokens con consultas muy esporádicas, cargar el texto completo directamente en el prompt es más simple y no justifica la infraestructura de Vector Search.",
-      "El análisis estilístico holístico de dos novelas completas requiere procesar el texto entero de forma global, caso de uso idóneo para ventanas de contexto largas y no para RAG por fragmentos.",
-      "La ausencia de almacenamiento y conectividad imposibilita el uso de arquitecturas basadas en la nube y no representa un escenario favorable para Vector Search en Databricks.",
-      null
-    ],
-    "dbg-05": [
-      null,
-      null,
-      "Desactivar las `Inference Tables` destruye la trazabilidad y la observabilidad del sistema, impidiendo auditorías de seguridad y monitoreo forense de incidentes.",
-      "Aumentar la temperatura a 1.0 no protege contra prompt injection y provoca que el modelo sea mucho más propenso a alucinaciones e inconsistencias operativas."
-    ],
-    "dbg-06": [
-      null,
-      "`Pay-per-token` (Foundation Model APIs) sí ofrece soporte para modelos grandes como Llama-3-70B y DBRX; su limitación en alto tráfico reside en los costes por token y límites de tasa compartidos.",
-      "`Provisioned Throughput` se gobierna estrictamente bajo `Unity Catalog` al igual que el resto de componentes de Model Serving; no elude la seguridad empresarial.",
-      "Ningún modo de serving reentrena los pesos del modelo durante la inferencia; el servicio es estrictamente de evaluación y generación de respuestas en tiempo real."
-    ],
-    "dbg-07": [
-      "Enviar datos a un proveedor SaaS externo multitenant en otra región vulnera frontalmente los requerimientos de residencia de datos y normativas sanitarias estrictas.",
-      null,
-      "Cifrar en Base64 no es un mecanismo de anonimización ni seguridad; el texto puede ser decodificado inmediatamente y sigue transitando hacia servicios externos no autorizados.",
-      "Publicar datos de salud en buckets abiertos sin control de acceso en Unity Catalog constituye una brecha de seguridad grave y violación legal de normativas como HIPAA o RGPD."
-    ],
-    "dbg-08": [
-      "Un `CharacterTextSplitter` rígido sin considerar la sintaxis agrava el problema al cortar arbitrariamente tablas y oraciones en puntos ciegos a los 256 caracteres.",
-      "Eliminar los saltos de línea y la estructura de Markdown destruye la coherencia de las tablas y títulos técnicos, dificultando la comprensión semántica del modelo.",
-      null,
-      "Un chunk de 120.000 palabras desborda la capacidad de la mayoría de modelos de embeddings (típicamente 512 u 8192 tokens) y destruye la granularidad del retrieval semántico."
-    ],
-    "dbg-09": [
-      "Un tamaño de 32 tokens es excesivamente diminuto, destruye la sintaxis de las cláusulas contractuales e impide que el modelo extraiga contexto jurídico coherente.",
-      "Eliminar fragmentos alternos provoca la pérdida catastrófica del 50 % de la información documental disponible en el sistema.",
-      "Ampliar el chunk a 80.000 tokens supera el límite de contexto de la inmensa mayoría de modelos de embeddings, provocando truncamiento forzado y pérdida de datos.",
-      null
-    ],
-    "dbg-10": [
-      null,
-      "Una consulta `LIKE '%query%'` realiza un escaneo de texto estricto sin comprensión semántica, omitiendo sinónimos y sin capacidad de clasificar por relevancia contextual.",
-      "Ejecutar un bi-encoder idéntico produce exactamente las mismas puntuaciones y no añade nueva capacidad discriminatoria ni atención cruzada.",
-      "Invertir el orden sitúa los fragmentos menos relevantes en las posiciones preferentes del prompt, deteriorando gravemente la calidad de la respuesta del LLM."
-    ],
-    "dbg-11": [
-      "Concatenar en SQL sin sanitizar expone a inyección SQL y una búsqueda literal fracasará al no compartir las palabras exactas ('matrimonio' vs 'nupcias').",
-      null,
-      "Eliminar vocales corrompe la semántica del lenguaje y destruye la capacidad del modelo de embeddings para mapear el significado del texto.",
-      "Descartar la consulta original e imponer una etiqueta estática impide buscar la especificidad de la pregunta del empleado en la base documental."
-    ],
-    "dbg-12": [
-      null,
-      null,
-      "Exportar archivos `.pkl` en `/tmp` no registra el modelo en Unity Catalog ni gestiona dependencias, haciendo imposible su despliegue reproducible en Model Serving.",
-      "Incrustar tokens de acceso en el código fuente vulnera las políticas básicas de seguridad y expone credenciales; debe usarse la identidad gestionada del endpoint o Databricks Secrets."
-    ],
-    "dbg-13": [
-      "Enviar binarios ejecutables en el prompt es imposible en la API de los LLMs y representaría una vulnerabilidad de ejecución remota de código aberrante.",
-      "Permitir la generación y ejecución no controlada de SQL destructivo por parte de un LLM viola todos los principios de seguridad y pondría en riesgo la base de datos.",
-      null,
-      "Forzar texto libre sin estructuración impide que el sistema interprete de manera determinista cuándo invocar las herramientas y con qué parámetros exactos."
-    ],
-    "dbg-14": [
-      "Duplicar fragmentos centrales desperdicia presupuesto de tokens, incrementa costes de inferencia y puede inducir alucinaciones o redundancias en la respuesta.",
-      "Eliminar el 90 % de los fragmentos priva al modelo de la información necesaria para responder consultas complejas que requieren múltiples fuentes.",
-      "Modificar los pesos de atención posicional no es una práctica viable para usuarios de Foundation Model APIs ni resuelve el sesgo inherente de la arquitectura Transformer.",
-      null
-    ],
-    "dbg-15": [
-      null,
-      "`Direct Vector Access Index` requiere que la aplicación cliente gestione la ingesta, eliminación y cálculo de vectores mediante llamadas explícitas a la API REST, perdiendo la automatización con Delta Lake.",
-      "Elasticsearch fuera de Unity Catalog pierde la integración nativa con el catálogo, los controles de acceso y el linaje de datos de Databricks.",
-      "Un escaneo distribuido completo en Spark para cada consulta interactiva tarda minutos o decenas de segundos, siendo totalmente inviable para aplicaciones conversacionales en tiempo real."
-    ],
-    "dbg-16": [
-      "Es en `Managed Embeddings` donde Databricks gestiona la infraestructura de vectorización; en `Self-managed` es el usuario quien controla y calcula los embeddings.",
-      null,
-      "`Managed Embeddings` opera exclusivamente sobre tablas Delta en Unity Catalog, no sobre archivos CSV planos desprovistos de Change Data Feed.",
-      "`Self-managed Embeddings` sí realiza búsquedas vectoriales por similitud; la diferencia radica únicamente en quién realiza el cálculo del vector."
-    ],
-    "dbg-17": [
-      "Delta Sync Index soporta millones de registros y cientos de gigabytes; no existe una restricción de tamaño inferior a 10 MB ni obligación de particionar por hora.",
-      "Delta Sync Index requiere Unity Catalog; no funciona con el metastore heredado de Hive ni admite tablas con ACID deshabilitado.",
-      null,
-      "La tabla debe contener campos de texto para poder vectorizarlos (en Managed) o columnas vectoriales junto con metadatos; no puede ser sólo numérica."
-    ],
-    "dbg-18": [
-      "El modo `Triggered` se programa típicamente en intervalos (ej. cada hora o día) para minimizar costes en cargas batch, no satisfaciendo el SLA de 60 segundos.",
-      "Un proceso manual es inviable para flujos algorítmicos automatizados y no existe como modo formal de producción para SLAs de segundos.",
-      "El modo `Read-Only` bloquearía la inserción de nuevas noticias, invalidando el propósito funcional del sistema financiero.",
-      null
-    ],
-    "dbg-19": [
-      null,
-      "Reducir los embeddings a 4 dimensiones destruye la capacidad representativa del espacio vectorial y genera colisiones masivas entre conceptos dispares.",
-      "Eliminar los números de pieza priva al sistema de la información crítica de identificación de repuestos que los técnicos necesitan imperiosamente.",
-      "KNN exacto con producto punto en CPU no resuelve la discrepancia de representación de códigos alfanuméricos en embeddings continuos y es extremadamente lento."
-    ],
-    "dbg-20": [
-      "Recuperar 100.000 resultados en el cliente genera una enorme sobrecarga de red, satura la memoria del servidor de aplicaciones y penaliza la latencia.",
-      null,
-      "Crear un clúster Spark y reindexar para cada búsqueda individual tardaría decenas de minutos y generaría un coste económico demencial.",
-      "Añadir texto al prompt no garantiza que el retriever excluya documentos de otros países o años; es una técnica frágil e ineficaz para filtros estrictos."
-    ],
-    "dbg-21": [
-      "Vector Search admite decenas de millones de vectores en entornos de producción empresariales; no existe un límite rígido de 50.000 vectores.",
-      "El almacenamiento e indexación vectorial HNSW se ejecutan en infraestructura gestionada serverless de Databricks, no en el navegador del cliente.",
-      null,
-      "El escalado de endpoints de Vector Search se realiza en caliente sin necesidad de reiniciar Unity Catalog ni programar ventanas de mantenimiento que interrumpan el servicio."
-    ],
-    "dbg-22": [
-      "`ACCOUNT ADMIN` vulnera el principio de privilegio mínimo al conceder control sobre usuarios, facturación y gobernanza global innecesariamente.",
-      "`MODIFY` y `CREATE TABLE` otorgan permisos de modificación y creación destructiva de datos, innecesarios y peligrosos para una aplicación que sólo lee.",
-      "Desactivar Unity Catalog elimina la seguridad de la empresa, expone datos sensibles y no es una práctica admitida ni recomendada en Databricks.",
-      null
-    ],
-    "dbg-23": [
-      null,
-      null,
-      "Recrear el endpoint completo ante cada borrado provocaría caídas de servicio inaceptables y tiempos de espera de decenas de minutos innecesarios.",
-      "Ejecutar `VACUUM` prematuramente antes de que el pipeline procese el CDF podría purgar archivos de datos requeridos por la sincronización, causando inconsistencias."
-    ],
-    "dbg-24": [
-      null,
-      "El producto punto opera de forma nativa sobre números en coma flotante (`float32`, `float64`); no está restringido a enteros de 8 bits.",
-      "La similitud coseno acota los valores reales entre -1 y 1; no produce números complejos imaginarios en ningún cálculo vectorial.",
-      "El producto punto es máximo para vectores paralelos en la misma dirección y cero para vectores ortogonales; no exige ortogonalidad previa."
-    ],
-    "dbg-25": [
-      "Borrar la tabla destruye la información corporativa y el formato TSV no cuenta con transacciones, CDF ni optimización para Vector Search.",
-      null,
-      "Desactivar ACID corrompe la fiabilidad de los datos y desactiva las capacidades de Delta Lake requeridas por Vector Search.",
-      "Tener 200 millones de archivos minúsculos provoca el clásico problema de 'small files', saturando el metastore y ralentizando drásticamente la I/O."
-    ],
-    "dbg-26": [
-      "El endpoint de embeddings procesa texto legible, no objetos binarios serializados con Pickle, los cuales representan además un grave riesgo de seguridad.",
-      "Una matriz de hashes criptográficos SHA-512 no tiene significado semántico para un modelo de lenguaje de embeddings.",
-      null,
-      "El nombre de la columna es completamente configurable por el usuario durante la creación del índice; no existe ninguna restricción de nomenclatura fija."
-    ],
-    "dbg-27": [
-      "No es necesario ni admisible borrar el metastore de Unity Catalog; la definición del índice vectorial puede modificarse o sincronizarse ordenadamente.",
-      "Añadir columnas a una tabla Delta es una operación estándar de evolución de esquema que no bloquea la tabla ni corrompe el almacenamiento.",
-      "No se requiere migrar a soluciones NoSQL externas; Vector Search soporta nativamente metadatos y filtros avanzados dentro del Lakehouse.",
-      null
-    ],
-    "dbg-28": [
-      null,
-      "El endpoint no se reinicia ni se apaga ante consultas con filtros no indexados; la degradación es puramente de I/O por post-filtrado diferido.",
-      "HTTP/2 y JSON manejan cadenas de texto de cualquier longitud habitual sin ninguna limitación arbitraria a 8 caracteres.",
-      "Las consultas se ejecutan de manera automatizada en el motor de Vector Search; no interviene ningún proceso de correo ni resolución manual."
-    ],
-    "dbg-29": [
-      "No existe un límite de 1.000 registros en Vector Search de Databricks; el error documenta explícitamente una falla en el endpoint de serving de embeddings.",
-      null,
-      "Las sincronizaciones se ejecutan en clústeres serverless desacoplados de la sesión web del usuario; cerrar el navegador no detiene el pipeline.",
-      "Databricks opera sobre Spark SQL y Delta Lake; no utiliza Transact-SQL ni bases de datos locales para la sincronización vectorial."
-    ],
-    "dbg-30": [
-      "Model Serving está ampliamente optimizado para GenAI, soportando LLMs de última generación, modelos multimodales, agentes y APIs externas.",
-      "No se requiere compilar en C++ ni gestionar Kubernetes; Model Serving es un servicio totalmente administrado serverless en Databricks.",
-      null,
-      "Model Serving provee endpoints de inferencia REST en tiempo real y streaming de baja latencia; no está restringido a ejecuciones batch en SQL."
-    ],
-    "dbg-31": [
-      "Reducir el timeout a 5 ms provocaría que prácticamente el 100 % de las peticiones fallen sin llegar a completarse, destruyendo la usabilidad.",
-      "Un notebook interactivo no es un entorno de producción, carece de autoscaling, no ofrece SLAs de serving y no soporta 500 peticiones por segundo.",
-      "Reintentos infinitos sin backoff generan una tormenta de peticiones (retry storm) que empeora la saturación del sistema y agrava los errores 429.",
-      null
-    ],
-    "dbg-32": [
-      null,
-      "Incrustar claves de API en celdas de notebooks expone las credenciales a fugas de seguridad accidentales, control de versiones y accesos no autorizados.",
-      "Subir claves a DBFS con lectura pública constituye una vulnerabilidad crítica que permite a cualquier usuario del workspace sustraer las credenciales.",
-      "Pasar la clave en el prompt expone la credencial en logs de inferencia, interfaces de chat y vectores, violando cualquier estándar de seguridad."
-    ],
-    "dbg-33": [
-      "AI Gateway gestiona el tráfico de inferencia y gobernanza de modelos de IA; no es un transpilador ni compilador de lenguajes de programación.",
-      null,
-      "AI Gateway se apoya e integra profundamente con Unity Catalog para la seguridad y auditoría; no lo reemplaza ni elimina sus controles de acceso.",
-      "No desconecta el acceso a internet ni utiliza cintas magnéticas; es un servicio en la nube de alta disponibilidad y baja latencia."
-    ],
-    "dbg-34": [
-      "La compresión gzip reduce el consumo de ancho de banda en la red pero no analiza el contenido semántico ni anonimiza datos personales.",
-      "Reglas de iptables filtran paquetes a nivel de capa de red IP/TCP; son totalmente ciegas a la información PII contenida en payloads de lenguaje natural.",
-      null,
-      "Depender de promesas de usuarios es una medida puramente administrativa que no ofrece ninguna garantía técnica ni cumple con normativas de protección de datos."
-    ],
-    "dbg-35": [
-      null,
-      null,
-      "La longitud de los scripts en repositorios Git no tiene relación con el tráfico de inferencia en tiempo real ni con los límites de tasa de los endpoints.",
-      "La temperatura es un hiperparámetro de muestreo probabilístico del modelo, no un mecanismo de límite de tasa para control de consumo de recursos."
-    ],
-    "dbg-36": [
-      "Replicar servidores de aplicación no soluciona el problema de fondo si la API externa subyacente a la que todos consultan está caída.",
-      "Detener el balanceador bloquea por completo la aplicación médica, provocando la denegación total de servicio en un entorno de emergencias.",
-      "Depender de alertas humanas para editar código introduce minutos o cuartos de hora de retraso inaceptables para un sistema de triaje médico.",
-      null
-    ],
-    "dbg-37": [
-      null,
-      "Agrupar peticiones en batch incrementa la latencia individual de cada usuario al tener que esperar a que se acumulen 64 consultas para iniciar el procesamiento.",
-      "Ejecutar inferencia de LLMs en un único hilo de CPU ralentizaría la velocidad de generación de tokens de forma dramática, empeorando el problema.",
-      "Comprimir la respuesta en un archivo RAR requeriría esperar a que la generación termine por completo para luego comprimir y descomprimir, añadiendo más retraso."
-    ],
-    "dbg-38": [
-      "Instalar librerías en la máquina local no afecta en absoluto a los contenedores serverless que se ejecutan en la nube de Databricks.",
-      null,
-      "Los contenedores de Model Serving son serverless y gestionados; no ofrecen acceso SSH interactivo ni privilegios de superusuario root para el usuario.",
-      "Reescribir frameworks de IA en ensamblador es inviable y absurdo; las librerías estándar se integran limpiamente mediante la gestión de entornos de MLflow."
-    ],
-    "dbg-39": [
-      "Mantener 4 instancias fijas para 12 modelos escasamente consultados generaría un gasto económico exorbitante por recursos totalmente ociosos.",
-      "Reentrenar modelos desde cero es extremadamente costoso en tiempo y cómputo GPU; los artefactos ya entrenados deben conservarse en Unity Catalog.",
-      null,
-      "Desconectar la red del workspace interrumpiría otros procesos ETL y de producción críticos no relacionados con los modelos de I+D."
-    ],
-    "dbg-40": [
-      "Depender de la disciplina manual de los usuarios no es un mecanismo técnico de control de tráfico y no funciona para llamadas de aplicaciones o APIs.",
-      "Reiniciar servidores degrada el servicio, genera errores de conexión en los clientes y no reparte el tráfico de forma probabilística controlada.",
-      "Apagar el servicio interrumpe la disponibilidad corporativa e impacta negativamente a los usuarios en lugar de realizar una transición progresiva.",
-      null
-    ],
-    "dbg-41": [
-      null,
-      "Contar caracteres o consonantes no evalúa en absoluto el significado, la veracidad factual ni la relevancia de una respuesta ante una pregunta.",
-      "Asumir que no hay errores ignora el fenómeno de las alucinaciones, la pérdida de relevancia y los errores de comprensión inherentes a los LLMs.",
-      "La temperatura física del hardware no refleja la calidad lingüística ni la corrección de las salidas producidas por el modelo."
-    ],
-    "dbg-42": [
-      "La métrica evalúa la relación entre la respuesta generada y los documentos de contexto; no juzga la ortografía de la consulta del usuario.",
-      null,
-      "Las latencias de red se miden en milisegundos mediante tracing o monitoreo de red, no a través de la métrica semántica de fidelidad.",
-      "El tamaño de archivo de los pesos es una propiedad de almacenamiento estático que nada tiene que ver con la fidelidad semántica de la respuesta."
-    ],
-    "dbg-43": [
-      "La fidelidad puede ser alta si la historia de RSA estaba presente en los fragmentos de contexto; el fallo principal y evidente es la falta de relevancia.",
-      "La elegancia sintáctica no compensa la falta de pertinencia; Answer Relevance penaliza severamente desviar el tema de la consulta.",
-      null,
-      "Context Recall evalúa si el retriever recuperó toda la información necesaria; la validez de los tokens de sesión no afecta al cálculo de métricas de MLflow."
-    ],
-    "dbg-44": [
-      "Precision y Recall no miden recuentos brutos de palabras ni latencias en milisegundos; son métricas formales de relevancia de recuperación.",
-      "Estas métricas son estándares en evaluación de sistemas de recuperación de información (IR) y RAG en lenguaje natural, no exclusivas de visión o audio.",
-      "Son conceptos claramente diferenciados en la literatura de IR y en MLflow; no son sinónimos ni dependen de la configuración de idioma del workspace.",
-      null
-    ],
-    "dbg-45": [
-      null,
-      null,
-      "La Review App captura feedback humano sobre la aplicación; no realiza operaciones destructivas ni altera los pesos de la red neuronal en caliente.",
-      "Bloquear o penalizar a los evaluadores que reportan fallos destruiría el proceso de mejora continua y es una afirmación descabellada."
-    ],
-    "dbg-46": [
-      null,
-      "MLflow Tracing opera a nivel de lógica de aplicación y llamadas de software; no interactúa con registros de bajo nivel de memoria caché de hardware L1.",
-      "Tracing registra los payloads de inferencia para observabilidad; no sustrae datos privados ni números de teléfono de los dispositivos de los usuarios.",
-      "El propósito de Tracing es precisamente transparentar la ejecución temporal y diagnóstica exacta, no ocultar la información con números aleatorios."
-    ],
-    "dbg-47": [
-      "Inference Tables no utiliza correo electrónico ni protocolos SMTP externos; persiste los datos de forma nativa y segura en tablas Delta del Lakehouse.",
-      null,
-      "Las tablas Delta conservan el historial transaccional completo para auditoría y análisis temporal; no se sobrescriben ni borran cada 60 segundos.",
-      "El registro es estrictamente asíncrono y no bloquea el flujo de inferencia en tiempo real; no requiere aprobaciones humanas por petición."
-    ],
-    "dbg-48": [
-      "Imprimir código en papel no es un mecanismo de auditoría técnica en la nube y no demuestra el linaje real de los datos consumidos en producción.",
-      "Unity Catalog extiende su motor de linaje de forma nativa a modelos de MLflow, volúmenes, índices de Vector Search y endpoints de serving.",
-      null,
-      "Destruir la información constituiría una obstrucción a la auditoría, una violación legal grave y la pérdida de datos corporativos críticos."
-    ],
-    "dbg-49": [
-      "Contar la palabra 'gracias' es una heurística extremadamente simplista que no evalúa la empatía genuina, la claridad ni el tono profesional del mensaje.",
-      "Modificar la BIOS del hardware es imposible en entornos cloud gestionados y no tiene ningún impacto en la semántica del lenguaje natural.",
-      "Bloquear paquetes por longitud de palabras impide que el asistente proporcione explicaciones completas y no evalúa la calidad cualitativa del tono.",
-      null
-    ],
-    "dbg-50": [
-      "Un script local en una máquina personal es una solución precaria, no escalable y carente de alta disponibilidad para monitoreo empresarial continuo.",
-      "Desactivar las tablas de inferencias elimina toda la visibilidad operativa y hace imposible la monitorización de deriva y calidad en producción.",
-      "Capturas de pantalla en un servidor Tomcat no estructuran métricas de deriva de datos ni permiten supervisión analítica de los modelos en producción.",
-      null
+    "why": {
+      "dbg-01": [
+        null,
+        "`Fine-Tuning` adjusts the model's style, tone, or syntax but does not guarantee factual accuracy with dynamic data, introduces hallucinations, and does not provide direct auditable verbatim citations.",
+        "`Continued Pre-training` is extremely expensive computationally, requires weeks of computation on GPU clusters, and freezes the data in the weights, making it unviable for regulations that change biweekly.",
+        "Simple `Prompt Engineering` is unviable because a 60,000-page manual far exceeds the context window of current models and would generate unacceptable per-token cost and latency."
+      ],
+      "dbg-02": [
+        "Using a giant 70B LLM for simple classification over 12 classes produces latency substantially above 60 ms and a disproportionate financial cost at 2 million requests per day.",
+        null,
+        "Multi-stage RAG adds vector search latency (~20-40 ms) and generative inference (~200-500 ms), comfortably breaking the 60 ms SLA and making the solution more expensive.",
+        "A multi-step agent with recursive calls adds multiple network round trips over the API, raising latency above several seconds per classification request."
+      ],
+      "dbg-03": [
+        "A larger vector dimension does not imply better semantic performance if the model was not trained on multilingual data, and it needlessly increases memory consumption and index latency.",
+        "Generative autoregressive LLMs are not trained to produce comparative dense similarity representations like dedicated encoders (e.g. BGE), and their inference is slow and costly.",
+        null,
+        "Runtime machine translation adds considerable extra latency, introduces possible lexical translation errors, and raises the solution's operating costs."
+      ],
+      "dbg-04": [
+        "For a tiny corpus of 10,000 tokens with very sporadic queries, loading the full text directly into the prompt is simpler and does not justify the Vector Search infrastructure.",
+        "Holistic stylistic analysis of two complete novels requires processing the entire text globally, a use case suited to long context windows and not to chunk-based RAG.",
+        "The absence of storage and connectivity rules out cloud-based architectures and does not represent a favorable scenario for Vector Search in Databricks.",
+        null
+      ],
+      "dbg-05": [
+        null,
+        null,
+        "Disabling `Inference Tables` destroys the system's traceability and observability, preventing security audits and forensic incident monitoring.",
+        "Raising the temperature to 1.0 does not protect against prompt injection and makes the model much more prone to hallucinations and operational inconsistencies."
+      ],
+      "dbg-06": [
+        null,
+        "`Pay-per-token` (Foundation Model APIs) does support large models such as Llama-3-70B and DBRX; its limitation under high traffic lies in per-token costs and shared rate limits.",
+        "`Provisioned Throughput` is governed strictly under `Unity Catalog` like the rest of the Model Serving components; it does not bypass enterprise security.",
+        "No serving mode retrains the model weights during inference; the service is strictly for evaluation and real-time response generation."
+      ],
+      "dbg-07": [
+        "Sending data to a multitenant external SaaS provider in another region directly violates data residency requirements and strict health regulations.",
+        null,
+        "Base64 encoding is not an anonymization or security mechanism; the text can be decoded immediately and still travels to unauthorized external services.",
+        "Publishing health data in open buckets without access control in Unity Catalog constitutes a serious security breach and a legal violation of regulations such as HIPAA or GDPR."
+      ],
+      "dbg-08": [
+        "A rigid `CharacterTextSplitter` that ignores syntax worsens the problem by arbitrarily cutting tables and sentences at blind points every 256 characters.",
+        "Removing line breaks and Markdown structure destroys the coherence of the tables and technical headings, hindering the model's semantic understanding.",
+        null,
+        "A chunk of 120,000 words exceeds the capacity of most embedding models (typically 512 or 8192 tokens) and destroys the granularity of semantic retrieval."
+      ],
+      "dbg-09": [
+        "A size of 32 tokens is excessively tiny, destroys the syntax of contract clauses, and prevents the model from extracting coherent legal context.",
+        "Deleting alternate chunks causes a catastrophic loss of 50% of the document information available in the system.",
+        "Enlarging the chunk to 80,000 tokens exceeds the context limit of the vast majority of embedding models, causing forced truncation and data loss.",
+        null
+      ],
+      "dbg-10": [
+        null,
+        "A `LIKE '%query%'` query performs a strict text scan without semantic understanding, missing synonyms and lacking the ability to rank by contextual relevance.",
+        "Running an identical bi-encoder produces exactly the same scores and adds no new discriminative capability or cross-attention.",
+        "Reversing the order places the least relevant chunks in the prime positions of the prompt, seriously degrading the quality of the LLM's response."
+      ],
+      "dbg-11": [
+        "Concatenating into SQL without sanitizing exposes the system to SQL injection, and a literal search will fail because the exact words are not shared ('marriage' vs 'nuptials').",
+        null,
+        "Removing vowels corrupts the semantics of the language and destroys the embedding model's ability to map the meaning of the text.",
+        "Discarding the original query and imposing a static label prevents searching for the specificity of the employee's question in the document base."
+      ],
+      "dbg-12": [
+        null,
+        null,
+        "Exporting `.pkl` files to `/tmp` does not register the model in Unity Catalog or manage dependencies, making reproducible deployment on Model Serving impossible.",
+        "Embedding access tokens in the source code violates basic security policies and exposes credentials; the endpoint's managed identity or Databricks Secrets should be used."
+      ],
+      "dbg-13": [
+        "Sending executable binaries in the prompt is impossible in the LLM API and would represent an aberrant remote code execution vulnerability.",
+        "Allowing uncontrolled generation and execution of destructive SQL by an LLM violates all security principles and would put the database at risk.",
+        null,
+        "Forcing unstructured free text prevents the system from deterministically interpreting when to invoke the tools and with which exact parameters."
+      ],
+      "dbg-14": [
+        "Duplicating middle chunks wastes token budget, increases inference costs, and can induce hallucinations or redundancies in the response.",
+        "Removing 90% of the chunks deprives the model of the information needed to answer complex queries that require multiple sources.",
+        "Modifying positional attention weights is not a viable practice for Foundation Model APIs users and does not resolve the inherent bias of the Transformer architecture.",
+        null
+      ],
+      "dbg-15": [
+        null,
+        "`Direct Vector Access Index` requires the client application to manage ingestion, deletion, and vector computation through explicit REST API calls, losing the automation with Delta Lake.",
+        "Elasticsearch outside Unity Catalog loses the native integration with the catalog, the access controls, and the Databricks data lineage.",
+        "A full distributed scan in Spark for every interactive query takes minutes or tens of seconds, making it totally unviable for real-time conversational applications."
+      ],
+      "dbg-16": [
+        "It is in `Managed Embeddings` where Databricks manages the vectorization infrastructure; in `Self-managed` it is the user who controls and computes the embeddings.",
+        null,
+        "`Managed Embeddings` operates exclusively on Delta tables in Unity Catalog, not on flat CSV files lacking Change Data Feed.",
+        "`Self-managed Embeddings` does perform vector similarity searches; the difference lies only in who computes the vector."
+      ],
+      "dbg-17": [
+        "Delta Sync Index supports millions of records and hundreds of gigabytes; there is no size restriction below 10 MB or an obligation to partition by hour.",
+        "Delta Sync Index requires Unity Catalog; it does not work with the legacy Hive metastore or support tables with ACID disabled.",
+        null,
+        "The table must contain text fields in order to vectorize them (in Managed) or vector columns along with metadata; it cannot be numeric only."
+      ],
+      "dbg-18": [
+        "`Triggered` mode is typically scheduled at intervals (e.g., hourly or daily) to minimize costs in batch workloads, and does not meet the 60-second SLA.",
+        "A manual process is unviable for automated algorithmic flows and does not exist as a formal production mode for SLAs of seconds.",
+        "`Read-Only` mode would block the insertion of new news, defeating the functional purpose of the financial system.",
+        null
+      ],
+      "dbg-19": [
+        null,
+        "Reducing the embeddings to 4 dimensions destroys the representational capacity of the vector space and produces massive collisions between disparate concepts.",
+        "Removing part numbers deprives the system of the critical spare-part identification information that technicians urgently need.",
+        "Exact KNN with dot product on CPU does not resolve the representation mismatch of alphanumeric codes in continuous embeddings and is extremely slow."
+      ],
+      "dbg-20": [
+        "Retrieving 100,000 results on the client creates enormous network overhead, saturates the application server's memory, and penalizes latency.",
+        null,
+        "Creating a Spark cluster and reindexing for each individual search would take tens of minutes and generate an insane financial cost.",
+        "Adding text to the prompt does not guarantee that the retriever excludes documents from other countries or years; it is a fragile and ineffective technique for strict filters."
+      ],
+      "dbg-21": [
+        "Vector Search supports tens of millions of vectors in enterprise production environments; there is no rigid limit of 50,000 vectors.",
+        "HNSW vector storage and indexing run on Databricks' managed serverless infrastructure, not in the client's browser.",
+        null,
+        "Scaling Vector Search endpoints is done live without needing to restart Unity Catalog or schedule maintenance windows that interrupt the service."
+      ],
+      "dbg-22": [
+        "`ACCOUNT ADMIN` violates the principle of least privilege by needlessly granting control over users, billing, and global governance.",
+        "`MODIFY` and `CREATE TABLE` grant destructive data modification and creation permissions that are unnecessary and dangerous for an application that only reads.",
+        "Disabling Unity Catalog removes the company's security, exposes sensitive data, and is not a supported or recommended practice in Databricks.",
+        null
+      ],
+      "dbg-23": [
+        null,
+        null,
+        "Recreating the entire endpoint on every delete would cause unacceptable service outages and needless waits of tens of minutes.",
+        "Running `VACUUM` prematurely before the pipeline processes the CDF could purge data files required by the synchronization, causing inconsistencies."
+      ],
+      "dbg-24": [
+        null,
+        "The dot product operates natively on floating-point numbers (`float32`, `float64`); it is not restricted to 8-bit integers.",
+        "Cosine similarity bounds real values between -1 and 1; it does not produce imaginary complex numbers in any vector calculation.",
+        "The dot product is maximal for parallel vectors in the same direction and zero for orthogonal vectors; it does not require prior orthogonality."
+      ],
+      "dbg-25": [
+        "Dropping the table destroys corporate information, and the TSV format has no transactions, CDF, or optimization for Vector Search.",
+        null,
+        "Disabling ACID corrupts data reliability and disables the Delta Lake capabilities required by Vector Search.",
+        "Having 200 million tiny files causes the classic 'small files' problem, saturating the metastore and drastically slowing I/O."
+      ],
+      "dbg-26": [
+        "The embeddings endpoint processes readable text, not objects serialized with Pickle, which also represent a serious security risk.",
+        "An array of SHA-512 cryptographic hashes has no semantic meaning for an embedding language model.",
+        null,
+        "The column name is fully configurable by the user when creating the index; there is no fixed naming restriction."
+      ],
+      "dbg-27": [
+        "Deleting the Unity Catalog metastore is neither necessary nor permitted; the vector index definition can be modified or synchronized in an orderly manner.",
+        "Adding columns to a Delta table is a standard schema evolution operation that does not lock the table or corrupt storage.",
+        "Migrating to external NoSQL solutions is not required; Vector Search natively supports metadata and advanced filters within the Lakehouse.",
+        null
+      ],
+      "dbg-28": [
+        null,
+        "The endpoint does not restart or shut down on queries with non-indexed filters; the degradation is purely I/O from deferred post-filtering.",
+        "HTTP/2 and JSON handle text strings of any common length with no arbitrary limit of 8 characters.",
+        "Queries are run automatically in the Vector Search engine; no email process or manual resolution is involved."
+      ],
+      "dbg-29": [
+        "There is no 1,000-record limit in Databricks Vector Search; the error explicitly indicates a failure in the embeddings serving endpoint.",
+        null,
+        "Syncs run on serverless clusters decoupled from the user's web session; closing the browser does not stop the pipeline.",
+        "Databricks runs on Spark SQL and Delta Lake; it does not use Transact-SQL or local databases for vector synchronization."
+      ],
+      "dbg-30": [
+        "Model Serving is heavily optimized for GenAI, supporting state-of-the-art LLMs, multimodal models, agents, and external APIs.",
+        "There is no need to compile C++ or manage Kubernetes; Model Serving is a fully managed serverless service on Databricks.",
+        null,
+        "Model Serving provides real-time REST inference endpoints and low-latency streaming; it is not restricted to SQL batch executions."
+      ],
+      "dbg-31": [
+        "Reducing the timeout to 5 ms would cause virtually 100% of requests to fail before completing, destroying usability.",
+        "An interactive notebook is not a production environment, lacks autoscaling, offers no serving SLAs, and cannot support 500 requests per second.",
+        "Infinite retries without backoff create a request storm (retry storm) that worsens system saturation and aggravates 429 errors.",
+        null
+      ],
+      "dbg-32": [
+        null,
+        "Embedding API keys in notebook cells exposes the credentials to accidental security leaks, version control, and unauthorized access.",
+        "Uploading keys to DBFS with public read access is a critical vulnerability that allows any workspace user to steal the credentials.",
+        "Passing the key in the prompt exposes the credential in inference logs, chat interfaces, and vectors, violating any security standard."
+      ],
+      "dbg-33": [
+        "AI Gateway manages inference traffic and governance of AI models; it is not a transpiler or compiler for programming languages.",
+        null,
+        "AI Gateway relies on and integrates deeply with Unity Catalog for security and auditing; it does not replace it or remove its access controls.",
+        "It does not disconnect internet access or use magnetic tapes; it is a highly available, low-latency cloud service."
+      ],
+      "dbg-34": [
+        "gzip compression reduces network bandwidth consumption but does not analyze semantic content or anonymize personal data.",
+        "iptables rules filter packets at the IP/TCP network layer; they are completely blind to PII contained in natural language payloads.",
+        null,
+        "Relying on user promises is a purely administrative measure that offers no technical guarantee and does not meet data protection regulations."
+      ],
+      "dbg-35": [
+        null,
+        null,
+        "The length of scripts in Git repositories has no relation to real-time inference traffic or endpoint rate limits.",
+        "Temperature is a probabilistic sampling hyperparameter of the model, not a rate-limiting mechanism for controlling resource consumption."
+      ],
+      "dbg-36": [
+        "Replicating application servers does not solve the underlying problem if the external API that everyone queries is down.",
+        "Stopping the load balancer completely blocks the medical application, causing a total denial of service in an emergency environment.",
+        "Relying on human alerts to edit code introduces minutes or even quarter-hours of delay that are unacceptable for a medical triage system.",
+        null
+      ],
+      "dbg-37": [
+        null,
+        "Grouping requests into batches increases each user's individual latency because processing must wait until 64 queries have accumulated.",
+        "Running LLM inference on a single CPU thread would dramatically slow token generation speed, worsening the problem.",
+        "Compressing the response into a RAR file would require waiting for generation to finish completely and then compressing and decompressing, adding more delay."
+      ],
+      "dbg-38": [
+        "Installing libraries on the local machine has no effect whatsoever on the serverless containers running in the Databricks cloud.",
+        null,
+        "Model Serving containers are serverless and managed; they do not offer interactive SSH access or root superuser privileges to the user.",
+        "Rewriting AI frameworks in assembly is infeasible and absurd; standard libraries integrate cleanly through MLflow environment management."
+      ],
+      "dbg-39": [
+        "Keeping 4 fixed instances for 12 rarely queried models would generate exorbitant costs for completely idle resources.",
+        "Retraining models from scratch is extremely costly in time and GPU compute; already trained artifacts should be preserved in Unity Catalog.",
+        null,
+        "Disconnecting the workspace network would interrupt other critical ETL and production processes unrelated to the R&D models."
+      ],
+      "dbg-40": [
+        "Relying on users' manual discipline is not a technical traffic control mechanism and does not work for application or API calls.",
+        "Restarting servers degrades the service, causes connection errors for clients, and does not distribute traffic in a controlled probabilistic manner.",
+        "Shutting down the service interrupts corporate availability and negatively impacts users instead of performing a gradual transition.",
+        null
+      ],
+      "dbg-41": [
+        null,
+        "Counting characters or consonants does not evaluate at all the meaning, factual accuracy, or relevance of an answer to a question.",
+        "Assuming there are no errors ignores the phenomenon of hallucinations, loss of relevance, and comprehension errors inherent to LLMs.",
+        "The physical temperature of the hardware does not reflect the linguistic quality or correctness of the outputs produced by the model."
+      ],
+      "dbg-42": [
+        "The metric evaluates the relationship between the generated answer and the context documents; it does not judge the spelling of the user's query.",
+        null,
+        "Network latencies are measured in milliseconds through tracing or network monitoring, not through the semantic faithfulness metric.",
+        "The file size of the weights is a static storage property that has nothing to do with the semantic faithfulness of the answer."
+      ],
+      "dbg-43": [
+        "Faithfulness can be high if the history of RSA was present in the context chunks; the main and obvious failure is the lack of relevance.",
+        "Syntactic elegance does not compensate for a lack of pertinence; Answer Relevance severely penalizes straying off the topic of the query.",
+        null,
+        "Context Recall evaluates whether the retriever retrieved all the necessary information; the validity of session tokens does not affect MLflow metric calculation."
+      ],
+      "dbg-44": [
+        "Precision and Recall do not measure raw word counts or latencies in milliseconds; they are formal retrieval relevance metrics.",
+        "These metrics are standard in evaluating information retrieval (IR) and RAG systems over natural language, not exclusive to vision or audio.",
+        "They are clearly distinct concepts in the IR literature and in MLflow; they are not synonyms nor do they depend on the workspace language setting.",
+        null
+      ],
+      "dbg-45": [
+        null,
+        null,
+        "The Review App captures human feedback on the application; it does not perform destructive operations or alter the neural network weights on the fly.",
+        "Blocking or penalizing evaluators who report failures would destroy the continuous improvement process and is an outlandish claim."
+      ],
+      "dbg-46": [
+        null,
+        "MLflow Tracing operates at the application logic and software call level; it does not interact with low-level L1 hardware cache registers.",
+        "Tracing records inference payloads for observability; it does not steal private data or phone numbers from users' devices.",
+        "The purpose of Tracing is precisely to make the exact temporal and diagnostic execution transparent, not to hide the information with random numbers."
+      ],
+      "dbg-47": [
+        "Inference Tables do not use email or external SMTP protocols; they persist data natively and securely in Lakehouse Delta tables.",
+        null,
+        "Delta tables retain the full transaction history for auditing and temporal analysis; they are not overwritten or deleted every 60 seconds.",
+        "Logging is strictly asynchronous and does not block the real-time inference flow; it does not require human approvals per request."
+      ],
+      "dbg-48": [
+        "Printing code on paper is not a technical auditing mechanism in the cloud and does not demonstrate the real lineage of the data consumed in production.",
+        "Unity Catalog natively extends its lineage engine to MLflow models, volumes, Vector Search indexes, and serving endpoints.",
+        null,
+        "Destroying the information would constitute obstruction of the audit, a serious legal violation, and the loss of critical corporate data."
+      ],
+      "dbg-49": [
+        "Counting the word 'thank you' is an extremely simplistic heuristic that does not evaluate genuine empathy, clarity, or the professional tone of the message.",
+        "Modifying the hardware BIOS is impossible in managed cloud environments and has no impact on natural language semantics.",
+        "Blocking packets by word length prevents the assistant from providing complete explanations and does not evaluate the qualitative quality of the tone.",
+        null
+      ],
+      "dbg-50": [
+        "A local script on a personal machine is a precarious, non-scalable solution that lacks high availability for continuous enterprise monitoring.",
+        "Disabling inference tables removes all operational visibility and makes it impossible to monitor drift and quality in production.",
+        "Screenshots on a Tomcat server do not structure data drift metrics nor enable analytical supervision of models in production.",
+        null
+      ]
+    },
+    "glossary": [
+      {
+        "term": "Mosaic AI Vector Search",
+        "cat": "Vector Search",
+        "d": 3,
+        "def": "Serverless vector database engine in Databricks integrated with Unity Catalog that offers approximate nearest neighbor (ANN) search and hybrid search."
+      },
+      {
+        "term": "Delta Sync Index",
+        "cat": "Vector Search",
+        "d": 3,
+        "def": "Vector Search index that automatically synchronizes vectors and metadata from a Unity Catalog Delta table using Change Data Feed (CDF)."
+      },
+      {
+        "term": "Direct Vector Access Index",
+        "cat": "Vector Search",
+        "d": 3,
+        "def": "Vector Search index where vectors and metadata are inserted, updated, or deleted directly through REST API calls with no linked Delta table."
+      },
+      {
+        "term": "Change Data Feed (CDF)",
+        "cat": "Data Preparation",
+        "d": 3,
+        "def": "Delta Lake feature that records row-level changes (inserts, updates, deletes) for incremental streaming or batch processing."
+      },
+      {
+        "term": "Hybrid Search",
+        "cat": "Vector Search",
+        "d": 3,
+        "def": "Search technique that combines dense (semantic) vector similarity with sparse lexical search (BM25 / full-text) using Reciprocal Rank Fusion."
+      },
+      {
+        "term": "Mosaic AI Model Serving",
+        "cat": "Model Serving",
+        "d": 4,
+        "def": "Low-latency serverless platform for deploying foundation LLMs, custom MLflow models, and external model APIs with automatic scaling."
+      },
+      {
+        "term": "AI Gateway",
+        "cat": "Governance & Serving",
+        "d": 4,
+        "def": "Centralized management layer in Model Serving that provides security guardrails, rate limits, routing with fallback, and cost tracking."
+      },
+      {
+        "term": "Provisioned Throughput",
+        "cat": "Model Serving",
+        "d": 4,
+        "def": "Model Serving deployment mode with reserved compute capacity (Model Units) that guarantees deterministic latency and concurrency without rate limits."
+      },
+      {
+        "term": "Pay-per-token",
+        "cat": "Model Serving",
+        "d": 4,
+        "def": "Consumption mode in Foundation Model APIs where billing is based solely on the volume of input tokens and output tokens processed."
+      },
+      {
+        "term": "External Models",
+        "cat": "Model Serving",
+        "d": 4,
+        "def": "Model Serving feature that lets you expose and govern models from external providers (OpenAI, Anthropic, Cohere) through a unified API."
+      },
+      {
+        "term": "Guardrails (AI Gateway)",
+        "cat": "Security & Guardrails",
+        "d": 4,
+        "def": "Configurable filters in AI Gateway for automatic detection and redaction of PII (sensitive information), toxicity analysis, and jailbreak prevention."
+      },
+      {
+        "term": "Rate Limiting",
+        "cat": "Model Serving",
+        "d": 4,
+        "def": "AI Gateway policies that restrict the number of requests per minute (RPM) or tokens per minute (TPM) per user, team, or API key."
+      },
+      {
+        "term": "Fallback Routing",
+        "cat": "Model Serving",
+        "d": 4,
+        "def": "High-availability mechanism in AI Gateway that automatically switches to a backup model if the primary endpoint returns 429 or 5xx errors."
+      },
+      {
+        "term": "Inference Tables",
+        "cat": "Governance & Auditing",
+        "d": 5,
+        "def": "Automatic, asynchronous logging of incoming requests, model responses, and metrics to a Unity Catalog Delta table for auditing and monitoring."
+      },
+      {
+        "term": "mlflow.evaluate()",
+        "cat": "Evaluation",
+        "d": 5,
+        "def": "MLflow function for evaluating models and GenAI chains by computing classic, statistical, and LLM-as-a-judge metrics over evaluation datasets."
+      },
+      {
+        "term": "LLM-as-a-Judge",
+        "cat": "Evaluation",
+        "d": 5,
+        "def": "Pattern where a high-capacity language model evaluates the quality, relevance, and correctness of responses generated by another model following formal rubrics."
+      },
+      {
+        "term": "Faithfulness (Groundedness)",
+        "cat": "Evaluation",
+        "d": 5,
+        "def": "GenAI evaluation metric that quantifies whether all factual claims in the response are strictly grounded in the retrieved context (anti-hallucination)."
+      },
+      {
+        "term": "Answer Relevance",
+        "cat": "Evaluation",
+        "d": 5,
+        "def": "Evaluation metric that rates whether the generated answer responds pertinently and directly to the user's question, regardless of the context."
+      },
+      {
+        "term": "Context Precision",
+        "cat": "Evaluation",
+        "d": 5,
+        "def": "Retrieval component (retriever) metric that measures whether the most relevant context chunks appear in the top positions of the returned ranking."
+      },
+      {
+        "term": "Context Recall",
+        "cat": "Evaluation",
+        "d": 5,
+        "def": "Retriever metric that evaluates whether the retrieved chunks contain all the information needed to adequately answer the query."
+      },
+      {
+        "term": "MLflow Tracing",
+        "cat": "Observability",
+        "d": 5,
+        "def": "OpenTelemetry-based observability tool that captures hierarchical spans, latencies, prompts, and tool calls in GenAI chains and agents."
+      },
+      {
+        "term": "Review App",
+        "cat": "Evaluation",
+        "d": 5,
+        "def": "Interactive Mosaic AI Agent Evaluation application that lets business experts rate generated responses, record feedback, and refine test datasets."
+      },
+      {
+        "term": "Unity Catalog",
+        "cat": "Governance",
+        "d": 1,
+        "def": "Unified governance layer in Databricks for data, models, functions, volumes, and vector indexes with fine-grained access control and lineage."
+      },
+      {
+        "term": "Recursive Character Chunking",
+        "cat": "Data Preparation",
+        "d": 2,
+        "def": "Text splitting algorithm that recursively splits by a hierarchical list of delimiters (paragraphs, line breaks, spaces) to preserve semantic coherence."
+      },
+      {
+        "term": "Cross-Encoder Re-ranking",
+        "cat": "RAG & Chains",
+        "d": 2,
+        "def": "Model that jointly evaluates the query and each candidate document, assigning a precise relevance score; used as a second stage after the bi-encoder."
+      }
     ]
-  },
-  "glossary": [
-    {
-      "term": "Mosaic AI Vector Search",
-      "cat": "Vector Search",
-      "d": 3,
-      "def": "Motor de base de datos vectorial serverless en Databricks integrado con Unity Catalog que ofrece búsqueda de vecinos más cercanos (ANN) y búsqueda híbrida."
-    },
-    {
-      "term": "Delta Sync Index",
-      "cat": "Vector Search",
-      "d": 3,
-      "def": "Índice de Vector Search que sincroniza automáticamente vectores y metadatos desde una tabla Delta de Unity Catalog usando Change Data Feed (CDF)."
-    },
-    {
-      "term": "Direct Vector Access Index",
-      "cat": "Vector Search",
-      "d": 3,
-      "def": "Índice de Vector Search donde los vectores y metadatos se insertan, actualizan o eliminan directamente mediante llamadas a la API REST sin tabla Delta vinculada."
-    },
-    {
-      "term": "Change Data Feed (CDF)",
-      "cat": "Data Preparation",
-      "d": 3,
-      "def": "Característica de Delta Lake que registra cambios fila por fila (inserciones, actualizaciones, borrados) para procesamiento incremental por streaming o batch."
-    },
-    {
-      "term": "Hybrid Search",
-      "cat": "Vector Search",
-      "d": 3,
-      "def": "Técnica de búsqueda que combina similitud vectorial densa (semántica) con búsqueda léxica dispersa (BM25 / full-text) usando Reciprocal Rank Fusion."
-    },
-    {
-      "term": "Mosaic AI Model Serving",
-      "cat": "Model Serving",
-      "d": 4,
-      "def": "Plataforma serverless de baja latencia para desplegar LLMs fundacionales, modelos MLflow personalizados y APIs de modelos externos con escalado automático."
-    },
-    {
-      "term": "AI Gateway",
-      "cat": "Governance & Serving",
-      "d": 4,
-      "def": "Capa de gestión centralizada en Model Serving que proporciona guardrails de seguridad, límites de tasa, enrutamiento con fallback y seguimiento de costes."
-    },
-    {
-      "term": "Provisioned Throughput",
-      "cat": "Model Serving",
-      "d": 4,
-      "def": "Modo de despliegue en Model Serving con capacidad de cómputo reservada (Model Units) que garantiza latencia determinista y concurrencia sin límites de tasa."
-    },
-    {
-      "term": "Pay-per-token",
-      "cat": "Model Serving",
-      "d": 4,
-      "def": "Modalidad de consumo en Foundation Model APIs donde se factura exclusivamente por el volumen de tokens de entrada y tokens de salida procesados."
-    },
-    {
-      "term": "External Models",
-      "cat": "Model Serving",
-      "d": 4,
-      "def": "Funcionalidad de Model Serving que permite exponer y gobernar modelos de proveedores externos (OpenAI, Anthropic, Cohere) a través de una API unificada."
-    },
-    {
-      "term": "Guardrails (AI Gateway)",
-      "cat": "Security & Guardrails",
-      "d": 4,
-      "def": "Filtros configurables en AI Gateway para detección y redacción automática de PII (información sensible), análisis de toxicidad y prevención de jailbreaks."
-    },
-    {
-      "term": "Rate Limiting",
-      "cat": "Model Serving",
-      "d": 4,
-      "def": "Políticas en AI Gateway que restringen el número de peticiones por minuto (RPM) o tokens por minuto (TPM) por usuario, equipo o clave de API."
-    },
-    {
-      "term": "Fallback Routing",
-      "cat": "Model Serving",
-      "d": 4,
-      "def": "Mecanismo de alta disponibilidad en AI Gateway que conmuta automáticamente a un modelo de respaldo si el endpoint principal devuelve errores 429 o 5xx."
-    },
-    {
-      "term": "Inference Tables",
-      "cat": "Governance & Auditing",
-      "d": 5,
-      "def": "Registro automático y asíncrono de solicitudes entrantes, respuestas del modelo y métricas en una tabla Delta de Unity Catalog para auditoría y monitoreo."
-    },
-    {
-      "term": "mlflow.evaluate()",
-      "cat": "Evaluation",
-      "d": 5,
-      "def": "Función de MLflow para evaluar modelos y cadenas GenAI calculando métricas clásicas, estadísticas y basadas en LLM-as-a-judge sobre datasets de evaluación."
-    },
-    {
-      "term": "LLM-as-a-Judge",
-      "cat": "Evaluation",
-      "d": 5,
-      "def": "Patrón donde un modelo de lenguaje de alta capacidad evalúa la calidad, relevancia y corrección de las respuestas generadas por otro modelo siguiendo rúbricas formales."
-    },
-    {
-      "term": "Faithfulness (Groundedness)",
-      "cat": "Evaluation",
-      "d": 5,
-      "def": "Métrica de evaluación GenAI que cuantifica si todas las afirmaciones factuales de la respuesta se fundamentan estrictamente en el contexto recuperado (anti-alucinación)."
-    },
-    {
-      "term": "Answer Relevance",
-      "cat": "Evaluation",
-      "d": 5,
-      "def": "Métrica de evaluación que califica si la respuesta generada responde de forma pertinente y directa a la pregunta del usuario, independientemente del contexto."
-    },
-    {
-      "term": "Context Precision",
-      "cat": "Evaluation",
-      "d": 5,
-      "def": "Métrica del componente de recuperación (retriever) que mide si los fragmentos de contexto más relevantes aparecen en las posiciones superiores del ranking devuelto."
-    },
-    {
-      "term": "Context Recall",
-      "cat": "Evaluation",
-      "d": 5,
-      "def": "Métrica del retriever que evalúa si los fragmentos recuperados contienen toda la información necesaria para responder adecuadamente a la consulta formulada."
-    },
-    {
-      "term": "MLflow Tracing",
-      "cat": "Observability",
-      "d": 5,
-      "def": "Herramienta de observabilidad basada en OpenTelemetry que captura spans jerárquicos, latencias, prompts y llamadas a herramientas en cadenas y agentes GenAI."
-    },
-    {
-      "term": "Review App",
-      "cat": "Evaluation",
-      "d": 5,
-      "def": "Aplicación interactiva de Mosaic AI Agent Evaluation que permite a expertos de negocio calificar respuestas generadas, registrar feedback y refinar datasets de prueba."
-    },
-    {
-      "term": "Unity Catalog",
-      "cat": "Governance",
-      "d": 1,
-      "def": "Plano unificado de gobernanza en Databricks para datos, modelos, funciones, volúmenes e índices vectoriales con control de acceso granular y linaje."
-    },
-    {
-      "term": "Recursive Character Chunking",
-      "cat": "Data Preparation",
-      "d": 2,
-      "def": "Algoritmo de división de texto que divide recursivamente por una lista jerárquica de delimitadores (párrafos, saltos de línea, espacios) para preservar la coherencia semántica."
-    },
-    {
-      "term": "Cross-Encoder Re-ranking",
-      "cat": "RAG & Chains",
-      "d": 2,
-      "def": "Modelo que evalúa conjuntamente la consulta y cada documento candidato asignando un score de relevancia preciso, utilizado como segunda fase tras el bi-encoder."
-    }
-  ]
-};
+  };
 })(window);
