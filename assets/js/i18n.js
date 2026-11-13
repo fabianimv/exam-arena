@@ -73,7 +73,7 @@
 
   /**
    * Obtiene el idioma activo ('es' o 'en').
-   * Prioridad: localStorage > detección de navegador > 'es'.
+   * Prioridad: localStorage > detección de navegador > 'en'.
    * @returns {'es'|'en'}
    */
   function getLang() {
@@ -96,11 +96,12 @@
           }
         }
         var single = (nav.language || nav.userLanguage || '').toLowerCase();
+        if (single.indexOf('es') === 0) return 'es';
         if (single.indexOf('en') === 0) return 'en';
       }
     } catch (e) {}
 
-    return 'es';
+    return 'en';
   }
 
   /**
