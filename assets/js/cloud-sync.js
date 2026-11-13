@@ -235,6 +235,10 @@
   }
 
   function getKey() {
+    if (DEFAULT_SUPABASE_URL && DEFAULT_SUPABASE_ANON_KEY && getUrl() === DEFAULT_SUPABASE_URL) {
+      try { localStorage.removeItem(STORAGE_KEYS.KEY); } catch (e) {}
+      return String(DEFAULT_SUPABASE_ANON_KEY).trim();
+    }
     var key = '';
     try {
       key = localStorage.getItem(STORAGE_KEYS.KEY) || DEFAULT_SUPABASE_ANON_KEY || '';
