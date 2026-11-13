@@ -12,7 +12,21 @@
   var DEFAULT_SUPABASE_URL = 'https://cvzcjrhxifecieeefdpq.supabase.co';
   var DEFAULT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2emNqcmh4aWZlY2llZWVmZHBxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ5MTUzNDYsImV4cCI6MjEwMDQ5MTM0Nn0.05a_l0G6rx-YbxZElo80k16lYb1YW2L0z7ZngpB1W78';
 
-  var EXAM_IDS = ['sre-incidents', 'kafka-confluent', 'gcp-genai-leader', 'az-104', 'aws-saa-c03'];
+  var EXAM_IDS = [
+    'claude-architect',
+    'claude-developer',
+    'claude-associate',
+    'databricks-genai',
+    'databricks-de',
+    'nvidia-genl',
+    'k8s-kcna',
+    'terraform-003',
+    'sre-incidents',
+    'kafka-confluent',
+    'gcp-genai-leader',
+    'az-104',
+    'aws-saa-c03'
+  ];
 
   // Claves en localStorage
   var STORAGE_KEYS = {

@@ -2,7 +2,8 @@
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-2ea44f?style=flat-square&logo=github)](https://fabianimv.github.io/exam-arena/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
-[![Questions](https://img.shields.io/badge/Questions-494%20Scenarios-orange?style=flat-square)](#included-exam-tracks)
+[![Questions](https://img.shields.io/badge/Questions-902%20Scenarios-orange?style=flat-square)](#included-exam-tracks)
+[![Visuals](https://img.shields.io/badge/SVG%20Visuals-617%20Unique-blue?style=flat-square)](#included-exam-tracks)
 [![i18n](https://img.shields.io/badge/i18n-ES%20%7C%20EN-purple?style=flat-square)](#automatic-bilingual-localization-es--en)
 [![Cloud Sync](https://img.shields.io/badge/Cloud%20Sync-Supabase-3ECF8E?style=flat-square&logo=supabase)](#cloud-sync-setup-supabase-free-tier)
 [![Powered by study-tracker](https://img.shields.io/badge/Tracking-%40fabianimv%2Fstudy--tracker-blueviolet?style=flat-square)](https://github.com/fabianimv/study-tracker)
@@ -14,7 +15,11 @@
 ## 🌟 Key Features
 
 ### 🎯 Multi-Provider Exam & SRE Incident Simulator
-Unifies 5 production engineering, streaming, and cloud certification tracks into a single, high-performance, zero-build web application:
+Unifies 13 AI, Data, Cloud Native, IaC, streaming, and SRE certification tracks into a single, high-performance, zero-build web application — ordered from newest/featured to traditional:
+- **Anthropic Claude Certifications** (`CCAR-F` Architect, `CCDV-F` Developer, `CCAO-F` Associate)
+- **Databricks** (Generative AI Engineer Associate & Data Engineer Associate)
+- **NVIDIA** (Generative AI LLMs `NCA-GENL`)
+- **CNCF & HashiCorp** (Kubernetes `KCNA` & Terraform Associate `003`)
 - **SRE & Production Engineering Incidents** (Real on-call outage response scenarios)
 - **Apache Kafka & Confluent Platform (CCDAK / CCAAK)** (Event-driven architecture, KRaft, EOS, Connect & Kafka Streams)
 - **Google Cloud Generative AI Leader**
@@ -49,14 +54,22 @@ Study seamlessly across desktop, tablet, and mobile browsers:
 
 ## 📚 Included Exam Tracks
 
-| Provider / Track | ID (`appId`) | Scenarios | Domains | Content & Study Resources |
+| Provider / Track | ID (`appId`) | Scenarios | Unique SVGs | Highlights |
 | :--- | :--- | :---: | :---: | :--- |
-| 🚨 **SRE & Production Engineering** | `sre-incidents` | **60** | **6** | 9 production study guides, 50 glossary terms. Covers Incident Command, K8s traffic, Kafka, Prometheus/Thanos, DRP, DNS, TLS, and GitOps drift. |
-| 📡 **Apache Kafka & Confluent** | `kafka-confluent` | **60** | **5** | 10 study topics, 38 glossary terms. Covers KRaft, ISR/replication, Producer/Consumer tuning, EOS transactions, Schema Registry, Connect, and Kafka Streams/ksqlDB. |
-| ☁️ **Google Cloud GenAI Leader** | `gcp-genai-leader` | **200** | **4** | 16 study topics, 85 glossary terms. Covers LLM fundamentals, Vertex AI, Gemini, Model Garden, fine-tuning, RAG, and AI governance. |
-| 🔷 **Microsoft Azure (AZ-104)** | `az-104` | **130** | **5** | 5 domain summaries, 11 glossary terms. Covers Entra ID, governance, storage redundancy, ARM/Bicep, compute, VNets, and Azure Monitor. |
-| 🟧 **AWS Solutions Architect (SAA-C03)** | `aws-saa-c03` | **44** | **4** | 4 domain summaries, 6 glossary terms. Covers Well-Architected Framework: secure, resilient, high-performing, and cost-optimized architectures. |
-| **Total Arena Scenarios** | — | **494** | **24** | **44 study topics & 190 technical glossary terms** |
+| 🏛️ **Anthropic · Claude Architect (CCAR-F)** *(Featured)* | `claude-architect` | **55** | **44** | Agentic orchestration, Claude Agent SDK, Claude Code, MCP, structured JSON & context reliability. |
+| ⚡ **Anthropic · Claude Developer (CCDV-F)** *(Featured)* | `claude-developer` | **53** | **48** | Messages API, SSE streaming, Prompt Caching, Batches API, tool use, MCP & evals. |
+| ✨ **Anthropic · Claude Associate (CCAO-F)** *(Featured)* | `claude-associate` | **55** | **35** | Claude Projects, Artifacts, AUP/PII governance, Human-in-the-Loop, rubrics & prompt chaining. |
+| 🧱 **Databricks · GenAI Engineer** *(Featured)* | `databricks-genai` | **50** | **42** | Mosaic AI Vector Search, RAG, Model Serving, AI Gateway, MLflow Evaluation & Unity Catalog. |
+| 🧱 **Databricks · Data Engineer** *(Featured)* | `databricks-de` | **50** | **43** | Lakehouse, Medallion Architecture, Delta Lake, Auto Loader, DLT, Workflows & Unity Catalog. |
+| 🟩 **NVIDIA · GenAI LLMs (NCA-GENL)** *(Featured)* | `nvidia-genl` | **45** | **38** | Transformers, FlashAttention, LoRA/QLoRA, NeMo, NIM, TensorRT-LLM & PagedAttention. |
+| ☸️ **CNCF · Kubernetes (KCNA)** | `k8s-kcna` | **50** | **42** | Control Plane, Pods, Services, NetworkPolicy, Gateway API, Observability & GitOps. |
+| 🟪 **HashiCorp · Terraform (003)** | `terraform-003` | **50** | **42** | IaC, HCL, State & Locking, `moved`/`import`, `for_each` vs `count`, Modules & HCP Terraform. |
+| 🚨 **SRE & Production Engineering** | `sre-incidents` | **60** | **49** | Incident Command, K8s traffic, Kafka, Prometheus/Thanos, DRP, DNS, TLS & GitOps drift. |
+| 📡 **Apache Kafka & Confluent** | `kafka-confluent` | **60** | **49** | KRaft, ISR/replication, Producer/Consumer tuning, EOS, Schema Registry, Connect & Streams. |
+| ☁️ **Google Cloud GenAI Leader** | `gcp-genai-leader` | **200** | **94** | LLM fundamentals, Vertex AI, Gemini, Model Garden, fine-tuning, RAG & AI governance. |
+| 🔷 **Microsoft Azure (AZ-104)** | `az-104` | **130** | **55** | Entra ID, governance, storage redundancy, ARM/Bicep, compute, VNets & Azure Monitor. |
+| 🟧 **AWS Solutions Architect (SAA-C03)** | `aws-saa-c03` | **44** | **36** | Well-Architected Framework: secure, resilient, high-performing & cost-optimized architectures. |
+| **Total Arena Scenarios** | — | **902** | **617** | **13 certification tracks with ad-hoc SVG diagrams & per-option rationales** |
 
 ---
 

@@ -6,12 +6,26 @@
 (function (w, d) {
   'use strict';
 
-  var EXAM_ORDER = ['sre-incidents', 'kafka-confluent', 'gcp-genai-leader', 'az-104', 'aws-saa-c03'];
+  var EXAM_ORDER = [
+    'claude-architect',
+    'claude-developer',
+    'claude-associate',
+    'databricks-genai',
+    'databricks-de',
+    'nvidia-genl',
+    'k8s-kcna',
+    'terraform-003',
+    'sre-incidents',
+    'kafka-confluent',
+    'gcp-genai-leader',
+    'az-104',
+    'aws-saa-c03'
+  ];
   var LETTERS = 'ABCDEF';
   var view = d.getElementById('view');
   var picker = d.getElementById('exam-picker');
 
-  var currentExamId = 'sre-incidents';
+  var currentExamId = 'claude-architect';
   var currentTab = 'examenes';
 
   /* Inyección de ajuste tipográfico para tarjetas KPI */
@@ -369,9 +383,11 @@
         return '<span class="domain-chip">' + esc(name) + '</span>';
       }).join('');
 
-      return '<div class="hub-card' + (isCurrent ? ' current' : '') + '" data-provider="' + esc(id) + '">' +
+      var featuredHtml = ex.featured ? '<span class="featured-pill">' + t('featured_badge', '✨ Featured') + '</span>' : '';
+
+      return '<div class="hub-card' + (isCurrent ? ' current' : '') + (ex.featured ? ' is-featured' : '') + '" data-provider="' + esc(id) + '">' +
         '<div>' +
-          '<span class="badge">' + ex.icon + ' ' + esc(ex.provider) + '</span>' +
+          '<div class="hub-card-badges"><span class="badge">' + ex.icon + ' ' + esc(ex.provider) + '</span>' + featuredHtml + '</div>' +
           '<h3>' + esc(ex.title) + '</h3>' +
           '<p class="muted small">' + esc(ex.subtitle) + '</p>' +
           '<div class="hub-domains">' + domainChips + '</div>' +
@@ -397,7 +413,7 @@
         '<h1>' + t('hub_title', 'Simulador General de Exámenes Cloud & SRE') + '</h1>' +
         '<p class="muted">' + t('hub_desc', 'Elige un proveedor o certificación. Cada pregunta se corrige al instante explicando <b>por qué tu opción elegida es incorrecta</b> y <b>por qué la respuesta correcta es la adecuada</b>. Todo tu avance se guarda localmente en este navegador con <code>@fabianimv/study-tracker</code> y puede sincronizarse en la nube.') + '</p>' +
         '<div class="hub-kpis">' +
-          '<div class="kpi-card"><b>' + totalQ + '</b><span>' + t('kpi_total_q', 'Preguntas en 5 simuladores') + '</span></div>' +
+          '<div class="kpi-card"><b>' + totalQ + '</b><span>' + t('kpi_total_q', 'Preguntas en 13 simuladores') + '</span></div>' +
           '<div class="kpi-card"><b>' + totalSeen + ' / ' + totalQ + '</b><span>' + t('kpi_seen', 'Preguntas vistas') + '</span></div>' +
           '<div class="kpi-card"><b>' + globalMastery + '</b><span>' + t('kpi_mastery', 'Dominio global estimado') + '</span></div>' +
           '<div class="kpi-card"><b>' + totalSessions + '</b><span>' + t('kpi_sessions', 'Sesiones completadas') + '</span></div>' +
