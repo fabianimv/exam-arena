@@ -6,7 +6,6 @@
   'use strict';
 
   var STORAGE_LANG_KEY = 'exam-arena-lang';
-  var CACHE_KEY = 'exam-arena-tr-en-v3';
 
   /* ---------- 1. Formateo y escape de texto ---------- */
 
@@ -73,7 +72,7 @@
 
   /**
    * Obtiene el idioma activo ('es' o 'en').
-   * Prioridad: localStorage > detección de navegador > 'es'.
+   * Prioridad: localStorage (elección del usuario) > 'en' (por defecto).
    * @returns {'es'|'en'}
    */
   function getLang() {
@@ -84,23 +83,7 @@
       }
     } catch (e) {}
 
-    try {
-      var nav = w.navigator;
-      if (nav) {
-        var langs = nav.languages;
-        if (langs && langs.length) {
-          for (var i = 0; i < langs.length; i++) {
-            var l = (langs[i] || '').toLowerCase();
-            if (l.indexOf('en') === 0) return 'en';
-            if (l.indexOf('es') === 0) return 'es';
-          }
-        }
-        var single = (nav.language || nav.userLanguage || '').toLowerCase();
-        if (single.indexOf('en') === 0) return 'en';
-      }
-    } catch (e) {}
-
-    return 'es';
+    return 'en';
   }
 
   /**
@@ -110,7 +93,7 @@
    * @returns {'es'|'en'}
    */
   function setLang(lang) {
-    var target = (lang === 'en') ? 'en' : 'es';
+    var target = (lang === 'es') ? 'es' : 'en';
     try {
       if (w.localStorage) {
         w.localStorage.setItem(STORAGE_LANG_KEY, target);
@@ -140,7 +123,7 @@
    * @returns {'es'|'en'}
    */
   function toggleLang() {
-    return setLang(getLang() === 'es' ? 'en' : 'es');
+    return setLang(getLang() === 'en' ? 'es' : 'en');
   }
 
   /* ---------- 3. Diccionario de UI ---------- */
@@ -158,6 +141,7 @@
       theme_to_light: 'Cambiar a tema claro',
       theme_to_dark: 'Cambiar a tema oscuro',
       lang_toggle_title: 'Cambiar idioma (ES/EN)',
+      footer_html: 'Simulador de estudio y entrenamiento de incidentes SRE · Código en <a href="https://github.com/fabianimv/exam-arena" target="_blank" rel="noopener">GitHub</a> · Progreso impulsado por <a href="https://github.com/fabianimv/study-tracker" target="_blank" rel="noopener">@fabianimv/study-tracker</a>.',
       sync_connect: 'Nube',
       sync_connected: 'Sincronizado',
       sync_syncing: 'Sincronizando…',
@@ -251,7 +235,8 @@
       // Header & Sync
       theme_to_light: 'Switch to light theme',
       theme_to_dark: 'Switch to dark theme',
-      lang_toggle_title: 'Switch language (ES/EN)',
+      lang_toggle_title: 'Switch language (EN/ES)',
+      footer_html: 'Certification study and SRE incident training simulator · Source on <a href="https://github.com/fabianimv/exam-arena" target="_blank" rel="noopener">GitHub</a> · Progress powered by <a href="https://github.com/fabianimv/study-tracker" target="_blank" rel="noopener">@fabianimv/study-tracker</a>.',
       sync_connect: 'Cloud Sync',
       sync_connected: 'Synced',
       sync_syncing: 'Syncing…',
@@ -344,10 +329,10 @@
    */
   function t(key, vars, langOverride) {
     var lang = langOverride || getLang();
-    var dict = DICTIONARY[lang] || DICTIONARY.es;
+    var dict = DICTIONARY[lang] || DICTIONARY.en;
     var str = dict[key];
-    if (str === undefined && DICTIONARY.es) {
-      str = DICTIONARY.es[key];
+    if (str === undefined && DICTIONARY.en) {
+      str = DICTIONARY.en[key];
     }
     if (str === undefined) {
       str = key;
@@ -433,303 +418,19 @@
     };
   }
 
-  /* ---------- 4. Traducción Dinámica con Caché (ES -> EN) ---------- */
+  /* ---------- 4. Contenido de exámenes ----------
+     El contenido se publica estático en ambos idiomas:
+     data/<exam>/exam.js (inglés, por defecto) y data/<exam>/exam.es.js (español).
+     Ya no se traduce en tiempo de ejecución. */
 
-  var memCache = {};
-  var cacheLoaded = false;
-
-  function loadCache() {
-    if (cacheLoaded) return;
-    try {
-      if (w.localStorage) {
-        var raw = w.localStorage.getItem(CACHE_KEY);
-        if (raw) {
-          var parsed = JSON.parse(raw);
-          if (parsed && typeof parsed === 'object') {
-            memCache = parsed;
-          }
-        }
-      }
-    } catch (e) {}
-    cacheLoaded = true;
-  }
-
-  function saveCache() {
-    try {
-      if (w.localStorage) {
-        w.localStorage.setItem(CACHE_KEY, JSON.stringify(memCache));
-      }
-    } catch (e) {}
-  }
-
-  function clearCache() {
-    memCache = {};
-    try {
-      if (w.localStorage) {
-        w.localStorage.removeItem(CACHE_KEY);
-      }
-    } catch (e) {}
-  }
-
-  /**
-   * Devuelve la traducción en caché si existe, o el string original.
-   * @param {string} str
-   * @returns {string}
-   */
-  function getCachedTranslation(str) {
-    if (typeof str !== 'string' || !str) return str;
-    loadCache();
-    if (memCache && typeof memCache[str] === 'string') {
-      return memCache[str];
-    }
-    return str;
-  }
-
-  /**
-   * Realiza una petición GET segura compatible con fetch y XMLHttpRequest.
-   */
-  function httpGet(url, done) {
-    if (typeof fetch === 'function') {
-      fetch(url)
-        .then(function (res) {
-          if (!res.ok) throw new Error('HTTP ' + res.status);
-          return res.json();
-        })
-        .then(function (data) { done(null, data); })
-        .catch(function (err) { done(err); });
-    } else if (typeof XMLHttpRequest !== 'undefined') {
-      try {
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', url, true);
-        xhr.onreadystatechange = function () {
-          if (xhr.readyState === 4) {
-            if (xhr.status >= 200 && xhr.status < 300) {
-              try {
-                var json = JSON.parse(xhr.responseText);
-                done(null, json);
-              } catch (e) {
-                done(e);
-              }
-            } else {
-              done(new Error('HTTP ' + xhr.status));
-            }
-          }
-        };
-        xhr.onerror = function (e) { done(e || new Error('Network error')); };
-        xhr.send();
-      } catch (err) {
-        done(err);
-      }
-    } else {
-      done(new Error('No HTTP transport available'));
-    }
-  }
-
-  /**
-   * Extrae el texto traducido completo desde la respuesta de Google Translate GTX.
-   */
-  function extractTranslation(data) {
-    if (!Array.isArray(data) || !Array.isArray(data[0])) return null;
-    var out = '';
-    for (var i = 0; i < data[0].length; i++) {
-      if (data[0][i] && typeof data[0][i][0] === 'string') {
-        out += data[0][i][0];
-      }
-    }
-    return out;
-  }
-
-  /**
-   * Traduce un lote de cadenas al inglés con caché local.
-   * Si todos los textos están en caché, llama al callback de forma síncrona.
-   * Si la red falla, devuelve los textos originales sin arrojar errores.
-   * @param {string[]} stringsArray
-   * @param {function(string[]): void} callback
-   */
-  function translateBatch(stringsArray, callback) {
-    if (!Array.isArray(stringsArray)) {
-      stringsArray = stringsArray != null ? [String(stringsArray)] : [];
-    }
-
-    if (stringsArray.length === 0 || getLang() !== 'en') {
-      var copy = stringsArray.slice();
-      if (typeof callback === 'function') callback(copy);
-      return copy;
-    }
-
-    loadCache();
-
-    var missing = [];
-    var missingSet = {};
-    for (var i = 0; i < stringsArray.length; i++) {
-      var s = stringsArray[i];
-      if (typeof s === 'string' && s.trim().length > 0 && memCache[s] === undefined) {
-        if (!missingSet[s]) {
-          missingSet[s] = true;
-          missing.push(s);
-        }
-      }
-    }
-
-    // Si todo está en caché, responder sincrónicamente
-    if (missing.length === 0) {
-      var cachedRes = stringsArray.map(function (str) {
-        return (typeof str === 'string' && memCache[str] !== undefined) ? memCache[str] : str;
-      });
-      if (typeof callback === 'function') callback(cachedRes);
-      return cachedRes;
-    }
-
-    // Dividir en bloques de hasta ~3200 caracteres codificados
-    var DELIM = '\n ||| \n';
-    var chunks = [];
-    var curChunk = [];
-    var curLen = 0;
-
-    for (var m = 0; m < missing.length; m++) {
-      var item = missing[m];
-      var encLen = encodeURIComponent(item).length + DELIM.length;
-      if (curChunk.length > 0 && (curLen + encLen > 3200)) {
-        chunks.push(curChunk);
-        curChunk = [item];
-        curLen = encLen;
-      } else {
-        curChunk.push(item);
-        curLen += encLen;
-      }
-    }
-    if (curChunk.length > 0) chunks.push(curChunk);
-
-    var pending = chunks.length;
-
-    function finish() {
-      saveCache();
-      var finalMapped = stringsArray.map(function (str) {
-        return (typeof str === 'string' && memCache[str] !== undefined) ? memCache[str] : str;
-      });
-      if (typeof callback === 'function') callback(finalMapped);
-    }
-
-    function processChunk(chunk) {
-      var query = chunk.join(DELIM);
-      var url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=es&tl=en&dt=t&q=' + encodeURIComponent(query);
-
-      httpGet(url, function (err, data) {
-        if (!err && data) {
-          var translated = extractTranslation(data);
-          if (typeof translated === 'string') {
-            if (chunk.length === 1) {
-              memCache[chunk[0]] = translated.trim();
-            } else {
-              var parts = translated.split(/\s*\|\|\|\s*/);
-              if (parts.length === chunk.length) {
-                for (var p = 0; p < chunk.length; p++) {
-                  memCache[chunk[p]] = parts[p].trim();
-                }
-              } else {
-                var altParts = translated.split(/[\r\n]+\s*\|\|\|\s*[\r\n]+/);
-                if (altParts.length === chunk.length) {
-                  for (var a = 0; a < chunk.length; a++) {
-                    memCache[chunk[a]] = altParts[a].trim();
-                  }
-                } else {
-                  // Respaldo sin romper
-                  for (var f = 0; f < chunk.length; f++) {
-                    if (!memCache[chunk[f]]) {
-                      memCache[chunk[f]] = chunk[f];
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-        pending--;
-        if (pending === 0) finish();
+  /* Limpia la caché de la antigua traducción automática (ya no se usa). */
+  try {
+    if (w.localStorage) {
+      ['exam-arena-tr-en-v1', 'exam-arena-tr-en-v2', 'exam-arena-tr-en-v3'].forEach(function (k) {
+        w.localStorage.removeItem(k);
       });
     }
-
-    for (var c = 0; c < chunks.length; c++) {
-      processChunk(chunks[c]);
-    }
-  }
-
-  /**
-   * Traduce un único texto al inglés si getLang() === 'en'.
-   * @param {string} str
-   * @param {function(string): void} [callback]
-   * @returns {string} (devuelve el texto original o traducción en caché si está disponible de inmediato)
-   */
-  function translateText(str, callback) {
-    if (typeof str !== 'string' || !str.trim() || getLang() !== 'en') {
-      if (typeof callback === 'function') callback(str);
-      return str;
-    }
-    loadCache();
-    if (memCache[str] !== undefined) {
-      if (typeof callback === 'function') callback(memCache[str]);
-      return memCache[str];
-    }
-    translateBatch([str], function (res) {
-      if (typeof callback === 'function') callback(res && res[0] != null ? res[0] : str);
-    });
-    return str;
-  }
-
-  /**
-   * Traduce un objeto de pregunta y su lista asociada de 'why' (explicaciones por error).
-   * @param {Object} q
-   * @param {string[]|function} [whyArrayOrCb]
-   * @param {function(Object, string[]): void} [cb]
-   */
-  function translateQuestion(q, whyArrayOrCb, cb) {
-    var whyArray = whyArrayOrCb;
-    var callback = cb;
-    if (typeof whyArrayOrCb === 'function') {
-      callback = whyArrayOrCb;
-      whyArray = null;
-    }
-
-    if (!q || getLang() !== 'en') {
-      if (typeof callback === 'function') callback(q, whyArray);
-      return;
-    }
-
-    var list = [];
-    function add(val) {
-      if (typeof val === 'string' && val.length > 0) {
-        list.push(val);
-        return list.length - 1;
-      }
-      return -1;
-    }
-
-    var tIdx = add(q.t);
-    var qIdx = add(q.q);
-    var oIndices = (q.o || []).map(function (opt) { return add(opt); });
-    var eIdx = add(q.e);
-    var whyIndices = (whyArray || []).map(function (wItem) { return add(wItem); });
-
-    translateBatch(list, function (translated) {
-      var cloneQ = Object.assign({}, q);
-      if (tIdx !== -1) cloneQ.t = translated[tIdx];
-      if (qIdx !== -1) cloneQ.q = translated[qIdx];
-      if (q.o) {
-        cloneQ.o = oIndices.map(function (idx, i) {
-          return idx !== -1 ? translated[idx] : q.o[i];
-        });
-      }
-      if (eIdx !== -1) cloneQ.e = translated[eIdx];
-
-      var cloneWhy = whyArray ? whyIndices.map(function (idx, i) {
-        return idx !== -1 ? translated[idx] : whyArray[i];
-      }) : null;
-
-      if (typeof callback === 'function') {
-        callback(cloneQ, cloneWhy);
-      }
-    });
-  }
+  } catch (e) {}
 
   /* ---------- Inicialización en el DOM ---------- */
   if (d && d.documentElement) {
@@ -748,11 +449,6 @@
     toggleLang: toggleLang,
     t: t,
     progressTexts: progressTexts,
-    translateBatch: translateBatch,
-    translateText: translateText,
-    translateQuestion: translateQuestion,
-    getCachedTranslation: getCachedTranslation,
-    clearCache: clearCache,
     DICTIONARY: DICTIONARY
   };
 

@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cloud & SRE Exam Arena · Simulador Multi-Provider</title>
-<meta name="description" content="Plataforma unificada de simulación de exámenes e incidentes SRE: SRE Incident Commander, Google Cloud (GenAI Leader), Microsoft Azure (AZ-104) y AWS (SAA-C03) con seguimiento de progreso mediante @fabianimv/study-tracker.">
+<title>Cloud & SRE Exam Arena · Multi-Provider Exam Simulator</title>
+<meta name="description" content="Free multi-provider certification exam simulator: AWS, Azure, Google Cloud, Kafka, Databricks, Kubernetes, Terraform, NVIDIA, Anthropic Claude and SRE incident response, with instant per-option explanations and progress tracking via @fabianimv/study-tracker. Available in English and Spanish.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap">
@@ -17,39 +17,52 @@
 <header class="top">
   <div class="brand-wrap">
     <a href="#examenes" class="brand" id="brand-link">⚡ Exam Arena</a>
-    <select id="exam-picker" aria-label="Seleccionar examen o proveedor"></select>
+    <select id="exam-picker" aria-label="Select exam or provider"></select>
   </div>
   <nav id="tabs" aria-label="Navegación principal">
-    <button data-tab="examenes">Exámenes</button>
-    <button data-tab="temas">Temas</button>
-    <button data-tab="prueba">Prueba</button>
-    <button data-tab="progreso">Progreso</button>
-    <button data-tab="glosario">Glosario</button>
+    <button data-tab="examenes">Exams</button>
+    <button data-tab="temas">Topics</button>
+    <button data-tab="prueba">Quiz</button>
+    <button data-tab="progreso">Progress</button>
+    <button data-tab="glosario">Glossary</button>
   </nav>
   <div class="top-actions" style="display:flex;align-items:center;gap:0.45rem">
-    <button id="cloud-sync-btn" class="sync-pill" type="button" title="Sincronizar progreso en la nube" aria-label="Sincronizar progreso en la nube">☁️ <span id="cloud-sync-label">Sync</span></button>
-    <button id="lang-toggle" class="icon-btn lang-btn" type="button" title="Cambiar idioma (ES/EN)" aria-label="Cambiar idioma (ES/EN)">ES</button>
-    <button id="theme-toggle" class="icon-btn" type="button" title="Cambiar tema claro/oscuro" aria-label="Cambiar tema claro/oscuro">🌓</button>
+    <button id="cloud-sync-btn" class="sync-pill" type="button" title="Sync progress to the cloud" aria-label="Sync progress to the cloud">☁️ <span id="cloud-sync-label">Sync</span></button>
+    <button id="lang-toggle" class="icon-btn lang-btn" type="button" title="Switch language (EN/ES)" aria-label="Switch language (EN/ES)">EN</button>
+    <button id="theme-toggle" class="icon-btn" type="button" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">🌓</button>
   </div>
 </header>
 
 <main id="view"></main>
 
-<footer>Simulador de estudio y entrenamiento de incidentes SRE · Código en <a href="https://github.com/fabianimv/exam-arena" target="_blank" rel="noopener">GitHub</a> · Progreso impulsado por <a href="https://github.com/fabianimv/study-tracker" target="_blank" rel="noopener">@fabianimv/study-tracker</a>.</footer>
+<footer id="site-footer">Certification study and SRE incident training simulator · Source on <a href="https://github.com/fabianimv/exam-arena" target="_blank" rel="noopener">GitHub</a> · Progress powered by <a href="https://github.com/fabianimv/study-tracker" target="_blank" rel="noopener">@fabianimv/study-tracker</a>.</footer>
 
 <script src="data/anthropic-architect/exam.js"></script>
+<script src="data/anthropic-architect/exam.es.js"></script>
 <script src="data/anthropic-developer/exam.js"></script>
+<script src="data/anthropic-developer/exam.es.js"></script>
 <script src="data/anthropic-associate/exam.js"></script>
+<script src="data/anthropic-associate/exam.es.js"></script>
 <script src="data/databricks-genai/exam.js"></script>
+<script src="data/databricks-genai/exam.es.js"></script>
 <script src="data/databricks-de/exam.js"></script>
+<script src="data/databricks-de/exam.es.js"></script>
 <script src="data/nvidia-genl/exam.js"></script>
+<script src="data/nvidia-genl/exam.es.js"></script>
 <script src="data/k8s-kcna/exam.js"></script>
+<script src="data/k8s-kcna/exam.es.js"></script>
 <script src="data/terraform-003/exam.js"></script>
+<script src="data/terraform-003/exam.es.js"></script>
 <script src="data/sre/exam.js"></script>
+<script src="data/sre/exam.es.js"></script>
 <script src="data/kafka/exam.js"></script>
+<script src="data/kafka/exam.es.js"></script>
 <script src="data/gcp/exam.js"></script>
+<script src="data/gcp/exam.es.js"></script>
 <script src="data/azure/exam.js"></script>
+<script src="data/azure/exam.es.js"></script>
 <script src="data/aws/exam.js"></script>
+<script src="data/aws/exam.es.js"></script>
 <script src="assets/js/visuals-anthropic-architect.js"></script>
 <script src="assets/js/visuals-anthropic-developer.js"></script>
 <script src="assets/js/visuals-anthropic-associate.js"></script>

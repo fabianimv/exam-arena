@@ -157,7 +157,24 @@
 
   function getLang() {
     if (w.ExamI18n && w.ExamI18n.getLang) return w.ExamI18n.getLang();
-    return 'es';
+    return 'en';
+  }
+
+  /* Exam content is shipped statically in both languages:
+     w.EXAMS (English, default) and w.EXAMS_ES (Spanish). */
+  function examsMap() {
+    if (getLang() === 'es' && w.EXAMS_ES) return w.EXAMS_ES;
+    return w.EXAMS || {};
+  }
+
+  /* Returns the question with the same id in the active language. */
+  function loc(q) {
+    var ex = exam();
+    if (!q || !ex || !ex.questions) return q;
+    for (var i = 0; i < ex.questions.length; i++) {
+      if (ex.questions[i].id === q.id) return ex.questions[i];
+    }
+    return q;
   }
 
   function t(key, varsOrFallback, fallback) {
@@ -244,7 +261,7 @@
   }
 
   function exam() {
-    return (w.EXAMS || {})[currentExamId] || (w.EXAMS || {})[EXAM_ORDER[0]];
+    return examsMap()[currentExamId] || examsMap()[EXAM_ORDER[0]];
   }
 
   function shuffle(arr) {
@@ -257,8 +274,8 @@
 
   function initPicker() {
     if (!picker) return;
-    picker.innerHTML = EXAM_ORDER.filter(function (id) { return w.EXAMS && w.EXAMS[id]; }).map(function (id) {
-      var ex = w.EXAMS[id];
+    picker.innerHTML = EXAM_ORDER.filter(function (id) { return examsMap()[id]; }).map(function (id) {
+      var ex = examsMap()[id];
       return '<option value="' + esc(id) + '">' + ex.icon + ' ' + esc(ex.badge) + ' (' + ex.questions.length + ')</option>';
     }).join('');
     picker.value = currentExamId;
@@ -318,6 +335,11 @@
       langBtn.setAttribute('aria-label', langTitle);
     }
 
+    var footer = d.getElementById('site-footer');
+    if (footer) footer.innerHTML = t('footer_html', footer.innerHTML);
+
+    if (d.documentElement) d.documentElement.lang = lang;
+
     var theme = d.documentElement.getAttribute('data-theme') || 'light';
     applyTheme(theme);
   }
@@ -354,8 +376,8 @@
     var totalSessions = 0;
 
     EXAM_ORDER.forEach(function (id) {
-      if (!w.EXAMS || !w.EXAMS[id]) return;
-      var ex = w.EXAMS[id];
+      if (!examsMap()[id]) return;
+      var ex = examsMap()[id];
       var tr = getTracker(ex.appId);
       var m = tr.mastery ? tr.mastery() : { seen: 0, mastered: 0 };
       totalQ += ex.questions.length;
@@ -369,8 +391,8 @@
 
     var globalMastery = totalSeen ? Math.round(totalMastered / totalSeen * 100) + ' %' : '—';
 
-    var cards = EXAM_ORDER.filter(function (id) { return w.EXAMS && w.EXAMS[id]; }).map(function (id) {
-      var ex = w.EXAMS[id];
+    var cards = EXAM_ORDER.filter(function (id) { return examsMap()[id]; }).map(function (id) {
+      var ex = examsMap()[id];
       var tr = getTracker(ex.appId);
       var m = tr.mastery ? tr.mastery() : { seen: 0, mastered: 0, mastery: null };
       var sessions = tr.getSessions ? tr.getSessions().length : 0;
@@ -432,7 +454,6 @@
   /* ---------- Temas ---------- */
   function showTopics() {
     var ex = exam();
-    var isEn = getLang() === 'en';
     var html = examBannerHtml(ex) +
       '<div class="topics-toolbar" style="display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:1rem; flex-wrap:wrap">' +
         '<p class="muted" style="margin:0">' + t('topics_intro', 'Lee el resumen de cada dominio y luego ponlo a prueba en la pestaña <b>Prueba</b>.') + '</p>' +
@@ -476,23 +497,6 @@
       });
     }
 
-    // Traducción dinámica suave al inglés de títulos de dominios y temas visibles
-    if (isEn && w.ExamI18n && w.ExamI18n.translateBatch) {
-      var summaries = view.querySelectorAll('details.topic > summary');
-      var toTranslate = [];
-      Array.prototype.forEach.call(summaries, function (s) {
-        toTranslate.push(s.textContent);
-      });
-      if (toTranslate.length) {
-        w.ExamI18n.translateBatch(toTranslate, function (translated) {
-          Array.prototype.forEach.call(summaries, function (s, idx) {
-            if (translated && translated[idx]) {
-              s.innerHTML = fmt(translated[idx]);
-            }
-          });
-        });
-      }
-    }
   }
 
   function resolveVisualAid(ex, item, isTopic) {
@@ -615,7 +619,7 @@
 
   function endTest() {
     if (!T.session || !T.examId) return;
-    var ex = (w.EXAMS || {})[T.examId];
+    var ex = examsMap()[T.examId];
     if (ex) {
       var tr = getTracker(ex.appId);
       tr.endSession(T.session, T.results.length >= T.list.length ? 'completed' : 'stopped');
@@ -629,13 +633,12 @@
 
   function showQuestion() {
     var ex = exam();
-    var q = T.list[T.i];
+    var q = loc(T.list[T.i]);
     var correct = [].concat(q.a);
     var order = shuffle(q.o.map(function (_, idx) { return idx; }));
     var multi = correct.length > 1;
     var picked = [];
     var pct = Math.round(T.i / T.list.length * 100);
-    var isEn = getLang() === 'en';
 
     var qOfText = t('q_of', { i: T.i + 1, n: T.list.length }, 'Pregunta <b>' + (T.i + 1) + '</b> de ' + T.list.length);
     var correctCountText = t('correct_count', 'Correctas:');
@@ -695,27 +698,6 @@
         reveal(ex, q, order, correct, picked);
       };
     }
-
-    // Traducción automática suave al inglés si el idioma seleccionado es 'en'
-    if (isEn && w.ExamI18n && w.ExamI18n.translateQuestion) {
-      w.ExamI18n.translateQuestion(q, function (trQ) {
-        if (!T.list || T.list[T.i] !== q) return; // Si la sesión cambió de pregunta, no sobreescribir
-        var qtextEl = view.querySelector('.qtext');
-        if (qtextEl && trQ.q) qtextEl.innerHTML = fmtQuestion(trQ.q);
-
-        var topicEl = d.getElementById('q-topic-text');
-        if (topicEl && trQ.t) topicEl.innerHTML = '📌 ' + fmt(trQ.t);
-
-        var optBtns = view.querySelectorAll('.opt');
-        Array.prototype.forEach.call(optBtns, function (btn) {
-          var idx = parseInt(btn.getAttribute('data-i'), 10);
-          var textSpan = btn.querySelector('span:last-child');
-          if (textSpan && trQ.o && trQ.o[idx]) {
-            textSpan.innerHTML = fmt(trQ.o[idx]);
-          }
-        });
-      });
-    }
   }
 
   function reveal(ex, q, order, correct, picked) {
@@ -756,12 +738,6 @@
     var tok = d.getElementById('tok');
     if (tok) tok.textContent = T.ok;
 
-    // Si está en inglés, traducir automáticamente la explicación y respuestas en el feedback
-    if (getLang() === 'en' && w.ExamI18n && w.ExamI18n.translateQuestion) {
-      w.ExamI18n.translateQuestion(q, why, function (trQ, trWhy) {
-        renderFeedbackWith(trQ, trWhy || why);
-      });
-    }
   }
 
   function feedbackHtml(q, order, correct, wrongPicked, why, ok) {
@@ -789,7 +765,6 @@
     var pct = done ? Math.round(T.ok / done * 100) : 0;
     var pass = ex.passingScore || 70;
     var wrong = T.results.filter(function (r) { return !r.ok; });
-    var isEn = getLang() === 'en';
 
     var resTitle = t('res_title', { badge: esc(ex.badge) }, 'Resultado · ' + esc(ex.badge));
     var resSummary = t('res_summary', { ok: T.ok, done: done, pass: pass }, T.ok + ' correctas de ' + done + ' respondidas (umbral de referencia: ' + pass + ' %).');
@@ -808,20 +783,21 @@
       '<button id="newtest">' + newTestText + '</button>' +
       '<p class="muted small">' + resSavedText + ' <a href="#' + esc(ex.id) + '/progreso">' + resViewProgText + '</a></p></div>' +
       (wrong.length ? '<h2>' + reviewTitle + '</h2><div id="wrong-review-list">' + wrong.map(function (r) {
-        var correct = [].concat(r.q.a);
-        var why = (ex.why || {})[r.q.id] || [];
-        var domainName = (ex.shortDomains && ex.shortDomains[r.q.d]) || (ex.domains && ex.domains[r.q.d]) || '';
-        var domainLabelText = t('domain_label', 'Dominio') + ' ' + r.q.d + (domainName ? ' · ' + esc(domainName) : '');
-        return '<div class="card review q-card" data-qid="' + esc(r.q.id) + '">' +
+        var rq = loc(r.q);
+        var correct = [].concat(rq.a);
+        var why = (ex.why || {})[rq.id] || [];
+        var domainName = (ex.shortDomains && ex.shortDomains[rq.d]) || (ex.domains && ex.domains[rq.d]) || '';
+        var domainLabelText = t('domain_label', 'Dominio') + ' ' + rq.d + (domainName ? ' · ' + esc(domainName) : '');
+        return '<div class="card review q-card" data-qid="' + esc(rq.id) + '">' +
           '<div class="q-header">' +
             '<div class="q-header-left">' +
               '<span class="q-domain-badge"><span class="q-domain-dot"></span>' + domainLabelText + '</span>' +
-              '<span class="q-topic-badge">📌 ' + fmt(r.q.t) + '</span>' +
+              '<span class="q-topic-badge">📌 ' + fmt(rq.t) + '</span>' +
             '</div>' +
           '</div>' +
-          '<div class="qtext">' + fmtQuestion(r.q.q) + '</div>' +
-          visualAidHtml(ex, r.q, false) +
-          feedbackHtml(r.q, r.order, correct, r.picked.filter(function (p) { return correct.indexOf(p) === -1; }), why, false) +
+          '<div class="qtext">' + fmtQuestion(rq.q) + '</div>' +
+          visualAidHtml(ex, rq, false) +
+          feedbackHtml(rq, r.order, correct, r.picked.filter(function (p) { return correct.indexOf(p) === -1; }), why, false) +
           '</div>';
       }).join('') + '</div>' : '');
 
@@ -831,28 +807,6 @@
     if (nt) nt.onclick = showSetup;
     w.scrollTo(0, 0);
 
-    // Traducción dinámica de la revisión de preguntas falladas al inglés
-    if (isEn && wrong.length && w.ExamI18n && w.ExamI18n.translateQuestion) {
-      wrong.forEach(function (r) {
-        var why = (ex.why || {})[r.q.id] || [];
-        w.ExamI18n.translateQuestion(r.q, why, function (trQ, trWhy) {
-          var cardEl = view.querySelector('.card.review[data-qid="' + r.q.id + '"]');
-          if (cardEl) {
-            var correct = [].concat(trQ.a);
-            var domainName = (ex.shortDomains && ex.shortDomains[trQ.d]) || (ex.domains && ex.domains[trQ.d]) || '';
-            var domainLabelText = t('domain_label', 'Dominio') + ' ' + trQ.d + (domainName ? ' · ' + esc(domainName) : '');
-            cardEl.innerHTML = '<div class="q-header">' +
-              '<div class="q-header-left">' +
-                '<span class="q-domain-badge"><span class="q-domain-dot"></span>' + domainLabelText + '</span>' +
-                '<span class="q-topic-badge">📌 ' + fmt(trQ.t) + '</span>' +
-              '</div>' +
-            '</div>' +
-            '<div class="qtext">' + fmtQuestion(trQ.q) + '</div>' +
-            feedbackHtml(trQ, r.order, correct, r.picked.filter(function (p) { return correct.indexOf(p) === -1; }), trWhy || why, false);
-          }
-        });
-      });
-    }
   }
 
   /* ---------- Atajos de Teclado (Prueba) ---------- */
@@ -977,7 +931,6 @@
   /* ---------- Glosario ---------- */
   function showGlossary() {
     var ex = exam();
-    var isEn = getLang() === 'en';
     var all = (ex.glossary || []).slice().sort(function (a, b) { return a.term.localeCompare(b.term, 'es'); });
 
     // Extraer categorías únicas con conteo
@@ -1039,23 +992,6 @@
     if (input) input.oninput = paint;
     paint();
 
-    // Traducción dinámica al inglés para términos y definiciones del glosario
-    if (isEn && w.ExamI18n && w.ExamI18n.translateBatch) {
-      var defEls = view.querySelectorAll('.gitem .gdef');
-      var defTexts = [];
-      Array.prototype.forEach.call(defEls, function (el) {
-        defTexts.push(el.textContent);
-      });
-      if (defTexts.length) {
-        w.ExamI18n.translateBatch(defTexts, function (translated) {
-          Array.prototype.forEach.call(defEls, function (el, idx) {
-            if (translated && translated[idx]) {
-              el.innerHTML = fmt(translated[idx]);
-            }
-          });
-        });
-      }
-    }
   }
 
   /* ---------- Enrutador (Hash) y Pestañas ---------- */
@@ -1084,9 +1020,9 @@
       nextTab = 'examenes';
     } else if (raw.indexOf('/') !== -1) {
       var parts = raw.split('/');
-      if (w.EXAMS && w.EXAMS[parts[0]]) nextExam = parts[0];
+      if (examsMap()[parts[0]]) nextExam = parts[0];
       nextTab = TABS[parts[1]] ? parts[1] : 'prueba';
-    } else if (w.EXAMS && w.EXAMS[raw]) {
+    } else if (examsMap()[raw]) {
       nextExam = raw;
       nextTab = 'prueba';
     } else if (TABS[raw]) {
@@ -1120,8 +1056,8 @@
   function initCloudSync() {
     // Inicializar los 4 trackers para que estén registrados en memoria
     EXAM_ORDER.forEach(function (id) {
-      if (w.EXAMS && w.EXAMS[id]) {
-        getTracker(w.EXAMS[id].appId);
+      if (examsMap()[id]) {
+        getTracker(examsMap()[id].appId);
       }
     });
 
