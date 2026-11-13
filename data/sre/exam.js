@@ -560,10 +560,10 @@
         "t": "Thanos Compactor Singleton",
         "q": "In your observability platform with Thanos on S3/GCS, you notice that long-range queries (30 or 90 days) are getting slower and slower and that the `thanos-compactor` component constantly fails with overlapping block errors (`overlapping blocks`) and metadata corruption. When reviewing Kubernetes you see that someone scaled the `thanos-compactor` Deployment to `replicas: 3` for \"high availability\". What is the problem?",
         "o": [
-          "The highest finite bound of the histogram was `le=\"10.0\"` (+Inf); for larger values, `histogram_quantile()` interpolates linearly within the last bucket and reports its edge (`10.0s`). The buckets must be adjusted to the real range.",
-          "The global `scrape_timeout: 10s` parameter aborted the collection of the slowest samples; Prometheus automatically truncates any histogram value that exceeds the scrape time configured in the job.",
-          "The expression omitted the infinite bucket (`le=\"+Inf\"`) when computing the sum in PromQL; the `histogram_quantile()` function by default assigns the value of the largest available bucket when the total sum of samples does not match.",
-          "The microservice's metrics library implements a timer with a 10-second cutoff to mitigate memory contention, diverting slower requests to an independent failure counter."
+          "`Thanos Compactor` must run as a singleton (`replicas: 1`) per bucket; running multiple instances concurrently against the same object storage bucket causes race conditions, overlapping blocks, and metadata corruption.",
+          "`Thanos Compactor` requires an odd number of replicas (minimum 5) with an embedded Raft cluster enabled to achieve quorum before compacting blocks in object storage.",
+          "`Thanos Compactor` is a stateless proxy that routes queries from Grafana; scaling to 3 replicas requires enabling sticky sessions on the Ingress to prevent parallel compaction.",
+          "`Thanos Compactor` supports multiple replicas only when paired with an external distributed lock in DynamoDB or Consul to coordinate lease management across pods."
         ],
         "a": 0,
         "e": "Unlike `Thanos Querier` or `Thanos Store Gateway` (which are stateless and scalable to multiple replicas), `Thanos Compactor` modifies and replaces TSDB blocks in the Object Storage bucket. Running two or more instances over the same series at the same time corrupts the bucket state."
@@ -574,10 +574,10 @@
         "t": "Thanos HA Deduplication",
         "q": "You have two identical Prometheus servers (`prom-a` and `prom-b`) scraping the same pods in high availability, each with its `Thanos Sidecar` connected to `Thanos Querier`. However, when querying in Grafana through `Thanos Querier`, you see each series duplicated or `sum()` values come out at exactly double the real ones. Which configuration is missing?",
         "o": [
-          "`group_by` (groups by common labels such as `cluster`), `group_wait` (initial wait to accumulate alerts of the same incident), and `group_interval` (wait before emitting batches with new alerts of the group).",
-          "`repeat_interval` extended to 12 hours combined with `resolve_timeout: 5m` to freeze notifications from new containers without needing to define label-based aggregation criteria.",
-          "`mute_time_intervals` configured on the Slack receiver to temporarily silence the communication channels during the scheduled execution of deployments in production environments.",
-          "Global `inhibit_rules` that discard any subsequent alert after the first notification is recorded, without applying dampening in `group_wait` or aggregation filters in the route."
+          "Configure identical `external_labels` (e.g. `cluster: prod`) on both Prometheus instances with a distinct replica label (e.g. `replica: prom-a` and `replica: prom-b`), and pass `--query.replica-label=replica` to `Thanos Querier`.",
+          "Configure Prometheus federation so that `prom-a` scrapes `prom-b` with `honor_labels: true`, disabling the sidecar on `prom-b` to avoid duplicate block uploads.",
+          "Divide all aggregations by 2 in Grafana PromQL expressions (e.g. `sum(rate(...)) / 2`) whenever querying metrics collected by redundant Prometheus pairs.",
+          "Configure `Thanos Sidecar` in active-passive mode by setting `--sidecar.standby=true` on `prom-b` to block its gRPC query endpoint while `prom-a` is healthy."
         ],
         "a": 0,
         "e": "For `Thanos Querier` to transparently merge the samples of an HA pair of Prometheus servers without duplicating results in `sum()`, both Prometheus servers must share the same `external_labels` except for the replica label (such as `replica=\"prom-a\"` / `replica=\"prom-b\"`), which is specified in `--query.replica-label`."
@@ -731,10 +731,10 @@
         "t": "Read-After-Write Consistency with Read Replicas",
         "q": "To relieve the load on the primary database node, you modify the API so that all `POST /perfil` requests write to the primary node and all `GET /perfil` requests read from the asynchronous read replicas. Users immediately report that when they save a change to their profile and the screen automatically reloads (100 ms later), they see their old data as if it had not been saved. What phenomenon is occurring and how is it resolved without giving up the replicas?",
         "o": [
-          "Under MVCC, the transaction holds the oldest `xmin`; `autovacuum` cannot recycle dead tuples created after that point so as not to violate the snapshot, generating bloat. It is mitigated with `statement_timeout`.",
-          "The analytical query acquired an `ACCESS EXCLUSIVE LOCK` that prevented concurrent execution of the `autovacuum` process; it is fixed by scheduling a daily `VACUUM FULL` immediately after the query.",
-          "The `maintenance_work_mem` parameter proved insufficient to store the dead tuple pointers in memory, forcing `autovacuum` to abort cleanup to avoid planner locks.",
-          "The query saturated the WAL logical replication buffer, forcing the collector to suspend the disk page sweep until the replicas confirmed receipt of all transactional changes."
+          "Read-after-write (Read-your-own-writes) consistency violation due to asynchronous replication lag; resolve it by pinning the author's reads to the primary node for a few seconds after writes, or checking the transaction LSN/GTID.",
+          "Dirty read phenomenon under MVCC concurrency; resolve it by setting the transaction isolation level to `SERIALIZABLE` across all read replica connections.",
+          "HTTP stale response caching in the browser; resolve it by adding `Cache-Control: no-cache, no-store, must-revalidate` headers to the `POST /perfil` response.",
+          "Replication stream corruption between primary and standby nodes; resolve it by terminating all read replicas and scaling the primary database vertically."
         ],
         "a": 0,
         "e": "Even in a healthy cluster, asynchronous replication takes tens or hundreds of milliseconds. If the browser makes a `POST` followed immediately by a `GET`, the `GET` may reach a replica before the replication event does. Routing the user's reads to the primary for a few seconds after a `POST/PUT` (or checking the WAL log position/LSN) guarantees Read-after-write consistency."
@@ -745,10 +745,10 @@
         "t": "Untested backups",
         "q": "During a Production Readiness Review, a team claims to have a solid DRP because a cronjob runs `pg_dump` every night and uploads a `.sql.gz` file to an S3 bucket, but they have never run a test restore in the last 18 months. When inspecting the bucket you discover that the files from the last 4 months weigh 20 bytes because the backup user's password expired and the script compressed the empty output without `set -euo pipefail`. What fundamental SRE lesson does this illustrate?",
         "o": [
-          "First `SELECT pg_cancel_backend(pid);` (sends `SIGINT`, canceling the query without cutting the socket); if it does not yield, `SELECT pg_terminate_backend(pid);` (sends `SIGTERM`, closing the connection and the process).",
-          "First invoke `SELECT pg_terminate_backend(pid);` to abort the client session; if the query stays hung, force termination with `kill -9 <PID>` on the backend process in the operating system.",
-          "First run `DISCARD ALL` pointing at the process identifier to invalidate locks; as a last resort invoke `VACUUM FULL` on the blocked tables to force the release of resources.",
-          "First invoke `pg_reload_conf()` with a reduced `statement_timeout` to force expiration; if the hold persists, perform a soft restart of the service with `systemctl reload postgresql`."
+          "\"A backup does not exist until you have verified its restoration\": backup systems require periodic automated restore drills, artifact size and checksum validation, and alerting on job failures or empty output.",
+          "Cloud object storage provides eleven nines of durability, rendering periodic restore verification redundant once files are successfully placed in the bucket.",
+          "Cron exit code monitoring alone provides complete operational verification, because operating system schedulers catch silent credential failures in subshells.",
+          "Streaming database replication to a secondary region eliminates the need for logical dumps, point-in-time recovery, and restore drills in production disaster recovery."
         ],
         "a": 0,
         "e": "In SRE it is a law that real recovery capability is not your backup policy, but your tested restore process. Without `set -euo pipefail` in bash scripts, without success/size metrics, and without periodic restore drills that verify the data and measure the real RTO, backups tend to fail silently just when they are needed most."
@@ -849,10 +849,10 @@
         "t": "Terraform State Drift During an Emergency",
         "q": "Two weeks ago, during an emergency, an engineer manually modified the rules of a Firewall / Security Group and the size of a node group in the AWS/GCP console without updating the Terraform code. Today you need to add a new rule with Terraform, and when you run `terraform plan` you see: `Plan: 1 to add, 3 to change, 2 to destroy` (including the destruction and recreation of critical resources created by hand). What is the safe procedure?",
         "o": [
-          "Cold Start: scheduling a pod from scratch (scheduling, runtime startup, and probes) takes seconds; if the SLO demands low latency, `minReplicas` must be at least 1, or pre-warmed replicas should be used instead of scale-to-zero.",
-          "Thundering Herd phenomenon: the sudden concentration of requests after an idle period saturates the connection pool; it is remedied by configuring a Circuit Breaker with fast opening and retries at the Ingress.",
-          "Cluster Autoscaler latency: the delay occurs exclusively when provisioning new worker nodes at the cloud provider; it is resolved by fixing an instance pool with backup nodes that are already powered on.",
-          "TCP connection starvation: the Ingress proxy freezes the TLS handshake for destinations with no active endpoints; it is mitigated by reducing the `keepalive_timeout` parameter to 1 second to force continuous reconnections."
+          "Do not apply the plan; analyze the drift, reconcile HCL code and state with live infrastructure using `terraform plan -refresh-only` and `terraform import`, and only apply once the plan reflects solely the intended change.",
+          "Run `terraform apply -auto-approve` immediately to force infrastructure back to the canonical Git state, treating all out-of-band emergency modifications as unauthorized drift.",
+          "Delete the remote `terraform.tfstate` file from object storage and re-run `terraform apply` to automatically reconstruct the state file from current HCL declarations.",
+          "Execute `terraform destroy -target` against the drifted security group resources to tear them down cleanly before recreating them through the automated pipeline."
         ],
         "a": 0,
         "e": "When there is state drift due to manual changes (ClickOps), a blind `terraform apply` will revert the earlier emergency changes or destroy production resources. First, you reconcile the HCL code and the state with the reality in production, and only when the `plan` is clean do you apply the new change."
@@ -863,10 +863,10 @@
         "t": "SNAT Port Exhaustion",
         "q": "Your 50 Kubernetes nodes reach the internet through a single NAT Gateway with only 1 public IP address (which has ~64,000 ephemeral ports per destination). After a change in a microservice that calls an external bank's API at 2,000 RPS, outbound connections from the entire cluster start failing with connection timeouts (`SYN` packets sent without response / packets dropped at the NAT Gateway). Reviewing the code, you see that the developer instantiates a new HTTP client on every request without reusing connections (`Connection: close`). What is the cause and the solution?",
         "o": [
-          "Lack of N-1 reserve: the regions were operating without headroom to absorb traffic from another region; the failover overflowed `us-east-1`. It is prevented by provisioning sufficient headroom in each region and applying Load Shedding in the surviving one.",
-          "Route 53 session affinity failure: sticky cookies saturated the regional load balancer in Virginia; it is prevented by migrating to a weighted round-robin algorithm that ignores the geographic origin of clients.",
-          "DNS health check propagation latency: the checks kept declaring the failed region healthy for 15 minutes; it is avoided by reducing the probe interval to 1 second using Route 53 fast checks.",
-          "Schema divergence in distributed databases: asynchronous replication between regions blocked transactions in Virginia; it is avoided by forcing bidirectional synchronous multi-region replication on all tables."
+          "SNAT port exhaustion: closing TCP connections at 2,000 RPS leaves ports in `TIME_WAIT` for 60–120s, consuming all 64k ephemeral ports; solve by reusing sockets via a singleton HTTP client with Keep-Alive connection pooling, and attaching additional public IPs to the NAT Gateway.",
+          "CoreDNS UDP buffer saturation: high query volume causes DNS drops; solve by configuring NodeLocal DNSCache and forcing all HTTP requests to resolve over TCP.",
+          "Path MTU Discovery (PMTUD) black hole: packet fragmentation drops SYN packets at the gateway; solve by clamping MSS to 1,420 bytes on all worker node virtual interfaces.",
+          "Cloud NAT egress bandwidth saturation: the single public IP throttles throughput above 1 Gbps; solve by upgrading worker node instance types and disabling TLS encryption on outbound traffic."
         ],
         "a": 0,
         "e": "At 2,000 new connections per second to the same destination IP/port, in just 32 seconds you consume the 64,512 ephemeral ports of a public IP on the NAT Gateway because closed connections remain in a waiting state before their tuple can be recycled. Reusing sockets through a singleton HTTP client with a Keep-Alive pool reduces port usage from 64,000 to a few dozen."
@@ -1143,15 +1143,15 @@
       ],
       "sre-34": [
         null,
-        "The `scrape_timeout` governs the duration of the HTTP scrape request against `/metrics`, not the magnitude of the latency times recorded in the app's metrics.",
-        "If `+Inf` were excluded, the formula would return NaN or count errors; the exact value of 10.0s arises from interpolation by falling into the upper finite bucket `le=\"10.0\"`.",
-        "Instrumentation libraries do not truncate duration measurements; they simply increment the counters of the corresponding buckets according to the actual duration."
+        "`Thanos Compactor` does not use Raft or consensus protocols; horizontal scaling against the same bucket is not supported and inevitably produces corrupted, overlapping TSDB blocks.",
+        "`Thanos Compactor` is a background batch compaction worker that mutates TSDB blocks in object storage, not a stateless request proxy that serves Grafana queries.",
+        "`Thanos Compactor` does not integrate with DynamoDB or Consul distributed locks; running multiple instances against the same series and bucket is explicitly unsupported."
       ],
       "sre-35": [
         null,
-        "`repeat_interval` only spaces out the resending of identical alerts that are already active; it does not group 45 distinct alerts fired simultaneously into a single notification.",
-        "Muting by schedule (`mute_time_intervals`) hides legitimate incidents during deployments instead of intelligently grouping them when they occur.",
-        "A generic inhibition rule without explicit hierarchy would silence unrelated critical alerts instead of neatly grouping the incident's alerts."
+        "Prometheus federation does not perform deduplication across HA replicas and would double TSDB storage overhead instead of leveraging Thanos query-time deduplication.",
+        "Dividing by 2 in Grafana queries is an antipattern that breaks whenever one Prometheus replica fails or experiences scrape delays.",
+        "`Thanos Sidecar` does not support active-passive standby modes; both sidecars remain active and expose metrics concurrently while Thanos Querier deduplicates based on the replica label."
       ],
       "sre-36": [
         null,
@@ -1215,15 +1215,15 @@
       ],
       "sre-46": [
         null,
-        "An analytical `SELECT` query acquires a shared `ACCESS SHARE` lock, which does not block `autovacuum`; what blocks cleanup is the MVCC horizon held back by the snapshot.",
-        "A reduced `maintenance_work_mem` only increases the number of passes over the index; it does not suspend or invalidate the dead tuple sweep.",
-        "The described bloat is due to the transaction horizon (`xmin`) being held by the open query on the primary, not to WAL replication slot saturation."
+        "Changing transaction isolation levels on read replicas does not eliminate physical network and replay lag of WAL records between the primary and replica nodes.",
+        "HTTP cache-control headers do not fix database replication lag; the browser's fresh reload request still hits a database replica that has not yet applied the write.",
+        "Disabling read replicas abandons horizontal read scaling entirely instead of solving the read-after-write consistency window through sticky routing or LSN tracking."
       ],
       "sre-47": [
         null,
-        "Sending `kill -9` (`SIGKILL`) to a PostgreSQL backend process corrupts shared memory (`shared memory`), forcing all backends to restart and begin crash recovery.",
-        "`DISCARD ALL` only takes effect within the local session itself, and `VACUUM FULL` will try to obtain `ACCESS EXCLUSIVE LOCK`, severely worsening database locking.",
-        "`pg_reload_conf()` and `systemctl reload` reload global file configurations without altering the timeout of queries that are already running."
+        "Object storage durability guarantees that stored bytes are not lost, but cannot verify whether the uploaded backup file itself contains valid database data rather than empty output.",
+        "Without `set -euo pipefail`, a pipeline like `pg_dump | gzip` succeeds with exit code 0 because gzip successfully compresses empty stdin, masking pg_dump authentication errors.",
+        "Replication copies accidental deletions, drops, and corrupted records immediately to standby nodes; it does not replace point-in-time recovery and tested backup restores."
       ],
       "sre-48": [
         null,
@@ -1263,15 +1263,15 @@
       ],
       "sre-54": [
         null,
-        "The symptom is not a collapse from massive concurrency (Thundering Herd), but the inherent startup time of a pod when scaling from zero replicas.",
-        "Even with nodes already running, the pod's cold start (scheduling, process startup, and `readinessProbe`) takes several seconds to respond to the first call.",
-        "The delay is not due to the Ingress TLS negotiation, but to the time the pod takes to initialize and register as a healthy endpoint in Kubernetes."
+        "Blindly applying the plan would destroy or revert live emergency firewall configurations, recreating critical resources and causing an immediate production outage.",
+        "Deleting the remote state file orphans existing cloud resources; Terraform will attempt to recreate them from scratch and fail due to resource naming and address collisions.",
+        "Destroying production security groups drops live customer traffic immediately, creating a severe outage instead of safely reconciling state drift."
       ],
       "sre-55": [
         null,
-        "The cause of the outage is not session affinity, but the massive overflow of requests onto a region that did not have idle capacity to absorb the global traffic.",
-        "The health checks worked (they failed over within 3 minutes); the problem was that the destination region could not process 100% of the combined load and collapsed.",
-        "Forcing synchronous replication between São Paulo and Virginia would add 120 ms of latency per transaction and does not protect against CPU saturation from request overload."
+        "The failure occurs during TCP handshake (SYN timeouts) to the destination IP after DNS resolution has already completed, caused by source port depletion rather than CoreDNS buffer limits.",
+        "PMTUD black holes occur on large data packets that exceed MTU sizes, not during initial SYN packets of the TCP handshake.",
+        "The bottleneck is connection concurrency and ephemeral 4-tuple port exhaustion in TIME_WAIT, not raw network bandwidth; disabling TLS to an external bank is insecure and rejected by the banking endpoint."
       ],
       "sre-56": [
         null,

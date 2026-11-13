@@ -1855,10 +1855,10 @@
         "t": "Data",
         "q": "What role do embeddings play in the data layer of an enterprise gen AI solution?",
         "o": [
-          "It lets you test, customize through tuning, and deploy models on managed endpoints with a single click",
-          "It requires that each listed model be previously compiled and certified on the customer's local hardware",
-          "It works as a marketplace where individual users buy and sell their own text prompts",
-          "It is limited to indexing technical research articles with no connection to cloud execution environments"
+          "Converting text fragments into dense numeric vectors that capture their semantic meaning in a vector space",
+          "Translating user queries into normalized SQL statements to directly query database tables",
+          "Removing whitespace, typographic marks, and stop words before transmitting the text to the model endpoint",
+          "Compressing the physical size of PDF files hosted in `Cloud Storage`, reducing monthly storage costs"
         ],
         "a": 0,
         "e": "Embeddings convert content into vectors where proximity equals similarity of meaning, which makes it possible to retrieve relevant documents even if they do not share the same words as the question."
@@ -1886,10 +1886,10 @@
         "t": "Product selection",
         "q": "A training manager wants to turn the documentation of a new product into study material and an audio summary for the sales team. Which tool solves this without development?",
         "o": [
-          "It processes text, image, video, and audio jointly without decoupled intermediate conversion steps",
-          "It eliminates the need to apply moderation filters or safety classifications on images",
-          "It reduces `GPU` or `TPU` compute consumption to zero when evaluating inputs containing video frames",
-          "It guarantees the total absence of errors or visual hallucinations when transcribing complex technical diagrams"
+          "NotebookLM",
+          "Vertex AI Pipelines",
+          "Dataflow",
+          "Model Garden"
         ],
         "a": 0,
         "e": "NotebookLM generates study guides, FAQs, outlines, and Audio Overviews from the sources uploaded to it, with no programming needed."
@@ -1900,10 +1900,10 @@
         "t": "Google's strengths",
         "q": "Which of these is NOT a component of Google Cloud's AI-optimized infrastructure?",
         "o": [
-          "Completing code, generating unit tests, and explaining complex snippets from the developer's IDE",
-          "Replacing engineers by automatically approving and deploying changes to production without validation",
-          "Monitoring web server performance in real time, detecting intrusions on the corporate network",
-          "Managing software license purchases and provisioning physical workstations for programmers"
+          "Model Garden",
+          "Tensor Processing Units (TPUs)",
+          "NVIDIA GPUs (such as H100 and A100)",
+          "Google's private global fiber network"
         ],
         "a": 0,
         "e": "Model Garden belongs to the platform layer (it is the Vertex AI model catalog), not the infrastructure layer. TPUs, GPUs, and the global network are indeed part of the physical layer."
@@ -2074,10 +2074,10 @@
         "t": "RAG",
         "q": "A RAG system returns irrelevant responses even though the correct documents are in the index. What is the most likely cause?",
         "o": [
-          "Zero-shot includes only the instruction; `few-shot` additionally provides demonstrative input and output examples",
-          "Zero-shot modifies the model's weights in memory; `few-shot` preserves the original frozen architecture",
-          "Zero-shot requires deploying an endpoint in `Vertex AI`; `few-shot` can only be run in `Google AI Studio`",
-          "Zero-shot is limited to unimodal text models; `few-shot` is the only technique applicable to multimodal models"
+          "Retrieval quality issues such as inadequate chunk size, overlap, embedding models, or poorly formulated search queries",
+          "The generation temperature is set too low, which prevents creative synthesis",
+          "The base foundation model has too many parameters to process retrieved documents",
+          "The base generative model lacks supervised fine-tuning on the domain documents"
         ],
         "a": 0,
         "e": "In a RAG, if retrieval fails, generation cannot save it. The usual suspects are chunk size and overlap, the chosen embedding model, and query reformulation."
@@ -2088,10 +2088,10 @@
         "t": "Prompting",
         "q": "A team needs the model to classify tickets into five proprietary internal categories, with company-specific names. Which prompting technique is the first to try?",
         "o": [
-          "The examples saturate the context, add noise, or introduce inconsistencies in the expected outputs",
-          "Too many examples automatically trigger a retraining process of the model's weights",
-          "The `Gemini` API blocks queries that include more than five example pairs per call",
-          "Adding examples reduces the numerical computation precision of the `GPU` when performing local inference"
+          "Few-shot prompting by providing representative input-output examples for each category in the prompt",
+          "Zero-shot prompting relying solely on the model's pretraining to infer internal category names",
+          "Chain-of-thought prompting asking the model to show step-by-step mathematical reasoning",
+          "Full parameter fine-tuning of a foundation model from scratch using raw support tickets"
         ],
         "a": 0,
         "e": "With proprietary categories, a few representative examples teach the model the expected criterion and format. It is the cheapest option and usually suffices; only if it fails is fine-tuning considered."
@@ -2290,10 +2290,10 @@
         "t": "RAG vs. tuning",
         "q": "An executive proposes fine-tuning so the assistant knows the up-to-date prices of each product. Which objection is correct?",
         "o": [
-          "Because it increases the probability of sampling unlikely tokens, causing syntax errors and hallucinations",
-          "Because it decreases the processing speed of the `GPU` card by doubling the number of clock cycles required",
-          "Because it saturates the inference buffer, forcing the original prompt's text strings to be trimmed",
-          "Because it disables the model's access to external functions configured through extension tools"
+          "Fine-tuning is not a mechanism for keeping facts up to date; volatile prices should be queried in real time via tools or grounding",
+          "Fine-tuning can only be applied to open models and is unsupported for managed enterprise foundation models",
+          "Fine-tuning alters the model's neural architecture, drastically increasing inference latency on every call",
+          "Fine-tuning eliminates the model's ability to process natural language queries from non-technical users"
         ],
         "a": 0,
         "e": "Embedding changing facts in the weights is expensive, slow, and immediately outdated. Volatile data is handled by querying the source in real time through tools, or with RAG over an updated index."
@@ -2304,10 +2304,10 @@
         "t": "Prompting",
         "q": "What is the difference between zero-shot, one-shot, and few-shot prompting?",
         "o": [
-          "Converting text fragments into dense numeric vectors that capture their semantic meaning in a vector space",
-          "Translating user queries into normalized SQL statements to directly query database tables",
-          "Removing whitespace, typographic marks, and stop words before transmitting the text to the model endpoint",
-          "Compressing the physical size of PDF files hosted in `Cloud Storage`, reducing monthly storage costs"
+          "Zero-shot includes only the instruction; `few-shot` additionally provides demonstrative input and output examples",
+          "Zero-shot modifies the model's weights in memory; `few-shot` preserves the original frozen architecture",
+          "Zero-shot requires deploying an endpoint in `Vertex AI`; `few-shot` can only be run in `Google AI Studio`",
+          "Zero-shot is limited to unimodal text models; `few-shot` is the only technique applicable to multimodal models"
         ],
         "a": 0,
         "e": "The difference is solely how many input and output examples are included in the prompt. More examples help fix format and criterion, at the cost of consuming more context tokens."
@@ -2318,10 +2318,10 @@
         "t": "Parameters",
         "q": "The marketing team complains that the ideas generated are always too similar to each other. Which adjustment is reasonable to try?",
         "o": [
-          "It substantially reduces cost and latency by reusing already processed token representations in recurring prompts",
-          "It guarantees that the model retains permanent, historical memory of all users across different organizations",
-          "It allows dispensing with safety filters on responses by assuming previously cached sources are benign",
-          "It irreversibly modifies the foundation model's base weights after 24 hours of active caching"
+          "Increase the `temperature` parameter (and potentially `top-P`) to promote token diversity and variety in generation",
+          "Lower the `temperature` to 0.0 to force the model into deterministic greedy decoding",
+          "Reduce the `max_output_tokens` limit to truncate repetitive token sequences",
+          "Add more few-shot demonstrative examples that showcase identical phrasing and style"
         ],
         "a": 0,
         "e": "A higher temperature increases the diversity of generation, which is desirable in brainstorming. Adding very similar examples would have the opposite effect: it would reinforce homogeneity."
@@ -2652,10 +2652,10 @@
         "t": "Prioritization",
         "q": "Which combined criterion is commonly used to prioritize gen AI use cases?",
         "o": [
-          "Because the freed-up time is not channeled into productive tasks or additional revenue, remaining a theoretical saving",
-          "Because international accounting standards explicitly prohibit counting employee time as an operating cost",
-          "Because cloud AI software subscriptions are taxed with extraordinary surcharges on the balance sheet",
-          "Because generative algorithms automatically reduce the base salary of the workers who use them"
+          "Business impact versus feasibility (data availability, organizational risk, and technical effort)",
+          "Technological novelty versus technical team curiosity and experimentation interest",
+          "Total model parameter size versus available annual cloud infrastructure budget",
+          "Number of departments involved versus seniority and age of the legacy business process"
         ],
         "a": 0,
         "e": "Crossing impact with feasibility makes it possible to start with high-value, low-risk cases, which generate traction and fund the next ones. Prioritizing by technological novelty is the direct path to the pilot trap."
@@ -2666,10 +2666,10 @@
         "t": "Responsible AI",
         "q": "Which Google AI principle is directly compromised if a personnel selection model favors one demographic group?",
         "o": [
-          "Mainframe relational database administrator dedicated exclusively to magnetic tape indexing tasks",
-          "Business product owner (Product Owner) responsible for defining the functional requirements and the expected value",
-          "Data and integration engineer in charge of enabling pipelines to the vector stores and analytical databases",
-          "Security, governance, and regulatory compliance specialist in charge of validating the system's privacy and ethical risks"
+          "Avoid creating or reinforcing unfair bias (ensuring fairness and equality across demographic groups)",
+          "Uphold high standards of scientific excellence",
+          "Be made available for uses that accord with these principles",
+          "Maximize hardware energy efficiency and carbon neutrality"
         ],
         "a": 0,
         "e": "Fairness is one of Google's AI principles and translates into concrete practices: representative data, subgroup evaluation, and human review in decisions about people."
@@ -2680,10 +2680,10 @@
         "t": "Security",
         "q": "What is SAIF?",
         "o": [
-          "The opacity of the decision-making process (\"black box\"), allowing one to understand how and why a result was generated",
-          "The saturation of the corporate network bandwidth when transmitting massive requests to the inference clusters",
-          "The unexpected thermal overheating of the `GPU` accelerators in the data centers hosting the AI model",
-          "The incompatibility of communication protocols in the REST integration APIs and the company's legacy microservices"
+          "Google's Secure AI Framework (SAIF): a conceptual framework to protect and secure AI systems and models throughout their lifecycle",
+          "A specialized security foundation model fine-tuned to automatically detect malware in source code",
+          "An international ISO standard that defines certified quality management procedures for software development",
+          "Google Cloud's managed compliance auditing service that monitors firewall logs in real time"
         ],
         "a": 0,
         "e": "SAIF extends traditional security controls to the AI lifecycle: protect the data and the model, automate defenses, adapt detection to AI-specific threats, and contextualize risk in the business process."
@@ -2868,10 +2868,10 @@
         "t": "Change management",
         "q": "Which message about the impact on employment is most effective and honest when deploying gen AI?",
         "o": [
-          "Confusing probabilistic statistical text generation with deterministic storage and exact data retrieval",
-          "Ignoring that traditional relational databases are inherently incompatible with cloud architectures",
-          "Assuming a foundation model will always be cheaper per query than a managed columnar SQL engine",
-          "Forgetting that language models require a physical fiber-optic connection to `BigQuery` storage"
+          "That the goal is to augment human capability, clearly explaining which tasks change and what training is offered",
+          "That no roles or day-to-day responsibilities will change in any way across the entire organization",
+          "That headcount will be aggressively reduced across all business units without providing specific details",
+          "Avoid addressing the topic of employment until the technology rollout is completely finished"
         ],
         "a": 0,
         "e": "Adoption depends on trust. Denying any change is not credible, and avoiding the topic feeds rumors. Explaining which tasks change and providing training is what sustains adoption."
@@ -2899,10 +2899,10 @@
         "t": "Strategy",
         "q": "A director wants to launch 20 use cases simultaneously in the first quarter. What risk should be flagged?",
         "o": [
-          "Because LLM output is probabilistic and inherently imperfect, requiring graceful degradation and oversight",
-          "Because public cloud providers' data centers suffer global service outages on a weekly basis",
-          "Because foundation models automatically self-destruct if they detect three consecutive errors in a prompt",
-          "Because telecommunications regulations require restarting inference servers after every response"
+          "Opening twenty fronts at once risks resource dispersion and guarantees finishing none; sequencing use cases allows cumulative learning and reuse",
+          "The cost per token charged by cloud providers increases exponentially with the number of deployed applications",
+          "Foundation model weights degrade in quality and accuracy when accessed simultaneously by multiple projects",
+          "No risk: launching as many use cases as possible at once is the recommended strategy to guarantee early returns"
         ],
         "a": 0,
         "e": "Each case requires data, integration, evaluation, and change management. Opening twenty fronts at once guarantees finishing none. Sequencing makes it possible to reuse learnings and assets from one case to the next."
@@ -3724,9 +3724,9 @@
       ],
       "d2-62": [
         null,
-        "Model Garden deploys models on `Vertex AI` cloud infrastructure; it does not require compilation on the customer's local machines.",
-        "Model Garden is a catalog of enterprise foundation models, not a marketplace for buying and selling individual prompts.",
-        "Model Garden is directly integrated with the `Vertex AI` console for testing in the sandbox and deploying to production."
+        "Generating SQL queries from natural language is a text-to-SQL task performed by a generative LLM, not by an embeddings model.",
+        "Text preprocessing and cleaning is a basic tokenization operation, not the computation of dense vector representations.",
+        "Embeddings do not compress files on disk; they generate mathematical vectors to enable semantic search."
       ],
       "d2-63": [
         null,
@@ -3736,15 +3736,15 @@
       ],
       "d2-64": [
         null,
-        "Natively multimodal models still require safety filters and content controls on inputs and outputs.",
-        "Processing heavy modalities such as video still consumes accelerator compute; being native optimizes processing, it does not eliminate the cost.",
-        "Even if natively multimodal, the model can still make visual interpretation mistakes; there is no absolute guarantee of zero errors."
+        "Vertex AI Pipelines is an MLOps orchestration service for machine learning workflows, requiring code and engineering setup.",
+        "Dataflow is a stream and batch data processing service based on Apache Beam, not an end-user document analysis tool.",
+        "Model Garden is a catalog of foundation models within Vertex AI, not a no-code application for generating study guides or audio."
       ],
       "d2-65": [
         null,
-        "Code Assist is a development copilot; it does not replace human review, integration tests, or CI/CD policies.",
-        "Monitoring network traffic and intrusions corresponds to security tools such as `Cloud IDS` or Google SecOps.",
-        "Code Assist is not a system for purchasing licenses or provisioning office hardware."
+        "TPUs are custom ASIC hardware accelerators designed by Google that form the core of the physical AI infrastructure.",
+        "NVIDIA GPUs are high-performance hardware accelerators offered as part of Google Cloud's physical compute infrastructure.",
+        "Google's Jupiter data center network and private global fiber backbone are key physical infrastructure components for distributed AI training."
       ],
       "d2-66": [
         null,
@@ -3814,15 +3814,15 @@
       ],
       "d3-07": [
         null,
-        "Neither technique modifies the model's weights; both act exclusively on the prompt context.",
-        "Both techniques are prompt design patterns applicable interchangeably in `Vertex AI`, AI Studio, or any API.",
-        "Both `zero-shot` and `few-shot` can be used with unimodal or multimodal models (for example, by showing example images)."
+        "A low temperature ensures factual determinism; it does not cause the retrieval step to fetch irrelevant documents.",
+        "Model parameter size affects reasoning and generation quality, not the relevance of the document chunks retrieved from the index.",
+        "RAG relies on in-context retrieval rather than fine-tuning; if irrelevant chunks are retrieved, fine-tuning the generator will not fix the problem."
       ],
       "d3-08": [
         null,
-        "Examples in the prompt do not modify the weights or launch retraining processes on the server.",
-        "The API does not block queries based on the number of examples; it only applies quota limits and the maximum token window.",
-        "The arithmetic precision of the hardware accelerator is fixed and does not degrade due to the text content of the examples."
+        "The base model cannot know proprietary, company-specific category names in zero-shot without demonstrative examples.",
+        "Chain-of-thought is designed for complex multi-step logical reasoning and calculations, not straightforward category classification.",
+        "Fine-tuning is expensive, slow, and complex; few-shot prompting should always be attempted first for classification tasks."
       ],
       "d3-09": [
         null,
@@ -3904,21 +3904,21 @@
       ],
       "d3-22": [
         null,
-        "`temperature` affects the softmax probabilistic distribution, not the clock speed or compute time of the hardware.",
-        "It does not saturate memory buffers or alter the physical length of the tokens sent in the input.",
-        "The `temperature` setting does not disable the declared tools or the `function calling` mechanism."
+        "Fine-tuning is supported on both open models (like Gemma) and managed models (like Gemini) in Vertex AI.",
+        "Tuning modifies weights (often with lightweight adapters like LoRA) without changing architecture or significantly increasing latency.",
+        "Fine-tuning adapts tone, style, or task alignment without degrading the model's core natural language understanding."
       ],
       "d3-23": [
         null,
-        "Generating SQL queries from natural language is a text-to-SQL task performed by a generative LLM, not by an embeddings model.",
-        "Text preprocessing and cleaning is a basic tokenization operation, not the computation of dense vector representations.",
-        "Embeddings do not compress files on disk; they generate mathematical vectors to enable semantic search."
+        "Neither technique modifies the model's weights; both act exclusively on the prompt context.",
+        "Both techniques are prompt design patterns applicable interchangeably in `Vertex AI`, AI Studio, or any API.",
+        "Both `zero-shot` and `few-shot` can be used with unimodal or multimodal models (for example, by showing example images)."
       ],
       "d3-24": [
         null,
-        "`context caching` is temporary and private to a specific application/project; it does not mix memories or transfer data between organizations.",
-        "Safety filters and moderation controls continue to be applied on every inference regardless of cache use.",
-        "The cache stores intermediate activations to speed up inference; it does not alter the static weights of the foundation model."
+        "Setting temperature to zero produces greedy, deterministic outputs, which makes responses even more repetitive and homogeneous.",
+        "Limiting output tokens only cuts the response short; it does nothing to introduce diverse or creative concepts.",
+        "Adding identical or very similar examples anchors the model to that narrow pattern, further reinforcing repetition."
       ],
       "d3-25": [
         null,
@@ -4054,21 +4054,21 @@
       ],
       "d4-07": [
         null,
-        "Accounting standards allow recording reductions in operating costs; the difficulty lies in capturing the real value of the time saved.",
-        "Cloud services do not suffer special tax penalties that cancel out operational efficiency savings.",
-        "Using AI tools does not alter employment contracts or modify staff salaries."
+        "Novelty or team curiosity does not reflect business value or operational readiness and typically leads to the pilot trap.",
+        "Comparing parameter size to budget is a tactical sizing decision, not a strategic use-case prioritization framework.",
+        "The number of departments or age of a process does not determine whether generative AI can deliver measurable return on investment."
       ],
       "d4-08": [
         null,
-        "The business Product Owner is a critical, indispensable role to ensure the system solves real business needs.",
-        "The data engineer is essential for connecting, transforming, and maintaining the knowledge sources that feed RAG.",
-        "The compliance and security specialist is indispensable in enterprise projects to mitigate regulatory and privacy risks."
+        "Scientific excellence relates to methodological rigor and peer review, not the prevention of demographic discrimination in candidate screening.",
+        "Making AI available for aligned uses concerns commercial licensing and distribution boundaries, not bias prevention in selection models.",
+        "Energy efficiency and carbon neutrality are green datacenter sustainability goals, not one of Google's AI principles."
       ],
       "d4-09": [
         null,
-        "Managing network traffic and bandwidth is a telecommunications infrastructure matter, not one of model explainability.",
-        "Thermal dissipation and cooling is a physical aspect of data center hardware engineering, unrelated to algorithmic explainability.",
-        "Compatibility of microservices and web protocols is a standard software architecture problem, not one of model transparency."
+        "SAIF is a security framework and set of architectural guidelines, not a specialized language model.",
+        "ISO quality standards (such as ISO 9001 or ISO 42001) are formal external certifications, whereas SAIF is Google's practical security framework.",
+        "Cloud audit logging and firewall monitoring are platform services (like Cloud Audit Logs or Security Command Center), not SAIF itself."
       ],
       "d4-10": [
         null,
@@ -4144,9 +4144,9 @@
       ],
       "d4-22": [
         null,
-        "Relational databases work perfectly in cloud environments (for example Cloud SQL or AlloyDB); the mistake is asking the LLM for memory.",
-        "Generative inference is computationally more expensive than a traditional database query, but the error is one of factual fidelity.",
-        "Integration between cloud services is done through network APIs and logical protocols, not through exclusive physical cabling."
+        "Claiming zero change is not credible to employees and undermines executive trust when workflows inevitably evolve.",
+        "Announcing vague, indiscriminate layoffs creates widespread panic and active organizational resistance to adoption.",
+        "Avoiding the conversation feeds rumors and distrust, which hinders adoption and psychological safety."
       ],
       "d4-23": [
         null,
@@ -4156,9 +4156,9 @@
       ],
       "d4-24": [
         null,
-        "Leading providers' data centers offer service level agreements (SLAs) of 99.9% or higher; the failure is in the model's output.",
-        "Models are managed software assets that do not self-destruct or alter their weights upon exceptions in requests.",
-        "There are no directives requiring servers to be restarted after each inference; the architecture must handle the non-deterministic nature of the LLM."
+        "Token costs are linear or benefit from volume discounts; cloud providers do not penalize deploying multiple applications.",
+        "Foundation models are stateless, immutable services whose weights do not degrade from concurrent multi-project access.",
+        "Spreading resources across too many simultaneous pilots leads directly to the pilot trap and failed adoption."
       ],
       "d4-25": [
         null,

@@ -156,7 +156,7 @@
           "An Azure Policy definition with an `Audit` effect filters non-compliant resources out"
         ],
         "a": 2,
-        "e": "Deny assignments explicitly block access even when a permissive role (like Contributor) would otherwise allow it. They take precedence over allow roles."
+        "e": "Azure RBAC permissions are scoped. A Contributor role assigned at a specific resource group only grants permissions to resources within that group; it provides no visibility or access to resources located in other resource groups where the user has no role assignment."
       },
       {
         "id": "az-008",
@@ -2045,10 +2045,10 @@
         "Changing the replication level does not affect authentication mechanisms or revoke leaked access keys."
       ],
       "az-028": [
-        "AzCopy is a command-line utility optimized for Azure Storage transfers with support for parallel transfers, job journaling (resume), and SAS tokens.",
+        "Azure Storage Explorer is a standalone desktop GUI application for managing Azure storage, not a command-line utility.",
         null,
-        "AzCopy is a command-line utility optimized for Azure Storage transfers with support for parallel transfers, job journaling (resume), and SAS tokens.",
-        "AzCopy is a command-line utility optimized for Azure Storage transfers with support for parallel transfers, job journaling (resume), and SAS tokens."
+        "The `az storage blob copy` command initiates server-side blob copies via the Azure CLI, but lacks AzCopy high-performance concurrency and local job journaling/resumption.",
+        "Azure Data Factory is a full cloud ETL and data integration service for complex pipelines, rather than a lightweight command-line transfer tool."
       ],
       "az-029": [
         "`Availability Zones` separate VMs into distinct datacenters within a region, but to distribute two VMs across update domains within a single datacenter you use an Availability Set.",
@@ -2177,10 +2177,10 @@
         "Default NSG rules already allow all outbound traffic (AllowInternetOutBound); what Azure blocks by default on a NIC is receiving packets with a foreign destination IP if `IP Forwarding` is missing."
       ],
       "az-050": [
-        "Azure Application Gateway is an L7 load balancer supporting URL path-based routing, SSL termination, session affinity, and optionally WAF (Web Application Firewall).",
+        "Azure Standard Load Balancer operates at Layer 4 (TCP/UDP) and cannot inspect HTTP payloads or perform URL path-based routing.",
         null,
-        "Azure Application Gateway is an L7 load balancer supporting URL path-based routing, SSL termination, session affinity, and optionally WAF (Web Application Firewall).",
-        "Azure Application Gateway is an L7 load balancer supporting URL path-based routing, SSL termination, session affinity, and optionally WAF (Web Application Firewall)."
+        "Azure Traffic Manager operates at the DNS layer using DNS queries to route traffic, without Layer 7 inspection, path routing, or WAF.",
+        "Azure Front Door is a global Layer 7 Anycast CDN and router; for regional Layer 7 load balancing with private VNet integration, Application Gateway is the designated service."
       ],
       "az-051": [
         "Standard Load Balancer operates at Layer 4 and, although Cross-region Load Balancer exists, it does not use the DNS latency-based routing method (Performance routing).",
@@ -2513,10 +2513,10 @@
         "VPA adjusts pod requests/limits, but does not add nodes; the pods would still not fit."
       ],
       "az-106": [
-        "Azure Batch is purpose-built for large-scale parallel and HPC workloads — it provisions, manages, and scales pools of compute nodes, distributes tasks, and tears down automatically after completion.",
+        "Azure VM Scale Sets manages autoscaling VM fleets, but does not provide job scheduling, automated task queuing, or batch compute resource teardown.",
         null,
-        "Azure Batch is purpose-built for large-scale parallel and HPC workloads — it provisions, manages, and scales pools of compute nodes, distributes tasks, and tears down automatically after completion.",
-        "Azure Batch is purpose-built for large-scale parallel and HPC workloads — it provisions, manages, and scales pools of compute nodes, distributes tasks, and tears down automatically after completion."
+        "Azure Kubernetes Service manages container clusters; provisioning a 1000-node AKS cluster for a temporary 2-hour job introduces unnecessary orchestration complexity and management overhead.",
+        "Azure App Service is optimized for hosting web applications and HTTP APIs, not for scheduling parallel high-performance batch computation across 1,000 nodes."
       ],
       "az-107": [
         "Spreading VMs across fault domains is what an Availability Set does, with the opposite goal (resilience, not proximity).",
@@ -2537,10 +2537,10 @@
         "State Configuration (DSC) manages desired configuration, not automatic patch assessment or installation."
       ],
       "az-110": [
-        "AKS provides full Kubernetes orchestration including persistent volumes, service discovery, ingress, horizontal pod autoscaling, and namespace isolation — the right choice for complex multi-container workloads.",
+        "Azure Container Instances runs individual serverless containers, lacking native persistent storage orchestration across multiple nodes and internal service discovery.",
         null,
-        "AKS provides full Kubernetes orchestration including persistent volumes, service discovery, ingress, horizontal pod autoscaling, and namespace isolation — the right choice for complex multi-container workloads.",
-        "AKS provides full Kubernetes orchestration including persistent volumes, service discovery, ingress, horizontal pod autoscaling, and namespace isolation — the right choice for complex multi-container workloads."
+        "Azure App Service with Docker Compose allows basic multi-container deployments, but does not provide complete Kubernetes cluster orchestration or enterprise persistent volume management.",
+        "Azure Container Apps provides serverless microservices with Dapr and KEDA, but full Kubernetes API control, custom resource definitions, and fine-grained cluster orchestration require AKS."
       ],
       "az-111": [
         "Bastion still uses RDP/SSH over the network to the VM; if the VM does not respond to RDP, Bastion will not connect either.",
@@ -2651,10 +2651,10 @@
         null
       ],
       "az-129": [
-        "Azure Monitor Workbooks are interactive documents that combine KQL queries, metrics visualizations, text, and parameter controls into shareable, parameterized reports — much richer than static dashboard tiles.",
+        "Azure Dashboards display pinned tiles and static charts, but do not support parameterized interactive documents combining narrative markdown, KQL results, and controls.",
         null,
-        "Azure Monitor Workbooks are interactive documents that combine KQL queries, metrics visualizations, text, and parameter controls into shareable, parameterized reports — much richer than static dashboard tiles.",
-        "Azure Monitor Workbooks are interactive documents that combine KQL queries, metrics visualizations, text, and parameter controls into shareable, parameterized reports — much richer than static dashboard tiles."
+        "Pinned Metrics Explorer charts only display standard time-series metric graphs pinned to a dashboard, without supporting KQL logs or interactive report parameters.",
+        "Application Insights Live Metrics streams real-time CPU, memory, and incoming request metrics with 1-second latency, rather than providing multi-source sharable reports."
       ],
       "az-130": [
         "That describes a ReadOnly lock; CanNotDelete only blocks delete operations.",
