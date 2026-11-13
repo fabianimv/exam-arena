@@ -1,1266 +1,1265 @@
 /* =========================================================================
-   data/k8s-kcna/exam.js — CNCF · Kubernetes & Cloud Native Associate (KCNA)
-   50 escenarios reales de Kubernetes, Contenedores OCI, Observabilidad y GitOps
+   data/k8s-kcna/exam.js — CNCF · Kubernetes & Cloud Native Associate (KCNA) (English)
    ========================================================================= */
 (function (w) {
   w.EXAMS = w.EXAMS || {};
   w.EXAMS["k8s-kcna"] = {
-  "id": "k8s-kcna",
-  "appId": "k8s-kcna",
-  "provider": "CNCF / Kubernetes",
-  "badge": "CNCF · KCNA",
-  "icon": "☸️",
-  "color": "#326ce5",
-  "featured": false,
-  "title": "CNCF · Kubernetes & Cloud Native Associate (KCNA)",
-  "subtitle": "Arquitectura K8s, Scheduling, Contenedores OCI, Observabilidad, GitOps y Service Mesh",
-  "passingScore": 75,
-  "domains": {
-    "1": "Fundamentos de Kubernetes (46 %)",
-    "2": "Orquestación de Contenedores (22 %)",
-    "3": "Arquitectura Cloud Native (16 %)",
-    "4": "Observabilidad Cloud Native (8 %)",
-    "5": "Entrega de Aplicaciones y GitOps (8 %)"
-  },
-  "shortDomains": {
-    "1": "K8s Core",
-    "2": "Orquestación",
-    "3": "Cloud Native",
-    "4": "Observabilidad",
-    "5": "GitOps & CI/CD"
-  },
-  "topics": [
-    {
-      "id": "kcna-t-1-1",
-      "d": 1,
-      "title": "1.1 · Arquitectura de Kubernetes: Control Plane y Nodos Worker",
-      "html": "\n<h4>El cerebro del clúster: Arquitectura del Control Plane</h4>\n<p>El <b>Control Plane</b> gestiona el estado global del clúster de Kubernetes, detecta y responde a eventos (como crear réplicas cuando un pod falla) y toma decisiones de agendamiento. Sus componentes clave son:</p>\n<table class=\"keytable\">\n<tr><th>Componente</th><th>Rol y Función Principal</th><th>Interacción Clave</th></tr>\n<tr><td><b><code>kube-apiserver</code></b></td><td>Puerta de entrada y API REST central del clúster; valida y configura datos para pods, servicios y controladores.</td><td>Es el <b>único</b> componente que se comunica directamente con <code>etcd</code>. Todos los demás componentes dialogan a través de él.</td></tr>\n<tr><td><b><code>etcd</code></b></td><td>Almacén clave-valor distribuido, consistente y de alta disponibilidad basado en el algoritmo de consenso <b>Raft</b>.</td><td>Guarda todo el estado del clúster. Requiere un número impar de nodos (3 o 5) para mantener quórum <code>(N/2)+1</code>.</td></tr>\n<tr><td><b><code>kube-scheduler</code></b></td><td>Asigna pods recién creados sin nodo asignado a nodos viables y saludables.</td><td>Evalúa requisitos mediante dos fases: <b>Filtrado (Predicates)</b> para descartar nodos no viables y <b>Priorización (Priorities/Scoring)</b> para puntuar los restantes.</td></tr>\n<tr><td><b><code>kube-controller-manager</code></b></td><td>Ejecuta los bucles de control continuos que reconcilian el estado actual con el estado deseado.</td><td>Agrupa múltiples controladores: Node Controller, Deployment Controller, ReplicaSet Controller, ServiceAccount Controller.</td></tr>\n<tr><td><b><code>cloud-controller-manager</code></b></td><td>Integra la lógica específica del proveedor cloud (AWS, Azure, GCP) separándola del núcleo de Kubernetes.</td><td>Gestiona balanceadores de carga externos (<code>LoadBalancer</code>), rutas de red cloud y ciclos de vida de instancias/nodos.</td></tr>\n</table>\n\n<h4>Ejecución en los Nodos Worker</h4>\n<p>Los nodos worker ejecutan las cargas de trabajo reales del usuario en contenedores agrupados en Pods:</p>\n<table class=\"keytable\">\n<tr><th>Componente</th><th>Rol y Función Principal</th></tr>\n<tr><td><b><code>kubelet</code></b></td><td>Agente principal que corre en cada nodo. Recibe especificaciones de Pods (<code>PodSpecs</code>) desde el apiserver y asegura que los contenedores estén corriendo y saludables interactuando con el runtime vía <b>CRI</b>.</td></tr>\n<tr><td><b><code>kube-proxy</code></b></td><td>Proxy de red que mantiene las reglas de reenvío de tráfico en cada nodo (usando <code>iptables</code> o <code>IPVS</code>), implementando la abstracción de <b>Service</b> y balanceo interno.</td></tr>\n<tr><td><b>Container Runtime (CRI)</b></td><td>Software encargado de descargar imágenes y ejecutar contenedores (por ejemplo, <code>containerd</code> o <code>CRI-O</code>), implementando la especificación OCI (Open Container Initiative).</td></tr>\n</table>\n<div class=\"tip\"><b>Clave para KCNA:</b> Ningún componente ni usuario escribe jamás en <code>etcd</code> de forma directa excepto <code>kube-apiserver</code>. Si el apiserver está caído, los pods existentes continúan ejecutándose en los nodos, pero no se pueden realizar cambios declarativos ni consultar el clúster.</div>\n"
+    "id": "k8s-kcna",
+    "appId": "k8s-kcna",
+    "provider": "CNCF / Kubernetes",
+    "badge": "CNCF · KCNA",
+    "icon": "☸️",
+    "color": "#326ce5",
+    "featured": false,
+    "title": "CNCF · Kubernetes & Cloud Native Associate (KCNA)",
+    "subtitle": "K8s Architecture, Scheduling, OCI Containers, Observability, GitOps, and Service Mesh",
+    "passingScore": 75,
+    "domains": {
+      "1": "Kubernetes Fundamentals (46 %)",
+      "2": "Container Orchestration (22 %)",
+      "3": "Cloud Native Architecture (16 %)",
+      "4": "Cloud Native Observability (8 %)",
+      "5": "Application Delivery and GitOps (8 %)"
     },
-    {
-      "id": "kcna-t-1-2",
-      "d": 1,
-      "title": "1.2 · Primitivas y Cargas de Trabajo Core de Kubernetes",
-      "html": "\n<h4>Jerarquía de Objetos y Cargas de Trabajo</h4>\n<p>Kubernetes proporciona abstracciones declarativas diseñadas para diferentes patrones de computación:</p>\n<table class=\"keytable\">\n<tr><th>Objeto</th><th>Propósito y Patrón de Uso</th><th>Comportamiento ante Fallo</th></tr>\n<tr><td><b><code>Pod</code></b></td><td>Unidad atómica mínima de despliegue. Agrupa uno o más contenedores que comparten almacenamiento, red (misma dirección IP y <code>localhost</code>) e IPC.</td><td>Es efímero. Si muere o el nodo falla, el pod no se recrea por sí solo; requiere un controlador.</td></tr>\n<tr><td><b><code>ReplicaSet</code></b></td><td>Mantiene un número estable y garantizado de réplicas de pods idénticos en ejecución en todo momento mediante selectores.</td><td>Crea nuevos pods o elimina sobrantes para coincidir exactamente con el campo <code>spec.replicas</code>.</td></tr>\n<tr><td><b><code>Deployment</code></b></td><td>Controlador declarativo de nivel superior que gestiona ReplicaSets. Soporta <b>Rolling Updates</b>, pausar despliegues y <b>Rollbacks</b> automáticos.</td><td>Ideal para aplicaciones web y APIs sin estado (<i>stateless</i>). Nunca se crean ReplicaSets directamente.</td></tr>\n<tr><td><b><code>StatefulSet</code></b></td><td>Para aplicaciones con estado (bases de datos, Kafka) que necesitan identidades ordinales estables (<code>app-0</code>, <code>app-1</code>), DNS predecible y almacenamiento persistente dedicado (<code>volumeClaimTemplates</code>).</td><td>Orden estricto de despliegue, escalado y terminación secuencial (de mayor a menor índice).</td></tr>\n<tr><td><b><code>DaemonSet</code></b></td><td>Garantiza que una copia del pod se ejecute en <b>todos</b> (o un subconjunto específico) de los nodos del clúster.</td><td>Ideal para agentes de infraestructura: recolectores de logs (Fluentd), métricas (node-exporter) o proxies CNI.</td></tr>\n<tr><td><b><code>Job</code> / <code>CronJob</code></b></td><td><code>Job</code> ejecuta pods hasta que un número específico de tareas finaliza con éxito (batch). <code>CronJob</code> añade programación basada en tiempo (formato crontab).</td><td>Termina el pod en <code>Completed</code> sin reiniciarlo indefinidamente (<code>restartPolicy: OnFailure</code> o <code>Never</code>).</td></tr>\n</table>\n\n<h4>Desacoplamiento de Configuración: ConfigMaps y Secrets</h4>\n<p>Para respetar los principios de la <i>12-Factor App</i>, el código y la configuración deben estar estrictamente separados:</p>\n<ul>\n<li><b><code>ConfigMap</code>:</b> Almacena configuraciones en texto plano (variables de entorno, archivos de configuración o argumentos de CLI) desacoplados de la imagen del contenedor.</li>\n<li><b><code>Secret</code>:</b> Almacena datos confidenciales (contraseñas, tokens OAuth, llaves SSH). Por defecto se almacenan codificados en base64 en la API y pueden cifrarse en reposo (<i>encryption at rest</i>) en <code>etcd</code>.</li>\n<li><b><code>Namespace</code>:</b> Partición lógica de un clúster físico para aislar entornos (dev, staging, prod), equipos o proyectos, aplicando límites de recursos (<code>ResourceQuota</code>) y permisos con RBAC.</li>\n</ul>\n<div class=\"tip\"><b>Pregunta típica KCNA:</b> Un <code>Namespace</code> no proporciona aislamiento de red ni de kernel por sí solo. Para aislar el tráfico entre namespaces se requieren <code>NetworkPolicies</code>.</div>\n"
+    "shortDomains": {
+      "1": "K8s Core",
+      "2": "Orchestration",
+      "3": "Cloud Native",
+      "4": "Observability",
+      "5": "GitOps & CI/CD"
     },
-    {
-      "id": "kcna-t-2-1",
-      "d": 2,
-      "title": "2.1 · Ciclo de Vida de Pods, Scheduling y Gestión de Recursos",
-      "html": "\n<h4>Requests vs. Limits y Clases de Calidad de Servicio (QoS)</h4>\n<p>El planificador (<code>kube-scheduler</code>) y el kernel de Linux (vía cgroups) gestionan los recursos de CPU y memoria de los contenedores:</p>\n<table class=\"keytable\">\n<tr><th>Directiva</th><th>Uso Principal</th><th>Efecto de Exceder el Límite</th></tr>\n<tr><td><b><code>resources.requests</code></b></td><td>Utilizado exclusivamente por <code>kube-scheduler</code> para calcular si un nodo tiene capacidad suficiente para albergar el pod.</td><td>Garantiza un piso mínimo reservado para el contenedor en el nodo.</td></tr>\n<tr><td><b><code>resources.limits</code></b></td><td>Límite superior rígido enforcing por el kernel mediante cgroups.</td><td>En <b>CPU</b> causa estrangulamiento (<i>CFS Throttling</i>); en <b>Memoria</b> provoca terminación inmediata por el kernel: <code>OOMKilled (Exit Code 137)</code>.</td></tr>\n</table>\n\n<h4>Clases de QoS (Quality of Service) y Prioridad de Desalojo (Eviction)</h4>\n<ol>\n<li><b><code>Guaranteed</code>:</b> Tanto CPU como memoria tienen <code>requests</code> y <code>limits</code> definidos y son <b>exactamente iguales</b> para todos los contenedores. Son los últimos en ser desalojados ante saturación del nodo.</li>\n<li><b><code>Burstable</code>:</b> Al menos un contenedor tiene <code>requests</code> o <code>limits</code> configurados pero no cumplen la condición estricta de Guaranteed.</li>\n<li><b><code>BestEffort</code>:</b> Ningún contenedor define ni requests ni limits. Son los primeros en ser eliminados cuando el nodo sufre presión de memoria o disco.</li>\n</ol>\n\n<h4>Sondas de Salud del Kubelet (Health Probes)</h4>\n<table class=\"keytable\">\n<tr><th>Sonda</th><th>Comportamiento ante Fallo</th><th>Caso de Uso Recomendado</th></tr>\n<tr><td><b><code>startupProbe</code></b></td><td>Inhabilita temporalmente a liveness y readiness mientras la aplicación arranca. Si supera los reintentos, el kubelet reinicia el pod.</td><td>Servicios heredados o pesados que tardan minutos en arrancar, evitando bucles de reinicio prematuros.</td></tr>\n<tr><td><b><code>readinessProbe</code></b></td><td>Si falla, el Pod <b>no se reinicia</b>, pero su IP es retirada inmediatamente de los Endpoints del Service.</td><td>Indica si el contenedor está listo para recibir tráfico de usuarios (p. ej. calentamiento de caché o conexión a DB establecida).</td></tr>\n<tr><td><b><code>livenessProbe</code></b></td><td>Si falla consecutivamente, el <code>kubelet</code> mata el contenedor y aplica la <code>restartPolicy</code> del Pod.</td><td>Detectar deadlocks o fallos internos irrecuperables donde el proceso sigue vivo pero no puede progresar.</td></tr>\n</table>\n<div class=\"tip\"><b>Regla de oro:</b> Nunca uses una <code>livenessProbe</code> para verificar una base de datos externa. Si la DB sufre latencia, Kubernetes matará todos tus pods a la vez, causando una tormenta de reinicios en cascada.</div>\n"
-    },
-    {
-      "id": "kcna-t-2-2",
-      "d": 2,
-      "title": "2.2 · Redes y Almacenamiento Persistente en Kubernetes",
-      "html": "\n<h4>El Modelo de Redes de Kubernetes y el CNI</h4>\n<p>Kubernetes impone un modelo de red plano y fundamental: <b>cada Pod tiene su propia dirección IP única y enrutable</b> dentro del clúster. Dos pods pueden comunicarse directamente por IP sin necesidad de NAT. Esta abstracción la implementa un plugin <b>CNI (Container Network Interface)</b> como Calico, Flannel o Cilium.</p>\n\n<h4>Tipos de Servicios (<code>Service</code>)</h4>\n<table class=\"keytable\">\n<tr><th>Tipo</th><th>Alcance y Funcionamiento</th><th>Caso de Uso Principal</th></tr>\n<tr><td><b><code>ClusterIP</code></b> (Por defecto)</td><td>Asigna una IP virtual interna estable accesible únicamente desde dentro del clúster.</td><td>Comunicación interna entre microservicios (backend, base de datos, colas).</td></tr>\n<tr><td><b><code>NodePort</code></b></td><td>Abre un puerto estático (rango por defecto <code>30000-32767</code>) en la IP de <b>cada nodo worker</b> del clúster.</td><td>Acceso externo básico de desarrollo o integración con balanceadores preexistentes.</td></tr>\n<tr><td><b><code>LoadBalancer</code></b></td><td>Crea un <code>NodePort</code> internamente e interactúa con el proveedor cloud para provisionar un balanceador de carga público/privado con IP externa.</td><td>Exposición directa de servicios críticos hacia Internet en entornos de nube gestionada.</td></tr>\n<tr><td><b><code>ExternalName</code></b></td><td>Mapea el servicio a un nombre DNS externo (registro CNAME), sin balanceo ni IPs proxy.</td><td>Conectar pods con servicios externos (p. ej. RDS, CloudSQL o APIs de terceros).</td></tr>\n</table>\n\n<h4>Seguridad de Red con NetworkPolicy</h4>\n<p>Por defecto, la red de Kubernetes es <b>no aislada</b>: cualquier pod puede comunicarse con cualquier otro pod en cualquier namespace. Un recurso <b><code>NetworkPolicy</code></b> permite definir reglas de filtrado en capa 3 y 4 (IP, puertos, selectores de Pod y Namespace). Al aplicar una política a un pod, este entra en modo <i>default-deny</i> para el tráfico no explícitamente autorizado.</p>\n\n<h4>Almacenamiento Persistente: CSI, PV, PVC y StorageClass</h4>\n<ul>\n<li><b><code>CSI (Container Storage Interface)</code>:</b> Estándar abierto que permite a proveedores de almacenamiento integrar sus drivers en Kubernetes sin tocar el código fuente del proyecto.</li>\n<li><b><code>StorageClass</code>:</b> Define el aprovisionador de almacenamiento y parámetros para aprovisionamiento dinámico de volúmenes.</li>\n<li><b><code>PersistentVolume (PV)</code>:</b> Recurso de almacenamiento en el clúster aprovisionado por un administrador o dinámicamente mediante StorageClass.</li>\n<li><b><code>PersistentVolumeClaim (PVC)</code>:</b> Solicitud de almacenamiento realizada por un desarrollador especificando tamaño y modo de acceso:\n  <ul>\n    <li><b><code>ReadWriteOnce (RWO)</code>:</b> Montable en modo lectura/escritura por un único nodo a la vez (discos de bloques).</li>\n    <li><b><code>ReadOnlyMany (ROX)</code>:</b> Montable en modo solo lectura por múltiples nodos concurrentemente.</li>\n    <li><b><code>ReadWriteMany (RWX)</code>:</b> Montable en modo lectura/escritura por múltiples nodos simultáneamente (sistemas de archivos compartidos como NFS o CephFS).</li>\n  </ul>\n</li>\n</ul>\n"
-    },
-    {
-      "id": "kcna-t-3-1",
-      "d": 3,
-      "title": "3.1 · Principios de Arquitectura Cloud Native y Ecosistema CNCF",
-      "html": "\n<h4>¿Qué es Cloud Native según la CNCF?</h4>\n<p>La <b>Cloud Native Computing Foundation (CNCF)</b> define las tecnologías <i>Cloud Native</i> como aquellas que capacitan a las organizaciones para construir y ejecutar aplicaciones escalables en entornos modernos y dinámicos como nubes públicas, privadas e híbridas. Sus características esenciales son:</p>\n<ul>\n<li><b>Contenedores:</b> Empaquetado autocontenido y reproducible de la aplicación con todas sus dependencias.</li>\n<li><b>Mallas de Servicios (Service Meshes):</b> Gestión inteligente y segura de la comunicación entre servicios.</li>\n<li><b>Microservicios:</b> Servicios pequeños, autónomos y desacoplados que se despliegan de forma independiente.</li>\n<li><b>Infraestructura Inmutable:</b> Los servidores y contenedores nunca se modifican en producción; se destruyen y reemplazan por nuevas versiones.</li>\n<li><b>APIs Declarativas:</b> El operador declara el estado deseado y el sistema automatizado se encarga de reconciliar el estado real.</li>\n</ul>\n\n<h4>Etapas de Madurez de los Proyectos en CNCF</h4>\n<p>La CNCF organiza sus proyectos en tres niveles de graduación según su adopción comunitaria, gobernanza y madurez en producción:</p>\n<table class=\"keytable\">\n<tr><th>Nivel</th><th>Criterios de Madurez</th><th>Ejemplos de Proyectos</th></tr>\n<tr><td><b>Sandbox</b></td><td>Proyectos en fase inicial, experimentales o de investigación con potencial prometedor. Requisitos de adopción mínimos.</td><td>KEDA (anteriormente), OpenFeature, Telepresence.</td></tr>\n<tr><td><b>Incubating</b></td><td>Proyectos con uso demostrado en producción, gobernanza activa y sólida base de colaboradores.</td><td>Cilium (previo a graduación), gRPC, Dapr, Notary.</td></tr>\n<tr><td><b>Graduated</b></td><td>Máximo nivel de madurez técnica, seguridad auditada, amplia adopción en entornos de misión crítica y gobernanza neutral demostrada.</td><td><b>Kubernetes, Prometheus, Envoy, Helm, containerd, CoreDNS, Jaeger, Fluentd, OpenTelemetry</b>.</td></tr>\n</table>\n<div class=\"tip\"><b>Consejo de examen KCNA:</b> Identifica con claridad qué proyectos son <i>Graduated</i>. Preguntas habituales consultan si proyectos fundamentales como Kubernetes, Prometheus, Envoy, Helm o containerd han alcanzado el estado de graduación oficial de la CNCF.</div>\n"
-    },
-    {
-      "id": "kcna-t-3-2",
-      "d": 3,
-      "title": "3.2 · Service Mesh, Seguridad, RBAC y Gateway API",
-      "html": "\n<h4>Service Mesh: Desacoplando la Red de la Lógica de Aplicación</h4>\n<p>Un <b>Service Mesh</b> es una capa de infraestructura dedicada que facilita la comunicación de servicio a servicio (tráfico <i>Este-Oeste</i>) de manera segura, rápida y observable. Se divide en dos planos:</p>\n<ul>\n<li><b>Data Plane (Plano de Datos):</b> Proxies sidecar ligeros (comúnmente <b>Envoy</b>) inyectados junto a cada contenedor de aplicación. Interceptan todo el tráfico de entrada y salida sin alterar el código de la app.</li>\n<li><b>Control Plane (Plano de Control):</b> Gestiona y distribuye la configuración a los proxies (p. ej. <b>Istio</b> o <b>Linkerd</b>), emitiendo certificados mTLS y políticas de enrutamiento.</li>\n</ul>\n<table class=\"keytable\">\n<tr><th>Capacidad</th><th>Beneficio Inmediato</th></tr>\n<tr><td><b>Mutual TLS (mTLS)</b></td><td>Cifrado punto a punto en tránsito y autenticación criptográfica mutua de identidades de servicio sin cambiar código.</td></tr>\n<tr><td><b>Resiliencia de Tráfico</b></td><td>Reintentos automáticos, timeouts, circuit breaking y limitación de tasa (rate limiting).</td></tr>\n<tr><td><b>Observabilidad Homogénea</b></td><td>Generación uniforme de métricas doradas (RPS, latencia, errores) y trazas distribuidas para todos los microservicios.</td></tr>\n</table>\n\n<h4>Control de Acceso Basado en Roles (RBAC)</h4>\n<p>En Kubernetes, toda solicitud se autentica y luego se autoriza mediante <b>RBAC</b>. Los componentes son:</p>\n<ul>\n<li><b><code>Role</code> vs. <code>ClusterRole</code>:</b> Un <code>Role</code> define permisos dentro de un <b>namespace específico</b> (ej. leer pods en <i>default</i>). Un <code>ClusterRole</code> define permisos a nivel de todo el clúster (ej. listar nodos, o leer pods en todos los namespaces).</li>\n<li><b><code>RoleBinding</code> vs. <code>ClusterRoleBinding</code>:</b> Vincula un Role o ClusterRole a un sujeto (usuario, grupo o <code>ServiceAccount</code>).</li>\n<li><b><code>ServiceAccount</code>:</b> Proporciona una identidad gestionada para los procesos que corren dentro de los Pods para interactuar con el <code>kube-apiserver</code>.</li>\n</ul>\n\n<h4>Evolución: De Ingress a la Gateway API</h4>\n<p>El recurso <code>Ingress</code> tradicional sufría de falta de expresividad y sobrecarga de anotaciones propietarias. La <b>Gateway API</b> es su sucesora moderna, orientada a roles:</p>\n<ul>\n<li><b><code>GatewayClass</code>:</b> Gestionado por el administrador de infraestructura (define el controlador).</li>\n<li><b><code>Gateway</code>:</b> Gestionado por el operador de clúster/red (define puertos y certificados TLS).</li>\n<li><b><code>HTTPRoute</code> / <code>GRPCRoute</code>:</b> Gestionado por el desarrollador de la aplicación (define reglas de reenvío y filtros).</li>\n</ul>\n"
-    },
-    {
-      "id": "kcna-t-4-1",
-      "d": 4,
-      "title": "4.1 · Los Tres Pilares de la Observabilidad Cloud Native",
-      "html": "\n<h4>Métricas, Logs y Trazas Distribuidas</h4>\n<p>La <b>Observabilidad</b> es la capacidad de inferir los estados internos de un sistema complejo a partir del análisis de sus salidas externas de telemetría:</p>\n<table class=\"keytable\">\n<tr><th>Pilar</th><th>Naturaleza del Dato</th><th>Propósito Principal</th><th>Tecnologías CNCF</th></tr>\n<tr><td><b>Métricas</b></td><td>Valores numéricos medidos a intervalos regulares (contadores, medidores, histogramas). Muy eficientes en almacenamiento.</td><td>Detección de anomalías, alertas en tiempo real, tableros de rendimiento y cálculo de SLOs.</td><td><b>Prometheus</b>, Thanos, Cortex.</td></tr>\n<tr><td><b>Logs</b></td><td>Registros textuales discretos con timestamp generados por eventos o errores de la aplicación.</td><td>Investigación forense profunda de fallos y auditoría de comportamiento específico.</td><td><b>Fluentd</b>, Fluent Bit, Grafana Loki.</td></tr>\n<tr><td><b>Trazas (Tracing)</b></td><td>Representación del ciclo de vida completo de una solicitud que atraviesa múltiples microservicios (compuesta por <i>Spans</i> con contexto temporal y causal).</td><td>Identificación precisa de cuellos de botella de latencia y dependencias lentas o rotas.</td><td><b>Jaeger</b>, <b>OpenTelemetry</b>.</td></tr>\n</table>\n\n<h4>OpenTelemetry (OTel): El Estándar Unificado</h4>\n<p><b>OpenTelemetry</b> es un proyecto <i>Graduated</i> de la CNCF nacido de la fusión de <i>OpenTracing</i> y <i>OpenCensus</i>. Proporciona una colección unificada de APIs, SDKs y herramientas para generar y exportar métricas, logs y trazas de forma agnóstica respecto al backend de observabilidad.</p>\n<ul>\n<li><b>OTel Collector:</b> Proxy de telemetría de alto rendimiento que recibe datos mediante el protocolo <b>OTLP</b> (OpenTelemetry Protocol), los procesa (filtra, enriquece, muestrea) y los exporta a backends como Prometheus, Jaeger o Datadog.</li>\n</ul>\n<div class=\"tip\"><b>Clave KCNA:</b> OpenTelemetry estandariza la instrumentación y recolección de telemetría, pero no proporciona almacenamiento ni visualización propios. Para almacenar y consultar métricas y trazas se conecta a backends como Prometheus o Jaeger.</div>\n"
-    },
-    {
-      "id": "kcna-t-4-2",
-      "d": 4,
-      "title": "4.2 · Monitoreo de Clúster, Telemetría con Prometheus y Alertmanager",
-      "html": "\n<h4>Arquitectura de Prometheus</h4>\n<p><b>Prometheus</b> es el estándar <i>de facto</i> para la monitorización de sistemas nativos de la nube. Sus características estructurales son:</p>\n<ul>\n<li><b>Modelo Pull (Scraping):</b> Prometheus sondea activamente los endpoints HTTP (habitualmente <code>/metrics</code>) de los destinos a intervalos configurados, en lugar de esperar que los servicios envíen los datos.</li>\n<li><b>Time-Series Database (TSDB):</b> Almacena los datos en disco como series temporales compuestas por un identificador de métrica, etiquetas (<i>key-value labels</i>) y valores flotantes con timestamp.</li>\n<li><b>PromQL:</b> Potente lenguaje funcional de consulta para agregar, filtrar y calcular derivadas y tasas sobre las métricas (p. ej. <code>rate(http_requests_total[5m])</code>).</li>\n</ul>\n\n<h4>Componentes del Ecosistema de Monitoreo</h4>\n<table class=\"keytable\">\n<tr><th>Componente</th><th>Rol en la Plataforma</th></tr>\n<tr><td><b><code>cAdvisor</code></b></td><td>Daemon embebido directamente en el <code>kubelet</code> que recopila y expone métricas de uso de CPU, memoria, red y disco de los contenedores en ejecución en cada nodo.</td></tr>\n<tr><td><b><code>node-exporter</code></b></td><td>Agente que se despliega como <code>DaemonSet</code> para recolectar métricas a nivel del sistema operativo y hardware del host (kernel, CPU, swap, filesystem).</td></tr>\n<tr><td><b><code>metrics-server</code></b></td><td>Componente ligero en memoria que agrega métricas básicas de uso para la CLI (<code>kubectl top</code>) y para el autoescalado de pods (<b>HPA</b>). No persiste datos históricos.</td></tr>\n<tr><td><b><code>Alertmanager</code></b></td><td>Servicio que recibe alertas disparadas por las reglas de Prometheus, se encarga de deduplicarlas, agruparlas por servicio/severidad y enviarlas a receptores (Slack, PagerDuty, Email).</td></tr>\n</table>\n\n<h4>Conceptos SRE: SLI, SLO y Error Budgets</h4>\n<ul>\n<li><b>SLI (Service Level Indicator):</b> Métrica cuantitativa del servicio en tiempo real (ej. tasa de éxito de solicitudes HTTP).</li>\n<li><b>SLO (Service Level Objective):</b> Objetivo interno acordado para el SLI durante un periodo (ej. 99.9% de éxito en 30 días).</li>\n<li><b>Error Budget:</b> El margen permitido de fallo <code>(100% - SLO)</code>. Si el presupuesto se agota, se congelan los despliegues para priorizar la estabilidad.</li>\n</ul>\n"
-    },
-    {
-      "id": "kcna-t-5-1",
-      "d": 5,
-      "title": "5.1 · Principios de GitOps y Despliegue Continuo Declarativo",
-      "html": "\n<h4>¿Qué es GitOps?</h4>\n<p><b>GitOps</b> es un modelo operativo para aplicaciones nativas de la nube que utiliza <b>Git como la única fuente de verdad (Single Source of Truth)</b> para la infraestructura declarativa y las aplicaciones. La iniciativa <b>OpenGitOps</b> de la CNCF establece cuatro principios fundamentales:</p>\n<ol>\n<li><b>Declarativo:</b> Todo el estado del sistema deseado debe estar expresado de forma declarativa (manifiestos YAML, Kustomize, Helm).</li>\n<li><b>Versionado e Inmutable:</b> El estado deseado se almacena en Git, permitiendo auditoría completa, historial de cambios y capacidad instantánea de rollback.</li>\n<li><b>Obtenido Automáticamente (Pull):</b> Los agentes de software en el clúster obtienen activamente el estado deseado desde Git (modelo <i>Pull</i>), en lugar de que un pipeline de CI externo ejecute <code>kubectl apply</code> con credenciales administrativas (modelo <i>Push</i>).</li>\n<li><b>Reconciliación Continua:</b> El agente compara permanentemente el estado real del clúster con el estado en Git. Si detecta divergencia (<i>Drift</i>), reconcilia el sistema automáticamente (<i>Self-Healing</i>).</li>\n</ol>\n\n<h4>Modelo Push vs. Modelo Pull en Despliegue Continuo</h4>\n<table class=\"keytable\">\n<tr><th>Criterio</th><th>CI/CD Tradicional (Modelo Push)</th><th>GitOps (Modelo Pull - ArgoCD / Flux)</th></tr>\n<tr><td><b>Acceso al Clúster</b></td><td>El servidor de CI (Jenkins, GitHub Actions) debe tener credenciales de administrador (kubeconfig) del clúster, creando un riesgo de seguridad crítico.</td><td>El operador (<b>ArgoCD / Flux</b>) se ejecuta <b>dentro</b> del clúster y tira de Git solo con permisos de lectura. No se exponen credenciales fuera.</td></tr>\n<tr><td><b>Detección de Deriva (Drift)</b></td><td>Si alguien modifica un recurso manualmente con <code>kubectl edit</code>, el pipeline de CI no se entera hasta el próximo despliegue.</td><td>El operador detecta la alteración manual en cuestión de segundos y la sobrescribe para restaurar el estado de Git.</td></tr>\n<tr><td><b>Auditoría y Rollback</b></td><td>Los rollbacks requieren re-ejecutar pipelines complejos o scripts manuales.</td><td>Un rollback se realiza simplemente ejecutando <code>git revert</code> en el repositorio Git.</td></tr>\n</table>\n<div class=\"tip\"><b>Proyectos Graduados CNCF en GitOps:</b> Tanto <b>Argo CD</b> como <b>Flux</b> son proyectos <i>Graduated</i> de la CNCF que implementan el patrón GitOps en Kubernetes.</div>\n"
-    },
-    {
-      "id": "kcna-t-5-2",
-      "d": 5,
-      "title": "5.2 · Empaquetado y Estrategias Modernas de Entrega de Aplicaciones",
-      "html": "\n<h4>Gestión de Paquetes y Templating: Helm vs. Kustomize</h4>\n<p>La gestión de manifiestos complejos en múltiples entornos (dev, QA, prod) se aborda con dos herramientas principales en el ecosistema CNCF:</p>\n<table class=\"keytable\">\n<tr><th>Característica</th><th>Helm (El gestor de paquetes de K8s)</th><th>Kustomize (Personalización sin plantillas)</th></tr>\n<tr><td><b>Enfoque</b></td><td>Utiliza un motor de plantillas Go (<i>Go Templates</i>) y archivos <code>values.yaml</code> para generar manifiestos dinámicos.</td><td>Enfoque sin plantillas (<i>template-free</i>); utiliza capas base (<i>bases</i>) y sobreescrituras declarativas (<i>overlays</i>).</td></tr>\n<tr><td><b>Estructura</b></td><td>Agrupado en <b>Charts</b> con <code>Chart.yaml</code>, <code>templates/</code> y dependencias versionadas en repositorios OCI.</td><td>Utiliza un archivo <code>kustomization.yaml</code> que define parches y recursos. Integrado de forma nativa en <code>kubectl</code> (<code>kubectl apply -k</code>).</td></tr>\n<tr><td><b>Gestión de Versiones</b></td><td>Mantiene historial de <i>releases</i> en el clúster (almacenadas como Secrets), permitiendo <code>helm rollback</code>.</td><td>No mantiene estado interno en el clúster; delega el versionado puramente a Git.</td></tr>\n</table>\n\n<h4>Estrategias de Despliegue de Aplicaciones</h4>\n<table class=\"keytable\">\n<tr><th>Estrategia</th><th>Cómo Funciona</th><th>Ventajas y Desventajas</th></tr>\n<tr><td><b>Recreate</b></td><td>Destruye todas las réplicas existentes (v1) antes de crear las nuevas réplicas (v2).</td><td>Sencillo y sin problemas de concurrencia de versiones en DB, pero causa <b>tiempo de inactividad (downtime)</b>.</td></tr>\n<tr><td><b>Rolling Update</b></td><td>Reemplaza gradualmente pods v1 por pods v2 controlando <code>maxSurge</code> y <code>maxUnavailable</code>.</td><td>Estrategia por defecto de Kubernetes. Cero downtime, pero requiere que v1 y v2 coexistan y soporten el mismo esquema de datos.</td></tr>\n<tr><td><b>Blue/Green</b></td><td>Despliega el entorno nuevo completo (Green) en paralelo al actual (Blue). Cuando Green está validado, el Service o Ingress cambia el selector instantáneamente.</td><td>Cero downtime y rollback instantáneo conmutando el selector. Duplica el consumo de recursos de infraestructura durante el corte.</td></tr>\n<tr><td><b>Canary</b></td><td>Envía un pequeño porcentaje de tráfico real (p. ej. 5% o 10%) a la versión nueva (Canary) mientras el 90% sigue en v1. Si las métricas son óptimas, se promueve gradualmente.</td><td>Minimiza el radio de impacto de bugs ante usuarios reales. Requiere un Ingress Controller avanzado, Service Mesh o herramientas como <b>Argo Rollouts</b> o <b>Flagger</b>.</td></tr>\n</table>\n"
-    }
-  ],
-  "questions": [
-    {
-      "id": "kcna-01",
-      "d": 1,
-      "t": "Arquitectura del Control Plane",
-      "q": "Durante una auditoría de seguridad en la arquitectura de un clúster de Kubernetes, el equipo de ciberseguridad necesita identificar cuál es el único componente del Control Plane que expone la API REST pública, autentica y autoriza las peticiones y se comunica de manera directa y exclusiva con el almacén de datos persistente `etcd`. ¿Qué componente cumple esta función?",
-      "o": [
-        "`kube-scheduler`, ya que evalúa los requisitos de recursos de cómputo y calcula el nodo adecuado para los pods.",
-        "`kube-controller-manager`, ya que centraliza los bucles de control continuos que reconcilian el estado deseado.",
-        "`kube-apiserver`, ya que expone los endpoints REST, valida manifiestos y es el único cliente directo de `etcd`.",
-        "`kubelet`, ya que reside en los nodos worker reportando la salud de los contenedores hacia el almacenamiento central."
-      ],
-      "a": 2,
-      "e": "El `kube-apiserver` es la puerta de enlace central de Kubernetes. Es el único componente del clúster que interactúa directamente con `etcd`; todos los demás clientes (controladores, planificador, kubelet y usuarios mediante `kubectl`) se comunican obligatoriamente a través de su API REST."
-    },
-    {
-      "id": "kcna-02",
-      "d": 1,
-      "t": "Almacén de Estado etcd",
-      "q": "Un arquitecto de infraestructura está diseñando la topología de alta disponibilidad para el almacén de estado `etcd` en un clúster de Kubernetes de producción. ¿Por qué es fundamental desplegar un número impar de miembros (por ejemplo, 3 o 5 instancias) en el clúster de `etcd`?",
-      "o": [
-        "Para permitir que el algoritmo de consenso Raft determine la mayoría estricta `(N/2)+1` y tolere particiones de red sin sufrir split-brain.",
-        "Para duplicar la velocidad de escritura secuencial mediante particionado hash y balanceo simétrico de transacciones entre nodos activos y pasivos.",
-        "Para asegurar que el `kube-apiserver` pueda alternar certificados TLS independientes en cada zona de disponibilidad de la nube.",
-        "Para evitar que la base de datos requiera compactación periódica de revisiones históricas en almacenamiento de bloques SSD."
-      ],
-      "a": 0,
-      "e": "`etcd` utiliza el algoritmo de consenso distribuido Raft, que requiere una mayoría estricta (quórum) de `(N/2)+1` miembros para confirmar escrituras y elegir un líder. Un número impar maximiza la tolerancia a fallos: un clúster de 3 nodos tolera la pérdida de 1 nodo (quórum 2), mientras que 4 nodos también toleran solo 1 fallo (quórum 3) consumiendo recursos extra innecesarios."
-    },
-    {
-      "id": "kcna-03",
-      "d": 1,
-      "t": "Agendamiento con kube-scheduler",
-      "q": "Se ha desplegado un Pod de inferencia de machine learning que solicita 4 GPUs dedicadas y 32 GiB de memoria RAM. Al revisar el estado del despliegue, el Pod permanece en estado `Pending`. ¿Qué componente del Control Plane es el encargado de evaluar los filtros de viabilidad y puntuar los nodos para asignar este Pod?",
-      "o": [
-        "`kube-scheduler`, ya que filtra los nodos viables mediante predicates y puntúa los candidatos para seleccionar el nodo definitivo.",
-        "`kube-controller-manager`, ya que supervisa que las réplicas solicitadas existan y crea nuevos nodos si la cuota no es suficiente.",
-        "`kubelet`, ya que inspecciona los controladores de hardware en el sistema operativo del host antes de aceptar nuevas cargas de trabajo.",
-        "`cloud-controller-manager`, ya que aprovisiona automáticamente instancias con GPU en la infraestructura del proveedor cloud."
-      ],
-      "a": 0,
-      "e": "El `kube-scheduler` supervisa los pods recién creados que no tienen un nodo asignado (`nodeName` vacío). Ejecuta un proceso de dos pasos: primero el filtrado (Filtering/Predicates), donde descarta nodos que no cumplen los recursos o taints; y luego la priorización (Scoring/Priorities), donde asigna una puntuación a los nodos viables restantes para elegir el mejor."
-    },
-    {
-      "id": "kcna-04",
-      "d": 1,
-      "t": "Bucle de Reconciliación",
-      "q": "En el modelo operativo de Kubernetes, la configuración se expresa de forma declarativa. ¿Cuál es la responsabilidad principal del componente `kube-controller-manager` en relación con este paradigma declarativo?",
-      "o": [
-        "Compilar los manifiestos YAML en imágenes binarias para que el runtime de contenedores las ejecute en cada nodo worker sin necesidad de interpretar texto.",
-        "Ejecutar bucles continuos de control que comparan el estado actual del clúster con el estado deseado y aplican correcciones continuas.",
-        "Validar criptográficamente los tokens JWT emitidos para los usuarios administradores que ejecutan comandos administrativos frecuentes con `kubectl`.",
-        "Establecer túneles de red overlay mediante encapsulación VXLAN entre todos los nodos que integran el clúster."
-      ],
-      "a": 1,
-      "e": "El `kube-controller-manager` ejecuta bucles de control continuos (reconciliation loops). En cada iteración, compara el estado deseado declarado en los objetos de Kubernetes con el estado real observado en el clúster y realiza las acciones necesarias (como crear o destruir pods) para que ambos coincidan."
-    },
-    {
-      "id": "kcna-05",
-      "d": 1,
-      "t": "Cloud Controller Manager",
-      "q": "Una empresa migra sus clústeres de Kubernetes auto-gestionados hacia una infraestructura de nube pública. ¿Cuál es el propósito del binario `cloud-controller-manager` introducido en la arquitectura moderna de Kubernetes?",
-      "o": [
-        "Reemplazar completamente al `kubelet` en los nodos para permitir la ejecución de microservicios sin necesidad de sistema operativo.",
-        "Monitorear la saturación de memoria de los pods y enviar alertas automáticas hacia los tableros de facturación mensual y analítica del proveedor.",
-        "Gestionar el aprovisionamiento de clústeres elásticos mediante plantillas de Terraform incrustadas en el firmware de los hipervisores bare-metal.",
-        "Desacoplar la lógica dependiente del proveedor cloud (balanceadores de carga, rutas e instancias de nodos) del código central de Kubernetes."
-      ],
-      "a": 3,
-      "e": "El `cloud-controller-manager` permite que los proveedores de nube (AWS, Azure, Google Cloud, OpenStack, etc.) integren sus plataformas con Kubernetes sin acoplar código propietario dentro del repositorio principal de Kubernetes. Gestiona controladores específicos de nodos, rutas de red y balanceadores de carga de tipo `LoadBalancer`."
-    },
-    {
-      "id": "kcna-06",
-      "d": 1,
-      "t": "Agente Kubelet de Nodo",
-      "q": "En cada nodo worker de un clúster de Kubernetes se ejecuta un proceso esencial que actúa como el agente principal del sistema. ¿Cuál es la responsabilidad principal del `kubelet` en la operación cotidiana del nodo?",
-      "o": [
-        "Distribuir el tráfico HTTP balanceando las peticiones externas entre los pods según la política de round-robin definida en las tablas de enrutamiento.",
-        "Consultar directamente la base de datos `etcd` para sincronizar los cambios de red y aplicar políticas de aislamiento perimetral.",
-        "Recibir especificaciones de Pods (`PodSpecs`) del `kube-apiserver`, interactuar con el runtime vía CRI y vigilar su estado de salud.",
-        "Ejecutar el proceso de compilación de código fuente cuando un desarrollador sube un nuevo commit a un repositorio Git conectado."
-      ],
-      "a": 2,
-      "e": "El `kubelet` es el agente primario de nodo. Recibe `PodSpecs` (principalmente del `kube-apiserver`, o de archivos locales en static pods), interactúa con el runtime de contenedores mediante la interfaz CRI para crear y detener contenedores, y ejecuta sondas de salud (liveness, readiness, startup) reportando el estado del nodo y los pods al apiserver."
-    },
-    {
-      "id": "kcna-07",
-      "d": 1,
-      "t": "Enrutamiento con kube-proxy",
-      "q": "Un desarrollador consulta cómo las peticiones dirigidas a una IP virtual de tipo `ClusterIP` llegan a los pods de backend correctos dentro de un nodo worker. ¿Qué componente de red implementa esta abstracción programando reglas de reenvío en el sistema operativo del nodo?",
-      "o": [
-        "`kube-proxy`, ya que programa reglas en `iptables` o `IPVS` en cada nodo para reenviar el tráfico dirigido a Services hacia los Pods.",
-        "`CoreDNS`, ya que traduce paquetes TCP a nivel de capa de enlace físico mediante tablas de conmutación ARP en los switches de red física del centro de datos.",
-        "`containerd`, ya que encapsula las tramas Ethernet en encabezados TLS antes de transmitirlas a la tarjeta de interfaz física.",
-        "`kube-scheduler`, ya que actualiza las tablas de rutas estáticas del kernel cada vez que un nuevo contenedor cambia de estado."
-      ],
-      "a": 0,
-      "e": "`kube-proxy` es el componente de red que se ejecuta en cada nodo worker. Monitorea los objetos `Service` y `Endpoints` (o `EndpointSlices`) a través del apiserver y programa reglas de filtrado y reenvío NAT en el kernel de Linux (usando modos `iptables` o `IPVS`) para traducir las IPs virtuales de los servicios a las IPs reales de los pods."
-    },
-    {
-      "id": "kcna-08",
-      "d": 1,
-      "t": "Alta Disponibilidad en Control Plane",
-      "q": "¿Cuáles DOS componentes del Control Plane de Kubernetes utilizan un mecanismo de elección de líder (Leader Election) basado en Leases para operar en modo activo-pasivo y evitar que múltiples instancias tomen decisiones contradictorias simultáneamente? (Selecciona dos)",
-      "o": [
-        "`kube-scheduler`",
-        "`kube-apiserver`",
-        "`kube-controller-manager`",
-        "`kubelet`"
-      ],
-      "a": [
-        0,
-        2
-      ],
-      "e": "Tanto `kube-scheduler` como `kube-controller-manager` implementan elección de líder (usando objetos `Lease` en Kubernetes). Aunque se desplieguen múltiples réplicas en nodos de control plane para alta disponibilidad, solo una instancia actúa como líder activa para evitar que dos planificadores asignen el mismo pod o que dos controladores dupliquen réplicas. En cambio, `kube-apiserver` es activo-activo sin líder (todas las instancias atienden tráfico en paralelo tras un balanceador)."
-    },
-    {
-      "id": "kcna-09",
-      "d": 1,
-      "t": "CRI y Runtime de Contenedores",
-      "q": "Históricamente, Kubernetes contenía código específico para comunicarse con Docker. Para desacoplar la orquestación del motor de ejecución, la CNCF promovió una especificación estándar basada en gRPC. ¿Cómo se denomina esta interfaz que permite usar runtimes como `containerd` o `CRI-O`?",
-      "o": [
-        "`CNI (Container Network Interface)`, que gestiona las direcciones IP y el enrutamiento de paquetes entre contenedores en el clúster a través de túneles de red.",
-        "`CSI (Container Storage Interface)`, que define la interoperabilidad para adjuntar y montar volúmenes persistentes.",
-        "`OCI (Open Container Initiative)`, que define exclusivamente el formato de archivo tarball de los manifiestos Helm.",
-        "`CRI (Container Runtime Interface)`, que estandariza la comunicación gRPC entre el `kubelet` y los runtimes de contenedores."
-      ],
-      "a": 3,
-      "e": "La `CRI` (Container Runtime Interface) es la API estándar de gRPC introducida en Kubernetes para que el `kubelet` pueda interactuar con cualquier runtime de contenedores compatible (como `containerd` o `CRI-O`) sin necesidad de incorporar código específico de cada motor dentro del proyecto de Kubernetes."
-    },
-    {
-      "id": "kcna-10",
-      "d": 1,
-      "t": "Anatomía del Pod",
-      "q": "Un desarrollador configura un Pod multi-contenedor que contiene una aplicación web y un contenedor auxiliar (sidecar) para procesar logs. ¿Cuál de las siguientes afirmaciones describe con precisión el entorno compartido por los contenedores dentro de este mismo Pod?",
-      "o": [
-        "Cada contenedor recibe una dirección IP pública independiente y se comunican entre sí exclusivamente a través del Ingress del clúster mediante certificados TLS.",
-        "Comparten el mismo Network namespace (misma dirección IP y comunicación por `localhost`), así como volúmenes de almacenamiento montados.",
-        "Se ejecutan en nodos worker físicamente distintos para garantizar alta disponibilidad ante la pérdida imprevista de un servidor.",
-        "Comparten obligatoriamente el mismo sistema de archivos raíz de solo lectura y el mismo espacio de usuarios sin aislamiento de procesos."
-      ],
-      "a": 1,
-      "e": "Un `Pod` es la unidad mínima en Kubernetes. Todos los contenedores que forman parte de un mismo Pod se agendan siempre en el mismo nodo worker y comparten namespaces del kernel de Linux: Network namespace (comparten la misma IP del pod y pueden comunicarse por `localhost` en distintos puertos), IPC namespace, y pueden compartir volúmenes declarados en el pod."
-    },
-    {
-      "id": "kcna-11",
-      "d": 1,
-      "t": "Deployments y ReplicaSets",
-      "q": "Un equipo de ingeniería de software necesita actualizar una aplicación web en producción sin tiempo de inactividad, con la capacidad de realizar rollbacks automáticos si aumentan los errores. ¿Por qué se utiliza un objeto `Deployment` en lugar de crear directamente un `ReplicaSet`?",
-      "o": [
-        "Porque los ReplicaSets no admiten pods con más de un contenedor ni permiten montar secretos inyectados desde variables de entorno.",
-        "Porque los Deployments ejecutan automáticamente análisis de vulnerabilidades estáticas de código antes de iniciar el ciclo de vida del pod.",
-        "Porque el `Deployment` gestiona de forma declarativa el ciclo de vida de múltiples ReplicaSets, permitiendo rolling updates y rollbacks.",
-        "Porque el `ReplicaSet` ha sido marcado como obsoleto en la versión 1.25 de Kubernetes y ya no puede ser procesado por el API Server."
-      ],
-      "a": 2,
-      "e": "Un `Deployment` es un controlador declarativo de nivel superior que gestiona `ReplicaSets`. Al realizar una actualización de versión (`RollingUpdate`), el Deployment crea un nuevo ReplicaSet con la nueva imagen y va escalando gradualmente el nuevo mientras desescala el anterior. Si algo falla, permite revertir (`kubectl rollout undo`) al ReplicaSet anterior de forma instantánea."
-    },
-    {
-      "id": "kcna-12",
-      "d": 1,
-      "t": "Controlador DaemonSet",
-      "q": "Se necesita recolectar los archivos de log de cada servidor físico del clúster enviándolos a un clúster central de Elasticsearch. Para ello, se requiere que exactamente una réplica del agente Fluentd se ejecute en cada uno de los nodos worker del clúster. ¿Qué primitiva de carga de trabajo es la idónea para este requerimiento?",
-      "o": [
-        "`DaemonSet`, ya que garantiza que una copia del Pod se ejecute automáticamente en todos los nodos (o los seleccionados) del clúster.",
-        "`StatefulSet`, ya que asigna una dirección IP estática fija y un volumen persistente exclusivo numerado para cada réplica en ejecución.",
-        "`Job`, ya que ejecuta los contenedores en segundo plano hasta que se alcanza el código de finalización exitosa en la tarea batch.",
-        "`Deployment`, ya que recalcula aleatoriamente la ubicación de los agentes en cada reinicio del servicio para evitar cuellos de botella."
-      ],
-      "a": 0,
-      "e": "Un `DaemonSet` asegura que todos (o una selección basada en node selectors/taints) los nodos ejecuten una copia de un Pod. A medida que se agregan nuevos nodos al clúster, el DaemonSet crea automáticamente el Pod en ellos; cuando los nodos se destruyen, los pods son eliminados. Casos típicos: recolección de logs (Fluentd), métricas de nodo (node-exporter) o agentes CNI."
-    },
-    {
-      "id": "kcna-13",
-      "d": 1,
-      "t": "Controlador StatefulSet",
-      "q": "Un equipo de datos necesita desplegar un clúster de Apache ZooKeeper en Kubernetes. La aplicación requiere que cada instancia mantenga un nombre de host DNS estable y predecible a lo largo de reinicios (`zk-0`, `zk-1`, `zk-2`) y conserve su propio almacenamiento de disco persistente dedicado. ¿Qué recurso de Kubernetes deben emplear?",
-      "o": [
-        "`DaemonSet`, ya que proporciona nombres de host derivados del nombre del nodo worker sobre el cual se ha iniciado el contenedor.",
-        "`Deployment`, ya que permite asociar un único volumen compartido NFS de lectura concurrente para todas las réplicas activas del clúster sin colisiones de bloqueo.",
-        "`CronJob`, ya que reinicia periódicamente las instancias asignando nuevos identificadores correlativos al terminar el tiempo de ejecución.",
-        "`StatefulSet`, ya que ofrece identidades de red ordinales estables, terminación ordenada y volúmenes dedicados vía `volumeClaimTemplates`."
-      ],
-      "a": 3,
-      "e": "Un `StatefulSet` es el controlador diseñado para cargas con estado que necesitan identidades de red fijas y predecibles (índices ordinales `nombre-0`, `nombre-1`), orden secuencial de despliegue y actualización, y almacenamiento persistente dedicado para cada réplica mediante `volumeClaimTemplates` (el volumen de `zk-0` no se reasigna a `zk-1` al reiniciar)."
-    },
-    {
-      "id": "kcna-14",
-      "d": 1,
-      "t": "Cargas Batch: Job vs CronJob",
-      "q": "Una aplicación financiera debe ejecutar una conciliación contable todas las noches a las 02:00 AM UTC. El proceso dura aproximadamente 20 minutos, procesa transacciones pendientes y debe terminar liberando los recursos de cómputo tras finalizar exitosamente. ¿Qué recurso es el más apropiado para modelar este requerimiento?",
-      "o": [
-        "`Deployment`, configurando `replicas: 1` y una sonda `livenessProbe` que mate el contenedor al terminar la conciliación de datos para forzar la liberación de memoria.",
-        "`CronJob`, ya que crea objetos `Job` de forma recurrente según una expresión temporal tipo crontab, terminando al completarse la tarea.",
-        "`DaemonSet`, ya que asegura que la tarea financiera se ejecute en todos los nodos worker sin interferir con las cargas de producción.",
-        "`StatefulSet`, ya que garantiza que el proceso conserve el mismo identificador de red durante la ejecución de los cálculos contables."
-      ],
-      "a": 1,
-      "e": "Un `CronJob` gestiona la ejecución periódica basada en tiempo de tareas batch. En cada intervalo especificado por la sintaxis de cron (ej. `0 2 * * *`), crea un objeto `Job`. El `Job` crea uno o más pods que se ejecutan hasta que completan su trabajo con éxito (`Completed`) y luego se detienen, sin consumir CPU/memoria residual."
-    },
-    {
-      "id": "kcna-15",
-      "d": 1,
-      "t": "Aislamiento con Namespaces",
-      "q": "Una organización comparte un clúster de Kubernetes grande entre tres equipos de desarrollo distintos. Quieren organizar los recursos de forma lógica para evitar colisiones de nombres y aplicar límites de cuotas de cómputo (`ResourceQuota`). ¿Qué primitiva de Kubernetes proporciona este tipo de partición lógica?",
-      "o": [
-        "`NodeSelector`, ya que particiona físicamente los núcleos de CPU del host asignándolos a los diferentes equipos mediante hipervisor.",
-        "`ClusterRole`, ya que divide el tráfico de red de los microservicios en diferentes subredes virtuales con cifrado de hardware.",
-        "`Namespace`, ya que ofrece una partición lógica dentro del clúster para aislar nombres, cuotas y políticas de control de acceso.",
-        "`StorageClass`, ya que segmenta los discos de almacenamiento de los contenedores garantizando aislamiento criptográfico por usuario."
-      ],
-      "a": 2,
-      "e": "Los `Namespaces` proporcionan un mecanismo para aislar grupos de recursos dentro de un mismo clúster físico. Permiten que diferentes equipos o proyectos utilicen los mismos nombres de recursos sin colisiones, apliquen políticas de autorización mediante RBAC y establezcan límites de consumo de CPU, memoria y recuento de objetos mediante `ResourceQuota`."
-    },
-    {
-      "id": "kcna-16",
-      "d": 1,
-      "t": "Resolución DNS entre Namespaces",
-      "q": "El pod de frontend ubicado en el namespace `production` necesita invocar mediante HTTP la API de facturación expuesta por el servicio `billing-svc` que reside en el namespace `finance`. Asumiendo el dominio por defecto del clúster (`cluster.local`), ¿cuál es el FQDN (Fully Qualified Domain Name) correcto para conectarse?",
-      "o": [
-        "`billing-svc.production.pod.cluster.local`, ya que las consultas entre pods siempre resuelven dentro del namespace originario.",
-        "`finance.billing-svc.k8s.internal`, ya que los nombres de los servicios siguen el formato de subdominio invertido del proveedor cloud.",
-        "`http://billing-svc:8080/finance`, ya que Kubernetes utiliza rutas relativas en el protocolo HTTP en lugar de registros DNS estándar.",
-        "`billing-svc.finance.svc.cluster.local`, siguiendo el formato estándar de nombres DNS de servicios entre diferentes namespaces."
-      ],
-      "a": 3,
-      "e": "CoreDNS en Kubernetes resuelve los servicios utilizando la convención estándar FQDN: `<nombre-servicio>.<namespace>.svc.<dominio-cluster>`. En este caso, para acceder al servicio `billing-svc` en el namespace `finance`, el nombre completo resoluble desde cualquier namespace es `billing-svc.finance.svc.cluster.local`."
-    },
-    {
-      "id": "kcna-17",
-      "d": 1,
-      "t": "Inyección de Configuración",
-      "q": "¿Cuáles DOS objetos de Kubernetes se utilizan habitualmente para inyectar configuración desacoplada dentro de los contenedores (a través de variables de entorno o archivos montados como volúmenes), diferenciándose principalmente por la sensibilidad de la información almacenada? (Selecciona dos)",
-      "o": [
-        "`PersistentVolumeClaim`",
-        "`ConfigMap`",
-        "`NetworkPolicy`",
-        "`Secret`"
-      ],
-      "a": [
-        1,
-        3
-      ],
-      "e": "`ConfigMap` y `Secret` son los dos objetos centrales de Kubernetes para separar la configuración del código de la aplicación. `ConfigMap` almacena pares clave-valor y archivos en texto plano para configuraciones no confidenciales, mientras que `Secret` almacena datos confidenciales (claves API, contraseñas, certificados) codificados en base64 en la API y con soporte de cifrado en reposo en `etcd`."
-    },
-    {
-      "id": "kcna-18",
-      "d": 1,
-      "t": "Static Pods",
-      "q": "Al inicializar un clúster de Kubernetes con `kubeadm`, los componentes esenciales del Control Plane (como `kube-apiserver`, `etcd` y `kube-scheduler`) se inician como Pods. Sin embargo, no hay un scheduler activo en ese momento para agendarlos. ¿Cómo se ejecutan estos componentes en el nodo de control?",
-      "o": [
-        "Como `Static Pods`, gestionados directamente por el `kubelet` al leer manifiestos YAML en el directorio local `/etc/kubernetes/manifests`.",
-        "Como contenedores de Docker Swarm que se ejecutan en una máquina virtual temporal hasta que el clúster alcanza el estado Ready y el scheduler toma el control del sistema.",
-        "Mediante un script de inicio en `/etc/rc.local` que simula las respuestas del apiserver mediante un archivo JSON estático en memoria.",
-        "A través de un controlador externo de Terraform que envía comandos SSH para compilar el código de Kubernetes en el nodo."
-      ],
-      "a": 0,
-      "e": "Los `Static Pods` son gestionados directamente por el daemon `kubelet` en un nodo específico, sin intervención del `kube-apiserver` ni del `kube-scheduler`. El kubelet supervisa periódicamente un directorio local del host (por defecto `/etc/kubernetes/manifests`) y crea los pods allí declarados. `kubeadm` utiliza este mecanismo para el bootstrap del propio Control Plane."
-    },
-    {
-      "id": "kcna-19",
-      "d": 1,
-      "t": "Contenedores Init (initContainers)",
-      "q": "Una aplicación web necesita verificar que el servidor de base de datos esté aceptando conexiones y descargar un archivo de configuración desde un bucket S3 antes de iniciar su proceso principal. ¿Qué primitiva de Kubernetes permite ejecutar estas tareas preparatorias de forma secuencial y bloqueante?",
-      "o": [
-        "`Ephemeral Containers`, ya que se ejecutan temporalmente para recolectar volcados de memoria cuando un pod entra en CrashLoopBackOff.",
-        "`Sidecar Containers`, ya que se inician simultáneamente con la app principal y corren indefinidamente compartiendo el mismo ciclo de vida.",
-        "`initContainers`, ya que se ejecutan secuencialmente antes de arrancar los contenedores de aplicación y deben terminar con éxito.",
-        "`Pause Containers`, ya que retienen el tráfico de red hasta que el usuario ejecuta manualmente una señal de confirmación por la API."
-      ],
-      "a": 2,
-      "e": "Los `initContainers` son contenedores especializados que se ejecutan antes de que inicien los contenedores principales de la aplicación en un Pod. Siempre se ejecutan de forma secuencial: cada uno debe finalizar exitosamente (`exit code 0`) antes de que comience el siguiente. Si un initContainer falla, Kubernetes reinicia el pod hasta que se complete satisfactoriamente."
-    },
-    {
-      "id": "kcna-20",
-      "d": 1,
-      "t": "Fases del Ciclo de Vida del Pod",
-      "q": "Al consultar un Pod con el comando `kubectl get pods`, un operador observa el campo `STATUS`. ¿Cuál de los siguientes estados corresponde a una fase oficial de alto nivel del ciclo de vida del objeto `Pod` según la especificación de Kubernetes?",
-      "o": [
-        "`CrashLoopBackOff`, que indica que el contenedor ha alcanzado el límite máximo de memoria permitido por su clase de calidad de servicio y es terminado por el kernel.",
-        "`Pending`, que indica que el Pod ha sido aceptado por el clúster pero uno o más de sus contenedores aún no han sido programados o creados.",
-        "`ImagePullBackOff`, que indica que el registro de imágenes ha revocado el token de autenticación del desarrollador que desplegó la app.",
-        "`Terminating`, que indica que el kubelet ha recibido una petición de evacuación forzada inmediata sin respetar periodos de gracia."
-      ],
-      "a": 1,
-      "e": "Las fases oficiales del ciclo de vida de un Pod (campo `status.phase`) son: `Pending`, `Running`, `Succeeded`, `Failed` y `Unknown`. En cambio, `CrashLoopBackOff` o `ImagePullBackOff` son estados detallados del contenedor (`waiting.reason`), y `Terminating` es un estado visual de la CLI durante la eliminación, pero no una fase formal del objeto."
-    },
-    {
-      "id": "kcna-21",
-      "d": 1,
-      "t": "Labels y Selectors",
-      "q": "En Kubernetes, los objetos no se vinculan entre sí mediante referencias estáticas rígidas, sino mediante un acoplamiento débil basado en metadatos clave-valor. ¿Cómo se denomina el mecanismo utilizado por un `Service` para identificar dinámicamente qué pods deben recibir su tráfico?",
-      "o": [
-        "`Annotations`, ya que almacenan información no identificativa consumida por herramientas externas de monitoreo e integración continua.",
-        "`ClusterIP`, ya que asocia automáticamente todos los pods que se encuentren dentro del mismo bloque CIDR de la subred del nodo worker.",
-        "`ResourceVersion`, ya que conecta los controladores con los pods que poseen el mismo número de secuencia criptográfico en `etcd`.",
-        "`Labels` y `Label Selectors`, ya que el Service consulta y empareja las etiquetas declaradas en la plantilla de los Pods activos."
-      ],
-      "a": 3,
-      "e": "Las `Labels` (etiquetas) son pares clave-valor asociados a los objetos de Kubernetes. Los controladores y servicios utilizan `Label Selectors` para consultar y agrupar recursos de forma desacoplada. Por ejemplo, un Service con `selector: { app: backend }` dirigirá el tráfico a todos los Pods que contengan la etiqueta `app: backend`."
-    },
-    {
-      "id": "kcna-22",
-      "d": 1,
-      "t": "Metadatos y Annotations",
-      "q": "Un equipo de SRE desea adjuntar información en manifiestos de Kubernetes con el hash del commit de Git, la dirección de correo del equipo responsable y directivas de configuración para un Ingress Controller externo. No necesitan filtrar pods mediante estos datos. ¿Qué campo de metadatos deben usar?",
-      "o": [
-        "`annotations`, ya que permite almacenar metadatos arbitrarios extensos no estructurados que no se utilizan para seleccionar objetos.",
-        "`labels`, ya que las etiquetas son el único campo de metadatos admitido por la especificación OpenAPI de los esquemas de Kubernetes.",
-        "`finalizers`, ya que notifican a los controladores externos que deben registrar el commit en Git antes de autorizar la creación del pod.",
-        "`ownerReferences`, ya que vinculan las credenciales del desarrollador de Git con la cuenta de servicio administrativa del clúster."
-      ],
-      "a": 0,
-      "e": "Las `annotations` (anotaciones) permiten adjuntar metadatos arbitrarios en formato clave-valor a los objetos de Kubernetes. A diferencia de las `labels`, las annotations no se utilizan para identificar ni seleccionar objetos mediante consultas eficientes; están pensadas para ser leídas por herramientas externas, bibliotecas, controladores especializados (como Ingress) o para propósitos de auditoría."
-    },
-    {
-      "id": "kcna-23",
-      "d": 1,
-      "t": "Terminación Graceful de Pods",
-      "q": "Cuando se solicita la eliminación de un Pod (por ejemplo, durante un escalado hacia abajo o un despliegue), Kubernetes ejecuta un proceso ordenado de terminación. ¿Cuál es la secuencia estándar de señales y tiempos que el `kubelet` aplica a los procesos del contenedor?",
-      "o": [
-        "Envía `SIGKILL` inmediatamente al contenedor y luego espera 30 segundos para confirmar que el disco haya sido desacoplado del host de forma segura por el kernel.",
-        "Envía una señal `SIGSTOP` para congelar la memoria del contenedor y luego exporta un volcado de diagnóstico al apiserver.",
-        "Envía `SIGTERM`, espera el tiempo definido en `terminationGracePeriodSeconds` (30s por defecto) y si no ha salido, envía `SIGKILL`.",
-        "Elimina las interfaces de red del pod y espera indefinidamente hasta que todos los hilos del proceso finalicen de forma natural."
-      ],
-      "a": 2,
-      "e": "El proceso de terminación graceful de un Pod sigue este orden: 1) El pod pasa a estado Terminating y se retira de los Endpoints de los servicios; 2) Se ejecuta el hook `preStop` si está configurado; 3) El `kubelet` envía la señal `SIGTERM` al proceso principal (PID 1); 4) Espera el tiempo de gracia (`terminationGracePeriodSeconds`, por defecto 30 segundos); 5) Si el proceso aún no ha terminado, envía `SIGKILL` para forzar su apagado inmediato."
-    },
-    {
-      "id": "kcna-24",
-      "d": 2,
-      "t": "Gestión de Recursos: Requests vs Limits",
-      "q": "Un ingeniero configura los recursos de CPU y memoria de un contenedor dentro de un Pod. ¿Cuál es la diferencia fundamental entre el comportamiento de `resources.requests` y `resources.limits` en Kubernetes?",
-      "o": [
-        "`requests` define el consumo máximo de memoria antes de reiniciar el nodo, mientras que `limits` se usa para calcular el coste mensual en la nube.",
-        "`requests` restringe el número de peticiones HTTP por segundo que puede atender el contenedor, mientras que `limits` restringe el ancho de banda de red.",
-        "`requests` es utilizado exclusivamente por el kernel de Linux para aplicar throttling de CPU, mientras que `limits` es usado por el scheduler para agendar.",
-        "`requests` es la cantidad garantizada que usa el scheduler para ubicar el pod, mientras que `limits` es el tope rígido que imponen los cgroups."
-      ],
-      "a": 3,
-      "e": "`resources.requests` representa la cantidad mínima garantizada de CPU y memoria que el contenedor necesita; el `kube-scheduler` lo utiliza para encontrar un nodo con suficiente capacidad disponible. En cambio, `resources.limits` es el límite superior rígido enforced por los cgroups del kernel de Linux: superar el límite de CPU causa throttling (estrangulamiento CFS), mientras que superar el límite de memoria provoca la terminación inmediata por el OOM Killer (`OOMKilled`)."
-    },
-    {
-      "id": "kcna-25",
-      "d": 2,
-      "t": "Clases de Calidad de Servicio (QoS)",
-      "q": "Un nodo worker se queda sin memoria RAM disponible y el kernel entra en presión severa de recursos. El `kubelet` debe comenzar a desalojar (evict) pods para mantener la estabilidad del sistema operativo. ¿Qué clase de QoS (Quality of Service) será la primera en ser seleccionada para desalojo?",
-      "o": [
-        "`Guaranteed`, ya que sus réplicas pueden ser recreadas de forma instantánea por el scheduler en otros nodos del clúster.",
-        "`BestEffort`, ya que no define ningún valor de `requests` ni de `limits`, siendo la clase con menor prioridad de retención.",
-        "`Burstable`, ya que ha consumido más memoria del promedio asignado históricamente por las directivas de cuota del namespace.",
-        "`CriticalSystem`, ya que Kubernetes prioriza las aplicaciones de usuario sobre los demonios internos del sistema operativo."
-      ],
-      "a": 1,
-      "e": "Kubernetes clasifica automáticamente cada Pod en una clase de QoS: 1) `Guaranteed` (requests = limits para CPU y memoria en todos los contenedores); 2) `Burstable` (al menos un request o limit definido); 3) `BestEffort` (ningún contenedor define ni requests ni limits). Ante presión de memoria (MemoryPressure), los pods `BestEffort` son los primeros en ser expulsados y terminados, seguidos por `Burstable` que excedan sus requests, y finalmente `Guaranteed`."
-    },
-    {
-      "id": "kcna-26",
-      "d": 2,
-      "t": "Taints y Tolerations",
-      "q": "Un clúster dispone de 3 nodos worker equipados con hardware de aceleración GPU de alto coste. El administrador de la plataforma desea asegurar que ningún Pod ordinario sea programado en estos nodos, a menos que el desarrollador declare explícitamente que su Pod puede tolerar esa restricción. ¿Qué mecanismo debe implementarse?",
-      "o": [
-        "Aplicar un `Taint` en los nodos con GPUs y configurar una `Toleration` correspondiente en los Pods que requieran ejecutarse en ellos.",
-        "Configurar una `NetworkPolicy` de tipo DenyAll en el namespace donde se encuentran registrados los servidores físicos con GPU.",
-        "Crear un `ClusterRole` con verbos de solo lectura asignado a la cuenta de servicio predeterminada del controlador de réplicas en cada una de las zonas de disponibilidad.",
-        "Definir un `LimitRange` con valor cero en el campo de memoria compartida para todos los nodos que no tengan aceleración de hardware."
-      ],
-      "a": 0,
-      "e": "Los `Taints` (manchas) y `Tolerations` (tolerancias) trabajan en conjunto para asegurar que los pods no sean asignados a nodos inapropiados. Un Taint se aplica a un nodo (`kubectl taint nodes nodo1 gpu=true:NoSchedule`) y actúa como repulsión: el `kube-scheduler` no agendará ningún pod en ese nodo a menos que el pod contenga una `Toleration` coincidente."
-    },
-    {
-      "id": "kcna-27",
-      "d": 2,
-      "t": "Afinidad de Nodos (NodeAffinity)",
-      "q": "Un equipo de ingeniería necesita que sus pods se ejecuten preferentemente en nodos que tengan la etiqueta `topology.kubernetes.io/zone=us-east-1a`, pero si no hay capacidad disponible en esa zona, aceptan que se agenden en cualquier otra zona sin quedarse en estado Pending. ¿Qué configuración de afinidad deben declarar?",
-      "o": [
-        "`nodeSelector: { zone: us-east-1a }`, ya que `nodeSelector` conmuta automáticamente a otras zonas disponibles ante fallos de capacidad en los servidores del rack.",
-        "`requiredDuringSchedulingIgnoredDuringExecution`, ya que representa una regla estricta e inquebrantable de cumplimiento obligatorio.",
-        "`preferredDuringSchedulingIgnoredDuringExecution`, ya que define una afinidad suave (soft) que prioriza pero no bloquea el agendamiento.",
-        "`podAntiAffinity` con `topologyKey` configurado a nivel de sistema operativo para forzar el despliegue en hipervisores distintos."
-      ],
-      "a": 2,
-      "e": "`NodeAffinity` ofrece dos tipos de reglas: `requiredDuringSchedulingIgnoredDuringExecution` (afinidad dura o hard rule, obligatoria para que el pod sea agendado; si no se cumple, queda Pending) y `preferredDuringSchedulingIgnoredDuringExecution` (afinidad suave o soft rule, donde el scheduler intenta satisfacer la preferencia otorgando mayor puntuación a esos nodos, pero si no están disponibles, agendará el pod en otro nodo viable)."
-    },
-    {
-      "id": "kcna-28",
-      "d": 2,
-      "t": "Sondas de Salud del Kubelet",
-      "q": "¿Cuáles DOS afirmaciones describen correctamente la diferencia fundamental entre una `livenessProbe` y una `readinessProbe` ejecutadas por el `kubelet` en un Pod? (Selecciona dos)",
-      "o": [
-        "Si una `livenessProbe` falla consecutivamente, el kubelet reinicia el contenedor afectado según la política `restartPolicy`.",
-        "Si una `livenessProbe` falla, el pod es migrado inmediatamente a otro nodo worker mediante un comando de live migration.",
-        "Si una `readinessProbe` falla, el kubelet destruye permanentemente el volumen de almacenamiento persistente del contenedor.",
-        "Si una `readinessProbe` falla, el Pod no se reinicia, pero su dirección IP se retira de los Endpoints de todos los Services asociados."
-      ],
-      "a": [
-        0,
-        3
-      ],
-      "e": "`livenessProbe` y `readinessProbe` tienen consecuencias operativas muy distintas: La `livenessProbe` determina si la aplicación está viva; si falla, el `kubelet` mata el contenedor y lo reinicia. La `readinessProbe` determina si la aplicación está lista para recibir tráfico; si falla, el pod **no se reinicia**, pero se excluye temporalmente de los endpoints de los servicios para que ningún usuario reciba errores mientras el servicio se recupera o inicializa."
-    },
-    {
-      "id": "kcna-29",
-      "d": 2,
-      "t": "Sonda de Inicio (startupProbe)",
-      "q": "Un microservicio heredado desarrollado en Java tarda habitualmente entre 90 y 120 segundos en cargar cachés y dependencias durante su inicialización. En despliegues anteriores, la `livenessProbe` configurada a los 30 segundos mataba el contenedor reiteradamente, provocando un ciclo continuo de reinicios (`CrashLoopBackOff`). ¿Qué solución nativa de Kubernetes resuelve este problema de manera óptima?",
-      "o": [
-        "Incrementar el límite de memoria del contenedor a 64 GiB para forzar que la máquina virtual Java desactive la compilación Just-In-Time y reserve espacio en el heap de memoria.",
-        "Configurar una `startupProbe` con un tiempo de gracia suficiente, ya que desactiva las comprobaciones de liveness y readiness hasta que responde con éxito.",
-        "Eliminar todas las sondas de salud del manifiesto y delegar la monitorización a un cron de Linux ejecutado en el sistema operativo del nodo que reinicie el pod al detectar fallos.",
-        "Configurar la directiva `restartPolicy: Never` en el Deployment para impedir que el kubelet intente reiniciar la aplicación ante fallos de sonda."
-      ],
-      "a": 1,
-      "e": "La `startupProbe` fue introducida específicamente para resolver el problema de arranque lento de aplicaciones. Mientras la `startupProbe` no haya respondido exitosamente por primera vez, las comprobaciones de `livenessProbe` y `readinessProbe` quedan completamente deshabilitadas. Esto permite conceder un margen generoso de arranque (ej. `failureThreshold: 30`, `periodSeconds: 10` = hasta 300s) sin sacrificar la reactividad rápida de la liveness probe una vez que el servicio ya está en régimen normal."
-    },
-    {
-      "id": "kcna-30",
-      "d": 2,
-      "t": "Horizontal Pod Autoscaler (HPA)",
-      "q": "Una tienda de comercio electrónico experimenta picos variables de tráfico durante promociones comerciales. Para responder automáticamente a estos incrementos de demanda, configuran un objeto `HorizontalPodAutoscaler` (HPA). ¿Cuál es el comportamiento operativo estándar del HPA ante un aumento continuado de la carga?",
-      "o": [
-        "Aumenta la cantidad de vCPUs físicas y tarjetas de red asignadas a las máquinas virtuales de los nodos worker mediante hot-plugging.",
-        "Incrementa los valores de `resources.limits` de CPU del contenedor en caliente sin necesidad de reiniciar el proceso de la aplicación.",
-        "Ajusta dinámicamente el número de réplicas de pods en el Deployment o ReplicaSet objetivo basándose en las métricas observadas.",
-        "Convierte automáticamente el `Deployment` en un `DaemonSet` para asegurar que todas las instancias del clúster atiendan tráfico."
-      ],
-      "a": 2,
-      "e": "El `HorizontalPodAutoscaler` (HPA) implementa escalabilidad horizontal (escalado hacia afuera o hacia adentro): incrementa o reduce el número de réplicas de pods (`spec.replicas`) de un Deployment, ReplicaSet o StatefulSet para mantener la métrica observada (uso de CPU, memoria o métricas personalizadas de Prometheus) cercana al objetivo configurado por el operador."
-    },
-    {
-      "id": "kcna-31",
-      "d": 2,
-      "t": "Almacenamiento: PV, PVC y StorageClass",
-      "q": "Un desarrollador necesita solicitar 100 GiB de almacenamiento persistente para su base de datos sin necesidad de conocer los detalles de infraestructura del almacenamiento subyacente del proveedor de nube. ¿Cuál es el flujo declarativo estándar en Kubernetes para aprovisionar este almacenamiento de forma desacoplada y dinámica?",
-      "o": [
-        "El desarrollador crea un `PersistentVolumeClaim` (PVC) que hace referencia a una `StorageClass`, la cual invoca al driver CSI para crear el `PersistentVolume` (PV).",
-        "El desarrollador ejecuta un script en el contenedor que formatea directamente un dispositivo SCSI en el sistema operativo del host worker asignando permisos de root al bloque.",
-        "El administrador del clúster debe conectarse por SSH al nodo de la base de datos para crear manualmente una partición ext4 en el disco local y editar el archivo /etc/fstab.",
-        "El desarrollador define un volumen de tipo `emptyDir` con retención indefinida configurado en la raíz de su imagen de contenedor."
-      ],
-      "a": 0,
-      "e": "El modelo de almacenamiento de Kubernetes separa roles: el desarrollador solicita recursos declarando un `PersistentVolumeClaim` (PVC) con la capacidad y modo de acceso requeridos, indicando una `StorageClass`. La `StorageClass` define el aprovisionador (driver CSI de nube, ej. EBS, Azure Disk, GPD), que interactúa automáticamente con la API de almacenamiento para aprovisionar un disco físico y crear el objeto `PersistentVolume` (PV) enlazado al PVC."
-    },
-    {
-      "id": "kcna-32",
-      "d": 2,
-      "t": "Modos de Acceso de Volúmenes",
-      "q": "Se despliega una aplicación de procesamiento de imágenes con 5 réplicas distribuidas en diferentes nodos worker. Todas las réplicas deben leer y escribir concurrentemente archivos en el mismo volumen de almacenamiento compartido en red. ¿Qué modo de acceso (accessMode) debe soportar el `PersistentVolume` asignado?",
-      "o": [
-        "`ReadWriteOnce` (RWO), ya que permite el montaje en modo lectura y escritura por múltiples nodos simultáneos siempre que compartan el mismo namespace.",
-        "`ReadOnlyMany` (ROX), ya que ofrece la máxima tasa de transferencia de datos en operaciones concurrentes de entrada y salida a disco.",
-        "`ReadWriteOncePod` (RWOP), ya que garantiza que múltiples pods en el mismo clúster puedan compartir el socket de red del driver de almacenamiento.",
-        "`ReadWriteMany` (RWX), ya que permite que el volumen sea montado en modo lectura/escritura simultáneamente por múltiples nodos worker."
-      ],
-      "a": 3,
-      "e": "Los modos de acceso de un PersistentVolume en Kubernetes son: 1) `ReadWriteOnce` (RWO): el volumen puede ser montado como lectura/escritura por un único nodo; 2) `ReadOnlyMany` (ROX): puede ser montado como solo lectura por múltiples nodos; 3) `ReadWriteMany` (RWX): puede ser montado como lectura/escritura por múltiples nodos concurrentemente (típico de sistemas de archivos de red como NFS, AWS EFS, Azure Files o CephFS)."
-    },
-    {
-      "id": "kcna-33",
-      "d": 2,
-      "t": "Tipos de Service en Kubernetes",
-      "q": "Una empresa desea exponer un microservicio interno de procesamiento contable para que solo pueda ser invocado por otros microservicios que residen dentro del mismo clúster de Kubernetes, garantizando que no sea accesible desde el exterior. ¿Qué tipo de `Service` debe configurarse?",
-      "o": [
-        "`LoadBalancer`, ya que restringe automáticamente el tráfico entrante a las direcciones IP privadas de los desarrolladores conectados por VPN.",
-        "`ClusterIP`, ya que asigna una dirección IP virtual interna accesible exclusivamente desde el interior del clúster de Kubernetes.",
-        "`NodePort`, ya que expone un puerto estático accesible únicamente en la dirección de bucle local `127.0.0.1` de los nodos maestros.",
-        "`ExternalName`, ya que redirige el tráfico hacia un balanceador de carga público gestionado por la pasarela de pagos internacional."
-      ],
-      "a": 1,
-      "e": "`ClusterIP` es el tipo de `Service` por defecto en Kubernetes. Asigna una dirección IP virtual estable y enrutable exclusivamente desde el interior del clúster. Es la opción ideal y recomendada para la comunicación interna entre microservicios (backends, bases de datos, APIs privadas) que no deben exponerse al exterior."
-    },
-    {
-      "id": "kcna-34",
-      "d": 2,
-      "t": "Seguridad de Red con NetworkPolicy",
-      "q": "Por defecto, la red de Kubernetes permite que cualquier Pod se comunique con cualquier otro Pod en el clúster. Para cumplir con normativas de seguridad bancaria, se requiere aislar los pods de bases de datos para que solo acepten tráfico en el puerto 5432 proveniente de pods con la etiqueta `app: payment-api`. ¿Qué mecanismo y requisito se necesitan?",
-      "o": [
-        "Crear un `ClusterRoleBinding` que revoque los privilegios de conexión TCP a nivel del protocolo de autenticación del API Server.",
-        "Configurar un archivo `/etc/hosts` estático dentro de la imagen del contenedor de base de datos bloqueando los rangos CIDR del clúster.",
-        "Definir una `NetworkPolicy` con reglas de Ingress específicas y asegurarse de contar con un plugin CNI que soporte la especificación.",
-        "Modificar las banderas del `kubelet` en cada nodo para deshabilitar el enrutamiento de paquetes entre diferentes namespaces."
-      ],
-      "a": 2,
-      "e": "Una `NetworkPolicy` es el recurso nativo de Kubernetes para controlar el flujo de tráfico en capa 3 y 4 (IPs, puertos y selectores de Pod/Namespace). Al aplicar una NetworkPolicy a un conjunto de pods, estos pasan a estar aislados (default deny para lo no explícitamente permitido). Es indispensable contar con un plugin `CNI` que soporte NetworkPolicies (como Calico, Cilium o Weave Net), ya que proveedores básicos como Flannel ignoran estas reglas."
-    },
-    {
-      "id": "kcna-35",
-      "d": 3,
-      "t": "Principios Cloud Native (CNCF)",
-      "q": "De acuerdo con la definición oficial de la Cloud Native Computing Foundation (CNCF), ¿cuál es el propósito primordial de adoptar tecnologías nativas de la nube como contenedores, service meshes y APIs declarativas?",
-      "o": [
-        "Permitir a las organizaciones construir y ejecutar aplicaciones escalables en entornos dinámicos, tolerantes a fallos y con cambios predecibles.",
-        "Eliminar por completo el uso de sistemas operativos en los servidores mediante emulación directa de instrucciones en microcódigo dentro de los procesadores del hardware.",
-        "Obligar a que todas las aplicaciones empresariales migren a un modelo monolítico centralizado para simplificar la auditoría contable y consolidar todas las bases de datos en un host.",
-        "Garantizar que ninguna carga de trabajo pueda ejecutarse fuera de centros de datos privados para evitar costos de transferencia cloud."
-      ],
-      "a": 0,
-      "e": "La CNCF define Cloud Native como el conjunto de tecnologías que permiten construir y ejecutar aplicaciones escalables en entornos dinámicos (nubes públicas, privadas e híbridas) mediante contenedores, mallas de servicios, microservicios, infraestructura inmutable y APIs declarativas, facilitando sistemas resilientes, manejables, observables y con capacidad de cambios frecuentes y predecibles con mínimo esfuerzo."
-    },
-    {
-      "id": "kcna-36",
-      "d": 3,
-      "t": "Metodología 12-Factor App",
-      "q": "Un equipo de desarrollo está refactorizando un servicio para que cumpla con las mejores prácticas de la metodología `12-Factor App` recomendada para aplicaciones en Kubernetes. ¿Cuál de las siguientes decisiones de diseño representa una aplicación fiel de estos principios?",
-      "o": [
-        "Incrustar las contraseñas de las bases de datos de producción dentro del código fuente de la aplicación para evitar peticiones de red.",
-        "Almacenar el estado de las sesiones de los usuarios en archivos locales del disco duro del contenedor para maximizar la velocidad de acceso y evitar llamadas a cachés externas.",
-        "Escribir los logs directamente en particiones de disco de bloques sin formato para evitar la sobrecarga del demonio del sistema operativo y reducir el consumo de ciclos de CPU.",
-        "Almacenar la configuración en variables de entorno inyectadas, ejecutar procesos sin estado y enviar los logs a stdout como flujo de eventos."
-      ],
-      "a": 3,
-      "e": "La metodología `12-Factor App` establece principios fundamentales para aplicaciones cloud native: Factor III (Configuración): separar estrictamente la configuración del código mediante variables de entorno; Factor VI (Procesos): ejecutar la aplicación como uno o más procesos sin estado (stateless) que comparten nada (share-nothing); Factor XI (Logs): tratar los logs como flujos continuos de eventos dirigidos a la salida estándar (`stdout`/`stderr`), delegando su recolección a la plataforma."
-    },
-    {
-      "id": "kcna-37",
-      "d": 3,
-      "t": "Niveles de Madurez de Proyectos CNCF",
-      "q": "La CNCF clasifica sus proyectos en tres niveles de graduación: `Sandbox`, `Incubating` y `Graduated`. ¿Cuál es el criterio fundamental que distingue a un proyecto en nivel `Graduated` (como Kubernetes, Prometheus o Envoy)?",
-      "o": [
-        "Haber sido adquirido en su totalidad por una empresa multinacional que financie en exclusiva a todos sus programadores activos.",
-        "Demostrar máxima madurez técnica, amplia adopción en entornos de producción a gran escala, seguridad auditada y gobernanza neutral sólida.",
-        "Ser un proyecto de desarrollo experimental reciente sin usuarios en producción pero con una arquitectura conceptualmente innovadora.",
-        "Haber reemplazado por completo a todas las demás herramientas de software libre existentes en la misma categoría tecnológica de la industria."
-      ],
-      "a": 1,
-      "e": "Los proyectos `Graduated` en la CNCF representan el máximo nivel de madurez. Para alcanzar este estado, un proyecto debe cumplir criterios rigurosos: adopción masiva y documentada en entornos de producción de misión crítica por múltiples organizaciones, procesos de gobernanza transparentes, saludables y neutrales, compromisos de diversidad de contribuidores y haber superado una auditoría formal e independiente de seguridad."
-    },
-    {
-      "id": "kcna-38",
-      "d": 3,
-      "t": "Arquitectura de Service Mesh",
-      "q": "¿Cuáles DOS capacidades fundamentales aporta una arquitectura de `Service Mesh` (como Istio o Linkerd) mediante el despliegue de proxies sidecar (como Envoy) en el tráfico este-oeste entre microservicios? (Selecciona dos)",
-      "o": [
-        "Reemplazo total de la capa de almacenamiento persistente mediante bases de datos embebidas en los sockets del kernel.",
-        "Cifrado y autenticación mutua automática en tránsito (`mTLS`) entre microservicios sin necesidad de modificar el código de la aplicación.",
-        "Generación uniforme de telemetría, métricas doradas (RPS, latencia, errores) y propagación de trazas distribuidas para todo el tráfico interno.",
-        "Aceleración por hardware de consultas SQL complejas mediante reescritura estática de índices en el motor de base de datos relacional."
-      ],
-      "a": [
-        1,
-        2
-      ],
-      "e": "Un `Service Mesh` gestiona la comunicación de servicio a servicio (tráfico este-oeste) inyectando proxies sidecar ligeros (habitualmente Envoy). Sus dos grandes aportes son: 1) Seguridad: autenticación criptográfica de identidad y cifrado automático de extremo a extremo mediante `mTLS` transparente; 2) Observabilidad homogénea: recopila métricas doradas de red (latencia p99, tasa de éxito, throughput) y propaga encabezados de trazas sin requerir que los desarrolladores instrumenten cada cliente HTTP en su código."
-    },
-    {
-      "id": "kcna-39",
-      "d": 3,
-      "t": "Control de Acceso con RBAC",
-      "q": "Un administrador de Kubernetes necesita otorgar permisos al equipo de soporte para que puedan consultar los logs y listar pods únicamente dentro del namespace `staging`, garantizando que no puedan ver ni modificar recursos en ningún otro namespace ni a nivel de clúster. ¿Qué combinación de objetos RBAC debe aplicar?",
-      "o": [
-        "Un `ClusterRole` con verbos wildcard `*` asociado a través de un `ClusterRoleBinding` a nivel de toda la organización para asegurar visibilidad completa de soporte.",
-        "Una `NetworkPolicy` de tipo Ingress combinada con un objeto `LimitRange` configurado con permisos de lectura en la subred y cuotas de consumo en el espacio de nombres.",
-        "Un `Role` definido con permisos sobre pods en el namespace `staging`, vinculado a los usuarios mediante un `RoleBinding` en ese mismo namespace.",
-        "Un `ServiceAccount` configurado con privilegios administrativos de root dentro del archivo local `/etc/sudoers` de los nodos worker."
-      ],
-      "a": 2,
-      "e": "En RBAC de Kubernetes: un `Role` define permisos que tienen alcance exclusivo dentro de un **namespace específico**. Para otorgar esos permisos a un usuario, grupo o ServiceAccount dentro de ese mismo namespace, se utiliza un `RoleBinding`. Si se utilizara un `ClusterRole` con un `ClusterRoleBinding`, los permisos se extenderían a todo el clúster, violando el principio de mínimo privilegio."
-    },
-    {
-      "id": "kcna-40",
-      "d": 3,
-      "t": "Identidades de Pod con ServiceAccount",
-      "q": "Un microservicio desplegado en Kubernetes necesita consultar periódicamente la API de Kubernetes para listar el estado de otros pods en su namespace. ¿Cómo debe autenticarse este proceso ante el `kube-apiserver` de acuerdo con las buenas prácticas de seguridad de Kubernetes?",
-      "o": [
-        "Asignando una `ServiceAccount` dedicada al Pod, la cual inyecta automáticamente un token JWT proyectado que el cliente HTTP utiliza como credencial Bearer.",
-        "Compartiendo el certificado administrativo del usuario `kubernetes-admin` dentro de una variable de entorno en texto plano en el manifiesto para simplificar las pruebas.",
-        "Deshabilitando el módulo de autorización en el archivo de configuración del `kube-apiserver` para permitir consultas anónimas en la red interna del clúster de cómputo.",
-        "Configurando una regla en el cortafuegos perimetral que asuma que todo el tráfico proveniente de la dirección IP del pod es de confianza."
-      ],
-      "a": 0,
-      "e": "Una `ServiceAccount` proporciona una identidad gestionada a los procesos que se ejecutan dentro de los Pods. Al asociar una ServiceAccount al Pod (`spec.serviceAccountName`), Kubernetes monta de forma segura un token de autenticación (JWT criptográfico) como un volumen proyectado en `/var/run/secrets/kubernetes.io/serviceaccount/token`. El SDK de la aplicación lee este token y lo envía como cabecera `Authorization: Bearer <token>` al `kube-apiserver`."
-    },
-    {
-      "id": "kcna-41",
-      "d": 3,
-      "t": "Gateway API vs Ingress",
-      "q": "A medida que los clústeres de Kubernetes crecieron en complejidad, el recurso tradicional `Ingress` mostró limitaciones de expresividad, dependiendo excesivamente de anotaciones propietarias específicas de cada controlador. ¿Cuál es la principal ventaja arquitectónica que introduce la moderna `Gateway API` de la CNCF?",
-      "o": [
-        "Obliga a que todos los servicios del clúster se comuniquen exclusivamente mediante sockets UDP sin cifrado para reducir la latencia en las conexiones de alta concurrencia.",
-        "Fusiona todas las capas de red en un único archivo binario monolítico administrado exclusivamente por el equipo de seguridad corporativa para evitar divergencias de configuración.",
-        "Elimina la necesidad de utilizar direcciones IP públicas al enrutar todo el tráfico entrante a través de puertos serie de consola física instalados en cada rack del centro de datos.",
-        "Estructura el enrutamiento mediante recursos orientados a roles (`GatewayClass`, `Gateway`, `HTTPRoute`), permitiendo separación de responsabilidades y portabilidad."
-      ],
-      "a": 3,
-      "e": "La `Gateway API` es la evolución oficial de Ingress en Kubernetes. Su gran ventaja arquitectónica es su diseño orientado a roles (Role-Oriented Design): 1) `GatewayClass` (administrador de infraestructura cloud); 2) `Gateway` (operador de clúster que define listeners y TLS); 3) `HTTPRoute` / `GRPCRoute` (desarrollador de la aplicación que define rutas y redirecciones). Además, estandariza funciones avanzadas como división de tráfico ponderada, filtros de cabeceras y soporte nativo de gRPC sin anotaciones propietarias."
-    },
-    {
-      "id": "kcna-42",
-      "d": 3,
-      "t": "Control de Admisión y Políticas",
-      "q": "El equipo de gobierno de seguridad requiere garantizar que ningún contenedor pueda ejecutarse como usuario `root` (`privileged: true`) ni descargar imágenes con la etiqueta `:latest` en el clúster. ¿Qué mecanismo nativo de Kubernetes y del ecosistema CNCF permite interceptar y validar manifiestos antes de persistirlos en `etcd`?",
-      "o": [
-        "`kube-proxy` mediante inspección profunda de paquetes con inspección heurística de firmas de código en la capa de transporte TCP para bloquear conexiones no deseadas.",
-        "`Admission Controllers` (controladores de admisión mutadores y validadores) integrados con motores de políticas como `OPA / Gatekeeper` o `Kyverno`.",
-        "El planificador `kube-scheduler`, asignando puntuación negativa a los pods que no incluyan un certificado de firma digital corporativo emitido por la autoridad de certificación.",
-        "Un script en Bash ejecutado localmente en los equipos portátiles de los desarrolladores antes de enviar el comando `git push`."
-      ],
-      "a": 1,
-      "e": "Los `Admission Controllers` (Controladores de Admisión) son interceptores en el `kube-apiserver` que evalúan las solicitudes justo después de ser autenticadas y autorizadas, pero antes de que el objeto sea almacenado en `etcd`. Mediante `ValidatingAdmissionWebhooks`, herramientas del ecosistema CNCF como `OPA/Gatekeeper` o `Kyverno` inspeccionan el contenido del manifiesto y rechazan la creación de pods que violen políticas de seguridad (como correr como root o usar imágenes `:latest`)."
-    },
-    {
-      "id": "kcna-43",
-      "d": 4,
-      "t": "Los Tres Pilares de la Observabilidad",
-      "q": "En el paradigma de observabilidad de sistemas distribuidos y arquitecturas nativas de la nube, se describen con frecuencia los denominados «Tres Pilares de la Observabilidad». ¿Cuáles son estos tres tipos fundamentales de señales de telemetría y su valor característico?",
-      "o": [
-        "CPU, Memoria y Almacenamiento en disco, que miden exclusivamente el rendimiento del hardware físico en el centro de datos y alertan sobre fallos mecánicos en los servidores.",
-        "Autenticación, Autorización y Auditoría, que garantizan el cumplimiento de las políticas de seguridad perimetral del cortafuegos y el registro de acceso de usuarios corporativos.",
-        "Métricas (agregados numéricos para tendencias), Logs (eventos textuales detallados con timestamp) y Trazas (recorrido y latencia distribuida de peticiones).",
-        "Despliegues, Pruebas unitarias e Integración continua, que aseguran que el código cumpla con los estándares de calidad del repositorio."
-      ],
-      "a": 2,
-      "e": "Los Tres Pilares de la Observabilidad son: 1) `Métricas`: datos numéricos agregables y eficientes para medir tendencias, calcular SLIs y disparar alertas en tiempo real; 2) `Logs`: registros de eventos textuales con marca de tiempo para entender qué ocurrió exactamente en un momento puntual; 3) `Trazas`: representan el recorrido completo de una petición a través de múltiples microservicios (mediante Spans), permitiendo identificar cuellos de botella de latencia."
-    },
-    {
-      "id": "kcna-44",
-      "d": 4,
-      "t": "Arquitectura de Prometheus",
-      "q": "Prometheus es el proyecto de monitorización y alertas graduado por excelencia en la CNCF. ¿Cuál de las siguientes afirmaciones describe con precisión el modelo de recolección de datos y la arquitectura central de Prometheus?",
-      "o": [
-        "Utiliza un modelo basado en `pull` sondeando activamente endpoints HTTP `/metrics`, almacena series temporales en su TSDB local y consulta datos con `PromQL`.",
-        "Requiere que todos los microservicios envíen eventos de telemetría mediante llamadas síncronas hacia una base de datos relacional PostgreSQL externa con esquemas relacionales normalizados.",
-        "Opera exclusivamente como un agente pasivo que intercepta paquetes en la interfaz de red Ethernet de los switches físicos sin consumir CPU ni requerir agentes en los nodos worker.",
-        "Descarga automáticamente los archivos de configuración de los pods para compilar binarios de auditoría en memoria flash durante el arranque."
-      ],
-      "a": 0,
-      "e": "Prometheus utiliza un modelo de recolección basado en sondeo activo (`pull model` / scraping): a intervalos regulares (scrape interval), Prometheus consulta por HTTP el endpoint de métricas (habitualmente `/metrics`) expuesto por cada destino configurado. Guarda estos datos en su base de datos de series temporales (`TSDB`) optimizada en disco y ofrece el potente lenguaje `PromQL` para consultar métricas y evaluar reglas de alerta."
-    },
-    {
-      "id": "kcna-45",
-      "d": 4,
-      "t": "Ecosistema OpenTelemetry (OTel)",
-      "q": "Una organización utiliza múltiples lenguajes de programación (Go, Java, Python, Node.js) y desea instrumentar sus microservicios de manera neutral para no quedar cautiva de un proveedor específico de observabilidad (vendor lock-in). ¿Cuál es el rol de `OpenTelemetry` (OTel) en este escenario?",
-      "o": [
-        "Reemplazar por completo el sistema operativo de los nodos para unificar los controladores de red en un único estándar binario de Linux optimizado para arquitecturas distribuidas.",
-        "Proveer una base de datos distribuida relacional con soporte transaccional ACID diseñada específicamente para competir con clústeres MySQL en almacenamiento de datos transaccionales.",
-        "Ejecutar automáticamente pruebas de carga de estrés simulando millones de usuarios concurrentes en los entornos de producción.",
-        "Proveer un conjunto estándar de APIs, SDKs y herramientas (junto al OTel Collector) para generar y exportar métricas, logs y trazas de forma agnóstica."
-      ],
-      "a": 3,
-      "e": "OpenTelemetry (OTel), proyecto `Graduated` de la CNCF, proporciona un estándar unificado y agnóstico a proveedores para la observabilidad. Ofrece APIs y SDKs en múltiples lenguajes para instrumentar código de forma homogénea, define el protocolo abierto `OTLP` y provee el `OTel Collector`, un componente intermediario que recibe, procesa y exporta telemetría (métricas, trazas y logs) hacia cualquier backend de análisis compatible (Prometheus, Jaeger, Datadog, etc.)."
-    },
-    {
-      "id": "kcna-46",
-      "d": 4,
-      "t": "Monitoreo del Clúster y Alertmanager",
-      "q": "En una infraestructura de Kubernetes, ¿cuál es la función de `cAdvisor` en la cadena de telemetría de monitorización y cómo colabora con `Prometheus Alertmanager` ante situaciones de degradación del servicio?",
-      "o": [
-        "`cAdvisor` gestiona el cifrado de las comunicaciones HTTPS en el Ingress, mientras que Alertmanager reinicia los contenedores que sufren latencia de red prolongada en sus conexiones.",
-        "`cAdvisor` recopila métricas de uso de CPU y memoria de los contenedores desde el kubelet, y Alertmanager gestiona, agrupa y enruta las alertas disparadas por Prometheus.",
-        "`cAdvisor` ejecuta periódicamente backups de la base de datos `etcd` en disco, y Alertmanager revierte los despliegues fallidos en el clúster enviando comandos automáticos al apiserver.",
-        "`cAdvisor` calcula los costos de facturación de las máquinas virtuales, mientras que Alertmanager envía correos exclusivamente al equipo de finanzas corporativas."
-      ],
-      "a": 1,
-      "e": "`cAdvisor` (Container Advisor) es un servicio embebido de forma nativa en el binario del `kubelet` que recopila, agrega y expone métricas de rendimiento y uso de recursos (CPU, memoria, disco y red) de todos los contenedores en ejecución en ese nodo. Prometheus hace scraping a estas métricas y, si una regla de alerta se cumple, envía la notificación a `Alertmanager`, que se encarga de deduplicar, agrupar y enrutar las alertas hacia Slack, PagerDuty o correo."
-    },
-    {
-      "id": "kcna-47",
-      "d": 5,
-      "t": "Principios Fundamentales de GitOps",
-      "q": "Un equipo de ingeniería de plataformas adopta la metodología `GitOps` para gestionar la infraestructura y las aplicaciones de sus clústeres de producción. ¿Cuál es el postulado central que define el funcionamiento de GitOps?",
-      "o": [
-        "Los desarrolladores deben conectarse por consola interactiva a cada nodo worker para compilar los cambios directamente en el entorno productivo sin necesidad de pruebas automatizadas.",
-        "Las modificaciones en producción se realizan enviando peticiones manuales no versionadas a través del panel de control web del proveedor de nube para acelerar los tiempos de despliegue.",
-        "El repositorio Git es la única fuente de verdad (Single Source of Truth) donde se declara el estado deseado, el cual es reconciliado continuamente por un agente en el clúster.",
-        "Toda la infraestructura debe configurarse utilizando scripts en ensamblador almacenados en el sector de arranque de los discos rígidos."
-      ],
-      "a": 2,
-      "e": "El núcleo de `GitOps` consiste en utilizar Git como la única fuente de verdad (Single Source of Truth) para todo el sistema. Toda la configuración y los manifiestos de las aplicaciones se almacenan de forma declarativa y versionada en repositorios Git. Un operador automatizado que corre dentro del clúster (como ArgoCD o Flux) compara continuamente el estado de Git con el estado del clúster y sincroniza las desviaciones (drift) de forma automática."
-    },
-    {
-      "id": "kcna-48",
-      "d": 5,
-      "t": "Empaquetado: Helm vs Kustomize",
-      "q": "Una organización necesita estandarizar la entrega de aplicaciones en sus clústeres. Al evaluar herramientas del ecosistema CNCF, comparan `Helm` con `Kustomize`. ¿Cuál es la diferencia metodológica principal entre estas dos soluciones?",
-      "o": [
-        "`Helm` es un compilador binario para el kernel de Linux en servidores físicos, mientras que `Kustomize` es una base de datos clave-valor distribuida como `etcd` para almacenar configuraciones.",
-        "`Helm` solo admite despliegues en nubes privadas sin conexión a Internet, mientras que `Kustomize` requiere acceso root obligatorio al hardware del host para montar sistemas de archivos.",
-        "`Helm` gestiona exclusivamente certificados de seguridad TLS en el Ingress, mientras que `Kustomize` monitoriza el consumo de CPU de los pods calculando el escalado automático de réplicas.",
-        "`Helm` utiliza plantillas Go con `values.yaml`, mientras que `Kustomize` compone manifiestos declarativos mediante capas (bases y overlays) sin plantillas."
-      ],
-      "a": 3,
-      "e": "`Helm` es el gestor de paquetes de Kubernetes; utiliza plantillas de Go (`templates/`) combinadas con archivos de variables (`values.yaml`) para generar manifiestos parametrizados, gestionando versiones de release y rollbacks en el clúster. En cambio, `Kustomize` es una herramienta sin plantillas (`template-free`) que utiliza un enfoque de composición declarativa mediante capas base (`bases`) y modificaciones específicas por entorno (`overlays`), y viene integrada nativamente en `kubectl` (`kubectl apply -k`)."
-    },
-    {
-      "id": "kcna-49",
-      "d": 5,
-      "t": "Principios OpenGitOps",
-      "q": "¿Cuáles DOS características corresponden a los principios oficiales de `OpenGitOps` promovidos por la CNCF para el despliegue moderno de aplicaciones nativas de la nube? (Selecciona dos)",
-      "o": [
-        "El estado deseado del sistema se describe de forma completamente declarativa y se almacena en un sistema versionado e inmutable como Git.",
-        "Los agentes de software que residen dentro del clúster obtienen automáticamente (modelo Pull) el estado deseado desde la fuente de verdad.",
-        "Los despliegues se ejecutan obligatoriamente mediante scripts imperativos en Bash invocados manualmente por un operador de guardia.",
-        "El clúster autoriza a cualquier herramienta externa de CI a sobrescribir configuraciones en caliente sin guardar registro en el historial de commits."
-      ],
-      "a": [
-        0,
-        1
-      ],
-      "e": "Los cuatro principios fundamentales de `OpenGitOps` (CNCF) son: 1) `Declarativo`: el sistema se describe mediante declaraciones; 2) `Versionado e Inmutable`: el estado deseado se almacena de forma inmutable y con historial (en Git); 3) `Obtenido Automáticamente`: agentes de software en el clúster extraen (pull) el estado deseado; 4) `Reconciliado Continuamente`: software automatizado supervisa y reconcilia permanentemente cualquier divergencia entre el estado deseado y el estado real."
-    },
-    {
-      "id": "kcna-50",
-      "d": 5,
-      "t": "Estrategias de Despliegue Cloud Native",
-      "q": "Un equipo de comercio electrónico desea desplegar una versión experimental del motor de recomendaciones. Quieren enviar únicamente el 10% del tráfico de usuarios reales a la nueva versión para evaluar la tasa de errores y la latencia antes de extenderla a toda la plataforma. ¿Qué estrategia de despliegue deben utilizar?",
-      "o": [
-        "`Canary Deployment` (Despliegue Canario), ya que permite enrutar un porcentaje controlado y progresivo del tráfico real hacia la nueva versión.",
-        "`Recreate`, ya que apaga simultáneamente todas las réplicas antiguas antes de encender las nuevas para evitar incompatibilidad de esquemas.",
-        "`Blue/Green`, ya que conmuta instantáneamente el 100% de todo el tráfico de usuarios desde el entorno azul hacia el entorno verde sin coexistencia.",
-        "`RollingUpdate` estándar sin balanceador, ya que divide automáticamente las transacciones bancarias entre los dos servidores más antiguos del rack."
-      ],
-      "a": 0,
-      "e": "Un `Canary Deployment` (despliegue canario) introduce una nueva versión de software enviándole únicamente una pequeña fracción de tráfico productivo real (ej. 10%), mientras el 90% restante sigue siendo atendido por la versión estable v1. Esto permite validar métricas de telemetría, errores y rendimiento con usuarios reales minimizando drásticamente el radio de impacto ante fallos. Si las métricas son satisfactorias, se incrementa progresivamente el tráfico hasta reemplazar v1 por completo."
-    }
-  ],
-  "why": {
-    "kcna-01": [
-      "El `kube-scheduler` no expone la API REST ni accede directamente a `etcd`; consulta pods sin asignar y actualiza asignaciones a través del `kube-apiserver`.",
-      "El `kube-controller-manager` ejecuta los bucles de control internos (como ReplicaSet o NodeController), pero no almacena datos ni interactúa con `etcd` directamente.",
-      null,
-      "El `kubelet` es un agente que corre en los nodos worker, no en el Control Plane, y jamás se comunica directamente con `etcd`."
+    "topics": [
+      {
+        "id": "kcna-t-1-1",
+        "d": 1,
+        "title": "1.1 · Kubernetes Architecture: Control Plane and Worker Nodes",
+        "html": "\n<h4>The brain of the cluster: Control Plane Architecture</h4>\n<p>The <b>Control Plane</b> manages the global state of the Kubernetes cluster, detects and responds to events (such as creating replicas when a pod fails), and makes scheduling decisions. Its key components are:</p>\n<table class=\"keytable\">\n<tr><th>Component</th><th>Role and Main Function</th><th>Key Interaction</th></tr>\n<tr><td><b><code>kube-apiserver</code></b></td><td>Front door and central REST API of the cluster; validates and configures data for pods, services, and controllers.</td><td>It is the <b>only</b> component that communicates directly with <code>etcd</code>. All other components talk through it.</td></tr>\n<tr><td><b><code>etcd</code></b></td><td>Distributed, consistent, highly available key-value store based on the <b>Raft</b> consensus algorithm.</td><td>Stores the entire cluster state. Requires an odd number of nodes (3 or 5) to maintain quorum <code>(N/2)+1</code>.</td></tr>\n<tr><td><b><code>kube-scheduler</code></b></td><td>Assigns newly created pods with no assigned node to viable, healthy nodes.</td><td>Evaluates requirements in two phases: <b>Filtering (Predicates)</b> to discard non-viable nodes and <b>Prioritization (Priorities/Scoring)</b> to score the remaining ones.</td></tr>\n<tr><td><b><code>kube-controller-manager</code></b></td><td>Runs the continuous control loops that reconcile the current state with the desired state.</td><td>Groups multiple controllers: Node Controller, Deployment Controller, ReplicaSet Controller, ServiceAccount Controller.</td></tr>\n<tr><td><b><code>cloud-controller-manager</code></b></td><td>Integrates cloud provider-specific logic (AWS, Azure, GCP), separating it from the Kubernetes core.</td><td>Manages external load balancers (<code>LoadBalancer</code>), cloud network routes, and instance/node lifecycles.</td></tr>\n</table>\n\n<h4>Execution on Worker Nodes</h4>\n<p>Worker nodes run the user's actual workloads in containers grouped into Pods:</p>\n<table class=\"keytable\">\n<tr><th>Component</th><th>Role and Main Function</th></tr>\n<tr><td><b><code>kubelet</code></b></td><td>Main agent that runs on every node. Receives Pod specifications (<code>PodSpecs</code>) from the apiserver and ensures containers are running and healthy by interacting with the runtime via <b>CRI</b>.</td></tr>\n<tr><td><b><code>kube-proxy</code></b></td><td>Network proxy that maintains traffic forwarding rules on each node (using <code>iptables</code> or <code>IPVS</code>), implementing the <b>Service</b> abstraction and internal load balancing.</td></tr>\n<tr><td><b>Container Runtime (CRI)</b></td><td>Software in charge of pulling images and running containers (for example, <code>containerd</code> or <code>CRI-O</code>), implementing the OCI (Open Container Initiative) specification.</td></tr>\n</table>\n<div class=\"tip\"><b>Key for KCNA:</b> No component or user ever writes to <code>etcd</code> directly except <code>kube-apiserver</code>. If the apiserver is down, existing pods keep running on the nodes, but no declarative changes can be made and the cluster cannot be queried.</div>\n"
+      },
+      {
+        "id": "kcna-t-1-2",
+        "d": 1,
+        "title": "1.2 · Core Kubernetes Primitives and Workloads",
+        "html": "\n<h4>Object Hierarchy and Workloads</h4>\n<p>Kubernetes provides declarative abstractions designed for different computing patterns:</p>\n<table class=\"keytable\">\n<tr><th>Object</th><th>Purpose and Usage Pattern</th><th>Behavior on Failure</th></tr>\n<tr><td><b><code>Pod</code></b></td><td>Smallest atomic unit of deployment. Groups one or more containers that share storage, network (same IP address and <code>localhost</code>), and IPC.</td><td>It is ephemeral. If it dies or the node fails, the pod is not recreated on its own; a controller is required.</td></tr>\n<tr><td><b><code>ReplicaSet</code></b></td><td>Maintains a stable, guaranteed number of identical pod replicas running at all times through selectors.</td><td>Creates new pods or deletes surplus ones to exactly match the <code>spec.replicas</code> field.</td></tr>\n<tr><td><b><code>Deployment</code></b></td><td>Higher-level declarative controller that manages ReplicaSets. Supports <b>Rolling Updates</b>, pausing rollouts, and automatic <b>Rollbacks</b>.</td><td>Ideal for stateless web applications and APIs (<i>stateless</i>). ReplicaSets are never created directly.</td></tr>\n<tr><td><b><code>StatefulSet</code></b></td><td>For stateful applications (databases, Kafka) that need stable ordinal identities (<code>app-0</code>, <code>app-1</code>), predictable DNS, and dedicated persistent storage (<code>volumeClaimTemplates</code>).</td><td>Strict order of deployment, scaling, and sequential termination (from highest to lowest index).</td></tr>\n<tr><td><b><code>DaemonSet</code></b></td><td>Ensures that a copy of the pod runs on <b>all</b> (or a specific subset of) the cluster's nodes.</td><td>Ideal for infrastructure agents: log collectors (Fluentd), metrics (node-exporter), or CNI proxies.</td></tr>\n<tr><td><b><code>Job</code> / <code>CronJob</code></b></td><td><code>Job</code> runs pods until a specified number of tasks complete successfully (batch). <code>CronJob</code> adds time-based scheduling (crontab format).</td><td>Ends the pod in <code>Completed</code> without restarting it indefinitely (<code>restartPolicy: OnFailure</code> or <code>Never</code>).</td></tr>\n</table>\n\n<h4>Configuration Decoupling: ConfigMaps and Secrets</h4>\n<p>To respect the principles of the <i>12-Factor App</i>, code and configuration must be strictly separated:</p>\n<ul>\n<li><b><code>ConfigMap</code>:</b> Stores plain-text configuration (environment variables, configuration files, or CLI arguments) decoupled from the container image.</li>\n<li><b><code>Secret</code>:</b> Stores confidential data (passwords, OAuth tokens, SSH keys). By default they are stored base64-encoded in the API and can be encrypted at rest (<i>encryption at rest</i>) in <code>etcd</code>.</li>\n<li><b><code>Namespace</code>:</b> Logical partition of a physical cluster to isolate environments (dev, staging, prod), teams, or projects, applying resource limits (<code>ResourceQuota</code>) and permissions with RBAC.</li>\n</ul>\n<div class=\"tip\"><b>Typical KCNA question:</b> A <code>Namespace</code> does not by itself provide network or kernel isolation. To isolate traffic between namespaces, <code>NetworkPolicies</code> are required.</div>\n"
+      },
+      {
+        "id": "kcna-t-2-1",
+        "d": 2,
+        "title": "2.1 · Pod Lifecycle, Scheduling, and Resource Management",
+        "html": "\n<h4>Requests vs. Limits and Quality of Service (QoS) Classes</h4>\n<p>The scheduler (<code>kube-scheduler</code>) and the Linux kernel (via cgroups) manage container CPU and memory resources:</p>\n<table class=\"keytable\">\n<tr><th>Directive</th><th>Main Use</th><th>Effect of Exceeding the Limit</th></tr>\n<tr><td><b><code>resources.requests</code></b></td><td>Used exclusively by <code>kube-scheduler</code> to calculate whether a node has enough capacity to host the pod.</td><td>Guarantees a reserved minimum floor for the container on the node.</td></tr>\n<tr><td><b><code>resources.limits</code></b></td><td>Hard upper limit enforced by the kernel through cgroups.</td><td>For <b>CPU</b> it causes throttling (<i>CFS Throttling</i>); for <b>Memory</b> it causes immediate termination by the kernel: <code>OOMKilled (Exit Code 137)</code>.</td></tr>\n</table>\n\n<h4>QoS (Quality of Service) Classes and Eviction Priority</h4>\n<ol>\n<li><b><code>Guaranteed</code>:</b> Both CPU and memory have <code>requests</code> and <code>limits</code> defined and they are <b>exactly equal</b> for all containers. They are the last to be evicted when the node is saturated.</li>\n<li><b><code>Burstable</code>:</b> At least one container has <code>requests</code> or <code>limits</code> configured but they do not meet the strict Guaranteed condition.</li>\n<li><b><code>BestEffort</code>:</b> No container defines either requests or limits. They are the first to be removed when the node suffers memory or disk pressure.</li>\n</ol>\n\n<h4>Kubelet Health Probes</h4>\n<table class=\"keytable\">\n<tr><th>Probe</th><th>Behavior on Failure</th><th>Recommended Use Case</th></tr>\n<tr><td><b><code>startupProbe</code></b></td><td>Temporarily disables liveness and readiness while the application starts. If it exceeds the retries, the kubelet restarts the pod.</td><td>Legacy or heavy services that take minutes to start, avoiding premature restart loops.</td></tr>\n<tr><td><b><code>readinessProbe</code></b></td><td>If it fails, the Pod is <b>not restarted</b>, but its IP is immediately removed from the Service's Endpoints.</td><td>Indicates whether the container is ready to receive user traffic (e.g. cache warm-up or DB connection established).</td></tr>\n<tr><td><b><code>livenessProbe</code></b></td><td>If it fails consecutively, the <code>kubelet</code> kills the container and applies the Pod's <code>restartPolicy</code>.</td><td>Detect deadlocks or unrecoverable internal failures where the process is still alive but cannot make progress.</td></tr>\n</table>\n<div class=\"tip\"><b>Golden rule:</b> Never use a <code>livenessProbe</code> to check an external database. If the DB suffers latency, Kubernetes will kill all your pods at once, causing a cascading restart storm.</div>\n"
+      },
+      {
+        "id": "kcna-t-2-2",
+        "d": 2,
+        "title": "2.2 · Networking and Persistent Storage in Kubernetes",
+        "html": "\n<h4>The Kubernetes Networking Model and CNI</h4>\n<p>Kubernetes imposes a flat, fundamental network model: <b>every Pod has its own unique, routable IP address</b> within the cluster. Two pods can communicate directly by IP without needing NAT. This abstraction is implemented by a <b>CNI (Container Network Interface)</b> plugin such as Calico, Flannel, or Cilium.</p>\n\n<h4>Service Types (<code>Service</code>)</h4>\n<table class=\"keytable\">\n<tr><th>Type</th><th>Scope and Operation</th><th>Main Use Case</th></tr>\n<tr><td><b><code>ClusterIP</code></b> (Default)</td><td>Assigns a stable internal virtual IP reachable only from within the cluster.</td><td>Internal communication between microservices (backend, database, queues).</td></tr>\n<tr><td><b><code>NodePort</code></b></td><td>Opens a static port (default range <code>30000-32767</code>) on the IP of <b>every worker node</b> in the cluster.</td><td>Basic external access for development or integration with pre-existing load balancers.</td></tr>\n<tr><td><b><code>LoadBalancer</code></b></td><td>Creates a <code>NodePort</code> internally and interacts with the cloud provider to provision a public/private load balancer with an external IP.</td><td>Direct exposure of critical services to the Internet in managed cloud environments.</td></tr>\n<tr><td><b><code>ExternalName</code></b></td><td>Maps the service to an external DNS name (CNAME record), with no load balancing or proxy IPs.</td><td>Connect pods with external services (e.g. RDS, CloudSQL, or third-party APIs).</td></tr>\n</table>\n\n<h4>Network Security with NetworkPolicy</h4>\n<p>By default, the Kubernetes network is <b>non-isolated</b>: any pod can communicate with any other pod in any namespace. A <b><code>NetworkPolicy</code></b> resource lets you define filtering rules at layers 3 and 4 (IP, ports, Pod and Namespace selectors). When a policy is applied to a pod, it enters <i>default-deny</i> mode for traffic not explicitly allowed.</p>\n\n<h4>Persistent Storage: CSI, PV, PVC, and StorageClass</h4>\n<ul>\n<li><b><code>CSI (Container Storage Interface)</code>:</b> Open standard that allows storage providers to integrate their drivers into Kubernetes without touching the project's source code.</li>\n<li><b><code>StorageClass</code>:</b> Defines the storage provisioner and parameters for dynamic volume provisioning.</li>\n<li><b><code>PersistentVolume (PV)</code>:</b> Storage resource in the cluster provisioned by an administrator or dynamically through a StorageClass.</li>\n<li><b><code>PersistentVolumeClaim (PVC)</code>:</b> Storage request made by a developer specifying size and access mode:\n  <ul>\n    <li><b><code>ReadWriteOnce (RWO)</code>:</b> Mountable in read/write mode by a single node at a time (block disks).</li>\n    <li><b><code>ReadOnlyMany (ROX)</code>:</b> Mountable in read-only mode by multiple nodes concurrently.</li>\n    <li><b><code>ReadWriteMany (RWX)</code>:</b> Mountable in read/write mode by multiple nodes simultaneously (shared file systems such as NFS or CephFS).</li>\n  </ul>\n</li>\n</ul>\n"
+      },
+      {
+        "id": "kcna-t-3-1",
+        "d": 3,
+        "title": "3.1 · Cloud Native Architecture Principles and the CNCF Ecosystem",
+        "html": "\n<h4>What is Cloud Native according to the CNCF?</h4>\n<p>The <b>Cloud Native Computing Foundation (CNCF)</b> defines <i>Cloud Native</i> technologies as those that empower organizations to build and run scalable applications in modern, dynamic environments such as public, private, and hybrid clouds. Their essential characteristics are:</p>\n<ul>\n<li><b>Containers:</b> Self-contained, reproducible packaging of the application with all its dependencies.</li>\n<li><b>Service Meshes:</b> Intelligent, secure management of communication between services.</li>\n<li><b>Microservices:</b> Small, autonomous, decoupled services that are deployed independently.</li>\n<li><b>Immutable Infrastructure:</b> Servers and containers are never modified in production; they are destroyed and replaced with new versions.</li>\n<li><b>Declarative APIs:</b> The operator declares the desired state and the automated system takes care of reconciling the actual state.</li>\n</ul>\n\n<h4>CNCF Project Maturity Stages</h4>\n<p>The CNCF organizes its projects into three graduation levels according to their community adoption, governance, and production maturity:</p>\n<table class=\"keytable\">\n<tr><th>Level</th><th>Maturity Criteria</th><th>Example Projects</th></tr>\n<tr><td><b>Sandbox</b></td><td>Early-stage, experimental, or research projects with promising potential. Minimal adoption requirements.</td><td>KEDA (formerly), OpenFeature, Telepresence.</td></tr>\n<tr><td><b>Incubating</b></td><td>Projects with demonstrated production use, active governance, and a solid base of contributors.</td><td>Cilium (prior to graduation), gRPC, Dapr, Notary.</td></tr>\n<tr><td><b>Graduated</b></td><td>Highest level of technical maturity, audited security, broad adoption in mission-critical environments, and demonstrated neutral governance.</td><td><b>Kubernetes, Prometheus, Envoy, Helm, containerd, CoreDNS, Jaeger, Fluentd, OpenTelemetry</b>.</td></tr>\n</table>\n<div class=\"tip\"><b>KCNA exam tip:</b> Clearly identify which projects are <i>Graduated</i>. Common questions ask whether foundational projects such as Kubernetes, Prometheus, Envoy, Helm, or containerd have reached official CNCF graduation status.</div>\n"
+      },
+      {
+        "id": "kcna-t-3-2",
+        "d": 3,
+        "title": "3.2 · Service Mesh, Security, RBAC, and Gateway API",
+        "html": "\n<h4>Service Mesh: Decoupling the Network from Application Logic</h4>\n<p>A <b>Service Mesh</b> is a dedicated infrastructure layer that facilitates service-to-service communication (<i>East-West</i> traffic) in a secure, fast, and observable way. It is divided into two planes:</p>\n<ul>\n<li><b>Data Plane:</b> Lightweight sidecar proxies (commonly <b>Envoy</b>) injected alongside each application container. They intercept all inbound and outbound traffic without altering the app's code.</li>\n<li><b>Control Plane:</b> Manages and distributes configuration to the proxies (e.g. <b>Istio</b> or <b>Linkerd</b>), issuing mTLS certificates and routing policies.</li>\n</ul>\n<table class=\"keytable\">\n<tr><th>Capability</th><th>Immediate Benefit</th></tr>\n<tr><td><b>Mutual TLS (mTLS)</b></td><td>End-to-end encryption in transit and mutual cryptographic authentication of service identities without changing code.</td></tr>\n<tr><td><b>Traffic Resilience</b></td><td>Automatic retries, timeouts, circuit breaking, and rate limiting.</td></tr>\n<tr><td><b>Uniform Observability</b></td><td>Uniform generation of golden metrics (RPS, latency, errors) and distributed traces for all microservices.</td></tr>\n</table>\n\n<h4>Role-Based Access Control (RBAC)</h4>\n<p>In Kubernetes, every request is authenticated and then authorized through <b>RBAC</b>. The components are:</p>\n<ul>\n<li><b><code>Role</code> vs. <code>ClusterRole</code>:</b> A <code>Role</code> defines permissions within a <b>specific namespace</b> (e.g. read pods in <i>default</i>). A <code>ClusterRole</code> defines permissions cluster-wide (e.g. list nodes, or read pods in all namespaces).</li>\n<li><b><code>RoleBinding</code> vs. <code>ClusterRoleBinding</code>:</b> Binds a Role or ClusterRole to a subject (user, group, or <code>ServiceAccount</code>).</li>\n<li><b><code>ServiceAccount</code>:</b> Provides a managed identity for processes running inside Pods to interact with the <code>kube-apiserver</code>.</li>\n</ul>\n\n<h4>Evolution: From Ingress to the Gateway API</h4>\n<p>The traditional <code>Ingress</code> resource suffered from a lack of expressiveness and an overload of proprietary annotations. The <b>Gateway API</b> is its modern, role-oriented successor:</p>\n<ul>\n<li><b><code>GatewayClass</code>:</b> Managed by the infrastructure administrator (defines the controller).</li>\n<li><b><code>Gateway</code>:</b> Managed by the cluster/network operator (defines ports and TLS certificates).</li>\n<li><b><code>HTTPRoute</code> / <code>GRPCRoute</code>:</b> Managed by the application developer (defines forwarding rules and filters).</li>\n</ul>\n"
+      },
+      {
+        "id": "kcna-t-4-1",
+        "d": 4,
+        "title": "4.1 · The Three Pillars of Cloud Native Observability",
+        "html": "\n<h4>Metrics, Logs, and Distributed Traces</h4>\n<p><b>Observability</b> is the ability to infer the internal states of a complex system from the analysis of its external telemetry outputs:</p>\n<table class=\"keytable\">\n<tr><th>Pillar</th><th>Nature of the Data</th><th>Main Purpose</th><th>CNCF Technologies</th></tr>\n<tr><td><b>Metrics</b></td><td>Numeric values measured at regular intervals (counters, gauges, histograms). Very storage-efficient.</td><td>Anomaly detection, real-time alerts, performance dashboards, and SLO calculation.</td><td><b>Prometheus</b>, Thanos, Cortex.</td></tr>\n<tr><td><b>Logs</b></td><td>Discrete textual records with a timestamp generated by application events or errors.</td><td>Deep forensic investigation of failures and auditing of specific behavior.</td><td><b>Fluentd</b>, Fluent Bit, Grafana Loki.</td></tr>\n<tr><td><b>Traces (Tracing)</b></td><td>Representation of the full lifecycle of a request that traverses multiple microservices (composed of <i>Spans</i> with temporal and causal context).</td><td>Precise identification of latency bottlenecks and slow or broken dependencies.</td><td><b>Jaeger</b>, <b>OpenTelemetry</b>.</td></tr>\n</table>\n\n<h4>OpenTelemetry (OTel): The Unified Standard</h4>\n<p><b>OpenTelemetry</b> is a CNCF <i>Graduated</i> project born from the merger of <i>OpenTracing</i> and <i>OpenCensus</i>. It provides a unified collection of APIs, SDKs, and tools to generate and export metrics, logs, and traces in a way that is agnostic of the observability backend.</p>\n<ul>\n<li><b>OTel Collector:</b> High-performance telemetry proxy that receives data through the <b>OTLP</b> (OpenTelemetry Protocol) protocol, processes it (filters, enriches, samples), and exports it to backends such as Prometheus, Jaeger, or Datadog.</li>\n</ul>\n<div class=\"tip\"><b>KCNA Key:</b> OpenTelemetry standardizes telemetry instrumentation and collection, but it does not provide its own storage or visualization. To store and query metrics and traces it connects to backends such as Prometheus or Jaeger.</div>\n"
+      },
+      {
+        "id": "kcna-t-4-2",
+        "d": 4,
+        "title": "4.2 · Cluster Monitoring, Telemetry with Prometheus and Alertmanager",
+        "html": "\n<h4>Prometheus Architecture</h4>\n<p><b>Prometheus</b> is the <i>de facto</i> standard for monitoring cloud-native systems. Its structural characteristics are:</p>\n<ul>\n<li><b>Pull Model (Scraping):</b> Prometheus actively polls the HTTP endpoints (usually <code>/metrics</code>) of targets at configured intervals, instead of waiting for services to push data.</li>\n<li><b>Time-Series Database (TSDB):</b> Stores data on disk as time series made up of a metric identifier, labels (<i>key-value labels</i>), and timestamped float values.</li>\n<li><b>PromQL:</b> Powerful functional query language to aggregate, filter, and compute derivatives and rates over metrics (e.g. <code>rate(http_requests_total[5m])</code>).</li>\n</ul>\n\n<h4>Monitoring Ecosystem Components</h4>\n<table class=\"keytable\">\n<tr><th>Component</th><th>Role in the Platform</th></tr>\n<tr><td><b><code>cAdvisor</code></b></td><td>Daemon embedded directly in the <code>kubelet</code> that collects and exposes CPU, memory, network, and disk usage metrics of the containers running on each node.</td></tr>\n<tr><td><b><code>node-exporter</code></b></td><td>Agent deployed as a <code>DaemonSet</code> to collect operating system and host hardware metrics (kernel, CPU, swap, filesystem).</td></tr>\n<tr><td><b><code>metrics-server</code></b></td><td>Lightweight in-memory component that aggregates basic usage metrics for the CLI (<code>kubectl top</code>) and for pod autoscaling (<b>HPA</b>). It does not persist historical data.</td></tr>\n<tr><td><b><code>Alertmanager</code></b></td><td>Service that receives alerts fired by Prometheus rules, deduplicates them, groups them by service/severity, and sends them to receivers (Slack, PagerDuty, Email).</td></tr>\n</table>\n\n<h4>SRE Concepts: SLI, SLO, and Error Budgets</h4>\n<ul>\n<li><b>SLI (Service Level Indicator):</b> Real-time quantitative metric of the service (e.g. success rate of HTTP requests).</li>\n<li><b>SLO (Service Level Objective):</b> Agreed internal target for the SLI over a period (e.g. 99.9% success over 30 days).</li>\n<li><b>Error Budget:</b> The allowed margin of failure <code>(100% - SLO)</code>. If the budget is exhausted, deployments are frozen to prioritize stability.</li>\n</ul>\n"
+      },
+      {
+        "id": "kcna-t-5-1",
+        "d": 5,
+        "title": "5.1 · GitOps Principles and Declarative Continuous Deployment",
+        "html": "\n<h4>What is GitOps?</h4>\n<p><b>GitOps</b> is an operating model for cloud-native applications that uses <b>Git as the Single Source of Truth</b> for declarative infrastructure and applications. The CNCF <b>OpenGitOps</b> initiative establishes four fundamental principles:</p>\n<ol>\n<li><b>Declarative:</b> The entire desired system state must be expressed declaratively (YAML manifests, Kustomize, Helm).</li>\n<li><b>Versioned and Immutable:</b> The desired state is stored in Git, allowing full auditing, change history, and instant rollback capability.</li>\n<li><b>Pulled Automatically (Pull):</b> Software agents in the cluster actively pull the desired state from Git (<i>Pull</i> model), instead of an external CI pipeline running <code>kubectl apply</code> with administrative credentials (<i>Push</i> model).</li>\n<li><b>Continuously Reconciled:</b> The agent permanently compares the cluster's actual state with the state in Git. If it detects divergence (<i>Drift</i>), it reconciles the system automatically (<i>Self-Healing</i>).</li>\n</ol>\n\n<h4>Push Model vs. Pull Model in Continuous Deployment</h4>\n<table class=\"keytable\">\n<tr><th>Criterion</th><th>Traditional CI/CD (Push Model)</th><th>GitOps (Pull Model - ArgoCD / Flux)</th></tr>\n<tr><td><b>Cluster Access</b></td><td>The CI server (Jenkins, GitHub Actions) must hold administrator credentials (kubeconfig) for the cluster, creating a critical security risk.</td><td>The operator (<b>ArgoCD / Flux</b>) runs <b>inside</b> the cluster and pulls from Git with read-only permissions. No credentials are exposed outside.</td></tr>\n<tr><td><b>Drift Detection</b></td><td>If someone manually modifies a resource with <code>kubectl edit</code>, the CI pipeline does not find out until the next deployment.</td><td>The operator detects the manual change within seconds and overwrites it to restore the Git state.</td></tr>\n<tr><td><b>Auditing and Rollback</b></td><td>Rollbacks require re-running complex pipelines or manual scripts.</td><td>A rollback is performed simply by running <code>git revert</code> on the Git repository.</td></tr>\n</table>\n<div class=\"tip\"><b>CNCF Graduated Projects in GitOps:</b> Both <b>Argo CD</b> and <b>Flux</b> are CNCF <i>Graduated</i> projects that implement the GitOps pattern on Kubernetes.</div>\n"
+      },
+      {
+        "id": "kcna-t-5-2",
+        "d": 5,
+        "title": "5.2 · Packaging and Modern Application Delivery Strategies",
+        "html": "\n<h4>Package Management and Templating: Helm vs. Kustomize</h4>\n<p>Managing complex manifests across multiple environments (dev, QA, prod) is addressed with two main tools in the CNCF ecosystem:</p>\n<table class=\"keytable\">\n<tr><th>Feature</th><th>Helm (The K8s package manager)</th><th>Kustomize (Template-free customization)</th></tr>\n<tr><td><b>Approach</b></td><td>Uses a Go template engine (<i>Go Templates</i>) and <code>values.yaml</code> files to generate dynamic manifests.</td><td>Template-free approach (<i>template-free</i>); uses base layers (<i>bases</i>) and declarative overrides (<i>overlays</i>).</td></tr>\n<tr><td><b>Structure</b></td><td>Packaged in <b>Charts</b> with <code>Chart.yaml</code>, <code>templates/</code>, and versioned dependencies in OCI repositories.</td><td>Uses a <code>kustomization.yaml</code> file that defines patches and resources. Natively integrated into <code>kubectl</code> (<code>kubectl apply -k</code>).</td></tr>\n<tr><td><b>Version Management</b></td><td>Keeps a history of <i>releases</i> in the cluster (stored as Secrets), allowing <code>helm rollback</code>.</td><td>Keeps no internal state in the cluster; delegates versioning purely to Git.</td></tr>\n</table>\n\n<h4>Application Deployment Strategies</h4>\n<table class=\"keytable\">\n<tr><th>Strategy</th><th>How It Works</th><th>Pros and Cons</th></tr>\n<tr><td><b>Recreate</b></td><td>Destroys all existing replicas (v1) before creating the new replicas (v2).</td><td>Simple and free of version concurrency issues in the DB, but causes <b>downtime</b>.</td></tr>\n<tr><td><b>Rolling Update</b></td><td>Gradually replaces v1 pods with v2 pods by controlling <code>maxSurge</code> and <code>maxUnavailable</code>.</td><td>Kubernetes default strategy. Zero downtime, but requires v1 and v2 to coexist and support the same data schema.</td></tr>\n<tr><td><b>Blue/Green</b></td><td>Deploys the complete new environment (Green) in parallel to the current one (Blue). When Green is validated, the Service or Ingress switches the selector instantly.</td><td>Zero downtime and instant rollback by switching the selector. Doubles infrastructure resource consumption during the cutover.</td></tr>\n<tr><td><b>Canary</b></td><td>Sends a small percentage of real traffic (e.g. 5% or 10%) to the new version (Canary) while 90% stays on v1. If the metrics are optimal, it is gradually promoted.</td><td>Minimizes the blast radius of bugs on real users. Requires an advanced Ingress Controller, Service Mesh, or tools such as <b>Argo Rollouts</b> or <b>Flagger</b>.</td></tr>\n</table>\n"
+      }
     ],
-    "kcna-02": [
-      null,
-      "`etcd` no realiza particionado (sharding) ni balanceo de escrituras; todas las operaciones de escritura pasan obligatoriamente por el nodo líder de Raft.",
-      "El número impar de nodos responde a la matemática del quórum de consenso en Raft, sin relación con los certificados TLS del apiserver.",
-      "La compactación periódica de revisiones históricas en `etcd` es necesaria independientemente de si el número de miembros es par o impar."
+    "questions": [
+      {
+        "id": "kcna-01",
+        "d": 1,
+        "t": "Control Plane Architecture",
+        "q": "During a security audit of a Kubernetes cluster architecture, the cybersecurity team needs to identify which is the only Control Plane component that exposes the public REST API, authenticates and authorizes requests, and communicates directly and exclusively with the persistent data store `etcd`. Which component fulfills this function?",
+        "o": [
+          "`kube-scheduler`, since it evaluates compute resource requirements and calculates the suitable node for pods.",
+          "`kube-controller-manager`, since it centralizes the continuous control loops that reconcile the desired state.",
+          "`kube-apiserver`, since it exposes the REST endpoints, validates manifests, and is the only direct client of `etcd`.",
+          "`kubelet`, since it resides on the worker nodes reporting container health to the central storage."
+        ],
+        "a": 2,
+        "e": "The `kube-apiserver` is the central gateway of Kubernetes. It is the only cluster component that interacts directly with `etcd`; all other clients (controllers, scheduler, kubelet, and users via `kubectl`) must communicate through its REST API."
+      },
+      {
+        "id": "kcna-02",
+        "d": 1,
+        "t": "etcd State Store",
+        "q": "An infrastructure architect is designing the high-availability topology for the `etcd` state store in a production Kubernetes cluster. Why is it essential to deploy an odd number of members (for example, 3 or 5 instances) in the `etcd` cluster?",
+        "o": [
+          "To allow the Raft consensus algorithm to determine the strict majority `(N/2)+1` and tolerate network partitions without suffering split-brain.",
+          "To double sequential write speed through hash partitioning and symmetric balancing of transactions between active and passive nodes.",
+          "To ensure that the `kube-apiserver` can alternate independent TLS certificates in each cloud availability zone.",
+          "To prevent the database from requiring periodic compaction of historical revisions on SSD block storage."
+        ],
+        "a": 0,
+        "e": "`etcd` uses the Raft distributed consensus algorithm, which requires a strict majority (quorum) of `(N/2)+1` members to commit writes and elect a leader. An odd number maximizes fault tolerance: a 3-node cluster tolerates the loss of 1 node (quorum 2), while 4 nodes also tolerate only 1 failure (quorum 3) while consuming unnecessary extra resources."
+      },
+      {
+        "id": "kcna-03",
+        "d": 1,
+        "t": "Scheduling with kube-scheduler",
+        "q": "A machine learning inference Pod has been deployed that requests 4 dedicated GPUs and 32 GiB of RAM. When reviewing the deployment status, the Pod remains in `Pending` state. Which Control Plane component is responsible for evaluating the feasibility filters and scoring the nodes to assign this Pod?",
+        "o": [
+          "`kube-scheduler`, since it filters viable nodes using predicates and scores the candidates to select the final node.",
+          "`kube-controller-manager`, since it monitors that the requested replicas exist and creates new nodes if the quota is not sufficient.",
+          "`kubelet`, since it inspects the hardware drivers in the host operating system before accepting new workloads.",
+          "`cloud-controller-manager`, since it automatically provisions GPU instances in the cloud provider's infrastructure."
+        ],
+        "a": 0,
+        "e": "The `kube-scheduler` watches for newly created pods that have no assigned node (empty `nodeName`). It runs a two-step process: first filtering (Filtering/Predicates), where it discards nodes that do not meet resources or taints; and then prioritization (Scoring/Priorities), where it assigns a score to the remaining viable nodes to choose the best one."
+      },
+      {
+        "id": "kcna-04",
+        "d": 1,
+        "t": "Reconciliation Loop",
+        "q": "In the Kubernetes operating model, configuration is expressed declaratively. What is the main responsibility of the `kube-controller-manager` component in relation to this declarative paradigm?",
+        "o": [
+          "Compile the YAML manifests into binary images so the container runtime can run them on each worker node without needing to interpret text.",
+          "Run continuous control loops that compare the cluster's current state with the desired state and apply continuous corrections.",
+          "Cryptographically validate the JWT tokens issued to the administrator users who run frequent administrative commands with `kubectl`.",
+          "Establish overlay network tunnels using VXLAN encapsulation between all the nodes that make up the cluster."
+        ],
+        "a": 1,
+        "e": "The `kube-controller-manager` runs continuous control loops (reconciliation loops). On each iteration, it compares the desired state declared in Kubernetes objects with the actual state observed in the cluster and performs the necessary actions (such as creating or destroying pods) so that both match."
+      },
+      {
+        "id": "kcna-05",
+        "d": 1,
+        "t": "Cloud Controller Manager",
+        "q": "A company migrates its self-managed Kubernetes clusters to a public cloud infrastructure. What is the purpose of the `cloud-controller-manager` binary introduced in the modern Kubernetes architecture?",
+        "o": [
+          "Completely replace the `kubelet` on the nodes to allow running microservices without needing an operating system.",
+          "Monitor pod memory saturation and send automatic alerts to the provider's monthly billing and analytics dashboards.",
+          "Manage the provisioning of elastic clusters using Terraform templates embedded in the firmware of bare-metal hypervisors.",
+          "Decouple cloud provider-dependent logic (load balancers, routes, and node instances) from the core Kubernetes code."
+        ],
+        "a": 3,
+        "e": "The `cloud-controller-manager` allows cloud providers (AWS, Azure, Google Cloud, OpenStack, etc.) to integrate their platforms with Kubernetes without coupling proprietary code inside the main Kubernetes repository. It manages specific controllers for nodes, network routes, and `LoadBalancer`-type load balancers."
+      },
+      {
+        "id": "kcna-06",
+        "d": 1,
+        "t": "Node Kubelet Agent",
+        "q": "On every worker node of a Kubernetes cluster runs an essential process that acts as the system's main agent. What is the main responsibility of the `kubelet` in the node's day-to-day operation?",
+        "o": [
+          "Distribute HTTP traffic by balancing external requests among the pods according to the round-robin policy defined in the routing tables.",
+          "Query the `etcd` database directly to synchronize network changes and apply perimeter isolation policies.",
+          "Receive Pod specifications (`PodSpecs`) from the `kube-apiserver`, interact with the runtime via CRI, and monitor their health status.",
+          "Run the source code build process when a developer pushes a new commit to a connected Git repository."
+        ],
+        "a": 2,
+        "e": "The `kubelet` is the primary node agent. It receives `PodSpecs` (mainly from the `kube-apiserver`, or from local files in static pods), interacts with the container runtime through the CRI interface to create and stop containers, and runs health probes (liveness, readiness, startup), reporting the status of the node and pods to the apiserver."
+      },
+      {
+        "id": "kcna-07",
+        "d": 1,
+        "t": "Routing with kube-proxy",
+        "q": "A developer asks how requests directed to a `ClusterIP` virtual IP reach the correct backend pods within a worker node. Which network component implements this abstraction by programming forwarding rules in the node's operating system?",
+        "o": [
+          "`kube-proxy`, since it programs rules in `iptables` or `IPVS` on each node to forward traffic directed to Services to the Pods.",
+          "`CoreDNS`, since it translates TCP packets at the physical link layer using ARP switching tables on the data center's physical network switches.",
+          "`containerd`, since it encapsulates Ethernet frames in TLS headers before transmitting them to the physical network interface card.",
+          "`kube-scheduler`, since it updates the kernel's static route tables every time a new container changes state."
+        ],
+        "a": 0,
+        "e": "`kube-proxy` is the network component that runs on every worker node. It watches the `Service` and `Endpoints` (or `EndpointSlices`) objects through the apiserver and programs NAT filtering and forwarding rules in the Linux kernel (using `iptables` or `IPVS` modes) to translate the services' virtual IPs to the pods' real IPs."
+      },
+      {
+        "id": "kcna-08",
+        "d": 1,
+        "t": "Control Plane High Availability",
+        "q": "Which TWO Kubernetes Control Plane components use a Lease-based Leader Election mechanism to operate in active-passive mode and prevent multiple instances from making conflicting decisions simultaneously? (Select two)",
+        "o": [
+          "`kube-scheduler`",
+          "`kube-apiserver`",
+          "`kube-controller-manager`",
+          "`kubelet`"
+        ],
+        "a": [
+          0,
+          2
+        ],
+        "e": "Both `kube-scheduler` and `kube-controller-manager` implement leader election (using `Lease` objects in Kubernetes). Even if multiple replicas are deployed on control plane nodes for high availability, only one instance acts as the active leader to prevent two schedulers from assigning the same pod or two controllers from duplicating replicas. In contrast, `kube-apiserver` is active-active with no leader (all instances serve traffic in parallel behind a load balancer)."
+      },
+      {
+        "id": "kcna-09",
+        "d": 1,
+        "t": "CRI and Container Runtime",
+        "q": "Historically, Kubernetes contained code specific to communicating with Docker. To decouple orchestration from the execution engine, the CNCF promoted a standard gRPC-based specification. What is this interface called that allows using runtimes such as `containerd` or `CRI-O`?",
+        "o": [
+          "`CNI (Container Network Interface)`, which manages IP addresses and packet routing between containers in the cluster through network tunnels.",
+          "`CSI (Container Storage Interface)`, which defines interoperability for attaching and mounting persistent volumes.",
+          "`OCI (Open Container Initiative)`, which exclusively defines the tarball file format of Helm manifests.",
+          "`CRI (Container Runtime Interface)`, which standardizes gRPC communication between the `kubelet` and container runtimes."
+        ],
+        "a": 3,
+        "e": "The `CRI` (Container Runtime Interface) is the standard gRPC API introduced in Kubernetes so that the `kubelet` can interact with any compatible container runtime (such as `containerd` or `CRI-O`) without needing to incorporate engine-specific code within the Kubernetes project."
+      },
+      {
+        "id": "kcna-10",
+        "d": 1,
+        "t": "Pod Anatomy",
+        "q": "A developer configures a multi-container Pod containing a web application and an auxiliary container (sidecar) to process logs. Which of the following statements accurately describes the environment shared by the containers within this same Pod?",
+        "o": [
+          "Each container receives an independent public IP address and they communicate with each other exclusively through the cluster's Ingress using TLS certificates.",
+          "They share the same Network namespace (same IP address and communication via `localhost`), as well as mounted storage volumes.",
+          "They run on physically distinct worker nodes to guarantee high availability against the unexpected loss of a server.",
+          "They necessarily share the same read-only root file system and the same user space with no process isolation."
+        ],
+        "a": 1,
+        "e": "A `Pod` is the smallest unit in Kubernetes. All containers that are part of the same Pod are always scheduled on the same worker node and share Linux kernel namespaces: Network namespace (they share the same pod IP and can communicate via `localhost` on different ports), IPC namespace, and they can share volumes declared in the pod."
+      },
+      {
+        "id": "kcna-11",
+        "d": 1,
+        "t": "Deployments and ReplicaSets",
+        "q": "A software engineering team needs to update a web application in production with no downtime, with the ability to perform automatic rollbacks if errors increase. Why is a `Deployment` object used instead of directly creating a `ReplicaSet`?",
+        "o": [
+          "Because ReplicaSets do not support pods with more than one container nor allow mounting secrets injected from environment variables.",
+          "Because Deployments automatically run static code vulnerability scans before starting the pod lifecycle.",
+          "Because the `Deployment` declaratively manages the lifecycle of multiple ReplicaSets, enabling rolling updates and rollbacks.",
+          "Because the `ReplicaSet` was marked as deprecated in Kubernetes version 1.25 and can no longer be processed by the API Server."
+        ],
+        "a": 2,
+        "e": "A `Deployment` is a higher-level declarative controller that manages `ReplicaSets`. When performing a version update (`RollingUpdate`), the Deployment creates a new ReplicaSet with the new image and gradually scales up the new one while scaling down the old one. If something fails, it allows reverting (`kubectl rollout undo`) to the previous ReplicaSet instantly."
+      },
+      {
+        "id": "kcna-12",
+        "d": 1,
+        "t": "DaemonSet Controller",
+        "q": "You need to collect the log files from every physical server in the cluster and send them to a central Elasticsearch cluster. For this, exactly one replica of the Fluentd agent must run on each of the cluster's worker nodes. Which workload primitive is ideal for this requirement?",
+        "o": [
+          "`DaemonSet`, since it guarantees that a copy of the Pod runs automatically on all (or the selected) nodes of the cluster.",
+          "`StatefulSet`, since it assigns a fixed static IP address and an exclusive numbered persistent volume to each running replica.",
+          "`Job`, since it runs the containers in the background until the successful completion code is reached in the batch task.",
+          "`Deployment`, since it randomly recalculates the location of the agents on each service restart to avoid bottlenecks."
+        ],
+        "a": 0,
+        "e": "A `DaemonSet` ensures that all (or a selection based on node selectors/taints) nodes run a copy of a Pod. As new nodes are added to the cluster, the DaemonSet automatically creates the Pod on them; when nodes are destroyed, the pods are removed. Typical cases: log collection (Fluentd), node metrics (node-exporter), or CNI agents."
+      },
+      {
+        "id": "kcna-13",
+        "d": 1,
+        "t": "StatefulSet Controller",
+        "q": "A data team needs to deploy an Apache ZooKeeper cluster on Kubernetes. The application requires each instance to keep a stable, predictable DNS hostname across restarts (`zk-0`, `zk-1`, `zk-2`) and to retain its own dedicated persistent disk storage. Which Kubernetes resource should they use?",
+        "o": [
+          "`DaemonSet`, since it provides hostnames derived from the name of the worker node on which the container was started.",
+          "`Deployment`, since it allows associating a single shared NFS volume with concurrent reads for all active replicas of the cluster without lock collisions.",
+          "`CronJob`, since it periodically restarts the instances, assigning new sequential identifiers when the execution time ends.",
+          "`StatefulSet`, since it offers stable ordinal network identities, ordered termination, and dedicated volumes via `volumeClaimTemplates`."
+        ],
+        "a": 3,
+        "e": "A `StatefulSet` is the controller designed for stateful workloads that need fixed, predictable network identities (ordinal indexes `name-0`, `name-1`), sequential order of deployment and update, and dedicated persistent storage for each replica through `volumeClaimTemplates` (the volume of `zk-0` is not reassigned to `zk-1` on restart)."
+      },
+      {
+        "id": "kcna-14",
+        "d": 1,
+        "t": "Batch Workloads: Job vs CronJob",
+        "q": "A financial application must run an accounting reconciliation every night at 02:00 AM UTC. The process takes approximately 20 minutes, processes pending transactions, and must release compute resources after finishing successfully. Which resource is the most appropriate to model this requirement?",
+        "o": [
+          "`Deployment`, setting `replicas: 1` and a `livenessProbe` that kills the container when the data reconciliation ends to force memory release.",
+          "`CronJob`, since it creates `Job` objects recurrently according to a crontab-style time expression, terminating when the task completes.",
+          "`DaemonSet`, since it ensures that the financial task runs on all worker nodes without interfering with production workloads.",
+          "`StatefulSet`, since it guarantees that the process retains the same network identifier during the execution of the accounting calculations."
+        ],
+        "a": 1,
+        "e": "A `CronJob` manages the periodic, time-based execution of batch tasks. At each interval specified by the cron syntax (e.g., `0 2 * * *`), it creates a `Job` object. The `Job` creates one or more pods that run until they complete their work successfully (`Completed`) and then stop, without consuming residual CPU/memory."
+      },
+      {
+        "id": "kcna-15",
+        "d": 1,
+        "t": "Namespace Isolation",
+        "q": "An organization shares a large Kubernetes cluster among three different development teams. They want to organize resources logically to avoid name collisions and enforce compute quota limits (`ResourceQuota`). Which Kubernetes primitive provides this kind of logical partitioning?",
+        "o": [
+          "`NodeSelector`, because it physically partitions the host's CPU cores and assigns them to the different teams through a hypervisor.",
+          "`ClusterRole`, because it splits microservice network traffic into different virtual subnets with hardware encryption.",
+          "`Namespace`, because it provides a logical partition within the cluster to isolate names, quotas, and access control policies.",
+          "`StorageClass`, because it segments container storage disks, guaranteeing cryptographic isolation per user."
+        ],
+        "a": 2,
+        "e": "`Namespaces` provide a mechanism for isolating groups of resources within a single physical cluster. They allow different teams or projects to use the same resource names without collisions, apply authorization policies through RBAC, and set limits on CPU, memory, and object count consumption through `ResourceQuota`."
+      },
+      {
+        "id": "kcna-16",
+        "d": 1,
+        "t": "DNS Resolution Across Namespaces",
+        "q": "The frontend pod in the `production` namespace needs to call, over HTTP, the billing API exposed by the `billing-svc` service that resides in the `finance` namespace. Assuming the cluster's default domain (`cluster.local`), what is the correct FQDN (Fully Qualified Domain Name) to connect to it?",
+        "o": [
+          "`billing-svc.production.pod.cluster.local`, because pod-to-pod queries always resolve within the originating namespace.",
+          "`finance.billing-svc.k8s.internal`, because service names follow the cloud provider's reversed subdomain format.",
+          "`http://billing-svc:8080/finance`, because Kubernetes uses relative paths in the HTTP protocol instead of standard DNS records.",
+          "`billing-svc.finance.svc.cluster.local`, following the standard DNS name format for services across different namespaces."
+        ],
+        "a": 3,
+        "e": "CoreDNS in Kubernetes resolves services using the standard FQDN convention: `<service-name>.<namespace>.svc.<cluster-domain>`. In this case, to reach the `billing-svc` service in the `finance` namespace, the full name resolvable from any namespace is `billing-svc.finance.svc.cluster.local`."
+      },
+      {
+        "id": "kcna-17",
+        "d": 1,
+        "t": "Configuration Injection",
+        "q": "Which TWO Kubernetes objects are commonly used to inject decoupled configuration into containers (through environment variables or files mounted as volumes), differing mainly in the sensitivity of the information they store? (Select two)",
+        "o": [
+          "`PersistentVolumeClaim`",
+          "`ConfigMap`",
+          "`NetworkPolicy`",
+          "`Secret`"
+        ],
+        "a": [
+          1,
+          3
+        ],
+        "e": "`ConfigMap` and `Secret` are the two core Kubernetes objects for separating configuration from application code. `ConfigMap` stores key-value pairs and plain-text files for non-confidential configuration, while `Secret` stores confidential data (API keys, passwords, certificates) base64-encoded in the API and with encryption-at-rest support in `etcd`."
+      },
+      {
+        "id": "kcna-18",
+        "d": 1,
+        "t": "Static Pods",
+        "q": "When a Kubernetes cluster is initialized with `kubeadm`, the essential Control Plane components (such as `kube-apiserver`, `etcd`, and `kube-scheduler`) are started as Pods. However, there is no active scheduler at that point to schedule them. How are these components run on the control node?",
+        "o": [
+          "As `Static Pods`, managed directly by the `kubelet` by reading YAML manifests in the local directory `/etc/kubernetes/manifests`.",
+          "As Docker Swarm containers running on a temporary virtual machine until the cluster reaches the Ready state and the scheduler takes control of the system.",
+          "Through a startup script in `/etc/rc.local` that simulates apiserver responses using a static in-memory JSON file.",
+          "Through an external Terraform controller that sends SSH commands to compile the Kubernetes code on the node."
+        ],
+        "a": 0,
+        "e": "`Static Pods` are managed directly by the `kubelet` daemon on a specific node, without involvement from the `kube-apiserver` or the `kube-scheduler`. The kubelet periodically watches a local host directory (by default `/etc/kubernetes/manifests`) and creates the pods declared there. `kubeadm` uses this mechanism to bootstrap the Control Plane itself."
+      },
+      {
+        "id": "kcna-19",
+        "d": 1,
+        "t": "Init Containers (initContainers)",
+        "q": "A web application needs to verify that the database server is accepting connections and download a configuration file from an S3 bucket before starting its main process. Which Kubernetes primitive allows these preparatory tasks to run sequentially and in a blocking manner?",
+        "o": [
+          "`Ephemeral Containers`, because they run temporarily to collect memory dumps when a pod enters CrashLoopBackOff.",
+          "`Sidecar Containers`, because they start simultaneously with the main app and run indefinitely, sharing the same lifecycle.",
+          "`initContainers`, because they run sequentially before the application containers start and must complete successfully.",
+          "`Pause Containers`, because they hold network traffic until the user manually sends a confirmation signal through the API."
+        ],
+        "a": 2,
+        "e": "`initContainers` are specialized containers that run before the application's main containers start in a Pod. They always run sequentially: each one must finish successfully (`exit code 0`) before the next one begins. If an initContainer fails, Kubernetes restarts the pod until it completes successfully."
+      },
+      {
+        "id": "kcna-20",
+        "d": 1,
+        "t": "Pod Lifecycle Phases",
+        "q": "When querying a Pod with the `kubectl get pods` command, an operator looks at the `STATUS` field. Which of the following states corresponds to an official high-level phase of the `Pod` object lifecycle according to the Kubernetes specification?",
+        "o": [
+          "`CrashLoopBackOff`, which indicates that the container has reached the maximum memory limit allowed by its quality of service class and is terminated by the kernel.",
+          "`Pending`, which indicates that the Pod has been accepted by the cluster but one or more of its containers have not yet been scheduled or created.",
+          "`ImagePullBackOff`, which indicates that the image registry has revoked the authentication token of the developer who deployed the app.",
+          "`Terminating`, which indicates that the kubelet has received an immediate forced eviction request without honoring grace periods."
+        ],
+        "a": 1,
+        "e": "The official Pod lifecycle phases (`status.phase` field) are: `Pending`, `Running`, `Succeeded`, `Failed`, and `Unknown`. By contrast, `CrashLoopBackOff` and `ImagePullBackOff` are detailed container states (`waiting.reason`), and `Terminating` is a CLI display status during deletion, but not a formal phase of the object."
+      },
+      {
+        "id": "kcna-21",
+        "d": 1,
+        "t": "Labels and Selectors",
+        "q": "In Kubernetes, objects are not linked to each other through rigid static references, but through loose coupling based on key-value metadata. What is the mechanism a `Service` uses to dynamically identify which pods should receive its traffic?",
+        "o": [
+          "`Annotations`, because they store non-identifying information consumed by external monitoring and continuous integration tools.",
+          "`ClusterIP`, because it automatically associates all pods within the same CIDR block of the worker node's subnet.",
+          "`ResourceVersion`, because it connects controllers with pods that have the same cryptographic sequence number in `etcd`.",
+          "`Labels` and `Label Selectors`, because the Service queries and matches the labels declared in the template of the active Pods."
+        ],
+        "a": 3,
+        "e": "`Labels` are key-value pairs attached to Kubernetes objects. Controllers and services use `Label Selectors` to query and group resources in a decoupled way. For example, a Service with `selector: { app: backend }` will route traffic to all Pods that carry the label `app: backend`."
+      },
+      {
+        "id": "kcna-22",
+        "d": 1,
+        "t": "Metadata and Annotations",
+        "q": "An SRE team wants to attach information to Kubernetes manifests, including the Git commit hash, the responsible team's email address, and configuration directives for an external Ingress Controller. They do not need to filter pods using this data. Which metadata field should they use?",
+        "o": [
+          "`annotations`, because it allows storing large, unstructured, arbitrary metadata that is not used to select objects.",
+          "`labels`, because labels are the only metadata field supported by the OpenAPI specification of Kubernetes schemas.",
+          "`finalizers`, because they notify external controllers that they must record the commit in Git before authorizing pod creation.",
+          "`ownerReferences`, because they link the Git developer's credentials to the cluster's administrative service account."
+        ],
+        "a": 0,
+        "e": "`annotations` allow attaching arbitrary key-value metadata to Kubernetes objects. Unlike `labels`, annotations are not used to identify or select objects through efficient queries; they are intended to be read by external tools, libraries, specialized controllers (such as Ingress), or for auditing purposes."
+      },
+      {
+        "id": "kcna-23",
+        "d": 1,
+        "t": "Graceful Pod Termination",
+        "q": "When a Pod deletion is requested (for example, during a scale-down or a rollout), Kubernetes runs an orderly termination process. What is the standard sequence of signals and timings that the `kubelet` applies to the container's processes?",
+        "o": [
+          "It sends `SIGKILL` to the container immediately and then waits 30 seconds to confirm that the disk has been safely detached from the host by the kernel.",
+          "It sends a `SIGSTOP` signal to freeze the container's memory and then exports a diagnostic dump to the apiserver.",
+          "It sends `SIGTERM`, waits for the time defined in `terminationGracePeriodSeconds` (30s by default), and if the process has not exited, sends `SIGKILL`.",
+          "It removes the pod's network interfaces and waits indefinitely until all process threads finish naturally."
+        ],
+        "a": 2,
+        "e": "The graceful termination process of a Pod follows this order: 1) The pod moves to the Terminating state and is removed from the services' Endpoints; 2) The `preStop` hook runs if configured; 3) The `kubelet` sends the `SIGTERM` signal to the main process (PID 1); 4) It waits for the grace period (`terminationGracePeriodSeconds`, 30 seconds by default); 5) If the process has still not terminated, it sends `SIGKILL` to force an immediate shutdown."
+      },
+      {
+        "id": "kcna-24",
+        "d": 2,
+        "t": "Resource Management: Requests vs Limits",
+        "q": "An engineer configures the CPU and memory resources of a container within a Pod. What is the fundamental difference in behavior between `resources.requests` and `resources.limits` in Kubernetes?",
+        "o": [
+          "`requests` defines the maximum memory consumption before the node is rebooted, while `limits` is used to calculate the monthly cloud cost.",
+          "`requests` restricts the number of HTTP requests per second the container can serve, while `limits` restricts network bandwidth.",
+          "`requests` is used exclusively by the Linux kernel to apply CPU throttling, while `limits` is used by the scheduler for scheduling.",
+          "`requests` is the guaranteed amount the scheduler uses to place the pod, while `limits` is the hard cap enforced by cgroups."
+        ],
+        "a": 3,
+        "e": "`resources.requests` represents the minimum guaranteed amount of CPU and memory that the container needs; the `kube-scheduler` uses it to find a node with enough available capacity. By contrast, `resources.limits` is the hard upper limit enforced by the Linux kernel cgroups: exceeding the CPU limit causes throttling (CFS throttling), while exceeding the memory limit causes immediate termination by the OOM Killer (`OOMKilled`)."
+      },
+      {
+        "id": "kcna-25",
+        "d": 2,
+        "t": "Quality of Service (QoS) Classes",
+        "q": "A worker node runs out of available RAM and the kernel enters severe resource pressure. The `kubelet` must begin evicting pods to maintain operating system stability. Which QoS (Quality of Service) class will be the first to be selected for eviction?",
+        "o": [
+          "`Guaranteed`, because its replicas can be instantly recreated by the scheduler on other nodes in the cluster.",
+          "`BestEffort`, because it defines no `requests` or `limits` values, making it the class with the lowest retention priority.",
+          "`Burstable`, because it has consumed more memory than the average historically allocated by the namespace quota directives.",
+          "`CriticalSystem`, because Kubernetes prioritizes user applications over the operating system's internal daemons."
+        ],
+        "a": 1,
+        "e": "Kubernetes automatically classifies each Pod into a QoS class: 1) `Guaranteed` (requests = limits for CPU and memory in all containers); 2) `Burstable` (at least one request or limit defined); 3) `BestEffort` (no container defines requests or limits). Under memory pressure (MemoryPressure), `BestEffort` pods are the first to be evicted and terminated, followed by `Burstable` pods that exceed their requests, and finally `Guaranteed` pods."
+      },
+      {
+        "id": "kcna-26",
+        "d": 2,
+        "t": "Taints and Tolerations",
+        "q": "A cluster has 3 worker nodes equipped with high-cost GPU acceleration hardware. The platform administrator wants to ensure that no ordinary Pod is scheduled on these nodes unless the developer explicitly declares that their Pod can tolerate that restriction. Which mechanism should be implemented?",
+        "o": [
+          "Apply a `Taint` to the GPU nodes and configure a matching `Toleration` on the Pods that need to run on them.",
+          "Configure a DenyAll `NetworkPolicy` in the namespace where the physical GPU servers are registered.",
+          "Create a `ClusterRole` with read-only verbs assigned to the replication controller's default service account in each of the availability zones.",
+          "Define a `LimitRange` with a value of zero in the shared memory field for all nodes that do not have hardware acceleration."
+        ],
+        "a": 0,
+        "e": "`Taints` and `Tolerations` work together to ensure that pods are not assigned to inappropriate nodes. A Taint is applied to a node (`kubectl taint nodes nodo1 gpu=true:NoSchedule`) and acts as a repellent: the `kube-scheduler` will not schedule any pod on that node unless the pod has a matching `Toleration`."
+      },
+      {
+        "id": "kcna-27",
+        "d": 2,
+        "t": "Node Affinity (NodeAffinity)",
+        "q": "An engineering team needs its pods to run preferably on nodes that have the label `topology.kubernetes.io/zone=us-east-1a`, but if there is no capacity available in that zone, they accept being scheduled in any other zone rather than remaining in the Pending state. Which affinity configuration should they declare?",
+        "o": [
+          "`nodeSelector: { zone: us-east-1a }`, because `nodeSelector` automatically fails over to other available zones when the servers in the rack run out of capacity.",
+          "`requiredDuringSchedulingIgnoredDuringExecution`, because it represents a strict, unbreakable rule that must be enforced.",
+          "`preferredDuringSchedulingIgnoredDuringExecution`, because it defines a soft affinity that gives priority but does not block scheduling.",
+          "`podAntiAffinity` with `topologyKey` set at the operating system level to force deployment onto different hypervisors."
+        ],
+        "a": 2,
+        "e": "`NodeAffinity` offers two types of rules: `requiredDuringSchedulingIgnoredDuringExecution` (hard affinity, or hard rule, mandatory for the pod to be scheduled; if it is not met, the pod stays Pending) and `preferredDuringSchedulingIgnoredDuringExecution` (soft affinity, or soft rule, where the scheduler tries to satisfy the preference by giving a higher score to those nodes, but if they are not available, it will schedule the pod on another viable node)."
+      },
+      {
+        "id": "kcna-28",
+        "d": 2,
+        "t": "Kubelet Health Probes",
+        "q": "Which TWO statements correctly describe the fundamental difference between a `livenessProbe` and a `readinessProbe` run by the `kubelet` in a Pod? (Select two)",
+        "o": [
+          "If a `livenessProbe` fails consecutively, the kubelet restarts the affected container according to the `restartPolicy`.",
+          "If a `livenessProbe` fails, the pod is immediately migrated to another worker node using a live migration command.",
+          "If a `readinessProbe` fails, the kubelet permanently destroys the container's persistent storage volume.",
+          "If a `readinessProbe` fails, the Pod is not restarted, but its IP address is removed from the Endpoints of all associated Services."
+        ],
+        "a": [
+          0,
+          3
+        ],
+        "e": "`livenessProbe` and `readinessProbe` have very different operational consequences: The `livenessProbe` determines whether the application is alive; if it fails, the `kubelet` kills the container and restarts it. The `readinessProbe` determines whether the application is ready to receive traffic; if it fails, the pod **is not restarted**, but it is temporarily excluded from the services' endpoints so that no user receives errors while the service recovers or initializes."
+      },
+      {
+        "id": "kcna-29",
+        "d": 2,
+        "t": "Startup Probe (startupProbe)",
+        "q": "A legacy microservice developed in Java typically takes between 90 and 120 seconds to load caches and dependencies during initialization. In previous deployments, the `livenessProbe` configured at 30 seconds repeatedly killed the container, causing a continuous restart loop (`CrashLoopBackOff`). Which native Kubernetes solution solves this problem optimally?",
+        "o": [
+          "Increase the container's memory limit to 64 GiB to force the Java virtual machine to disable Just-In-Time compilation and reserve space in the memory heap.",
+          "Configure a `startupProbe` with a sufficient grace period, because it disables liveness and readiness checks until it responds successfully.",
+          "Remove all health probes from the manifest and delegate monitoring to a Linux cron job running on the node's operating system that restarts the pod when it detects failures.",
+          "Set the `restartPolicy: Never` directive in the Deployment to prevent the kubelet from trying to restart the application on probe failures."
+        ],
+        "a": 1,
+        "e": "The `startupProbe` was introduced specifically to solve the problem of slow-starting applications. Until the `startupProbe` has responded successfully for the first time, the `livenessProbe` and `readinessProbe` checks are completely disabled. This makes it possible to grant a generous startup margin (e.g., `failureThreshold: 30`, `periodSeconds: 10` = up to 300s) without sacrificing the fast responsiveness of the liveness probe once the service is in normal operation."
+      },
+      {
+        "id": "kcna-30",
+        "d": 2,
+        "t": "Horizontal Pod Autoscaler (HPA)",
+        "q": "An e-commerce store experiences variable traffic spikes during sales promotions. To automatically respond to these demand increases, they configure a `HorizontalPodAutoscaler` (HPA) object. What is the standard operational behavior of the HPA under a sustained increase in load?",
+        "o": [
+          "It increases the number of physical vCPUs and network cards assigned to the worker node virtual machines through hot-plugging.",
+          "It increases the container's CPU `resources.limits` values on the fly without needing to restart the application process.",
+          "It dynamically adjusts the number of pod replicas in the target Deployment or ReplicaSet based on the observed metrics.",
+          "It automatically converts the `Deployment` into a `DaemonSet` to ensure that all instances in the cluster serve traffic."
+        ],
+        "a": 2,
+        "e": "The `HorizontalPodAutoscaler` (HPA) implements horizontal scaling (scaling out or in): it increases or decreases the number of pod replicas (`spec.replicas`) of a Deployment, ReplicaSet, or StatefulSet to keep the observed metric (CPU usage, memory, or custom Prometheus metrics) close to the target configured by the operator."
+      },
+      {
+        "id": "kcna-31",
+        "d": 2,
+        "t": "Storage: PV, PVC, and StorageClass",
+        "q": "A developer needs to request 100 GiB of persistent storage for their database without having to know the infrastructure details of the cloud provider's underlying storage. What is the standard declarative flow in Kubernetes to provision this storage in a decoupled, dynamic way?",
+        "o": [
+          "The developer creates a `PersistentVolumeClaim` (PVC) that references a `StorageClass`, which invokes the CSI driver to create the `PersistentVolume` (PV).",
+          "The developer runs a script in the container that directly formats a SCSI device on the worker host's operating system, assigning root permissions to the block.",
+          "The cluster administrator must connect via SSH to the database node to manually create an ext4 partition on the local disk and edit the /etc/fstab file.",
+          "The developer defines an `emptyDir` volume with indefinite retention configured at the root of their container image."
+        ],
+        "a": 0,
+        "e": "The Kubernetes storage model separates roles: the developer requests resources by declaring a `PersistentVolumeClaim` (PVC) with the required capacity and access mode, specifying a `StorageClass`. The `StorageClass` defines the provisioner (cloud CSI driver, e.g., EBS, Azure Disk, GPD), which automatically interacts with the storage API to provision a physical disk and create the `PersistentVolume` (PV) object bound to the PVC."
+      },
+      {
+        "id": "kcna-32",
+        "d": 2,
+        "t": "Volume Access Modes",
+        "q": "An image processing application is deployed with 5 replicas distributed across different worker nodes. All replicas must concurrently read and write files on the same shared network storage volume. Which access mode (accessMode) must the assigned `PersistentVolume` support?",
+        "o": [
+          "`ReadWriteOnce` (RWO), because it allows read-write mounting by multiple simultaneous nodes as long as they share the same namespace.",
+          "`ReadOnlyMany` (ROX), because it offers the highest data transfer rate in concurrent disk input and output operations.",
+          "`ReadWriteOncePod` (RWOP), because it guarantees that multiple pods in the same cluster can share the storage driver's network socket.",
+          "`ReadWriteMany` (RWX), because it allows the volume to be mounted in read/write mode simultaneously by multiple worker nodes."
+        ],
+        "a": 3,
+        "e": "The access modes of a PersistentVolume in Kubernetes are: 1) `ReadWriteOnce` (RWO): the volume can be mounted as read/write by a single node; 2) `ReadOnlyMany` (ROX): it can be mounted as read-only by multiple nodes; 3) `ReadWriteMany` (RWX): it can be mounted as read/write by multiple nodes concurrently (typical of network file systems such as NFS, AWS EFS, Azure Files, or CephFS)."
+      },
+      {
+        "id": "kcna-33",
+        "d": 2,
+        "t": "Service Types in Kubernetes",
+        "q": "A company wants to expose an internal accounting-processing microservice so that it can only be called by other microservices residing within the same Kubernetes cluster, guaranteeing that it is not accessible from outside. Which `Service` type should be configured?",
+        "o": [
+          "`LoadBalancer`, because it automatically restricts incoming traffic to the private IP addresses of developers connected through VPN.",
+          "`ClusterIP`, because it assigns an internal virtual IP address accessible exclusively from inside the Kubernetes cluster.",
+          "`NodePort`, because it exposes a static port accessible only on the `127.0.0.1` loopback address of the master nodes.",
+          "`ExternalName`, because it redirects traffic to a public load balancer managed by the international payment gateway."
+        ],
+        "a": 1,
+        "e": "`ClusterIP` is the default `Service` type in Kubernetes. It assigns a stable virtual IP address that is routable exclusively from inside the cluster. It is the ideal and recommended option for internal communication between microservices (backends, databases, private APIs) that must not be exposed externally."
+      },
+      {
+        "id": "kcna-34",
+        "d": 2,
+        "t": "Network Security with NetworkPolicy",
+        "q": "By default, the Kubernetes network allows any Pod to communicate with any other Pod in the cluster. To comply with banking security regulations, the database pods must be isolated so that they only accept traffic on port 5432 from pods with the label `app: payment-api`. Which mechanism and requirement are needed?",
+        "o": [
+          "Create a `ClusterRoleBinding` that revokes TCP connection privileges at the API Server authentication protocol level.",
+          "Configure a static `/etc/hosts` file inside the database container image that blocks the cluster's CIDR ranges.",
+          "Define a `NetworkPolicy` with specific Ingress rules and make sure a CNI plugin that supports the specification is in place.",
+          "Modify the `kubelet` flags on each node to disable packet routing between different namespaces."
+        ],
+        "a": 2,
+        "e": "A `NetworkPolicy` is the native Kubernetes resource for controlling traffic flow at layers 3 and 4 (IPs, ports, and Pod/Namespace selectors). When a NetworkPolicy is applied to a set of pods, they become isolated (default deny for anything not explicitly allowed). A `CNI` plugin that supports NetworkPolicies (such as Calico, Cilium, or Weave Net) is essential, since basic providers such as Flannel ignore these rules."
+      },
+      {
+        "id": "kcna-35",
+        "d": 3,
+        "t": "Cloud Native Principles (CNCF)",
+        "q": "According to the official definition from the Cloud Native Computing Foundation (CNCF), what is the primary purpose of adopting cloud native technologies such as containers, service meshes, and declarative APIs?",
+        "o": [
+          "To enable organizations to build and run scalable applications in dynamic environments, fault-tolerant and with predictable changes.",
+          "To completely eliminate the use of operating systems on servers through direct instruction emulation in microcode inside the hardware processors.",
+          "To force all enterprise applications to migrate to a centralized monolithic model to simplify accounting audits and consolidate all databases on a single host.",
+          "To guarantee that no workload can run outside private data centers in order to avoid cloud transfer costs."
+        ],
+        "a": 0,
+        "e": "The CNCF defines Cloud Native as the set of technologies that make it possible to build and run scalable applications in dynamic environments (public, private, and hybrid clouds) using containers, service meshes, microservices, immutable infrastructure, and declarative APIs, enabling systems that are resilient, manageable, and observable, and that allow frequent, predictable changes with minimal effort."
+      },
+      {
+        "id": "kcna-36",
+        "d": 3,
+        "t": "12-Factor App Methodology",
+        "q": "A development team is refactoring a service to comply with the best practices of the `12-Factor App` methodology recommended for Kubernetes applications. Which of the following design decisions represents a faithful application of these principles?",
+        "o": [
+          "Embedding production database passwords in the application's source code to avoid network requests.",
+          "Storing user session state in files on the container's local hard disk to maximize access speed and avoid calls to external caches.",
+          "Writing logs directly to raw block disk partitions to avoid the overhead of the operating system daemon and reduce CPU cycle consumption.",
+          "Storing configuration in injected environment variables, running stateless processes, and sending logs to stdout as an event stream."
+        ],
+        "a": 3,
+        "e": "The `12-Factor App` methodology establishes fundamental principles for cloud native applications: Factor III (Config): strictly separate configuration from code using environment variables; Factor VI (Processes): run the application as one or more stateless, share-nothing processes; Factor XI (Logs): treat logs as continuous event streams directed to standard output (`stdout`/`stderr`), delegating their collection to the platform."
+      },
+      {
+        "id": "kcna-37",
+        "d": 3,
+        "t": "CNCF Project Maturity Levels",
+        "q": "The CNCF classifies its projects into three graduation levels: `Sandbox`, `Incubating`, and `Graduated`. What is the fundamental criterion that distinguishes a project at the `Graduated` level (such as Kubernetes, Prometheus, or Envoy)?",
+        "o": [
+          "Having been acquired entirely by a multinational company that exclusively funds all of its active developers.",
+          "Demonstrating maximum technical maturity, broad adoption in large-scale production environments, audited security, and solid neutral governance.",
+          "Being a recent experimental development project with no production users but a conceptually innovative architecture.",
+          "Having completely replaced all other existing open source tools in the same technology category of the industry."
+        ],
+        "a": 1,
+        "e": "`Graduated` projects in the CNCF represent the highest level of maturity. To reach this status, a project must meet rigorous criteria: massive, documented adoption in mission-critical production environments by multiple organizations, transparent, healthy, and neutral governance processes, contributor diversity commitments, and having passed a formal, independent security audit."
+      },
+      {
+        "id": "kcna-38",
+        "d": 3,
+        "t": "Service Mesh Architecture",
+        "q": "Which TWO fundamental capabilities does a `Service Mesh` architecture (such as Istio or Linkerd) provide by deploying sidecar proxies (such as Envoy) on east-west traffic between microservices? (Select two)",
+        "o": [
+          "Complete replacement of the persistent storage layer with databases embedded in kernel sockets.",
+          "Automatic encryption and mutual authentication in transit (`mTLS`) between microservices without modifying the application code.",
+          "Uniform generation of telemetry, golden metrics (RPS, latency, errors), and distributed trace propagation for all internal traffic.",
+          "Hardware acceleration of complex SQL queries through static index rewriting in the relational database engine."
+        ],
+        "a": [
+          1,
+          2
+        ],
+        "e": "A `Service Mesh` manages service-to-service communication (east-west traffic) by injecting lightweight sidecar proxies (usually Envoy). Its two major contributions are: 1) Security: cryptographic identity authentication and automatic end-to-end encryption through transparent `mTLS`; 2) Uniform observability: it collects golden network metrics (p99 latency, success rate, throughput) and propagates trace headers without requiring developers to instrument every HTTP client in their code."
+      },
+      {
+        "id": "kcna-39",
+        "d": 3,
+        "t": "Access Control with RBAC",
+        "q": "A Kubernetes administrator needs to grant the support team permissions to view logs and list pods only within the `staging` namespace, ensuring that they cannot view or modify resources in any other namespace or at the cluster level. Which combination of RBAC objects should they apply?",
+        "o": [
+          "A `ClusterRole` with wildcard `*` verbs bound through a `ClusterRoleBinding` across the entire organization to ensure full support visibility.",
+          "An Ingress-type `NetworkPolicy` combined with a `LimitRange` object configured with read permissions on the subnet and consumption quotas in the namespace.",
+          "A `Role` defined with permissions on pods in the `staging` namespace, bound to the users through a `RoleBinding` in that same namespace.",
+          "A `ServiceAccount` configured with root administrative privileges in the local `/etc/sudoers` file of the worker nodes."
+        ],
+        "a": 2,
+        "e": "In Kubernetes RBAC: a `Role` defines permissions that are scoped exclusively within a **specific namespace**. To grant those permissions to a user, group, or ServiceAccount within that same namespace, a `RoleBinding` is used. If a `ClusterRole` with a `ClusterRoleBinding` were used, the permissions would extend to the entire cluster, violating the principle of least privilege."
+      },
+      {
+        "id": "kcna-40",
+        "d": 3,
+        "t": "Pod Identities with ServiceAccount",
+        "q": "A microservice deployed on Kubernetes needs to periodically query the Kubernetes API to list the status of other pods in its namespace. How should this process authenticate to the `kube-apiserver` according to Kubernetes security best practices?",
+        "o": [
+          "By assigning a dedicated `ServiceAccount` to the Pod, which automatically injects a projected JWT token that the HTTP client uses as a Bearer credential.",
+          "By sharing the `kubernetes-admin` user's administrative certificate in a plain-text environment variable in the manifest to simplify testing.",
+          "By disabling the authorization module in the `kube-apiserver` configuration file to allow anonymous queries on the compute cluster's internal network.",
+          "By configuring a perimeter firewall rule that assumes all traffic coming from the pod's IP address is trusted."
+        ],
+        "a": 0,
+        "e": "A `ServiceAccount` provides a managed identity to processes running inside Pods. When a ServiceAccount is associated with the Pod (`spec.serviceAccountName`), Kubernetes securely mounts an authentication token (cryptographic JWT) as a projected volume at `/var/run/secrets/kubernetes.io/serviceaccount/token`. The application's SDK reads this token and sends it as the `Authorization: Bearer <token>` header to the `kube-apiserver`."
+      },
+      {
+        "id": "kcna-41",
+        "d": 3,
+        "t": "Gateway API vs Ingress",
+        "q": "As Kubernetes clusters grew in complexity, the traditional `Ingress` resource showed expressiveness limitations, relying excessively on proprietary annotations specific to each controller. What is the main architectural advantage introduced by the modern CNCF `Gateway API`?",
+        "o": [
+          "It forces all services in the cluster to communicate exclusively over unencrypted UDP sockets to reduce latency in high-concurrency connections.",
+          "It merges all network layers into a single monolithic binary managed exclusively by the corporate security team to avoid configuration drift.",
+          "It eliminates the need for public IP addresses by routing all incoming traffic through physical console serial ports installed in each rack of the data center.",
+          "It structures routing through role-oriented resources (`GatewayClass`, `Gateway`, `HTTPRoute`), enabling separation of concerns and portability."
+        ],
+        "a": 3,
+        "e": "The `Gateway API` is the official evolution of Ingress in Kubernetes. Its major architectural advantage is its role-oriented design: 1) `GatewayClass` (cloud infrastructure administrator); 2) `Gateway` (cluster operator who defines listeners and TLS); 3) `HTTPRoute` / `GRPCRoute` (application developer who defines routes and redirects). It also standardizes advanced features such as weighted traffic splitting, header filters, and native gRPC support without proprietary annotations."
+      },
+      {
+        "id": "kcna-42",
+        "d": 3,
+        "t": "Admission Control and Policies",
+        "q": "The security governance team needs to guarantee that no container can run as the `root` user (`privileged: true`) or pull images with the `:latest` tag in the cluster. Which native Kubernetes and CNCF ecosystem mechanism makes it possible to intercept and validate manifests before they are persisted in `etcd`?",
+        "o": [
+          "`kube-proxy` through deep packet inspection with heuristic code-signature inspection at the TCP transport layer to block unwanted connections.",
+          "`Admission Controllers` (mutating and validating admission controllers) integrated with policy engines such as `OPA / Gatekeeper` or `Kyverno`.",
+          "The `kube-scheduler`, assigning a negative score to pods that do not include a corporate digital signature certificate issued by the certificate authority.",
+          "A Bash script run locally on developers' laptops before sending the `git push` command."
+        ],
+        "a": 1,
+        "e": "`Admission Controllers` are interceptors in the `kube-apiserver` that evaluate requests right after they are authenticated and authorized, but before the object is stored in `etcd`. Through `ValidatingAdmissionWebhooks`, CNCF ecosystem tools such as `OPA/Gatekeeper` or `Kyverno` inspect the manifest content and reject the creation of pods that violate security policies (such as running as root or using `:latest` images)."
+      },
+      {
+        "id": "kcna-43",
+        "d": 4,
+        "t": "The Three Pillars of Observability",
+        "q": "In the observability paradigm for distributed systems and cloud native architectures, the so-called \"Three Pillars of Observability\" are frequently described. What are these three fundamental types of telemetry signals and their characteristic value?",
+        "o": [
+          "CPU, Memory, and Disk Storage, which measure exclusively the performance of the physical hardware in the data center and alert on mechanical failures in servers.",
+          "Authentication, Authorization, and Auditing, which ensure compliance with perimeter firewall security policies and the access logging of corporate users.",
+          "Metrics (numeric aggregates for trends), Logs (detailed timestamped textual events), and Traces (the path and distributed latency of requests).",
+          "Deployments, Unit tests, and Continuous integration, which ensure that the code meets the repository's quality standards."
+        ],
+        "a": 2,
+        "e": "The Three Pillars of Observability are: 1) `Metrics`: aggregatable, efficient numeric data for measuring trends, calculating SLIs, and triggering real-time alerts; 2) `Logs`: timestamped textual event records for understanding exactly what happened at a specific moment; 3) `Traces`: represent the complete path of a request across multiple microservices (using Spans), making it possible to identify latency bottlenecks."
+      },
+      {
+        "id": "kcna-44",
+        "d": 4,
+        "t": "Prometheus Architecture",
+        "q": "Prometheus is the quintessential graduated monitoring and alerting project in the CNCF. Which of the following statements accurately describes Prometheus's data collection model and core architecture?",
+        "o": [
+          "It uses a `pull`-based model that actively polls `/metrics` HTTP endpoints, stores time series in its local TSDB, and queries data with `PromQL`.",
+          "It requires all microservices to send telemetry events through synchronous calls to an external PostgreSQL relational database with normalized relational schemas.",
+          "It operates exclusively as a passive agent that intercepts packets on the Ethernet network interface of physical switches without consuming CPU or requiring agents on the worker nodes.",
+          "It automatically downloads the pods' configuration files to compile audit binaries in flash memory during boot."
+        ],
+        "a": 0,
+        "e": "Prometheus uses a collection model based on active polling (`pull model` / scraping): at regular intervals (scrape interval), Prometheus queries over HTTP the metrics endpoint (usually `/metrics`) exposed by each configured target. It stores this data in its disk-optimized time series database (`TSDB`) and offers the powerful `PromQL` language for querying metrics and evaluating alerting rules."
+      },
+      {
+        "id": "kcna-45",
+        "d": 4,
+        "t": "OpenTelemetry (OTel) Ecosystem",
+        "q": "An organization uses multiple programming languages (Go, Java, Python, Node.js) and wants to instrument its microservices in a neutral way so as not to be locked into a specific observability vendor (vendor lock-in). What is the role of `OpenTelemetry` (OTel) in this scenario?",
+        "o": [
+          "To completely replace the nodes' operating system in order to unify network drivers into a single Linux binary standard optimized for distributed architectures.",
+          "To provide a distributed relational database with ACID transactional support designed specifically to compete with MySQL clusters in transactional data storage.",
+          "To automatically run stress load tests simulating millions of concurrent users in production environments.",
+          "To provide a standard set of APIs, SDKs, and tools (along with the OTel Collector) for generating and exporting metrics, logs, and traces in a vendor-agnostic way."
+        ],
+        "a": 3,
+        "e": "OpenTelemetry (OTel), a CNCF `Graduated` project, provides a unified, vendor-agnostic standard for observability. It offers APIs and SDKs in multiple languages to instrument code in a uniform way, defines the open `OTLP` protocol, and provides the `OTel Collector`, an intermediary component that receives, processes, and exports telemetry (metrics, traces, and logs) to any compatible analysis backend (Prometheus, Jaeger, Datadog, etc.)."
+      },
+      {
+        "id": "kcna-46",
+        "d": 4,
+        "t": "Cluster Monitoring and Alertmanager",
+        "q": "In a Kubernetes infrastructure, what is the function of `cAdvisor` in the monitoring telemetry chain, and how does it work with `Prometheus Alertmanager` in service degradation situations?",
+        "o": [
+          "`cAdvisor` manages the encryption of HTTPS communications at the Ingress, while Alertmanager restarts containers that suffer prolonged network latency on their connections.",
+          "`cAdvisor` collects container CPU and memory usage metrics from the kubelet, and Alertmanager manages, groups, and routes the alerts fired by Prometheus.",
+          "`cAdvisor` periodically runs backups of the `etcd` database to disk, and Alertmanager rolls back failed deployments in the cluster by sending automatic commands to the apiserver.",
+          "`cAdvisor` calculates the billing costs of virtual machines, while Alertmanager sends emails exclusively to the corporate finance team."
+        ],
+        "a": 1,
+        "e": "`cAdvisor` (Container Advisor) is a service natively embedded in the `kubelet` binary that collects, aggregates, and exposes performance and resource usage metrics (CPU, memory, disk, and network) for all containers running on that node. Prometheus scrapes these metrics and, if an alerting rule is met, sends the notification to `Alertmanager`, which deduplicates, groups, and routes the alerts to Slack, PagerDuty, or email."
+      },
+      {
+        "id": "kcna-47",
+        "d": 5,
+        "t": "Fundamental Principles of GitOps",
+        "q": "A platform engineering team adopts the `GitOps` methodology to manage the infrastructure and applications of its production clusters. What is the central tenet that defines how GitOps works?",
+        "o": [
+          "Developers must connect through an interactive console to each worker node to build the changes directly in the production environment without the need for automated testing.",
+          "Production changes are made by sending manual, unversioned requests through the cloud provider's web control panel to speed up deployment times.",
+          "The Git repository is the Single Source of Truth where the desired state is declared, which is continuously reconciled by an agent in the cluster.",
+          "All infrastructure must be configured using assembly scripts stored in the boot sector of hard drives."
+        ],
+        "a": 2,
+        "e": "The core of `GitOps` is using Git as the Single Source of Truth for the entire system. All configuration and application manifests are stored declaratively and versioned in Git repositories. An automated operator running inside the cluster (such as ArgoCD or Flux) continuously compares the state in Git with the state of the cluster and automatically syncs any drift."
+      },
+      {
+        "id": "kcna-48",
+        "d": 5,
+        "t": "Packaging: Helm vs Kustomize",
+        "q": "An organization needs to standardize application delivery across its clusters. While evaluating CNCF ecosystem tools, they compare `Helm` with `Kustomize`. What is the main methodological difference between these two solutions?",
+        "o": [
+          "`Helm` is a binary compiler for the Linux kernel on physical servers, while `Kustomize` is a distributed key-value database like `etcd` for storing configuration.",
+          "`Helm` only supports deployments in private clouds without Internet connectivity, while `Kustomize` requires mandatory root access to the host hardware to mount file systems.",
+          "`Helm` exclusively manages TLS security certificates at the Ingress, while `Kustomize` monitors the pods' CPU consumption to calculate automatic replica scaling.",
+          "`Helm` uses Go templates with `values.yaml`, while `Kustomize` composes declarative manifests through layers (bases and overlays) without templates."
+        ],
+        "a": 3,
+        "e": "`Helm` is the Kubernetes package manager; it uses Go templates (`templates/`) combined with variable files (`values.yaml`) to generate parameterized manifests, managing release versions and rollbacks in the cluster. By contrast, `Kustomize` is a template-free tool (`template-free`) that uses a declarative composition approach through base layers (`bases`) and environment-specific modifications (`overlays`), and is natively built into `kubectl` (`kubectl apply -k`)."
+      },
+      {
+        "id": "kcna-49",
+        "d": 5,
+        "t": "OpenGitOps Principles",
+        "q": "Which TWO characteristics correspond to the official `OpenGitOps` principles promoted by the CNCF for modern cloud native application deployment? (Select two)",
+        "o": [
+          "The desired state of the system is described in a fully declarative way and stored in a versioned, immutable system such as Git.",
+          "Software agents residing inside the cluster automatically retrieve (Pull model) the desired state from the source of truth.",
+          "Deployments are necessarily executed through imperative Bash scripts manually invoked by an on-call operator.",
+          "The cluster authorizes any external CI tool to overwrite configurations on the fly without leaving a record in the commit history."
+        ],
+        "a": [
+          0,
+          1
+        ],
+        "e": "The four fundamental principles of `OpenGitOps` (CNCF) are: 1) `Declarative`: the system is described through declarations; 2) `Versioned and Immutable`: the desired state is stored immutably and with history (in Git); 3) `Pulled Automatically`: software agents in the cluster pull the desired state; 4) `Continuously Reconciled`: automated software permanently monitors and reconciles any divergence between the desired state and the actual state."
+      },
+      {
+        "id": "kcna-50",
+        "d": 5,
+        "t": "Cloud Native Deployment Strategies",
+        "q": "An e-commerce team wants to deploy an experimental version of the recommendation engine. They want to send only 10% of real user traffic to the new version to evaluate the error rate and latency before rolling it out to the entire platform. Which deployment strategy should they use?",
+        "o": [
+          "`Canary Deployment`, because it allows routing a controlled, progressive percentage of real traffic to the new version.",
+          "`Recreate`, because it simultaneously shuts down all the old replicas before starting the new ones to avoid schema incompatibility.",
+          "`Blue/Green`, because it instantly switches 100% of all user traffic from the blue environment to the green environment without coexistence.",
+          "Standard `RollingUpdate` without a load balancer, because it automatically splits banking transactions between the two oldest servers in the rack."
+        ],
+        "a": 0,
+        "e": "A `Canary Deployment` introduces a new software version by sending it only a small fraction of real production traffic (e.g., 10%), while the remaining 90% continues to be served by the stable version v1. This makes it possible to validate telemetry, error, and performance metrics with real users while drastically minimizing the blast radius in case of failures. If the metrics are satisfactory, traffic is progressively increased until v1 is fully replaced."
+      }
     ],
-    "kcna-03": [
-      null,
-      "El `kube-controller-manager` gestiona el ciclo de vida de réplicas y recursos, pero no decide en qué nodo específico se ejecuta cada Pod.",
-      "El `kubelet` ejecuta y monitorea los pods una vez que ya han sido asignados a su nodo específico por el scheduler; no agenda pods globalmente.",
-      "El `cloud-controller-manager` integra servicios de nube (como balanceadores o rutas), pero no toma decisiones de agendamiento de pods individuales."
-    ],
-    "kcna-04": [
-      "Kubernetes no compila archivos YAML en binarios; las imágenes son construidas previamente por motores OCI y los YAML son definiciones de recursos analizadas por la API.",
-      null,
-      "La validación de tokens y certificados de autenticación es responsabilidad del `kube-apiserver`, no del controller manager.",
-      "La configuración de redes overlay y encapsulación de paquetes es responsabilidad del plugin CNI, no del controller manager."
-    ],
-    "kcna-05": [
-      "El `cloud-controller-manager` no reemplaza al `kubelet`; el kubelet sigue siendo el agente indispensable en cada nodo worker.",
-      "El monitoreo de recursos y la facturación son gestionados por herramientas de telemetría y APIs del proveedor, no por este componente.",
-      "La creación de clústeres con Terraform o IaC es externa a Kubernetes y no forma parte del `cloud-controller-manager`.",
-      null
-    ],
-    "kcna-06": [
-      "El balanceo de tráfico de red en los nodos es responsabilidad de `kube-proxy` o de un Service Mesh / Ingress Controller, no del `kubelet`.",
-      "El `kubelet` nunca se comunica directamente con `etcd`; cualquier consulta o reporte de estado se realiza a través del `kube-apiserver`.",
-      null,
-      "El `kubelet` no compila código fuente; únicamente ejecuta imágenes de contenedores previamente construidas y publicadas en un registry."
-    ],
-    "kcna-07": [
-      null,
-      "`CoreDNS` es el servidor DNS interno del clúster que resuelve nombres a IPs, pero no programa reglas en el kernel ni enruta paquetes a nivel de transporte.",
-      "`containerd` es un runtime de contenedores que gestiona imágenes y namespaces de procesos, no el enrutamiento de Services de Kubernetes.",
-      "El `kube-scheduler` agrupa pods en nodos en la fase de scheduling, pero no tiene relación con el enrutamiento de tráfico ni tablas del kernel."
-    ],
-    "kcna-08": [
-      null,
-      "`kube-apiserver` no utiliza elección de líder activo-pasivo; es totalmente sin estado (stateless) y opera en modo activo-activo balanceado.",
-      null,
-      "El `kubelet` es un agente que corre en cada nodo worker de manera independiente para gestionar sus propios contenedores locales, no participa en leader election del control plane."
-    ],
-    "kcna-09": [
-      "La `CNI` (Container Network Interface) se enfoca en la conectividad y configuración de interfaces de red de los contenedores, no en su ejecución.",
-      "La `CSI` (Container Storage Interface) se encarga de aprovisionar y montar volúmenes de almacenamiento, no del ciclo de vida de los contenedores.",
-      "La `OCI` (Open Container Initiative) define especificaciones de formato de imagen y runtime de bajo nivel (como `runc`), no el formato de Helm.",
-      null
-    ],
-    "kcna-10": [
-      "Los contenedores dentro de un mismo Pod comparten la misma dirección IP; no reciben direcciones IP independientes ni necesitan Ingress para comunicarse entre sí.",
-      null,
-      "Todos los contenedores de un mismo Pod se ejecutan obligatoriamente en el mismo nodo físico/virtual; un Pod nunca se fragmenta entre múltiples nodos.",
-      "Cada contenedor mantiene su propio sistema de archivos raíz derivado de su imagen de contenedor; solo comparten los volúmenes explícitamente montados."
-    ],
-    "kcna-11": [
-      "Los `ReplicaSets` admiten exactamente la misma plantilla de Pod (`PodTemplateSpec`) que los Deployments, incluyendo múltiples contenedores y secrets.",
-      "Los Deployments no realizan análisis estático de vulnerabilidades de código fuente; esa es una tarea de los pipelines de CI/CD.",
-      null,
-      "Los `ReplicaSets` siguen siendo componentes oficiales y fundamentales en Kubernetes; son los controladores que los Deployments usan internamente."
-    ],
-    "kcna-12": [
-      null,
-      "Un `StatefulSet` se usa para cargas con estado (como bases de datos distribuidas) que requieren orden y persistencia, no para ejecutar un agente por nodo.",
-      "Un `Job` se utiliza para tareas finitas que corren hasta completarse; los agentes de logs deben ejecutarse de forma continua como demonios.",
-      "Un `Deployment` distribuye pods buscando equilibrar capacidad, pudiendo colocar múltiples réplicas en un nodo y cero en otro, sin garantizar uno por nodo."
-    ],
-    "kcna-13": [
-      "Un `DaemonSet` no garantiza nombres ordinales estables ni plantillas de volumen dedicadas por réplica; ejecuta un pod por nodo para agentes.",
-      "Un `Deployment` trata a sus réplicas como reemplazables e intercambiables con nombres aleatorios (ej. `app-5df4c9-xk7pz`), lo cual rompe clústeres como ZooKeeper.",
-      "Un `CronJob` ejecuta tareas programadas puntuales y no mantiene servicios continuos ni identidades ordinales estables.",
-      null
-    ],
-    "kcna-14": [
-      "Un `Deployment` está diseñado para servicios continuos; si el contenedor termina con código 0, el Deployment lo considerará un fallo y lo reiniciará.",
-      null,
-      "Un `DaemonSet` ejecutaría el proceso en cada uno de los nodos del clúster a la vez, duplicando la conciliación contable y causando inconsistencias.",
-      "Un `StatefulSet` mantiene servicios continuos con estado y no está concebido para procesos batch que deben finalizar y apagarse."
-    ],
-    "kcna-15": [
-      "`NodeSelector` es una técnica de agendamiento para dirigir pods a nodos con etiquetas específicas, no un mecanismo de partición lógica del clúster.",
-      "Un `ClusterRole` es un objeto de RBAC que define permisos sobre recursos globales, no una partición de objetos ni cuotas de clúster.",
-      null,
-      "`StorageClass` define los tipos y aprovisionadores de volúmenes de almacenamiento persistente, sin proveer aislamiento de nombres de recursos."
-    ],
-    "kcna-16": [
-      "El FQDN propuesto apunta al namespace `production` y utiliza el sufijo de pod (`.pod.`), en lugar de apuntar a `finance` con el sufijo `.svc.`.",
-      "Kubernetes no utiliza la convención de subdominio invertido ni `.k8s.internal` como estándar por defecto de CoreDNS.",
-      "Una URL HTTP no es un nombre de host DNS de resolución en capa de transporte; la resolución de red requiere el FQDN estándar del servicio.",
-      null
-    ],
-    "kcna-17": [
-      "Un `PersistentVolumeClaim` es una solicitud de almacenamiento de bloques o archivos persistentes en disco, no un almacén de parámetros de configuración.",
-      null,
-      "Una `NetworkPolicy` define reglas de filtrado de tráfico de red a nivel de firewall de capa 3/4, sin relación con la configuración de la app.",
-      null
-    ],
-    "kcna-18": [
-      null,
-      "Kubernetes no depende de Docker Swarm para su arranque; el propio `kubelet` es capaz de arrancar pods de forma autónoma.",
-      "Los componentes del plano de control no son scripts simulados, sino los binarios reales de Kubernetes ejecutándose como Static Pods.",
-      "Terraform puede aprovisionar la máquina virtual, pero la orquestación del bootstrap de los pods en el nodo la realiza el `kubelet`."
-    ],
-    "kcna-19": [
-      "Los `Ephemeral Containers` se usan para depuración interactiva en caliente en pods ya en ejecución con `kubectl debug`, no para preparación de inicio.",
-      "Los `Sidecar Containers` corren en paralelo durante toda la vida de la aplicación, mientras que las tareas de preparación deben finalizar antes de iniciar la app.",
-      null,
-      "El contenedor `pause` reserva los namespaces de red e IPC del Pod en el kernel, pero no ejecuta tareas de inicialización ni scripts de usuario."
-    ],
-    "kcna-20": [
-      "`CrashLoopBackOff` es un estado de contenedor (`waiting.reason`) que indica fallos reiterados en el proceso, no una fase oficial del Pod.",
-      null,
-      "`ImagePullBackOff` es un motivo de espera del contenedor ante la imposibilidad de descargar la imagen, no una fase del ciclo de vida del Pod.",
-      "`Terminating` es una indicación que muestra `kubectl` mientras espera el periodo de gracia de borrado, pero no es una fase oficial del Pod."
-    ],
-    "kcna-21": [
-      "Las `Annotations` se utilizan para adjuntar metadatos arbitrarios no consultables mediante selectores eficientes por parte de controladores o servicios.",
-      "`ClusterIP` es la dirección IP virtual asignada al servicio, pero no es el mecanismo que busca o identifica los pods de backend.",
-      "`ResourceVersion` es una marca interna de control de concurrencia optimista utilizada por `etcd` y el apiserver, sin relación con el balanceo.",
-      null
-    ],
-    "kcna-22": [
-      null,
-      "Las `labels` están diseñadas para identificación y selección de objetos; para metadatos descriptivos o configuraciones de plugins se usan `annotations`.",
-      "Los `finalizers` son cadenas que bloquean la eliminación de un recurso hasta que se completen tareas de limpieza pre-borrado.",
-      "`ownerReferences` establecen relaciones padre-hijo entre objetos para la recolección de basura (ej. un Deployment como dueño de un ReplicaSet)."
-    ],
-    "kcna-23": [
-      "`SIGKILL` no se envía al inicio; enviar `SIGKILL` inmediatamente abortaría conexiones en vuelo de forma abrupta sin permitir limpieza graceful.",
-      "Kubernetes no envía `SIGSTOP` para congelar procesos ni realiza volcados de memoria durante la terminación habitual de pods.",
-      null,
-      "El `kubelet` no espera indefinidamente; el tiempo de espera está estrictamente acotado por `terminationGracePeriodSeconds` antes del `SIGKILL`."
-    ],
-    "kcna-24": [
-      "`requests` no reinicia nodos y `limits` no es una directiva de facturación en la nube, sino una configuración de aislamiento en el kernel.",
-      "`requests` y `limits` gestionan recursos de cómputo (CPU y memoria), no tasas de solicitudes HTTP de capa de aplicación ni ancho de banda de red.",
-      "La relación es inversa: `requests` es usado por el scheduler para ubicar el pod en un nodo, mientras que `limits` es usado por cgroups para throttling o OOM.",
-      null
-    ],
-    "kcna-25": [
-      "Los pods con QoS `Guaranteed` son los más protegidos del sistema y los últimos en ser considerados para desalojo ante saturación de memoria.",
-      null,
-      "Los pods `Burstable` tienen mayor prioridad que los `BestEffort`; solo son expulsados si no quedan pods `BestEffort` en el nodo.",
-      "`CriticalSystem` no es una clase estándar de QoS de pods ordinarios, y los procesos del sistema tienen mayor prioridad que las apps de usuario."
-    ],
-    "kcna-26": [
-      null,
-      "Una `NetworkPolicy` filtra tráfico de red entre pods en capa 3/4, pero no tiene ninguna influencia en las decisiones de agendamiento de nodos del scheduler.",
-      "Un `ClusterRole` controla permisos de autenticación y autorización sobre la API de Kubernetes, no la colocación física de cargas en nodos.",
-      "Un `LimitRange` establece mínimos y máximos de recursos por pod dentro de un namespace, no controla la asignación de nodos especializados."
-    ],
-    "kcna-27": [
-      "`nodeSelector` es un mecanismo estricto de coincidencia exacta; si ningún nodo cumple con la etiqueta especificada, el pod permanece en `Pending`.",
-      "`requiredDuringScheduling...` es una condición dura e ineludible; si no hay espacio en `us-east-1a`, el pod fallará en agendarse.",
-      null,
-      "`podAntiAffinity` aleja pods entre sí, no hacia nodos específicos; además se solicita una preferencia positiva hacia la zona `us-east-1a`."
-    ],
-    "kcna-28": [
-      null,
-      "Kubernetes no realiza migración en caliente (live migration) de pods entre nodos al fallar una sonda; el `kubelet` local simplemente reinicia el contenedor.",
-      "El fallo de una `readinessProbe` jamás destruye los datos ni los volúmenes persistentes asociados al Pod.",
-      null
-    ],
-    "kcna-29": [
-      "Aumentar la memoria a 64 GiB no soluciona el tiempo de carga de dependencias ni evita que la liveness probe falle por timeout prematuro.",
-      null,
-      "Eliminar las sondas de salud deja a la aplicación sin supervisión automatizada de fallos y deadlocks en producción, lo cual es un antipatrón grave.",
-      "`restartPolicy: Never` no es una opción válida para la plantilla de un `Deployment` (los Deployments exigen obligatoriamente `restartPolicy: Always`)."
-    ],
-    "kcna-30": [
-      "El HPA no agrega hardware físico ni reconfigura máquinas virtuales; esa función corresponde al `Cluster Autoscaler` o a `Karpenter` a nivel de nodos.",
-      "El escalado vertical de recursos (modificar requests/limits) lo gestiona el `VerticalPodAutoscaler` (VPA), no el HPA.",
-      null,
-      "El HPA no modifica la clase del controlador ni transforma Deployments en DaemonSets; únicamente modifica el contador de réplicas."
-    ],
-    "kcna-31": [
-      null,
-      "Los contenedores en Kubernetes corren aislados y no deben formatear directamente dispositivos SCSI de bajo nivel del sistema operativo anfitrión.",
-      "El aprovisionamiento manual vía SSH rompe el modelo declarativo y automatizado de la arquitectura cloud native de Kubernetes.",
-      "Un volumen `emptyDir` es efímero y se destruye por completo cuando el Pod es eliminado o finaliza, por lo que no es apto para bases de datos persistentes."
-    ],
-    "kcna-32": [
-      "`ReadWriteOnce` (RWO) solo puede ser montado por **un único nodo a la vez**; si los pods residen en nodos distintos, no podrán montar el volumen.",
-      "`ReadOnlyMany` (ROX) solo permite operaciones de **lectura**; las réplicas no podrán escribir ni guardar los archivos procesados.",
-      "`ReadWriteOncePod` (RWOP) restringe el montaje a un único Pod en todo el clúster, impidiendo el uso concurrente por 5 réplicas.",
-      null
-    ],
-    "kcna-33": [
-      "`LoadBalancer` aprovisiona un balanceador de carga externo en el proveedor cloud con una IP pública o de red externa, exponiendo el servicio innecesariamente.",
-      null,
-      "`NodePort` abre un puerto accesible públicamente en la IP de cada nodo worker del clúster (rango 30000-32767), permitiendo acceso exterior no deseado.",
-      "`ExternalName` mapea el servicio a un nombre DNS externo mediante CNAME sin balancear pods locales internos."
-    ],
-    "kcna-34": [
-      "`ClusterRoleBinding` regula permisos sobre la API de Kubernetes (operaciones CRUD con kubectl), no filtra paquetes de red entre pods.",
-      "Editar `/etc/hosts` en la imagen no bloquea conexiones de red entrantes a nivel de socket ni es mantenible en un entorno dinámico.",
-      null,
-      "El `kubelet` no gestiona el filtrado de paquetes de red de los pods; esa responsabilidad pertenece a las reglas programadas por el plugin CNI."
-    ],
-    "kcna-35": [
-      null,
-      "Cloud Native no elimina los sistemas operativos ni emula microcódigo; se basa en sistemas operativos modernos (principalmente Linux) y aislamiento de contenedores.",
-      "El paradigma Cloud Native promueve microservicios desacoplados y sistemas modulares, exactamente lo contrario de arquitecturas monolíticas centralizadas.",
-      "Las tecnologías Cloud Native están concebidas para operar en entornos híbridos y multi-cloud con portabilidad abierta, no para restringir cargas a centros privados."
-    ],
-    "kcna-36": [
-      "Incrustar credenciales en el código fuente viola el Factor III (Configuración) y representa una vulnerabilidad de seguridad grave en el control de versiones.",
-      "Guardar estado en el disco local viola el Factor VI (Procesos sin estado); los contenedores son efímeros y cualquier estado local se pierde al recrear el Pod.",
-      "Escribir directamente en discos sin formato viola el Factor XI (Logs); las aplicaciones 12-Factor deben emitir logs a `stdout` sin gestionar archivos de registro.",
-      null
-    ],
-    "kcna-37": [
-      "La CNCF exige estrictamente la neutralidad de proveedores (vendor-neutral); ningún proyecto Graduated puede ser propiedad exclusiva de una sola empresa privada.",
-      null,
-      "Los proyectos en fase experimental temprana sin adopción en producción corresponden a la categoría `Sandbox`, no a la de `Graduated`.",
-      "La CNCF no exige que un proyecto elimine a sus competidores; de hecho, múltiples proyectos graduados e incubados coexisten sanamente en el ecosistema."
-    ],
-    "kcna-38": [
-      "Un Service Mesh gestiona capas de transporte y red en capa 7, no reemplaza el almacenamiento persistente ni las bases de datos de Kubernetes.",
-      null,
-      null,
-      "Los proxies de red de un Service Mesh no analizan ni optimizan consultas SQL de bases de datos relacionales; operan sobre protocolos de red como HTTP, gRPC o TCP."
-    ],
-    "kcna-39": [
-      "Un `ClusterRole` vinculado mediante `ClusterRoleBinding` otorgaría permisos sobre todos los namespaces del clúster, violando la restricción de aislar a `staging`.",
-      "Una `NetworkPolicy` controla el flujo de tráfico de red IP entre pods, no gestiona autorizaciones sobre la API de Kubernetes ni comandos `kubectl`.",
-      null,
-      "Los permisos de Kubernetes se gestionan en la API mediante RBAC, no editando archivos locales `/etc/sudoers` del sistema operativo Linux de los nodos."
-    ],
-    "kcna-40": [
-      null,
-      "Incrustar el certificado de `kubernetes-admin` en una variable de entorno otorga acceso de superusuario ilimitado al contenedor, lo cual es un fallo crítico de seguridad.",
-      "Deshabilitar la autorización en el API Server abriría el clúster a accesos anónimos sin autenticación, comprometiendo completamente la seguridad del sistema.",
-      "Confiar ciegamente en direcciones IP de pods es extremadamente inseguro debido a la naturaleza dinámica, reutilizable y efímera de las IPs en Kubernetes."
-    ],
-    "kcna-41": [
-      "La Gateway API soporta protocolos estándar seguros (HTTP, HTTPS, TLS, gRPC), no fuerza el uso de UDP sin cifrado.",
-      "La Gateway API hace exactamente lo opuesto a un diseño monolítico: desacopla la configuración en recursos independientes para cada rol operativo.",
-      "La Gateway API no utiliza puertos serie ni prescinde de redes TCP/IP modernas; enruta tráfico de red estándar con alta expresividad en capa 7.",
-      null
-    ],
-    "kcna-42": [
-      "`kube-proxy` programa reglas de reenvío de paquetes de red en los nodos; no tiene visibilidad ni capacidad de analizar manifiestos en la API.",
-      null,
-      "El `kube-scheduler` se encarga de ubicar pods en nodos basándose en recursos y afinidad, no de validar políticas de cumplimiento de seguridad en la admisión.",
-      "Los scripts en equipos locales (como hooks de pre-commit) pueden ser evitados o desactivados por los desarrolladores; la seguridad debe ser enforced por el clúster."
-    ],
-    "kcna-43": [
-      "CPU, memoria y disco son recursos físicos de infraestructura que pueden medirse mediante métricas, pero no constituyen los 3 pilares de la observabilidad.",
-      "Autenticación, autorización y auditoría (las tres A) corresponden al dominio de la seguridad de la información y control de acceso, no de la observabilidad.",
-      null,
-      "Despliegues y pruebas continuas corresponden al ciclo de vida del desarrollo de software (CI/CD), no a las señales de telemetría en tiempo de ejecución."
-    ],
-    "kcna-44": [
-      null,
-      "Prometheus no utiliza un modelo push hacia bases de datos relacionales SQL; su diseño central es pull sobre una base de datos de series temporales (TSDB).",
-      "Prometheus no es un sniffer pasivo de interfaces de red física; es una aplicación de capa de aplicación que hace scraping HTTP explícito.",
-      "Prometheus no compila código ni modifica binarios; su función está estrictamente enfocada en la recolección, almacenamiento y consulta de métricas."
-    ],
-    "kcna-45": [
-      "OpenTelemetry no es un sistema operativo ni compite con el kernel de Linux; es un marco de observabilidad de capa de aplicación.",
-      "OpenTelemetry no incluye una base de datos relacional transaccional; delega el almacenamiento en backends dedicados de observabilidad.",
-      "Las pruebas de carga y estrés se realizan con herramientas especializadas (como k6 o Locust), no forman parte del alcance de OpenTelemetry.",
-      null
-    ],
-    "kcna-46": [
-      "`cAdvisor` no gestiona certificados TLS y `Alertmanager` no reinicia contenedores; Alertmanager es exclusivamente un sistema de gestión y enrutamiento de alertas.",
-      null,
-      "Los backups de `etcd` los gestionan herramientas de administración de datos (como `etcdctl` o Velero), no `cAdvisor`.",
-      "`cAdvisor` recolecta métricas técnicas de recursos de contenedores en el host, no es una herramienta de tarificación financiera cloud."
-    ],
-    "kcna-47": [
-      "Conectarse por SSH a nodos en producción para modificar configuraciones manualmente es exactamente la antítesis de la inmutabilidad y de GitOps.",
-      "Los cambios manuales mediante consolas web crean desincronización no auditada (drift) y violan el principio de versión única en Git.",
-      null,
-      "GitOps utiliza manifiestos declarativos legibles por humanos (YAML, Kustomize, Helm) almacenados en repositorios de control de versiones, no código en ensamblador."
-    ],
-    "kcna-48": [
-      "Ni Helm ni Kustomize compilan código de kernel ni son bases de datos; ambas son herramientas de gestión y empaquetado de manifiestos declarativos de Kubernetes.",
-      "Helm opera en cualquier entorno de Kubernetes (público o privado) y Kustomize no requiere privilegios de root ni interactúa directamente con el hardware.",
-      "La gestión de TLS y la monitorización de recursos son tareas de cert-manager y Prometheus respectivamente, no el propósito de Helm ni de Kustomize.",
-      null
-    ],
-    "kcna-49": [
-      null,
-      null,
-      "Los scripts imperativos ejecutados manualmente contradicen radicalmente el principio declarativo y automatizado de GitOps.",
-      "Permitir cambios externos sin registrarlos en Git crea divergencia oculta (drift) y destruye a Git como fuente única y auditable de la verdad."
-    ],
-    "kcna-50": [
-      null,
-      "La estrategia `Recreate` destruye todas las réplicas v1 a la vez, causando tiempo de inactividad (downtime) y afectando al 100% de los usuarios.",
-      "`Blue/Green` conmuta de golpe el **100% del tráfico** hacia el nuevo entorno una vez validado; no divide el tráfico en porcentajes progresivos (90/10).",
-      "`RollingUpdate` estándar sustituye réplicas pod a pod pero sin control fino porcentual de tráfico basado en pesos de capa 7."
+    "why": {
+      "kcna-01": [
+        "The `kube-scheduler` does not expose the REST API or access `etcd` directly; it queries unassigned pods and updates assignments through the `kube-apiserver`.",
+        "The `kube-controller-manager` runs the internal control loops (such as ReplicaSet or NodeController), but it does not store data or interact with `etcd` directly.",
+        null,
+        "The `kubelet` is an agent that runs on worker nodes, not on the Control Plane, and never communicates directly with `etcd`."
+      ],
+      "kcna-02": [
+        null,
+        "`etcd` does not perform sharding or write balancing; all write operations necessarily go through the Raft leader node.",
+        "The odd number of nodes follows from Raft consensus quorum math and has no relation to the apiserver's TLS certificates.",
+        "Periodic compaction of historical revisions in `etcd` is necessary regardless of whether the number of members is even or odd."
+      ],
+      "kcna-03": [
+        null,
+        "The `kube-controller-manager` manages the lifecycle of replicas and resources, but it does not decide on which specific node each Pod runs.",
+        "The `kubelet` runs and monitors pods once they have already been assigned to its specific node by the scheduler; it does not schedule pods globally.",
+        "The `cloud-controller-manager` integrates cloud services (such as load balancers or routes), but it does not make scheduling decisions for individual pods."
+      ],
+      "kcna-04": [
+        "Kubernetes does not compile YAML files into binaries; images are built beforehand by OCI engines, and the YAML files are resource definitions parsed by the API.",
+        null,
+        "Validating authentication tokens and certificates is the responsibility of the `kube-apiserver`, not the controller manager.",
+        "Configuring overlay networks and packet encapsulation is the responsibility of the CNI plugin, not the controller manager."
+      ],
+      "kcna-05": [
+        "The `cloud-controller-manager` does not replace the `kubelet`; the kubelet remains the indispensable agent on every worker node.",
+        "Resource monitoring and billing are handled by telemetry tools and provider APIs, not by this component.",
+        "Creating clusters with Terraform or IaC is external to Kubernetes and is not part of the `cloud-controller-manager`.",
+        null
+      ],
+      "kcna-06": [
+        "Network traffic balancing on the nodes is the responsibility of `kube-proxy` or a Service Mesh / Ingress Controller, not the `kubelet`.",
+        "The `kubelet` never communicates directly with `etcd`; any query or status report goes through the `kube-apiserver`.",
+        null,
+        "The `kubelet` does not compile source code; it only runs container images that were previously built and published to a registry."
+      ],
+      "kcna-07": [
+        null,
+        "`CoreDNS` is the cluster's internal DNS server that resolves names to IPs, but it does not program kernel rules or route packets at the transport level.",
+        "`containerd` is a container runtime that manages images and process namespaces, not the routing of Kubernetes Services.",
+        "The `kube-scheduler` assigns pods to nodes during the scheduling phase, but it has no relation to traffic routing or kernel tables."
+      ],
+      "kcna-08": [
+        null,
+        "`kube-apiserver` does not use active-passive leader election; it is completely stateless and operates in a balanced active-active mode.",
+        null,
+        "The `kubelet` is an agent that runs independently on each worker node to manage its own local containers; it does not take part in control plane leader election."
+      ],
+      "kcna-09": [
+        "The `CNI` (Container Network Interface) focuses on connectivity and the configuration of container network interfaces, not on running containers.",
+        "The `CSI` (Container Storage Interface) is responsible for provisioning and mounting storage volumes, not for the container lifecycle.",
+        "The `OCI` (Open Container Initiative) defines image format and low-level runtime specifications (such as `runc`), not the Helm format.",
+        null
+      ],
+      "kcna-10": [
+        "Containers within the same Pod share the same IP address; they do not receive independent IP addresses or need Ingress to communicate with each other.",
+        null,
+        "All containers in the same Pod necessarily run on the same physical/virtual node; a Pod is never split across multiple nodes.",
+        "Each container maintains its own root file system derived from its container image; only explicitly mounted volumes are shared."
+      ],
+      "kcna-11": [
+        "`ReplicaSets` support exactly the same Pod template (`PodTemplateSpec`) as Deployments, including multiple containers and secrets.",
+        "Deployments do not perform static vulnerability analysis of source code; that is a task for CI/CD pipelines.",
+        null,
+        "`ReplicaSets` remain official, fundamental components in Kubernetes; they are the controllers that Deployments use internally."
+      ],
+      "kcna-12": [
+        null,
+        "A `StatefulSet` is used for stateful workloads (such as distributed databases) that require ordering and persistence, not for running one agent per node.",
+        "A `Job` is used for finite tasks that run to completion; log agents must run continuously as daemons.",
+        "A `Deployment` distributes pods seeking to balance capacity, and may place multiple replicas on one node and zero on another, without guaranteeing one per node."
+      ],
+      "kcna-13": [
+        "A `DaemonSet` does not guarantee stable ordinal names or dedicated volume templates per replica; it runs one pod per node for agents.",
+        "A `Deployment` treats its replicas as replaceable and interchangeable with random names (e.g., `app-5df4c9-xk7pz`), which breaks clusters such as ZooKeeper.",
+        "A `CronJob` runs one-off scheduled tasks and does not maintain continuous services or stable ordinal identities.",
+        null
+      ],
+      "kcna-14": [
+        "A `Deployment` is designed for continuous services; if the container exits with code 0, the Deployment will treat it as a failure and restart it.",
+        null,
+        "A `DaemonSet` would run the process on every node in the cluster at once, duplicating the accounting reconciliation and causing inconsistencies.",
+        "A `StatefulSet` maintains continuous stateful services and is not designed for batch processes that must finish and shut down."
+      ],
+      "kcna-15": [
+        "`NodeSelector` is a scheduling technique for directing pods to nodes with specific labels, not a mechanism for logical partitioning of the cluster.",
+        "A `ClusterRole` is an RBAC object that defines permissions on cluster-wide resources, not a partition of objects or cluster quotas.",
+        null,
+        "`StorageClass` defines the types and provisioners of persistent storage volumes, without providing resource name isolation."
+      ],
+      "kcna-16": [
+        "The proposed FQDN points to the `production` namespace and uses the pod suffix (`.pod.`), instead of pointing to `finance` with the `.svc.` suffix.",
+        "Kubernetes does not use the reversed subdomain convention or `.k8s.internal` as the CoreDNS default standard.",
+        "An HTTP URL is not a DNS hostname resolvable at the transport layer; network resolution requires the service's standard FQDN.",
+        null
+      ],
+      "kcna-17": [
+        "A `PersistentVolumeClaim` is a request for persistent block or file storage on disk, not a store for configuration parameters.",
+        null,
+        "A `NetworkPolicy` defines network traffic filtering rules at the layer 3/4 firewall level, unrelated to application configuration.",
+        null
+      ],
+      "kcna-18": [
+        null,
+        "Kubernetes does not depend on Docker Swarm to start up; the `kubelet` itself is capable of starting pods autonomously.",
+        "The control plane components are not simulated scripts, but the real Kubernetes binaries running as Static Pods.",
+        "Terraform can provision the virtual machine, but orchestrating the bootstrap of the pods on the node is done by the `kubelet`."
+      ],
+      "kcna-19": [
+        "`Ephemeral Containers` are used for live interactive debugging in already running pods with `kubectl debug`, not for startup preparation.",
+        "`Sidecar Containers` run in parallel throughout the application's lifetime, whereas preparation tasks must finish before the app starts.",
+        null,
+        "The `pause` container reserves the Pod's network and IPC namespaces in the kernel, but it does not run initialization tasks or user scripts."
+      ],
+      "kcna-20": [
+        "`CrashLoopBackOff` is a container state (`waiting.reason`) that indicates repeated failures in the process, not an official Pod phase.",
+        null,
+        "`ImagePullBackOff` is a container waiting reason when the image cannot be pulled, not a phase of the Pod lifecycle.",
+        "`Terminating` is an indication shown by `kubectl` while waiting for the deletion grace period, but it is not an official Pod phase."
+      ],
+      "kcna-21": [
+        "`Annotations` are used to attach arbitrary metadata that controllers or services cannot query through efficient selectors.",
+        "`ClusterIP` is the virtual IP address assigned to the service, but it is not the mechanism that finds or identifies the backend pods.",
+        "`ResourceVersion` is an internal optimistic concurrency control marker used by `etcd` and the apiserver, unrelated to load balancing.",
+        null
+      ],
+      "kcna-22": [
+        null,
+        "`labels` are designed for identifying and selecting objects; `annotations` are used for descriptive metadata or plugin configuration.",
+        "`finalizers` are strings that block the deletion of a resource until pre-deletion cleanup tasks are completed.",
+        "`ownerReferences` establish parent-child relationships between objects for garbage collection (e.g., a Deployment as the owner of a ReplicaSet)."
+      ],
+      "kcna-23": [
+        "`SIGKILL` is not sent at the start; sending `SIGKILL` immediately would abruptly abort in-flight connections without allowing graceful cleanup.",
+        "Kubernetes does not send `SIGSTOP` to freeze processes or take memory dumps during normal pod termination.",
+        null,
+        "The `kubelet` does not wait indefinitely; the wait time is strictly bounded by `terminationGracePeriodSeconds` before `SIGKILL`."
+      ],
+      "kcna-24": [
+        "`requests` does not reboot nodes and `limits` is not a cloud billing directive, but a kernel isolation setting.",
+        "`requests` and `limits` manage compute resources (CPU and memory), not application-layer HTTP request rates or network bandwidth.",
+        "The relationship is reversed: `requests` is used by the scheduler to place the pod on a node, while `limits` is used by cgroups for throttling or OOM.",
+        null
+      ],
+      "kcna-25": [
+        "Pods with `Guaranteed` QoS are the most protected on the system and the last to be considered for eviction under memory saturation.",
+        null,
+        "`Burstable` pods have higher priority than `BestEffort` pods; they are only evicted if no `BestEffort` pods remain on the node.",
+        "`CriticalSystem` is not a standard QoS class for ordinary pods, and system processes have higher priority than user apps."
+      ],
+      "kcna-26": [
+        null,
+        "A `NetworkPolicy` filters network traffic between pods at layer 3/4, but it has no influence on the scheduler's node placement decisions.",
+        "A `ClusterRole` controls authentication and authorization permissions on the Kubernetes API, not the physical placement of workloads on nodes.",
+        "A `LimitRange` sets minimum and maximum resource values per pod within a namespace, and does not control the assignment of specialized nodes."
+      ],
+      "kcna-27": [
+        "`nodeSelector` is a strict exact-match mechanism; if no node satisfies the specified label, the pod remains `Pending`.",
+        "`requiredDuringScheduling...` is a hard, unavoidable condition; if there is no room in `us-east-1a`, the pod will fail to be scheduled.",
+        null,
+        "`podAntiAffinity` pushes pods away from each other, not toward specific nodes; moreover, a positive preference toward the `us-east-1a` zone is what is requested."
+      ],
+      "kcna-28": [
+        null,
+        "Kubernetes does not perform live migration of pods between nodes when a probe fails; the local `kubelet` simply restarts the container.",
+        "A `readinessProbe` failure never destroys the data or persistent volumes associated with the Pod.",
+        null
+      ],
+      "kcna-29": [
+        "Increasing memory to 64 GiB does not fix the dependency loading time or prevent the liveness probe from failing due to premature timeout.",
+        null,
+        "Removing the health probes leaves the application without automated supervision for failures and deadlocks in production, which is a serious anti-pattern.",
+        "`restartPolicy: Never` is not a valid option for a `Deployment` template (Deployments strictly require `restartPolicy: Always`)."
+      ],
+      "kcna-30": [
+        "The HPA does not add physical hardware or reconfigure virtual machines; that function belongs to the `Cluster Autoscaler` or `Karpenter` at the node level.",
+        "Vertical scaling of resources (modifying requests/limits) is managed by the `VerticalPodAutoscaler` (VPA), not the HPA.",
+        null,
+        "The HPA does not change the controller class or turn Deployments into DaemonSets; it only modifies the replica count."
+      ],
+      "kcna-31": [
+        null,
+        "Containers in Kubernetes run isolated and must not directly format low-level SCSI devices of the host operating system.",
+        "Manual provisioning via SSH breaks the declarative, automated model of Kubernetes cloud native architecture.",
+        "An `emptyDir` volume is ephemeral and is completely destroyed when the Pod is deleted or terminates, so it is not suitable for persistent databases."
+      ],
+      "kcna-32": [
+        "`ReadWriteOnce` (RWO) can only be mounted by **a single node at a time**; if the pods reside on different nodes, they will not be able to mount the volume.",
+        "`ReadOnlyMany` (ROX) only allows **read** operations; the replicas will not be able to write or save the processed files.",
+        "`ReadWriteOncePod` (RWOP) restricts mounting to a single Pod across the entire cluster, preventing concurrent use by 5 replicas.",
+        null
+      ],
+      "kcna-33": [
+        "`LoadBalancer` provisions an external load balancer in the cloud provider with a public or external network IP, needlessly exposing the service.",
+        null,
+        "`NodePort` opens a publicly accessible port on the IP of every worker node in the cluster (range 30000-32767), allowing unwanted external access.",
+        "`ExternalName` maps the service to an external DNS name through a CNAME without load balancing internal local pods."
+      ],
+      "kcna-34": [
+        "`ClusterRoleBinding` governs permissions on the Kubernetes API (CRUD operations with kubectl); it does not filter network packets between pods.",
+        "Editing `/etc/hosts` in the image does not block incoming network connections at the socket level, nor is it maintainable in a dynamic environment.",
+        null,
+        "The `kubelet` does not manage network packet filtering for pods; that responsibility belongs to the rules programmed by the CNI plugin."
+      ],
+      "kcna-35": [
+        null,
+        "Cloud Native does not eliminate operating systems or emulate microcode; it relies on modern operating systems (mainly Linux) and container isolation.",
+        "The Cloud Native paradigm promotes decoupled microservices and modular systems, exactly the opposite of centralized monolithic architectures.",
+        "Cloud Native technologies are designed to operate in hybrid and multi-cloud environments with open portability, not to restrict workloads to private data centers."
+      ],
+      "kcna-36": [
+        "Embedding credentials in source code violates Factor III (Config) and represents a serious security vulnerability in version control.",
+        "Storing state on local disk violates Factor VI (Stateless processes); containers are ephemeral and any local state is lost when the Pod is recreated.",
+        "Writing directly to raw disks violates Factor XI (Logs); 12-Factor applications must emit logs to `stdout` without managing log files.",
+        null
+      ],
+      "kcna-37": [
+        "The CNCF strictly requires vendor neutrality; no Graduated project can be exclusively owned by a single private company.",
+        null,
+        "Projects in an early experimental phase with no production adoption correspond to the `Sandbox` category, not `Graduated`.",
+        "The CNCF does not require a project to eliminate its competitors; in fact, multiple graduated and incubating projects coexist healthily in the ecosystem."
+      ],
+      "kcna-38": [
+        "A Service Mesh manages transport and network layers at layer 7; it does not replace persistent storage or Kubernetes databases.",
+        null,
+        null,
+        "A Service Mesh's network proxies do not analyze or optimize SQL queries of relational databases; they operate on network protocols such as HTTP, gRPC, or TCP."
+      ],
+      "kcna-39": [
+        "A `ClusterRole` bound through a `ClusterRoleBinding` would grant permissions across all namespaces in the cluster, violating the restriction to isolate to `staging`.",
+        "A `NetworkPolicy` controls the flow of IP network traffic between pods; it does not manage authorizations on the Kubernetes API or `kubectl` commands.",
+        null,
+        "Kubernetes permissions are managed in the API through RBAC, not by editing local `/etc/sudoers` files of the nodes' Linux operating system."
+      ],
+      "kcna-40": [
+        null,
+        "Embedding the `kubernetes-admin` certificate in an environment variable grants unlimited superuser access to the container, which is a critical security flaw.",
+        "Disabling authorization on the API Server would open the cluster to anonymous access without authentication, completely compromising system security.",
+        "Blindly trusting pod IP addresses is extremely insecure due to the dynamic, reusable, and ephemeral nature of IPs in Kubernetes."
+      ],
+      "kcna-41": [
+        "The Gateway API supports standard secure protocols (HTTP, HTTPS, TLS, gRPC); it does not force the use of unencrypted UDP.",
+        "The Gateway API does exactly the opposite of a monolithic design: it decouples configuration into independent resources for each operational role.",
+        "The Gateway API does not use serial ports or dispense with modern TCP/IP networks; it routes standard network traffic with high expressiveness at layer 7.",
+        null
+      ],
+      "kcna-42": [
+        "`kube-proxy` programs network packet forwarding rules on the nodes; it has no visibility into, or ability to analyze, manifests in the API.",
+        null,
+        "The `kube-scheduler` is responsible for placing pods on nodes based on resources and affinity, not for validating security compliance policies at admission.",
+        "Scripts on local machines (such as pre-commit hooks) can be bypassed or disabled by developers; security must be enforced by the cluster."
+      ],
+      "kcna-43": [
+        "CPU, memory, and disk are physical infrastructure resources that can be measured through metrics, but they are not the 3 pillars of observability.",
+        "Authentication, authorization, and auditing (the three A's) belong to the domain of information security and access control, not observability.",
+        null,
+        "Deployments and continuous testing belong to the software development lifecycle (CI/CD), not to runtime telemetry signals."
+      ],
+      "kcna-44": [
+        null,
+        "Prometheus does not use a push model toward SQL relational databases; its core design is pull over a time series database (TSDB).",
+        "Prometheus is not a passive sniffer of physical network interfaces; it is an application-layer application that performs explicit HTTP scraping.",
+        "Prometheus does not compile code or modify binaries; its function is strictly focused on collecting, storing, and querying metrics."
+      ],
+      "kcna-45": [
+        "OpenTelemetry is not an operating system and does not compete with the Linux kernel; it is an application-layer observability framework.",
+        "OpenTelemetry does not include a transactional relational database; it delegates storage to dedicated observability backends.",
+        "Load and stress testing is done with specialized tools (such as k6 or Locust) and is not part of OpenTelemetry's scope.",
+        null
+      ],
+      "kcna-46": [
+        "`cAdvisor` does not manage TLS certificates and `Alertmanager` does not restart containers; Alertmanager is exclusively an alert management and routing system.",
+        null,
+        "`etcd` backups are managed by data administration tools (such as `etcdctl` or Velero), not `cAdvisor`.",
+        "`cAdvisor` collects technical container resource metrics on the host; it is not a cloud financial billing tool."
+      ],
+      "kcna-47": [
+        "Connecting via SSH to production nodes to modify configurations manually is exactly the antithesis of immutability and GitOps.",
+        "Manual changes through web consoles create unaudited drift and violate the single-version principle in Git.",
+        null,
+        "GitOps uses human-readable declarative manifests (YAML, Kustomize, Helm) stored in version control repositories, not assembly code."
+      ],
+      "kcna-48": [
+        "Neither Helm nor Kustomize compiles kernel code or is a database; both are tools for managing and packaging declarative Kubernetes manifests.",
+        "Helm operates in any Kubernetes environment (public or private), and Kustomize does not require root privileges or interact directly with hardware.",
+        "TLS management and resource monitoring are tasks for cert-manager and Prometheus respectively, not the purpose of Helm or Kustomize.",
+        null
+      ],
+      "kcna-49": [
+        null,
+        null,
+        "Manually executed imperative scripts radically contradict the declarative, automated principle of GitOps.",
+        "Allowing external changes without recording them in Git creates hidden drift and destroys Git as the single, auditable source of truth."
+      ],
+      "kcna-50": [
+        null,
+        "The `Recreate` strategy destroys all v1 replicas at once, causing downtime and affecting 100% of users.",
+        "`Blue/Green` abruptly switches **100% of traffic** to the new environment once validated; it does not split traffic into progressive percentages (90/10).",
+        "Standard `RollingUpdate` replaces replicas pod by pod but without fine-grained percentage control of traffic based on layer 7 weights."
+      ]
+    },
+    "glossary": [
+      {
+        "term": "kube-apiserver",
+        "cat": "Control Plane",
+        "d": 1,
+        "def": "Core Control Plane component that exposes the Kubernetes REST API; it authenticates, authorizes, validates, and mutates requests and is the only process with direct access to etcd."
+      },
+      {
+        "term": "etcd",
+        "cat": "Control Plane",
+        "d": 1,
+        "def": "Distributed, consistent key-value store based on the Raft consensus algorithm that stores the entire declarative and real-time state of the cluster."
+      },
+      {
+        "term": "kube-scheduler",
+        "cat": "Control Plane",
+        "d": 1,
+        "def": "Control plane component that detects pods with no assigned node and selects the most suitable node through sequential filtering (predicates) and prioritization (scoring) phases."
+      },
+      {
+        "term": "kube-controller-manager",
+        "cat": "Control Plane",
+        "d": 1,
+        "def": "Binary that packages and runs Kubernetes' core control loops (Node Lifecycle, ReplicaSet, Endpoints, ServiceAccount) to reconcile the actual state with the desired state."
+      },
+      {
+        "term": "cloud-controller-manager",
+        "cat": "Control Plane",
+        "d": 1,
+        "def": "Component that decouples cloud provider-specific logic (network routes, node instances, and external load balancer provisioning) from the Kubernetes core."
+      },
+      {
+        "term": "kubelet",
+        "cat": "Worker Node",
+        "d": 1,
+        "def": "Primary agent that runs on each worker node; it interprets PodSpecs received from the apiserver, manages container lifecycle through CRI, and reports its health status."
+      },
+      {
+        "term": "kube-proxy",
+        "cat": "Worker Node",
+        "d": 1,
+        "def": "Network process on each node that programs rules in iptables or IPVS to implement the virtual Service abstraction and enable traffic routing to the right pods."
+      },
+      {
+        "term": "CRI (Container Runtime Interface)",
+        "cat": "Runtime",
+        "d": 1,
+        "def": "gRPC interface standard that lets the kubelet interoperate with multiple container runtimes (such as containerd or CRI-O) without recompiling the Kubernetes source code."
+      },
+      {
+        "term": "Pod",
+        "cat": "Workloads",
+        "d": 1,
+        "def": "Smallest and most basic deployable compute unit in Kubernetes; it encapsulates one or more tightly coupled containers that share storage, IP address, and localhost."
+      },
+      {
+        "term": "DaemonSet",
+        "cat": "Workloads",
+        "d": 1,
+        "def": "Controller that ensures a copy of a pod runs on all nodes (or on a subset filtered by selectors), typical for telemetry agents, logs, or CNI proxies."
+      },
+      {
+        "term": "StatefulSet",
+        "cat": "Workloads",
+        "d": 1,
+        "def": "Workload controller designed for stateful applications that require fixed ordinal network identities (e.g., app-0), dedicated persistence, and strict deployment order."
+      },
+      {
+        "term": "ConfigMap and Secret",
+        "cat": "Configuration",
+        "d": 1,
+        "def": "Primitives for injecting configuration decoupled from the container; ConfigMap stores plain text and variables, while Secret holds credentials and sensitive data that can be encrypted at rest."
+      },
+      {
+        "term": "QoS Classes (Guaranteed, Burstable, BestEffort)",
+        "cat": "Resources",
+        "d": 2,
+        "def": "Classification assigned by Kubernetes to each Pod based on the presence and equivalence of its CPU and memory requests and limits; it determines eviction priority under saturation."
+      },
+      {
+        "term": "Taints and Tolerations",
+        "cat": "Scheduling",
+        "d": 2,
+        "def": "Node repulsion mechanism: a Taint applied to a node prevents pods without a matching Toleration from being scheduled or from continuing to run on it."
+      },
+      {
+        "term": "Liveness and Readiness Probes",
+        "cat": "Lifecycle",
+        "d": 2,
+        "def": "Kubelet probes; Liveness restarts the container if it deadlocks, while Readiness removes the pod from the Service endpoints if it cannot yet serve user traffic."
+      },
+      {
+        "term": "CNI (Container Network Interface)",
+        "cat": "Networking",
+        "d": 2,
+        "def": "Standard CNCF specification for configuring network interfaces in Linux containers, guaranteeing the flat Kubernetes model where every Pod has a unique IP."
+      },
+      {
+        "term": "CSI and StorageClass",
+        "cat": "Storage",
+        "d": 2,
+        "def": "CSI decouples storage plugins from the K8s code, and StorageClass defines the provisioner and the parameters needed to dynamically create persistent volumes (PV)."
+      },
+      {
+        "term": "NetworkPolicy",
+        "cat": "Network Security",
+        "d": 2,
+        "def": "Kubernetes resource that specifies how groups of pods can communicate with each other and with other network endpoints at layers 3 and 4 through declarative Ingress and Egress rules."
+      },
+      {
+        "term": "HPA (Horizontal Pod Autoscaler)",
+        "cat": "Scalability",
+        "d": 2,
+        "def": "Controller that automatically adjusts the number of replicas of a Deployment or ReplicaSet based on observed CPU, memory, or custom metric utilization."
+      },
+      {
+        "term": "CNCF Graduation Levels",
+        "cat": "CNCF Ecosystem",
+        "d": 3,
+        "def": "Project maturity levels in the CNCF: Sandbox (early experimental phase), Incubating (real adoption and solid governance), and Graduated (maximum technical maturity and audited security)."
+      },
+      {
+        "term": "Service Mesh and mTLS",
+        "cat": "Architecture",
+        "d": 3,
+        "def": "Dedicated infrastructure layer with sidecar proxies (e.g., Envoy) that manages east-west traffic, applying mutual encryption (mTLS), traffic control, and telemetry without modifying the code."
+      },
+      {
+        "term": "RBAC (Role-Based Access Control)",
+        "cat": "Security",
+        "d": 3,
+        "def": "Access control model that governs permissions on the Kubernetes API through Roles (namespace scope), ClusterRoles (cluster-wide scope), and their corresponding bindings (Bindings)."
+      },
+      {
+        "term": "Gateway API",
+        "cat": "Networking",
+        "d": 3,
+        "def": "Evolution of Ingress with a role-oriented architecture (GatewayClass for infra, Gateway for operators, and HTTPRoute for developers) with advanced native layer 7 support."
+      },
+      {
+        "term": "Prometheus and PromQL",
+        "cat": "Observability",
+        "d": 4,
+        "def": "Time series monitoring system based on HTTP pull collection, accompanied by the PromQL language for queries, alerts, and calculation of SLIs and SLOs."
+      },
+      {
+        "term": "OpenGitOps",
+        "cat": "GitOps",
+        "d": 5,
+        "def": "Set of open CNCF principles that define GitOps: declarative desired state, versioned and immutable in Git, pulled by agents and continuously reconciled."
+      }
     ]
-  },
-  "glossary": [
-    {
-      "term": "kube-apiserver",
-      "cat": "Control Plane",
-      "d": 1,
-      "def": "Componente central del Control Plane que expone la API REST de Kubernetes; autentica, autoriza, valida y muta solicitudes y es el único proceso con acceso directo a etcd."
-    },
-    {
-      "term": "etcd",
-      "cat": "Control Plane",
-      "d": 1,
-      "def": "Almacén clave-valor distribuido y consistente basado en el algoritmo de consenso Raft que almacena la totalidad del estado declarativo y en tiempo real del clúster."
-    },
-    {
-      "term": "kube-scheduler",
-      "cat": "Control Plane",
-      "d": 1,
-      "def": "Componente del plano de control que detecta pods sin nodo asignado y selecciona el nodo más adecuado mediante fases secuenciales de filtrado (predicates) y priorización (scoring)."
-    },
-    {
-      "term": "kube-controller-manager",
-      "cat": "Control Plane",
-      "d": 1,
-      "def": "Binario que empaqueta y ejecuta los bucles de control centrales de Kubernetes (Node Lifecycle, ReplicaSet, Endpoints, ServiceAccount) para reconciliar el estado real con el deseado."
-    },
-    {
-      "term": "cloud-controller-manager",
-      "cat": "Control Plane",
-      "d": 1,
-      "def": "Componente que desacopla la lógica específica del proveedor de nube (rutas de red, instancias de nodos y aprovisionamiento de balanceadores externos) del núcleo de Kubernetes."
-    },
-    {
-      "term": "kubelet",
-      "cat": "Worker Node",
-      "d": 1,
-      "def": "Agente primario que se ejecuta en cada nodo worker; interpreta PodSpecs recibidos del apiserver, gestiona el ciclo de vida de los contenedores mediante CRI y reporta su estado de salud."
-    },
-    {
-      "term": "kube-proxy",
-      "cat": "Worker Node",
-      "d": 1,
-      "def": "Proceso de red en cada nodo que programa reglas en iptables o IPVS para implementar la abstracción virtual de Service y permitir el enrutamiento de tráfico hacia los pods adecuados."
-    },
-    {
-      "term": "CRI (Container Runtime Interface)",
-      "cat": "Runtime",
-      "d": 1,
-      "def": "Estándar de interfaz gRPC que permite al kubelet interoperar con múltiples motores de ejecución de contenedores (como containerd o CRI-O) sin recompilar el código fuente de Kubernetes."
-    },
-    {
-      "term": "Pod",
-      "cat": "Workloads",
-      "d": 1,
-      "def": "Unidad de cómputo más pequeña y básica desplegable en Kubernetes; encapsula uno o más contenedores estrechamente acoplados que comparten almacenamiento, dirección IP y localhost."
-    },
-    {
-      "term": "DaemonSet",
-      "cat": "Workloads",
-      "d": 1,
-      "def": "Controlador que garantiza que una copia de un pod se ejecute en todos los nodos (o en un subconjunto filtrado por selectores), típico para agentes de telemetría, logs o proxies CNI."
-    },
-    {
-      "term": "StatefulSet",
-      "cat": "Workloads",
-      "d": 1,
-      "def": "Controlador de cargas de trabajo diseñado para aplicaciones con estado que requieren identidades de red ordinales fijas (ej. app-0), persistencia dedicada y orden estricto de despliegue."
-    },
-    {
-      "term": "ConfigMap y Secret",
-      "cat": "Configuración",
-      "d": 1,
-      "def": "Primitivas para inyectar configuraciones desacopladas del contenedor; ConfigMap almacena texto plano y variables, mientras que Secret guarda credenciales y datos sensibles cifrables en reposo."
-    },
-    {
-      "term": "QoS Classes (Guaranteed, Burstable, BestEffort)",
-      "cat": "Recursos",
-      "d": 2,
-      "def": "Clasificación asignada por Kubernetes a cada Pod según la presencia y equivalencia de sus requests y limits de CPU y memoria; determina la prioridad de desalojo (eviction) ante saturación."
-    },
-    {
-      "term": "Taints y Tolerations",
-      "cat": "Scheduling",
-      "d": 2,
-      "def": "Mecanismo de repulsión de nodos: un Taint aplicado a un nodo impide que pods sin una Toleration coincidente puedan ser programados o permanecer ejecutándose en él."
-    },
-    {
-      "term": "Liveness y Readiness Probes",
-      "cat": "Ciclo de Vida",
-      "d": 2,
-      "def": "Sondas del kubelet; Liveness reinicia el contenedor si entra en deadlock, mientras que Readiness remueve el pod de los endpoints del Service si aún no puede atender tráfico de usuarios."
-    },
-    {
-      "term": "CNI (Container Network Interface)",
-      "cat": "Networking",
-      "d": 2,
-      "def": "Especificación estándar de la CNCF para configurar interfaces de red en contenedores Linux, garantizando el modelo plano de Kubernetes donde cada Pod tiene una IP única."
-    },
-    {
-      "term": "CSI y StorageClass",
-      "cat": "Almacenamiento",
-      "d": 2,
-      "def": "CSI desacopla los plugins de almacenamiento del código de K8s, y StorageClass define el aprovisionador y los parámetros necesarios para crear volúmenes persistentes (PV) de forma dinámica."
-    },
-    {
-      "term": "NetworkPolicy",
-      "cat": "Seguridad de Red",
-      "d": 2,
-      "def": "Recurso de Kubernetes que especifica cómo grupos de pods pueden comunicarse entre sí y con otros endpoints de red en capa 3 y 4 mediante reglas declarativas de Ingress y Egress."
-    },
-    {
-      "term": "HPA (Horizontal Pod Autoscaler)",
-      "cat": "Escalabilidad",
-      "d": 2,
-      "def": "Controlador que ajusta automáticamente el número de réplicas de un Deployment o ReplicaSet en función de la utilización observada de CPU, memoria o métricas personalizadas."
-    },
-    {
-      "term": "CNCF Graduation Levels",
-      "cat": "Ecosistema CNCF",
-      "d": 3,
-      "def": "Niveles de madurez de proyectos en la CNCF: Sandbox (fase experimental temprana), Incubating (adopción real y gobernanza sólida) y Graduated (máxima madurez técnica y seguridad auditada)."
-    },
-    {
-      "term": "Service Mesh y mTLS",
-      "cat": "Arquitectura",
-      "d": 3,
-      "def": "Capa de infraestructura dedicada con proxies sidecar (ej. Envoy) que gestiona tráfico este-oeste, aplicando cifrado mutuo (mTLS), control de tráfico y telemetría sin modificar el código."
-    },
-    {
-      "term": "RBAC (Role-Based Access Control)",
-      "cat": "Seguridad",
-      "d": 3,
-      "def": "Modelo de control de acceso que regula permisos sobre la API de Kubernetes mediante Roles (alcance de namespace), ClusterRoles (alcance global) y sus correspondientes vinculaciones (Bindings)."
-    },
-    {
-      "term": "Gateway API",
-      "cat": "Networking",
-      "d": 3,
-      "def": "Evolución de Ingress con una arquitectura orientada a roles (GatewayClass para infra, Gateway para operadores y HTTPRoute para desarrolladores) con soporte nativo avanzado de capa 7."
-    },
-    {
-      "term": "Prometheus y PromQL",
-      "cat": "Observabilidad",
-      "d": 4,
-      "def": "Sistema de monitorización de series temporales basado en recolección por pull HTTP, acompañado del lenguaje PromQL para consultas, alertas y cálculo de SLIs y SLOs."
-    },
-    {
-      "term": "OpenGitOps",
-      "cat": "GitOps",
-      "d": 5,
-      "def": "Conjunto de principios abiertos de la CNCF que definen GitOps: estado deseado declarativo, versionado e inmutable en Git, obtenido por agentes pull y reconciliado de forma continua."
-    }
-  ]
-};
+  };
 })(window);

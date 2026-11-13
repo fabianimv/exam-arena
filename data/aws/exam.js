@@ -1,58 +1,57 @@
 /* =========================================================================
-   data/aws/exam.js — AWS Certified Solutions Architect - Associate (SAA-C03)
-   44 preguntas en los 4 dominios oficiales con explicación por opción errónea (WHY)
+   data/aws/exam.js — AWS · Solutions Architect Associate (SAA-C03) (English)
    ========================================================================= */
 (function (w) {
   w.EXAMS = w.EXAMS || {};
   w.EXAMS["aws-saa-c03"] = {
-    id: "aws-saa-c03",
-    appId: "aws-saa-c03",
-    provider: "Amazon Web Services",
-    badge: "AWS · SAA-C03",
-    icon: "🟧",
-    color: "#e67e22",
-    title: "AWS · Solutions Architect Associate (SAA-C03)",
-    subtitle: "Diseño de arquitecturas seguras, resilientes, de alto rendimiento y optimizadas en costos en AWS.",
-    passingScore: 72,
-    domains: {
-      1: "Design Secure Architectures (30 %)",
-      2: "Design Resilient Architectures (26 %)",
-      3: "Design High-Performing Architectures (24 %)",
-      4: "Design Cost-Optimized Architectures (20 %)"
+    "id": "aws-saa-c03",
+    "appId": "aws-saa-c03",
+    "provider": "Amazon Web Services",
+    "badge": "AWS · SAA-C03",
+    "icon": "🟧",
+    "color": "#e67e22",
+    "title": "AWS · Solutions Architect Associate (SAA-C03)",
+    "subtitle": "Design of secure, resilient, high-performing, and cost-optimized architectures on AWS.",
+    "passingScore": 72,
+    "domains": {
+      "1": "Design Secure Architectures (30 %)",
+      "2": "Design Resilient Architectures (26 %)",
+      "3": "Design High-Performing Architectures (24 %)",
+      "4": "Design Cost-Optimized Architectures (20 %)"
     },
-    shortDomains: {
-      1: "Security",
-      2: "Resilience",
-      3: "Performance",
-      4: "Cost Optimization"
+    "shortDomains": {
+      "1": "Security",
+      "2": "Resilience",
+      "3": "Performance",
+      "4": "Cost Optimization"
     },
-    topics: [
-  {
-    "id": "aws-t-1",
-    "d": 1,
-    "title": "1.1 · Design Secure Architectures (IAM, KMS/CloudHSM, WAF, VPC Security)",
-    "html": "<table class=\"keytable\">\n<tr><th>Servicio</th><th>Cuándo es la respuesta correcta en SAA-C03</th></tr>\n<tr><td><b>IAM Roles & Instance Profiles</b></td><td>Otorgar permisos temporales rotados automáticamente a EC2, ECS o Lambda sin guardar credenciales en disco ni variables.</td></tr>\n<tr><td><b>Secrets Manager vs Parameter Store</b></td><td><b>Secrets Manager</b> rota automáticamente contraseñas con integración nativa RDS/Redshift/DocumentDB; <b>Parameter Store</b> guarda configuración jerárquica.</td></tr>\n<tr><td><b>KMS vs CloudHSM</b></td><td><b>KMS</b> es gestionado y multi-tenant; <b>CloudHSM</b> provee hardware HSM dedicado single-tenant bajo tu control exclusivo (FIPS 140-2 Nivel 3).</td></tr>\n<tr><td><b>AWS WAF vs Shield vs GuardDuty</b></td><td><b>WAF</b> filtra HTTP/HTTPS (SQLi, XSS) en ALB/CloudFront/API Gateway; <b>Shield</b> protege contra DDoS; <b>GuardDuty</b> detecta amenazas analizando CloudTrail, VPC Flow Logs y DNS.</td></tr>\n</table>"
-  },
-  {
-    "id": "aws-t-2",
-    "d": 2,
-    "title": "2.1 · Design Resilient Architectures (Multi-AZ, SQS/SNS, Aurora, Route 53, DR)",
-    "html": "<table class=\"keytable\">\n<tr><th>Patrón / Servicio</th><th>Clave de examen</th></tr>\n<tr><td><b>RDS Multi-AZ vs Read Replicas</b></td><td><b>Multi-AZ</b> es para alta disponibilidad (replicación síncrona y failover automático sin pérdida de datos); <b>Read Replicas</b> son asíncronas para escalar lecturas.</td></tr>\n<tr><td><b>SQS vs SNS vs EventBridge</b></td><td><b>SQS</b> desacopla mediante cola pull (con FIFO para orden estricto y deduplicación); <b>SNS</b> hace fan-out pub/sub a múltiples destinos; <b>EventBridge</b> filtra y enruta eventos JSON por reglas.</td></tr>\n<tr><td><b>Estrategias DR (RPO/RTO)</b></td><td>De menor a mayor costo y velocidad: <b>Backup & Restore</b> (horas) → <b>Pilot Light</b> (núcleo mínimo apagado/mínimo) → <b>Warm Standby</b> (escalado reducido activo) → <b>Multi-Site Active-Active</b> (segundos/cero).</td></tr>\n</table>"
-  },
-  {
-    "id": "aws-t-3",
-    "d": 3,
-    "title": "3.1 · Design High-Performing Architectures (EBS, EFS, ElastiCache, CloudFront, Global Accelerator)",
-    "html": "<table class=\"keytable\">\n<tr><th>Servicio</th><th>Cuándo elegirlo</th></tr>\n<tr><td><b>EBS vs EFS vs FSx for Lustre</b></td><td><b>EBS</b>: bloque para 1 instancia en 1 AZ; <b>EFS</b>: sistema de archivos NFS compartido Linux multi-AZ; <b>FSx for Lustre</b>: cómputo HPC de alto rendimiento integrado con S3.</td></tr>\n<tr><td><b>ElastiCache Redis vs Memcached</b></td><td><b>Redis</b> si necesitas persistencia, replicación Multi-AZ con failover, pub/sub o estructuras ordenadas (leaderboards); <b>Memcached</b> para caché simple multihilo sin persistencia.</td></tr>\n<tr><td><b>CloudFront vs Global Accelerator</b></td><td><b>CloudFront</b> cachea contenido HTTP/HTTPS estático y dinámico en Edge Locations; <b>Global Accelerator</b> optimiza la ruta TCP/UDP usando IPs estáticas Anycast sobre la red troncal de AWS.</td></tr>\n</table>"
-  },
-  {
-    "id": "aws-t-4",
-    "d": 4,
-    "title": "4.1 · Design Cost-Optimized Architectures (S3 Tiers, EC2 Pricing, Compute Optimizer)",
-    "html": "<table class=\"keytable\">\n<tr><th>Opción</th><th>Optimización de costos en SAA-C03</th></tr>\n<tr><td><b>S3 Storage Classes</b></td><td><b>S3 Intelligent-Tiering</b> para patrones de acceso desconocidos o cambiantes sin cargos de recuperación; <b>Standard-IA / One Zone-IA</b> para acceso infrecuente conocido (>30 días); <b>Glacier Flexible / Deep Archive</b> para archivo de largo plazo.</td></tr>\n<tr><td><b>EC2 Pricing Models</b></td><td><b>Spot Instances</b> (hasta 90 % descuento) para cargas tolerantes a interrupciones (batch, stateless); <b>Savings Plans / Reserved Instances</b> (1–3 años) para uso base constante; <b>On-Demand</b> para picos impredecibles que no pueden interrumpirse.</td></tr>\n<tr><td><b>Gateway VPC Endpoints</b></td><td>Los Gateway Endpoints para <b>S3 y DynamoDB</b> son <b>gratuitos</b> y evitan pagar cargos de procesamiento por GB en el NAT Gateway.</td></tr>\n</table>"
-  }
-],
-    questions: [
+    "topics": [
+      {
+        "id": "aws-t-1",
+        "d": 1,
+        "title": "1.1 · Design Secure Architectures (IAM, KMS/CloudHSM, WAF, VPC Security)",
+        "html": "<table class=\"keytable\">\n<tr><th>Service</th><th>When it is the correct answer in SAA-C03</th></tr>\n<tr><td><b>IAM Roles & Instance Profiles</b></td><td>Grant temporary, automatically rotated permissions to EC2, ECS, or Lambda without storing credentials on disk or in variables.</td></tr>\n<tr><td><b>Secrets Manager vs Parameter Store</b></td><td><b>Secrets Manager</b> automatically rotates passwords with native RDS/Redshift/DocumentDB integration; <b>Parameter Store</b> stores hierarchical configuration.</td></tr>\n<tr><td><b>KMS vs CloudHSM</b></td><td><b>KMS</b> is managed and multi-tenant; <b>CloudHSM</b> provides dedicated single-tenant HSM hardware under your exclusive control (FIPS 140-2 Level 3).</td></tr>\n<tr><td><b>AWS WAF vs Shield vs GuardDuty</b></td><td><b>WAF</b> filters HTTP/HTTPS (SQLi, XSS) on ALB/CloudFront/API Gateway; <b>Shield</b> protects against DDoS; <b>GuardDuty</b> detects threats by analyzing CloudTrail, VPC Flow Logs, and DNS.</td></tr>\n</table>"
+      },
+      {
+        "id": "aws-t-2",
+        "d": 2,
+        "title": "2.1 · Design Resilient Architectures (Multi-AZ, SQS/SNS, Aurora, Route 53, DR)",
+        "html": "<table class=\"keytable\">\n<tr><th>Pattern / Service</th><th>Exam key</th></tr>\n<tr><td><b>RDS Multi-AZ vs Read Replicas</b></td><td><b>Multi-AZ</b> is for high availability (synchronous replication and automatic failover with no data loss); <b>Read Replicas</b> are asynchronous and scale reads.</td></tr>\n<tr><td><b>SQS vs SNS vs EventBridge</b></td><td><b>SQS</b> decouples through a pull queue (with FIFO for strict ordering and deduplication); <b>SNS</b> does pub/sub fan-out to multiple destinations; <b>EventBridge</b> filters and routes JSON events by rules.</td></tr>\n<tr><td><b>DR Strategies (RPO/RTO)</b></td><td>From lowest to highest cost and speed: <b>Backup & Restore</b> (hours) → <b>Pilot Light</b> (minimal core off/minimal) → <b>Warm Standby</b> (reduced-scale active) → <b>Multi-Site Active-Active</b> (seconds/zero).</td></tr>\n</table>"
+      },
+      {
+        "id": "aws-t-3",
+        "d": 3,
+        "title": "3.1 · Design High-Performing Architectures (EBS, EFS, ElastiCache, CloudFront, Global Accelerator)",
+        "html": "<table class=\"keytable\">\n<tr><th>Service</th><th>When to choose it</th></tr>\n<tr><td><b>EBS vs EFS vs FSx for Lustre</b></td><td><b>EBS</b>: block storage for 1 instance in 1 AZ; <b>EFS</b>: shared multi-AZ Linux NFS file system; <b>FSx for Lustre</b>: high-performance HPC compute integrated with S3.</td></tr>\n<tr><td><b>ElastiCache Redis vs Memcached</b></td><td><b>Redis</b> if you need persistence, Multi-AZ replication with failover, pub/sub, or sorted structures (leaderboards); <b>Memcached</b> for simple multithreaded caching without persistence.</td></tr>\n<tr><td><b>CloudFront vs Global Accelerator</b></td><td><b>CloudFront</b> caches static and dynamic HTTP/HTTPS content at Edge Locations; <b>Global Accelerator</b> optimizes the TCP/UDP path using static Anycast IPs over the AWS backbone network.</td></tr>\n</table>"
+      },
+      {
+        "id": "aws-t-4",
+        "d": 4,
+        "title": "4.1 · Design Cost-Optimized Architectures (S3 Tiers, EC2 Pricing, Compute Optimizer)",
+        "html": "<table class=\"keytable\">\n<tr><th>Option</th><th>Cost optimization in SAA-C03</th></tr>\n<tr><td><b>S3 Storage Classes</b></td><td><b>S3 Intelligent-Tiering</b> for unknown or changing access patterns with no retrieval charges; <b>Standard-IA / One Zone-IA</b> for known infrequent access (>30 days); <b>Glacier Flexible / Deep Archive</b> for long-term archival.</td></tr>\n<tr><td><b>EC2 Pricing Models</b></td><td><b>Spot Instances</b> (up to 90% discount) for interruption-tolerant workloads (batch, stateless); <b>Savings Plans / Reserved Instances</b> (1–3 years) for constant baseline usage; <b>On-Demand</b> for unpredictable spikes that cannot be interrupted.</td></tr>\n<tr><td><b>Gateway VPC Endpoints</b></td><td>Gateway Endpoints for <b>S3 and DynamoDB</b> are <b>free</b> and avoid paying per-GB processing charges on the NAT Gateway.</td></tr>\n</table>"
+      }
+    ],
+    "questions": [
       {
         "id": "aws-001",
         "d": 1,
@@ -670,309 +669,309 @@
         "e": "2M requests × 200ms = 400,000 seconds of compute. With 128MB memory Lambda: 400,000 GB-seconds × 0.0000166667 = ~$6.67/month + 2M requests × $0.0000002 = $0.40 = ~$7/month (after free tier). A t3.large On-Demand costs ~$60/month. Lambda is ~8x cheaper for this intermittent workload. EC2 Reserved Instances would reduce to ~$35/month (1-year) — still 5x more expensive. The key insight: Lambda excels when compute time is a small fraction of wall-clock time. EC2 becomes cost-competitive when requests arrive continuously (high utilization), but for 2M requests at 200ms, actual compute time is a tiny fraction of 30 days."
       }
     ],
-    why: {
+    "why": {
       "aws-001": [
         null,
-        "`S3 Block Public Access` solo bloquea peticiones públicas o anónimas; no restringe el acceso de identidades autenticadas de `IAM` ni del usuario `root`.",
-        "`S3 Object Lock` en modo compliance protege contra sobrescritura o borrado de objetos (WORM), pero no restringe el acceso de lectura a otras identidades.",
-        "Un `S3 Access Point` por VPC limita la ruta de red, pero no anula el acceso directo al bucket desde otras credenciales autorizadas ni bloquea a `root` sin un `Deny` explícito."
+        "`S3 Block Public Access` only blocks public or anonymous requests; it does not restrict access by authenticated `IAM` identities or the `root` user.",
+        "`S3 Object Lock` in compliance mode protects against overwriting or deleting objects (WORM), but does not restrict read access for other identities.",
+        "A per-VPC `S3 Access Point` limits the network path, but does not override direct access to the bucket from other authorized credentials, nor does it block `root` without an explicit `Deny`."
       ],
       "aws-002": [
-        "Eliminar el usuario `IAM` de inmediato destruye dependencias y permisos antes de contener el riesgo, y toma más tiempo que desactivar la clave expuesta.",
-        "Generar nuevas claves y actualizar servicios antes de revocar la anterior deja la clave filtrada activa y explotable mientras dura el despliegue.",
+        "Deleting the `IAM` user immediately destroys dependencies and permissions before the risk is contained, and takes longer than deactivating the exposed key.",
+        "Generating new keys and updating services before revoking the old one leaves the leaked key active and exploitable for the duration of the rollout.",
         null,
-        "Exigir `MFA` para llamadas a la API mediante políticas no invalida de inmediato las credenciales estáticas comprometidas si no se desactivan primero."
+        "Requiring `MFA` for API calls through policies does not immediately invalidate the compromised static credentials unless they are deactivated first."
       ],
       "aws-003": [
-        "Guardar credenciales en variables de entorno deja claves estáticas en el sistema operativo y no evita el almacenamiento local en la instancia `EC2`.",
+        "Storing credentials in environment variables leaves static keys on the operating system and does not avoid local storage on the `EC2` instance.",
         null,
-        "`AWS Secrets Manager` sirve para credenciales de bases de datos o APIs externas, pero para llamadas al SDK de AWS la práctica recomendada es un `IAM role`.",
-        "Cifrar credenciales con `AWS KMS` en archivos de configuración sigue requiriendo almacenar claves en la instancia y gestionar el descifrado inicial."
+        "`AWS Secrets Manager` is meant for database credentials or external API credentials, but for AWS SDK calls the recommended practice is an `IAM role`.",
+        "Encrypting credentials with `AWS KMS` in configuration files still requires storing keys on the instance and handling the initial decryption."
       ],
       "aws-004": [
-        "`Parameter Store` Standard no incluye rotación automática nativa para `Amazon RDS`; requiere implementar y mantener funciones `Lambda` personalizadas.",
-        "`Parameter Store` Advanced soporta parámetros más grandes y políticas de expiración, pero carece de rotación automática nativa integrada con `RDS`.",
+        "`Parameter Store` Standard does not include native automatic rotation for `Amazon RDS`; it requires implementing and maintaining custom `Lambda` functions.",
+        "`Parameter Store` Advanced supports larger parameters and expiration policies, but lacks native automatic rotation integrated with `RDS`.",
         null,
-        "`AWS KMS` gestiona claves criptográficas y su rotación anual, pero no almacena ni rota secretos de aplicación como contraseñas de bases de datos."
+        "`AWS KMS` manages cryptographic keys and their annual rotation, but does not store or rotate application secrets such as database passwords."
       ],
       "aws-005": [
-        "`Cognito User Pools` gestiona el directorio de usuarios y emite tokens `JWT` (ID, Access, Refresh), pero no otorga credenciales temporales de `IAM` para llamadas directas a AWS.",
+        "`Cognito User Pools` manages the user directory and issues `JWT` tokens (ID, Access, Refresh), but does not grant temporary `IAM` credentials for direct calls to AWS.",
         null,
-        "Los resource servers en `User Pools` definen scopes personalizados de `OAuth 2.0` para APIs propias, no credenciales de `IAM` para servicios de AWS como `S3` o `DynamoDB`.",
-        "`Cognito Sync` sincroniza preferencias y datos de perfil de usuario entre dispositivos cliente; no provee credenciales temporales de `IAM` para AWS."
+        "Resource servers in `User Pools` define custom `OAuth 2.0` scopes for your own APIs, not `IAM` credentials for AWS services such as `S3` or `DynamoDB`.",
+        "`Cognito Sync` synchronizes preferences and user profile data across client devices; it does not provide temporary `IAM` credentials for AWS."
       ],
       "aws-006": [
-        "En `AWS KMS` (incluso con CMK), AWS opera y administra los HSMs multi-tenant subyacentes, por lo que no existe control exclusivo del hardware físico.",
-        "Las claves gestionadas por AWS en `AWS KMS` están totalmente bajo control operativo de AWS, sin aislamiento de hardware dedicado exclusivo para el cliente.",
+        "In `AWS KMS` (even with a CMK), AWS operates and administers the underlying multi-tenant HSMs, so there is no exclusive control of the physical hardware.",
+        "AWS-managed keys in `AWS KMS` are fully under AWS's operational control, with no dedicated hardware isolation exclusive to the customer.",
         null,
-        "`SSE-KMS` delega el control criptográfico a `AWS KMS`, donde el hardware HSM es multi-tenant y gestionado por AWS, sin cumplir con el control exclusivo requerido."
+        "`SSE-KMS` delegates cryptographic control to `AWS KMS`, where the HSM hardware is multi-tenant and managed by AWS, failing to meet the required exclusive control."
       ],
       "aws-007": [
-        "`AWS Shield Advanced` protege contra ataques de denegación de servicio distribuido (DDoS) a nivel de red y transporte, pero no filtra ataques dirigidos como SQLi y XSS en Capa 7.",
+        "`AWS Shield Advanced` protects against distributed denial-of-service (DDoS) attacks at the network and transport layers, but does not filter targeted attacks such as SQLi and XSS at Layer 7.",
         null,
-        "Los `Security Groups` operan en Capa 4 (IP y puertos) y no pueden inspeccionar el cuerpo ni los encabezados HTTP/HTTPS donde residen SQLi y XSS.",
-        "`Amazon Inspector` detecta vulnerabilidades y paquetes desactualizados en instancias `EC2` o contenedores; no bloquea tráfico web malicioso en tiempo real."
+        "`Security Groups` operate at Layer 4 (IP and ports) and cannot inspect the HTTP/HTTPS body or headers where SQLi and XSS reside.",
+        "`Amazon Inspector` detects vulnerabilities and outdated packages on `EC2` instances or containers; it does not block malicious web traffic in real time."
       ],
       "aws-008": [
-        "Los `Security Groups` son stateful y solo admiten reglas de tipo `Allow`; no permiten definir reglas explícitas de tipo `Deny` para bloquear rangos de IP.",
+        "`Security Groups` are stateful and only support `Allow` rules; they do not allow defining explicit `Deny` rules to block IP ranges.",
         null,
-        "Asignar `Elastic IPs` con `Internet Gateway` a instancias privadas las expondría a conexiones entrantes desde internet, violando el aislamiento requerido.",
-        "Una instancia `NAT` es una solución heredada con sobrecarga de administración, y las `Network ACLs` se asocian a subredes completas, no a tablas de ruteo."
+        "Assigning `Elastic IPs` with an `Internet Gateway` to private instances would expose them to inbound connections from the internet, violating the required isolation.",
+        "A `NAT` instance is a legacy solution with administrative overhead, and `Network ACLs` are associated with entire subnets, not with route tables."
       ],
       "aws-009": [
-        "Un límite de permisos de IAM (`permissions boundary`) puede ser modificado o desasociado por un administrador local con privilegios en la cuenta miembro.",
+        "An IAM permissions boundary (`permissions boundary`) can be modified or detached by a local administrator with privileges in the member account.",
         null,
-        "La validación de archivos y `MFA Delete` protegen la integridad y borrado de logs en `S3`, pero no impiden que un administrador ejecute `cloudtrail:StopLogging`.",
-        "`AWS Config` detecta y remedia de forma reactiva tras el evento, dejando una ventana de tiempo sin registro de auditoría."
+        "File validation and `MFA Delete` protect the integrity and deletion of logs in `S3`, but do not prevent an administrator from running `cloudtrail:StopLogging`.",
+        "`AWS Config` detects and remediates reactively after the event, leaving a window of time with no audit logging."
       ],
       "aws-010": [
-        "`Site-to-Site VPN` cifra el tráfico mediante túneles `IPsec`, pero utiliza la internet pública y no proporciona una conexión física dedicada.",
-        "`AWS Direct Connect` ofrece una conexión física dedicada y privada, pero de forma predeterminada no cifra el tráfico en tránsito.",
+        "`Site-to-Site VPN` encrypts traffic through `IPsec` tunnels, but uses the public internet and does not provide a dedicated physical connection.",
+        "`AWS Direct Connect` offers a dedicated, private physical connection, but by default does not encrypt traffic in transit.",
         null,
-        "`AWS PrivateLink` conecta VPCs con servicios de AWS o SaaS; no establece una conexión física dedicada desde centros de datos locales."
+        "`AWS PrivateLink` connects VPCs to AWS services or SaaS; it does not establish a dedicated physical connection from on-premises data centers."
       ],
       "aws-011": [
-        "`S3 Object Ownership` con `Bucket owner enforced` desactiva las ACLs, pero no bloquea políticas de bucket que otorguen acceso público.",
+        "`S3 Object Ownership` with `Bucket owner enforced` disables ACLs, but does not block bucket policies that grant public access.",
         null,
-        "Bloquear `s3:PutBucketPolicy` vía `SCP` impediría configurar políticas legítimas y necesarias en todos los buckets de la cuenta.",
-        "`S3 Versioning` con `MFA Delete` evita el borrado accidental o malicioso de objetos, pero no restringe el acceso de lectura público."
+        "Blocking `s3:PutBucketPolicy` via `SCP` would prevent configuring legitimate and necessary policies on all buckets in the account.",
+        "`S3 Versioning` with `MFA Delete` prevents accidental or malicious deletion of objects, but does not restrict public read access."
       ],
       "aws-012": [
-        "Crear roles `IAM` de acceso cruzado en cada cuenta otorga permisos en las cuentas miembro y requiere gestión manual sin proveer agregación nativa.",
+        "Creating cross-account `IAM` roles in each account grants permissions in the member accounts and requires manual management without providing native aggregation.",
         null,
-        "Reenviar eventos con `EventBridge` a un data lake en `S3` requiere construir un pipeline de ingesta y análisis a medida en lugar de usar la integración nativa de AWS.",
-        "Desplegar agentes en `EC2` añade sobrecarga operativa, costo de licencias y no se integra nativamente con los hallazgos de `GuardDuty` e `Inspector`."
+        "Forwarding events with `EventBridge` to an `S3` data lake requires building a custom ingestion and analysis pipeline instead of using the native AWS integration.",
+        "Deploying agents on `EC2` adds operational overhead and licensing costs, and does not integrate natively with `GuardDuty` and `Inspector` findings."
       ],
       "aws-013": [
-        "Las réplicas de lectura de `RDS` usan replicación asíncrona (con riesgo de pérdida de datos) y no admiten failover automático para alta disponibilidad.",
+        "`RDS` read replicas use asynchronous replication (with risk of data loss) and do not support automatic failover for high availability.",
         null,
-        "Los snapshots y la recuperación a un punto en el tiempo (`PITR`) requieren aprovisionar una nueva instancia manualmente, lo que tarda mucho más de 120 segundos.",
-        "`Aurora Global Database` está diseñado para recuperación ante desastres entre regiones distintas, no para alta disponibilidad local con failover en segundos en RDS MySQL."
+        "Snapshots and point-in-time recovery (`PITR`) require provisioning a new instance manually, which takes much longer than 120 seconds.",
+        "`Aurora Global Database` is designed for disaster recovery across different Regions, not for local high availability with failover in seconds on RDS MySQL."
       ],
       "aws-014": [
-        "Las colas `Standard` entregan mensajes al menos una vez (con posibles duplicados) y no garantizan el orden estricto de procesamiento.",
-        "Las colas `Standard` no admiten atributos de deduplicación nativos ni garantizan el procesamiento en orden FIFO.",
-        "El long polling optimiza el costo y la latencia de sondeo en colas `FIFO`, pero requiere configurar la deduplicación para evitar reprocesar mensajes idénticos.",
+        "`Standard` queues deliver messages at least once (with possible duplicates) and do not guarantee strict processing order.",
+        "`Standard` queues do not support native deduplication attributes nor guarantee FIFO-order processing.",
+        "Long polling optimizes polling cost and latency on `FIFO` queues, but deduplication must be configured to avoid reprocessing identical messages.",
         null
       ],
       "aws-015": [
-        "`Backup and Restore` requiere restaurar infraestructuras y bases de datos desde copias de seguridad, con un RTO típicamente de varias horas.",
-        "`Pilot Light` mantiene los datos replicados pero los servicios apagados; aprovisionar y levantar la flota de cómputo en una hora puede exceder el RTO o fallar ante alta demanda.",
+        "`Backup and Restore` requires restoring infrastructure and databases from backups, with an RTO typically of several hours.",
+        "`Pilot Light` keeps the data replicated but the services off; provisioning and starting the compute fleet within one hour may exceed the RTO or fail under high demand.",
         null,
-        "`Active-Active Multi-Region` cumple con RTO/RPO inmediatos pero duplica los costos de infraestructura completa, resultando excesivamente costoso para un RTO de 1 hora."
+        "`Active-Active Multi-Region` meets immediate RTO/RPO but doubles the full infrastructure costs, making it excessively expensive for a 1-hour RTO."
       ],
       "aws-016": [
-        "`Application Load Balancer` opera exclusivamente en Capa 7 (HTTP/HTTPS/gRPC) y no admite listeners en Capa 4 para tráfico TCP o UDP sin procesar.",
+        "`Application Load Balancer` operates exclusively at Layer 7 (HTTP/HTTPS/gRPC) and does not support Layer 4 listeners for raw TCP or UDP traffic.",
         null,
-        "`Classic Load Balancer` admite protocolos L4 y L7 básicos, pero carece de enrutamiento avanzado por ruta (`path`) y host de Capa 7.",
-        "`AWS Global Accelerator` es un servicio de enrutamiento de red Anycast en Capa 4, no un balanceador de carga con reglas de enrutamiento HTTP por ruta."
+        "`Classic Load Balancer` supports basic L4 and L7 protocols, but lacks advanced Layer 7 path-based (`path`) and host-based routing.",
+        "`AWS Global Accelerator` is a Layer 4 Anycast network routing service, not a load balancer with HTTP path-based routing rules."
       ],
       "aws-017": [
-        "En una cola `SQS` estándar cada mensaje es consumido por un único worker; no permite distribuir una copia idéntica a múltiples servicios independientes.",
+        "In a standard `SQS` queue each message is consumed by a single worker; it does not allow distributing an identical copy to multiple independent services.",
         null,
-        "`Amazon Kinesis Data Streams` requiere gestionar el número de shards, procesar offsets manualmente y tiene mayor sobrecarga operativa para pub/sub simple.",
-        "Los webhooks HTTP punto a punto exigen que el publicador mantenga y gestione la lista de endpoints receptores, agregando sobrecarga operativa."
+        "`Amazon Kinesis Data Streams` requires managing the number of shards, processing offsets manually, and has higher operational overhead for simple pub/sub.",
+        "Point-to-point HTTP webhooks require the publisher to maintain and manage the list of receiving endpoints, adding operational overhead."
       ],
       "aws-018": [
-        "`Weighted routing` distribuye porcentajes fijos de tráfico, por lo que el 90 % de los usuarios seguiría recibiendo errores si la región primaria falla.",
-        "`Latency-based routing` dirige las peticiones a la región más cercana, pero sin una política de failover no redirige automáticamente todo el tráfico ante una caída regional.",
+        "`Weighted routing` distributes fixed percentages of traffic, so 90% of users would keep receiving errors if the primary Region fails.",
+        "`Latency-based routing` directs requests to the nearest Region, but without a failover policy it does not automatically redirect all traffic during a Regional outage.",
         null,
-        "`Geolocation routing` restringe el tráfico por ubicación geográfica del cliente, ignorando el estado de salud de los endpoints de la aplicación."
+        "`Geolocation routing` restricts traffic by the client's geographic location, ignoring the health status of the application endpoints."
       ],
       "aws-019": [
-        "`Aurora Multi-AZ` provee alta disponibilidad local y réplicas entre zonas de disponibilidad de una misma región, no replicación entre regiones globales.",
+        "`Aurora Multi-AZ` provides local high availability and replicas across Availability Zones within a single Region, not replication across global Regions.",
         null,
-        "Las réplicas entre regiones estándar de `Aurora` usan replicación por binlog de motor, lo que introduce mayor latencia de replicación y carece de failover gestionado.",
-        "Restaurar copias de seguridad de `RDS` entre regiones requiere aprovisionar clusters nuevos manualmente, con tiempos de recuperación incompatibles con baja latencia."
+        "Standard cross-Region `Aurora` replicas use engine binlog replication, which introduces higher replication latency and lacks managed failover.",
+        "Restoring `RDS` backups across Regions requires provisioning new clusters manually, with recovery times incompatible with low latency."
       ],
       "aws-020": [
-        "`Rolling update` reduce temporalmente la capacidad disponible durante la sustitución por lotes y un rollback exige revertir el proceso lote por lote.",
+        "`Rolling update` temporarily reduces available capacity during batch replacement, and a rollback requires reverting the process batch by batch.",
         null,
-        "Un despliegue `in-place` detiene los servicios en las instancias existentes mientras actualiza el código, provocando degradación o tiempo de inactividad.",
-        "`Canary` envía un porcentaje pequeño a instancias de prueba para validar errores, pero no aprovisiona una flota completa paralela antes de cambiar el balanceador."
+        "An `in-place` deployment stops the services on the existing instances while updating the code, causing degradation or downtime.",
+        "`Canary` sends a small percentage to test instances to validate errors, but does not provision a full parallel fleet before switching the load balancer."
       ],
       "aws-021": [
-        "Eliminar los mensajes fallidos de la cola destruye la carga útil original (`payload`), impidiendo su posterior depuración y reprocesamiento.",
+        "Deleting failed messages from the queue destroys the original payload (`payload`), preventing later debugging and reprocessing.",
         null,
-        "Aumentar el `visibility timeout` solo retrasa la reaparición del mensaje fallido en la cola, provocando bucles infinitos de reintentos que no aíslan el error.",
-        "En una cola `FIFO` sin DLQ, un mensaje fallido bloquea por completo a todos los mensajes posteriores pertenecientes al mismo `MessageGroupId`."
+        "Increasing the `visibility timeout` only delays the failed message's reappearance in the queue, causing infinite retry loops that do not isolate the error.",
+        "In a `FIFO` queue without a DLQ, a failed message completely blocks all subsequent messages belonging to the same `MessageGroupId`."
       ],
       "aws-022": [
-        "`PITR` protege contra corrupciones de datos o borrados accidentales, pero requiere restaurar una tabla nueva manualmente con RTO de minutos u horas.",
+        "`PITR` protects against data corruption or accidental deletion, but requires restoring a new table manually with an RTO of minutes to hours.",
         null,
-        "Restaurar un backup en otra región es un proceso manual que puede tardar horas y pierde los datos generados desde el último snapshot.",
-        "Usar `DynamoDB Streams` y `Lambda` es una solución artesanal que introduce latencia de replicación variable y alta sobrecarga frente a `Global Tables`."
+        "Restoring a backup in another Region is a manual process that can take hours and loses the data generated since the last snapshot.",
+        "Using `DynamoDB Streams` and `Lambda` is a homegrown solution that introduces variable replication latency and high overhead compared to `Global Tables`."
       ],
       "aws-023": [
-        "La familia `C` (Compute Optimized) prioriza potencia de cómputo por vCPU y tiene una relación memoria-vCPU muy baja para cargas de 2 TB en RAM.",
+        "The `C` family (Compute Optimized) prioritizes compute power per vCPU and has a very low memory-to-vCPU ratio for workloads needing 2 TB of RAM.",
         null,
-        "La familia `P` (Accelerated Computing) está orientada a aprendizaje automático y renderizado con GPUs, con un costo muy alto e innecesario para cálculos en RAM.",
-        "La familia `I` (Storage Optimized) maximiza el rendimiento de E/S en discos NVMe locales, no la densidad de memoria RAM por vCPU."
+        "The `P` family (Accelerated Computing) is oriented toward machine learning and GPU rendering, at a very high cost that is unnecessary for in-RAM calculations.",
+        "The `I` family (Storage Optimized) maximizes I/O performance on local NVMe disks, not RAM density per vCPU."
       ],
       "aws-024": [
-        "Los volúmenes `gp3` tienen un límite máximo de 16.000 IOPS, insuficiente para el requisito de 64.000 IOPS.",
-        "Los volúmenes `gp2` escalan a 3 IOPS/GiB y tienen un techo absoluto de 16.000 IOPS sin permitir aprovisionar IOPS independientemente del tamaño.",
+        "`gp3` volumes have a maximum limit of 16,000 IOPS, insufficient for the 64,000 IOPS requirement.",
+        "`gp2` volumes scale at 3 IOPS/GiB and have an absolute ceiling of 16,000 IOPS, without allowing IOPS to be provisioned independently of size.",
         null,
-        "Los volúmenes `st1` son discos magnéticos diseñados para transferencias secuenciales masivas (throughput) y no pueden suministrar miles de IOPS aleatorias."
+        "`st1` volumes are magnetic disks designed for massive sequential transfers (throughput) and cannot deliver thousands of random IOPS."
       ],
       "aws-025": [
-        "Las réplicas de lectura alivian la carga de la base primaria, pero las lecturas siguen requiriendo I/O de base de datos relacional con latencias de milisegundos en lugar de submilisegundo.",
-        "`Performance Insights` es una herramienta de diagnóstico para monitorizar cuellos de botella; no almacena en caché ni acelera las consultas por sí misma.",
+        "Read replicas relieve load on the primary database, but reads still require relational database I/O with millisecond latencies instead of sub-millisecond.",
+        "`Performance Insights` is a diagnostic tool for monitoring bottlenecks; it does not cache or accelerate queries by itself.",
         null,
-        "Escalar verticalmente la instancia añade CPU y RAM al motor MySQL, pero no evita el costo computacional ni la latencia de consultar el motor relacional en cada petición."
+        "Vertically scaling the instance adds CPU and RAM to the MySQL engine, but does not avoid the computational cost or latency of querying the relational engine on every request."
       ],
       "aws-026": [
-        "Mover el bucket a Asia mejoraría la latencia para los usuarios asiáticos, pero degradaría severamente la latencia para los usuarios de América y Europa.",
-        "`S3 Transfer Acceleration` acelera subidas de datos a S3 usando Edge Locations, pero no optimiza la entrega ni cachea descargas masivas de contenido estático.",
+        "Moving the bucket to Asia would improve latency for Asian users, but would severely degrade latency for users in the Americas and Europe.",
+        "`S3 Transfer Acceleration` speeds up data uploads to S3 using Edge Locations, but does not optimize delivery or cache bulk downloads of static content.",
         null,
-        "Replicar buckets en múltiples regiones con enrutamiento de `Route 53` requiere sincronización bidireccional compleja y eleva los costos y la sobrecarga operativa."
+        "Replicating buckets across multiple Regions with `Route 53` routing requires complex bidirectional synchronization and raises costs and operational overhead."
       ],
       "aws-027": [
-        "`Amazon Aurora` es una base relacional diseñada para transacciones ACID complejas; alcanzar millones de RPS de lecturas clave-valor resulta significativamente más costoso y complejo.",
+        "`Amazon Aurora` is a relational database designed for complex ACID transactions; reaching millions of key-value read RPS is significantly more costly and complex.",
         null,
-        "`ElastiCache for Memcached` carece de persistencia duradera y requiere que la aplicación implemente lógica propia para sincronizar y cargar los datos desde un almacén permanente.",
-        "`Amazon Redshift` es un almacén de datos (data warehouse) analítico OLAP optimizado para agregaciones complejas sobre columnas, no para búsquedas clave-valor por milisegundo."
+        "`ElastiCache for Memcached` lacks durable persistence and requires the application to implement its own logic to synchronize and load data from a permanent store.",
+        "`Amazon Redshift` is an OLAP analytical data warehouse optimized for complex aggregations over columns, not for millisecond key-value lookups."
       ],
       "aws-028": [
-        "`Amazon SQS` elimina los mensajes una vez procesados por los consumidores; no permite rebobinar ni reproducir (`replay`) el flujo de datos para múltiples análisis.",
-        "`Amazon SNS` entrega los mensajes inmediatamente a los suscriptores y los descarta si no hay destino disponible; no almacena datos para su posterior relectura.",
+        "`Amazon SQS` deletes messages once they are processed by consumers; it does not allow rewinding or replaying (`replay`) the data stream for multiple analyses.",
+        "`Amazon SNS` delivers messages immediately to subscribers and discards them if no destination is available; it does not store data for later re-reading.",
         null,
-        "`Amazon MQ` está pensado para migrar aplicaciones existentes con protocolos como AMQP/MQTT y no escala a flujos masivos de streaming con reproducción como `Kinesis`."
+        "`Amazon MQ` is intended for migrating existing applications with protocols such as AMQP/MQTT and does not scale to massive streaming flows with replay like `Kinesis`."
       ],
       "aws-029": [
-        "`Amazon EFS` es un sistema NFS generalista con latencias más elevadas que no soporta el acceso paralelo masivo por franjas (`striping`) que requieren las cargas HPC.",
-        "`FSx for Windows File Server` utiliza el protocolo SMB diseñado para cargas Windows, no el sistema de archivos POSIX paralelo requerido por HPC en Linux.",
+        "`Amazon EFS` is a general-purpose NFS system with higher latencies that does not support the massive parallel striping (`striping`) access that HPC workloads require.",
+        "`FSx for Windows File Server` uses the SMB protocol designed for Windows workloads, not the parallel POSIX file system required by HPC on Linux.",
         null,
-        "`EBS Multi-Attach` está limitado a una única zona de disponibilidad y hasta 16 instancias EC2 de la misma familia, por lo que no escala a cientos de nodos multi-AZ."
+        "`EBS Multi-Attach` is limited to a single Availability Zone and up to 16 EC2 instances of the same family, so it does not scale to hundreds of multi-AZ nodes."
       ],
       "aws-030": [
         null,
-        "`S3 Glacier Deep Archive` requiere entre 12 y 48 horas para recuperar objetos, incumpliendo el SLA máximo de 12 horas, y `Intelligent-Tiering` cobra tarifa por objeto.",
-        "`S3 Glacier Deep Archive` tarda hasta 48 horas en recuperar datos y `One Zone-IA` pierde redundancia geográfica al residir en una única zona de disponibilidad.",
-        "`S3 Glacier Deep Archive` tiene tiempos de recuperación estándar de 12 a 48 horas, lo que excede el requisito de disponibilidad de 12 horas."
+        "`S3 Glacier Deep Archive` takes between 12 and 48 hours to retrieve objects, failing the maximum 12-hour SLA, and `Intelligent-Tiering` charges a per-object fee.",
+        "`S3 Glacier Deep Archive` takes up to 48 hours to retrieve data, and `One Zone-IA` loses geographic redundancy because it resides in a single Availability Zone.",
+        "`S3 Glacier Deep Archive` has standard retrieval times of 12 to 48 hours, which exceeds the 12-hour availability requirement."
       ],
       "aws-031": [
-        "Modificar la estructura de claves de partición exige recrear la tabla, migrar los datos existentes y rediseñar la lógica de acceso en la aplicación.",
+        "Changing the partition key structure requires recreating the table, migrating the existing data, and redesigning the access logic in the application.",
         null,
-        "Utilizar `DynamoDB Streams` con `ElastiCache` requiere escribir código para sincronizar datos, manejar expiraciones y gestionar fallos de conectividad con la caché.",
-        "Una caché en memoria local en las instancias genera inconsistencias entre servidores, carece de persistencia y requiere código adicional de gestión de caché."
+        "Using `DynamoDB Streams` with `ElastiCache` requires writing code to synchronize data, handle expirations, and manage cache connectivity failures.",
+        "A local in-memory cache on the instances creates inconsistencies between servers, lacks persistence, and requires additional cache management code."
       ],
       "aws-032": [
-        "Las instancias `On-Demand` facturan la tarifa estándar completa sin descuentos, resultando mucho más caras para procesos tolerantes a fallos.",
-        "Las instancias reservadas comprometen el pago continuo durante 1 año (24/7), desperdiciando dinero en las 18 horas diarias en que el lote no se ejecuta.",
+        "`On-Demand` instances bill the full standard rate with no discounts, making them much more expensive for fault-tolerant processes.",
+        "Reserved instances commit to continuous payment for 1 year (24/7), wasting money during the 18 hours per day when the batch job does not run.",
         null,
-        "Los `Dedicated Hosts` asignan servidores físicos dedicados para cumplir licencias por socket, siendo la alternativa más costosa e innecesaria para batch."
+        "`Dedicated Hosts` allocate dedicated physical servers to meet per-socket licensing, making them the most expensive option and unnecessary for batch."
       ],
       "aws-033": [
-        "Las instancias `On-Demand` pagan el precio de lista completo sin ningún descuento por uso prolongado a lo largo de 3 años.",
-        "Las instancias `Spot` pueden ser interrumpidas con aviso de 2 minutos cuando AWS requiere capacidad, lo cual no es admisible para producción 24/7.",
+        "`On-Demand` instances pay the full list price with no discount for prolonged use over 3 years.",
+        "`Spot` instances can be interrupted with a 2-minute notice when AWS needs the capacity, which is unacceptable for 24/7 production.",
         null,
-        "Los `Compute Savings Plans` ofrecen flexibilidad de cambio de familia y región, pero su descuento porcentual es menor que el de RIs Standard de 3 años All Upfront."
+        "`Compute Savings Plans` offer flexibility to change family and Region, but their percentage discount is lower than that of 3-year All Upfront Standard RIs."
       ],
       "aws-034": [
-        "Las instancias `EC2` facturan continuamente por horas de encendido, acumulando costos innecesarios durante los días de tráfico casi nulo.",
-        "Las instancias reservadas comprometen un pago mensual fijo 24/7 sin importar si hay tráfico o no, siendo inadecuadas para demanda altamente impredecible.",
+        "`EC2` instances bill continuously for powered-on hours, accumulating unnecessary costs during days of near-zero traffic.",
+        "Reserved instances commit to a fixed monthly payment 24/7 regardless of whether there is traffic, making them unsuitable for highly unpredictable demand.",
         null,
-        "`ECS Fargate` cobra por segundo con un tiempo mínimo de tarea y exige mantener tareas mínimas activas para no incurrir en caídas ante picos repentinos."
+        "`ECS Fargate` charges per second with a minimum task time and requires keeping minimum tasks running to avoid outages during sudden spikes."
       ],
       "aws-035": [
-        "`S3 Intelligent-Tiering` aplica una tarifa mensual de monitorización por objeto que reduce el ahorro en grandes volúmenes de logs que nunca vuelven a leerse.",
-        "`S3 Standard-IA` reduce costos respecto a Standard, pero su costo por GB es notablemente superior al de `S3 Glacier Deep Archive` (~$0.0125 vs ~$0.00099).",
+        "`S3 Intelligent-Tiering` applies a monthly per-object monitoring fee that reduces savings on large volumes of logs that are never read again.",
+        "`S3 Standard-IA` reduces costs compared to Standard, but its cost per GB is notably higher than that of `S3 Glacier Deep Archive` (~$0.0125 vs ~$0.00099).",
         null,
-        "Habilitar `S3 Versioning` retiene versiones adicionales de objetos, lo que incrementa el espacio total almacenado y el costo de la factura en lugar de reducirlo."
+        "Enabling `S3 Versioning` retains additional object versions, which increases the total stored space and the bill instead of reducing it."
       ],
       "aws-036": [
-        "Mover instancias a una subred pública con IPs públicas viola el aislamiento de seguridad y expone servidores privados directamente a internet.",
+        "Moving instances to a public subnet with public IPs violates security isolation and exposes private servers directly to the internet.",
         null,
-        "Los Interface Endpoints (`AWS PrivateLink`) cobran tarifa fija por hora más costos por GB procesado, mientras que los Gateway VPC Endpoints para `S3` son completamente gratuitos.",
-        "`S3 Transfer Acceleration` acelera subidas a través de CloudFront Edge Locations sobre la internet pública, no reduce cargos de procesamiento de `NAT Gateway`."
+        "Interface Endpoints (`AWS PrivateLink`) charge a fixed hourly fee plus per-GB processing costs, while Gateway VPC Endpoints for `S3` are completely free.",
+        "`S3 Transfer Acceleration` speeds up uploads through CloudFront Edge Locations over the public internet; it does not reduce `NAT Gateway` processing charges."
       ],
       "aws-037": [
-        "Las `Standard Reserved Instances` exigen fijar tipo de instancia, tamaño, sistema operativo y región, sin flexibilidad alguna ante cambios de arquitectura.",
-        "Las `Convertible RIs` permiten cambiar de tipo, pero aplican únicamente a `EC2` y requieren gestionar intercambios manuales para ajustar valores equivalentes.",
-        "Los `EC2 Instance Savings Plans` exigen comprometerse con una familia de instancias concreta en una región determinada, perdiendo flexibilidad si se cambia de familia.",
+        "`Standard Reserved Instances` require fixing the instance type, size, operating system, and Region, with no flexibility at all for architecture changes.",
+        "`Convertible RIs` allow changing the type, but apply only to `EC2` and require managing manual exchanges to adjust equivalent values.",
+        "`EC2 Instance Savings Plans` require committing to a specific instance family in a given Region, losing flexibility if the family is changed.",
         null
       ],
       "aws-038": [
-        "`AWS Cost Explorer` visualiza patrones históricos de gasto y proyecciones financieras, pero no analiza métricas detalladas a nivel de SO ni recomienda configuraciones exactas.",
-        "`AWS Trusted Advisor` incluye comprobaciones generales de optimización de costos, pero no ofrece el análisis profundo por aprendizaje automático de `Compute Optimizer`.",
+        "`AWS Cost Explorer` visualizes historical spending patterns and financial forecasts, but does not analyze detailed OS-level metrics or recommend exact configurations.",
+        "`AWS Trusted Advisor` includes general cost optimization checks, but does not offer the deep machine learning analysis of `Compute Optimizer`.",
         null,
-        "`AWS Budgets` define umbrales de gasto y envía alertas cuando se superan límites presupuestarios; no analiza la infrautilización de recursos ni sugiere cambios."
+        "`AWS Budgets` defines spending thresholds and sends alerts when budget limits are exceeded; it does not analyze resource underutilization or suggest changes."
       ],
       "aws-039": [
-        "Las acciones programadas de `Auto Scaling` terminan e inicializan instancias (incurriendo en recreación), en lugar de detener y reanudar las instancias existentes con su estado.",
+        "`Auto Scaling` scheduled actions terminate and launch instances (incurring recreation), instead of stopping and resuming the existing instances with their state.",
         null,
-        "`AWS Instance Scheduler` mediante Systems Manager o CloudFormation requiere desplegar y mantener una solución con DynamoDB y permisos complejos, con mayor sobrecarga.",
-        "Las alarmas de `CloudWatch` con acciones de `EC2` detienen instancias según umbrales de métricas (p. ej. CPU baja), pero no pueden volver a encenderlas a una hora fija."
+        "`AWS Instance Scheduler` via Systems Manager or CloudFormation requires deploying and maintaining a solution with DynamoDB and complex permissions, with greater overhead.",
+        "`CloudWatch` alarms with `EC2` actions stop instances based on metric thresholds (e.g., low CPU), but cannot turn them back on at a fixed time."
       ],
       "aws-040": [
-        "`Aurora Serverless v2` escala de forma instantánea pero mantiene una capacidad mínima base continua (0.5 ACU), facturando cómputo ininterrumpido las 24 horas.",
+        "`Aurora Serverless v2` scales instantly but maintains a continuous baseline minimum capacity (0.5 ACU), billing uninterrupted compute 24 hours a day.",
         null,
-        "Aprovisionar instancias fijas `db.t3.medium` factura continuamente las 24 horas del día aunque la base de datos solo se utilice 4 horas esporádicas.",
-        "`Amazon RDS Multi-AZ` no admite el comando de parada temporal (`Stop DB cluster`) y reiniciar tras una parada tarda varios minutos, inadecuado para horarios impredecibles."
+        "Provisioning fixed `db.t3.medium` instances bills continuously 24 hours a day even if the database is only used for 4 sporadic hours.",
+        "`Amazon RDS Multi-AZ` does not support the temporary stop command (`Stop DB cluster`) and restarting after a stop takes several minutes, unsuitable for unpredictable schedules."
       ],
       "aws-041": [
-        "Crear un usuario `IAM` local exige emitir credenciales estáticas en tu cuenta en lugar de permitir que el auditor use sus propias credenciales corporativas.",
-        "Configurar políticas basadas en recursos otorga acceso únicamente a servicios puntuales (como `S3` o `KMS`), no a la revisión transversal de todos los recursos de la cuenta.",
+        "Creating a local `IAM` user requires issuing static credentials in your account instead of letting the auditor use their own corporate credentials.",
+        "Configuring resource-based policies grants access only to specific services (such as `S3` or `KMS`), not to a cross-cutting review of all the account's resources.",
         null,
-        "La API `sts:GetSessionToken` solo genera credenciales temporales para usuarios `IAM` existentes de la misma cuenta, no para identidades externas de otra cuenta."
+        "The `sts:GetSessionToken` API only generates temporary credentials for existing `IAM` users in the same account, not for external identities from another account."
       ],
       "aws-042": [
-        "El periodo de retención define cuántos días permanece un mensaje no eliminado en la cola; no impide que otros consumidores reciban mensajes en procesamiento.",
+        "The retention period defines how many days an undeleted message remains in the queue; it does not prevent other consumers from receiving messages that are being processed.",
         null,
-        "El long polling (`ReceiveMessageWaitTimeSeconds`) optimiza el consumo al esperar hasta 20 segundos para que lleguen mensajes, pero no oculta mensajes que ya están siendo procesados.",
-        "Una cola `FIFO` garantiza orden y deduplicación en la ingesta, pero si el `visibility timeout` expira antes de completar el trabajo, el mensaje se reentrega al consumidor."
+        "Long polling (`ReceiveMessageWaitTimeSeconds`) optimizes consumption by waiting up to 20 seconds for messages to arrive, but does not hide messages that are already being processed.",
+        "A `FIFO` queue guarantees ordering and deduplication on ingestion, but if the `visibility timeout` expires before the work completes, the message is redelivered to the consumer."
       ],
       "aws-043": [
-        "`ENA` mejora notablemente el ancho de banda y la latencia tradicional, pero pasa por la pila de red del sistema operativo (kernel), agregando sobrecarga frente a EFA.",
-        "Los `Cluster Placement Groups` acercan físicamente las instancias en la misma AZ, pero por sí solos no proporcionan la aceleración de red OS-bypass para cálculos MPI.",
+        "`ENA` significantly improves bandwidth and traditional latency, but goes through the operating system's (kernel) network stack, adding overhead compared to EFA.",
+        "`Cluster Placement Groups` physically bring instances closer together in the same AZ, but by themselves do not provide the OS-bypass network acceleration for MPI computations.",
         null,
-        "Los `Spread Placement Groups` distribuyen instancias en racks e infraestructuras de energía distintas para alta disponibilidad, aumentando la latencia de red entre nodos."
+        "`Spread Placement Groups` distribute instances across different racks and power infrastructures for high availability, increasing network latency between nodes."
       ],
       "aws-044": [
-        "Una instancia `t3.large` On-Demand encendida 24/7 cuesta aproximadamente $60/mes, mientras que 2 millones de ejecuciones cortas en `AWS Lambda` cuestan menos de $10/mes.",
+        "A `t3.large` On-Demand instance running 24/7 costs approximately $60/month, while 2 million short executions on `AWS Lambda` cost less than $10/month.",
         null,
-        "Las instancias `Spot` no garantizan disponibilidad continua para servicios web y siguen pagando por horas de servidor completas en lugar de milisegundos de cómputo real.",
-        "Una instancia reservada de 1 año reduce el costo de `EC2` a ~$35/mes, pero sigue siendo varias veces más cara que el costo residual de `Lambda` tras la capa gratuita."
+        "`Spot` instances do not guarantee continuous availability for web services and still pay for full server hours instead of milliseconds of actual compute.",
+        "A 1-year reserved instance reduces the cost of `EC2` to ~$35/month, but is still several times more expensive than the residual cost of `Lambda` after the free tier."
       ]
     },
-    glossary: [
-  {
-    "term": "Cognito User Pools vs Identity Pools",
-    "cat": "Security",
-    "d": 1,
-    "def": "User Pools gestiona autenticación (sign-in y JWT); Identity Pools intercambia esa identidad por credenciales IAM temporales vía STS para acceder directo a servicios AWS."
-  },
-  {
-    "term": "Gateway VPC Endpoint",
-    "cat": "Networking & Cost",
-    "d": 4,
-    "def": "Endpoint gratuito en la tabla de rutas del VPC para conectar a S3 y DynamoDB de forma privada sin pasar ni pagar por NAT Gateway."
-  },
-  {
-    "term": "S3 Object Lock",
-    "cat": "Storage & Security",
-    "d": 1,
-    "def": "Impide borrar o sobrescribir objetos en S3 bajo modelo WORM (modo Governance o modo Compliance inmutable incluso para root)."
-  },
-  {
-    "term": "Aurora Global Database",
-    "cat": "Databases",
-    "d": 2,
-    "def": "Base de datos distribuida entre múltiples regiones con replicación basada en almacenamiento (< 1s de lag) y RPO/RTO mínimos."
-  },
-  {
-    "term": "AWS Global Accelerator",
-    "cat": "Networking",
-    "d": 3,
-    "def": "Servicio de red que proporciona 2 direcciones IP estáticas Anycast y encamina tráfico TCP/UDP por la red privada global de AWS."
-  },
-  {
-    "term": "S3 Intelligent-Tiering",
-    "cat": "Cost Optimization",
-    "d": 4,
-    "def": "Clase de almacenamiento de S3 que mueve objetos automáticamente entre niveles frecuentes e infrecuentes según su uso sin costos de recuperación."
-  }
-]
+    "glossary": [
+      {
+        "term": "Cognito User Pools vs Identity Pools",
+        "cat": "Security",
+        "d": 1,
+        "def": "User Pools handles authentication (sign-in and JWT); Identity Pools exchanges that identity for temporary IAM credentials via STS to access AWS services directly."
+      },
+      {
+        "term": "Gateway VPC Endpoint",
+        "cat": "Networking & Cost",
+        "d": 4,
+        "def": "Free endpoint in the VPC route table to connect privately to S3 and DynamoDB without going through, or paying for, a NAT Gateway."
+      },
+      {
+        "term": "S3 Object Lock",
+        "cat": "Storage & Security",
+        "d": 1,
+        "def": "Prevents deleting or overwriting objects in S3 under a WORM model (Governance mode or Compliance mode, immutable even for root)."
+      },
+      {
+        "term": "Aurora Global Database",
+        "cat": "Databases",
+        "d": 2,
+        "def": "Database distributed across multiple Regions with storage-based replication (< 1s lag) and minimal RPO/RTO."
+      },
+      {
+        "term": "AWS Global Accelerator",
+        "cat": "Networking",
+        "d": 3,
+        "def": "Networking service that provides 2 static Anycast IP addresses and routes TCP/UDP traffic over the AWS global private network."
+      },
+      {
+        "term": "S3 Intelligent-Tiering",
+        "cat": "Cost Optimization",
+        "d": 4,
+        "def": "S3 storage class that automatically moves objects between frequent and infrequent access tiers based on usage, with no retrieval costs."
+      }
+    ]
   };
 })(window);

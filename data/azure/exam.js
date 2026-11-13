@@ -1,66 +1,65 @@
 /* =========================================================================
-   data/azure/exam.js — Microsoft Azure Administrator (AZ-104)
-   130 preguntas en 5 dominios con explicación por opción errónea (WHY)
+   data/azure/exam.js — Microsoft Azure · Administrator (AZ-104) (English)
    ========================================================================= */
 (function (w) {
   w.EXAMS = w.EXAMS || {};
   w.EXAMS["az-104"] = {
-    id: "az-104",
-    appId: "az-104",
-    provider: "Microsoft Azure",
-    badge: "Azure · AZ-104",
-    icon: "🔷",
-    color: "#0078d4",
-    title: "Microsoft Azure · Administrator (AZ-104)",
-    subtitle: "Identidades y Gobernanza (Entra ID, RBAC, Policy), Almacenamiento, Cómputo (VMs, AKS, App Service), Redes y Monitoreo.",
-    passingScore: 70,
-    domains: {
-      1: "Identities & Governance (20 %)",
-      2: "Storage (15 %)",
-      3: "Compute (20 %)",
-      4: "Networking (25 %)",
-      5: "Monitor & Backup (20 %)"
+    "id": "az-104",
+    "appId": "az-104",
+    "provider": "Microsoft Azure",
+    "badge": "Azure · AZ-104",
+    "icon": "🔷",
+    "color": "#0078d4",
+    "title": "Microsoft Azure · Administrator (AZ-104)",
+    "subtitle": "Identity and Governance (Entra ID, RBAC, Policy), Storage, Compute (VMs, AKS, App Service), Networking, and Monitoring.",
+    "passingScore": 70,
+    "domains": {
+      "1": "Identities & Governance (20 %)",
+      "2": "Storage (15 %)",
+      "3": "Compute (20 %)",
+      "4": "Networking (25 %)",
+      "5": "Monitor & Backup (20 %)"
     },
-    shortDomains: {
-      1: "Identities",
-      2: "Storage",
-      3: "Compute",
-      4: "Networking",
-      5: "Monitor & Backup"
+    "shortDomains": {
+      "1": "Identities",
+      "2": "Storage",
+      "3": "Compute",
+      "4": "Networking",
+      "5": "Monitor & Backup"
     },
-    topics: [
-  {
-    "id": "az-t-1",
-    "d": 1,
-    "title": "1.1 · Identidades (Entra ID / Azure AD) y Gobernanza (RBAC, Policy, Locks)",
-    "html": "<table class=\"keytable\">\n<tr><th>Componente</th><th>Propósito clave en el examen AZ-104</th><th>Diferencia crítica</th></tr>\n<tr><td><b>Entra ID Roles vs Azure RBAC</b></td><td>Entra ID gestiona identidades del directorio (Global Admin, User Admin); Azure RBAC gestiona recursos Azure en jerarquía Management Group → Subscription → Resource Group → Resource.</td><td><b>Owner</b> puede delegar permisos; <b>Contributor</b> gestiona todo salvo dar acceso; <b>User Access Admin</b> solo asigna roles.</td></tr>\n<tr><td><b>Azure Policy</b></td><td>Evalúa y fuerza el cumplimiento de propiedades de recursos (regiones permitidas, SKUs, etiquetas).</td><td>Efectos clave: <b>Deny</b> (bloquea), <b>Audit</b> (solo registra), <b>Modify</b> (añade/edita tags), <b>DeployIfNotExists</b>.</td></tr>\n<tr><td><b>Resource Locks</b></td><td><code>CanNotDelete</code> (permite modificar pero no borrar) y <code>ReadOnly</code> (bloquea cambios en el plano de control).</td><td>Los bloqueos prevalecen incluso sobre el rol <b>Owner</b> hasta que se retira explícitamente el lock.</td></tr>\n<tr><td><b>Conditional Access & PIM</b></td><td>Conditional Access exige MFA/dispositivo según señales (requiere P1); PIM otorga acceso privilegiado Just-In-Time (requiere P2).</td><td><b>B2B</b> invita socios como Guest a tu tenant; <b>B2C</b> es una plataforma CIAM para clientes externos.</td></tr>\n</table>"
-  },
-  {
-    "id": "az-t-2",
-    "d": 2,
-    "title": "2.1 · Azure Storage: Redundancia, Tiers, SAS e Inmutabilidad",
-    "html": "<table class=\"keytable\">\n<tr><th>Redundancia</th><th>Copias y alcance</th><th>Cuándo elegirla</th></tr>\n<tr><td><b>LRS</b></td><td>3 copias síncronas en un único datacenter.</td><td>Menor costo, sin tolerancia a caída de zona ni región.</td></tr>\n<tr><td><b>ZRS</b></td><td>3 copias síncronas repartidas en 3 Availability Zones de la misma región.</td><td>Alta disponibilidad ante la caída de un datacenter completo.</td></tr>\n<tr><td><b>GRS / GZRS</b></td><td>Replica asíncronamente a una región secundaria emparejada.</td><td>Recuperación ante desastres regionales (lectura secundaria directa solo con <b>RA-GRS / RA-GZRS</b>).</td></tr>\n</table>\n<div class=\"tip\"><b>Truco AZ-104:</b> Para revocar un token SAS sin rotar la clave de la cuenta de almacenamiento, vincúlalo siempre a una <b>Stored Access Policy</b>. Para acceso privado por IP interna de tu VNet sin salir a internet incluso con acceso público deshabilitado, usa <b>Private Endpoint</b>.</div>"
-  },
-  {
-    "id": "az-t-3",
-    "d": 3,
-    "title": "3.1 · Compute: VMs, VMSS, App Service, ACI y AKS",
-    "html": "<table class=\"keytable\">\n<tr><th>Servicio</th><th>Caso de uso en AZ-104</th><th>Puntos clave</th></tr>\n<tr><td><b>VM Scale Sets (VMSS)</b></td><td>Autoescalado horizontal de VMs idénticas y actualizaciones con <i>rolling upgrade policy</i>.</td><td>Combínalo con <b>Proximity Placement Groups</b> para mínima latencia física entre VMs.</td></tr>\n<tr><td><b>Azure Bastion</b></td><td>Acceso RDP/SSH por navegador sobre TLS sin IP pública en la VM ni abrir puertos 22/3389 a internet.</td><td>Si la VM no responde por red, usa <b>Serial Console y Boot Diagnostics</b>.</td></tr>\n<tr><td><b>App Service</b></td><td>PaaS web con <b>Deployment Slots</b> (disponibles desde el plan <b>Standard S1</b>) para pruebas en staging y swap sin downtime.</td><td>Usa <b>Managed Identity</b> para conectar a Azure SQL o Key Vault sin guardar secretos en código.</td></tr>\n<tr><td><b>ACI vs AKS</b></td><td><b>ACI</b> ejecuta contenedores bajo demanda sin gestionar nodos; <b>AKS</b> provee orquestación completa con Cluster Autoscaler y almacenamiento persistente.</td><td>Para trabajos HPC paralelos masivos por lotes de corta duración, usa <b>Azure Batch</b>.</td></tr>\n</table>"
-  },
-  {
-    "id": "az-t-4",
-    "d": 4,
-    "title": "4.1 · Networking: VNets, Peering, NSG, Load Balancing y DNS Privado",
-    "html": "<table class=\"keytable\">\n<tr><th>Balanceador</th><th>Capa y alcance</th><th>Cuándo usarlo</th></tr>\n<tr><td><b>Azure Load Balancer</b></td><td>Capa 4 (TCP/UDP), Regional.</td><td>Tráfico no HTTP o balanceo interno de ultra baja latencia.</td></tr>\n<tr><td><b>Application Gateway</b></td><td>Capa 7 (HTTP/HTTPS), Regional, soporta WAF y enrutamiento por URL/host.</td><td>Proteger aplicaciones web contra SQLi/XSS en una región.</td></tr>\n<tr><td><b>Traffic Manager vs Front Door</b></td><td><b>Traffic Manager</b> balancea por DNS global; <b>Front Door</b> es un proxy inverso Anycast global de capa 7 con CDN y WAF.</td><td>Para resolver zonas DNS privadas de Azure desde on-premises vía ExpressRoute, despliega <b>Azure DNS Private Resolver</b> con inbound endpoint.</td></tr>\n</table>"
-  },
-  {
-    "id": "az-t-5",
-    "d": 5,
-    "title": "5.1 · Monitor & Backup: Alertas, Log Analytics (KQL), Recovery Services y ASR",
-    "html": "<table class=\"keytable\">\n<tr><th>Herramienta</th><th>Qué registra o resuelve</th></tr>\n<tr><td><b>Activity Log</b></td><td>Operaciones del plano de control (quién creó, modificó o borró un recurso en ARM y cuándo).</td></tr>\n<tr><td><b>Log Analytics Workspace</b></td><td>Consultas avanzadas en <b>KQL</b> sobre logs de VMs, contenedores y seguridad; se visualizan en informes interactivos con <b>Azure Workbooks</b>.</td></tr>\n<tr><td><b>Azure Backup vs Site Recovery (ASR)</b></td><td><b>Azure Backup</b> restaura puntos de recuperación históricos desde un Recovery Services Vault; <b>ASR</b> replica continuamente VMs para hacer failover con mínimo RTO/RPO ante caída del sitio primario.</td></tr>\n</table>"
-  }
-],
-    questions: [
+    "topics": [
+      {
+        "id": "az-t-1",
+        "d": 1,
+        "title": "1.1 · Identities (Entra ID / Azure AD) and Governance (RBAC, Policy, Locks)",
+        "html": "<table class=\"keytable\">\n<tr><th>Component</th><th>Key purpose on the AZ-104 exam</th><th>Critical difference</th></tr>\n<tr><td><b>Entra ID Roles vs Azure RBAC</b></td><td>Entra ID manages directory identities (Global Admin, User Admin); Azure RBAC manages Azure resources in the hierarchy Management Group → Subscription → Resource Group → Resource.</td><td><b>Owner</b> can delegate permissions; <b>Contributor</b> manages everything except granting access; <b>User Access Admin</b> only assigns roles.</td></tr>\n<tr><td><b>Azure Policy</b></td><td>Evaluates and enforces compliance of resource properties (allowed regions, SKUs, tags).</td><td>Key effects: <b>Deny</b> (blocks), <b>Audit</b> (only logs), <b>Modify</b> (adds/edits tags), <b>DeployIfNotExists</b>.</td></tr>\n<tr><td><b>Resource Locks</b></td><td><code>CanNotDelete</code> (allows modifying but not deleting) and <code>ReadOnly</code> (blocks changes on the control plane).</td><td>Locks take precedence even over the <b>Owner</b> role until the lock is explicitly removed.</td></tr>\n<tr><td><b>Conditional Access & PIM</b></td><td>Conditional Access requires MFA/device based on signals (requires P1); PIM grants Just-In-Time privileged access (requires P2).</td><td><b>B2B</b> invites partners as Guests to your tenant; <b>B2C</b> is a CIAM platform for external customers.</td></tr>\n</table>"
+      },
+      {
+        "id": "az-t-2",
+        "d": 2,
+        "title": "2.1 · Azure Storage: Redundancy, Tiers, SAS, and Immutability",
+        "html": "<table class=\"keytable\">\n<tr><th>Redundancy</th><th>Copies and scope</th><th>When to choose it</th></tr>\n<tr><td><b>LRS</b></td><td>3 synchronous copies in a single datacenter.</td><td>Lowest cost, no tolerance for zone or Region failure.</td></tr>\n<tr><td><b>ZRS</b></td><td>3 synchronous copies spread across 3 Availability Zones in the same Region.</td><td>High availability against the failure of an entire datacenter.</td></tr>\n<tr><td><b>GRS / GZRS</b></td><td>Replicates asynchronously to a paired secondary Region.</td><td>Recovery from Regional disasters (direct secondary read only with <b>RA-GRS / RA-GZRS</b>).</td></tr>\n</table>\n<div class=\"tip\"><b>AZ-104 tip:</b> To revoke a SAS token without rotating the storage account key, always tie it to a <b>Stored Access Policy</b>. For private access over your VNet's internal IP without going out to the internet, even with public access disabled, use a <b>Private Endpoint</b>.</div>"
+      },
+      {
+        "id": "az-t-3",
+        "d": 3,
+        "title": "3.1 · Compute: VMs, VMSS, App Service, ACI, and AKS",
+        "html": "<table class=\"keytable\">\n<tr><th>Service</th><th>Use case in AZ-104</th><th>Key points</th></tr>\n<tr><td><b>VM Scale Sets (VMSS)</b></td><td>Horizontal autoscaling of identical VMs and updates with a <i>rolling upgrade policy</i>.</td><td>Combine it with <b>Proximity Placement Groups</b> for minimum physical latency between VMs.</td></tr>\n<tr><td><b>Azure Bastion</b></td><td>Browser-based RDP/SSH over TLS with no public IP on the VM and without opening ports 22/3389 to the internet.</td><td>If the VM does not respond over the network, use <b>Serial Console and Boot Diagnostics</b>.</td></tr>\n<tr><td><b>App Service</b></td><td>Web PaaS with <b>Deployment Slots</b> (available from the <b>Standard S1</b> plan) for staging tests and zero-downtime swaps.</td><td>Use <b>Managed Identity</b> to connect to Azure SQL or Key Vault without storing secrets in code.</td></tr>\n<tr><td><b>ACI vs AKS</b></td><td><b>ACI</b> runs containers on demand without managing nodes; <b>AKS</b> provides full orchestration with Cluster Autoscaler and persistent storage.</td><td>For massive parallel short-lived batch HPC jobs, use <b>Azure Batch</b>.</td></tr>\n</table>"
+      },
+      {
+        "id": "az-t-4",
+        "d": 4,
+        "title": "4.1 · Networking: VNets, Peering, NSG, Load Balancing, and Private DNS",
+        "html": "<table class=\"keytable\">\n<tr><th>Load balancer</th><th>Layer and scope</th><th>When to use it</th></tr>\n<tr><td><b>Azure Load Balancer</b></td><td>Layer 4 (TCP/UDP), Regional.</td><td>Non-HTTP traffic or ultra-low-latency internal balancing.</td></tr>\n<tr><td><b>Application Gateway</b></td><td>Layer 7 (HTTP/HTTPS), Regional, supports WAF and URL/host-based routing.</td><td>Protect web applications against SQLi/XSS in a single Region.</td></tr>\n<tr><td><b>Traffic Manager vs Front Door</b></td><td><b>Traffic Manager</b> balances through global DNS; <b>Front Door</b> is a global Layer 7 Anycast reverse proxy with CDN and WAF.</td><td>To resolve Azure private DNS zones from on-premises over ExpressRoute, deploy <b>Azure DNS Private Resolver</b> with an inbound endpoint.</td></tr>\n</table>"
+      },
+      {
+        "id": "az-t-5",
+        "d": 5,
+        "title": "5.1 · Monitor & Backup: Alerts, Log Analytics (KQL), Recovery Services, and ASR",
+        "html": "<table class=\"keytable\">\n<tr><th>Tool</th><th>What it records or solves</th></tr>\n<tr><td><b>Activity Log</b></td><td>Control plane operations (who created, modified, or deleted a resource in ARM and when).</td></tr>\n<tr><td><b>Log Analytics Workspace</b></td><td>Advanced <b>KQL</b> queries over VM, container, and security logs; visualized in interactive reports with <b>Azure Workbooks</b>.</td></tr>\n<tr><td><b>Azure Backup vs Site Recovery (ASR)</b></td><td><b>Azure Backup</b> restores historical recovery points from a Recovery Services Vault; <b>ASR</b> continuously replicates VMs to fail over with minimal RTO/RPO if the primary site goes down.</td></tr>\n</table>"
+      }
+    ],
+    "questions": [
       {
         "id": "az-001",
         "d": 1,
@@ -1882,168 +1881,168 @@
         "e": "CanNotDelete lock only prevents deletion. Read and write operations (including tag updates, configuration changes) are still permitted on resources within the locked scope — only ReadOnly locks block modifications."
       }
     ],
-    why: {
+    "why": {
       "az-001": [
-        "`User Administrator` solo gestiona usuarios y grupos básicos, no puede administrar otros roles de directorio ni servicios globales de Microsoft.",
+        "`User Administrator` only manages basic users and groups; it cannot manage other directory roles or global Microsoft services.",
         null,
-        "`Privileged Role Administrator` administra asignaciones de roles de Azure AD y PIM, pero no otorga control operativo total sobre todos los servicios de Microsoft 365.",
-        "`Security Administrator` lee directivas y gestiona alertas de seguridad, pero no tiene permisos totales de administración de directorio ni asignación de recursos."
+        "`Privileged Role Administrator` manages Azure AD role assignments and PIM, but does not grant full operational control over all Microsoft 365 services.",
+        "`Security Administrator` reads policies and manages security alerts, but does not have full directory administration permissions or resource assignment rights."
       ],
       "az-002": [
-        "`Owner` incluye la acción `Microsoft.Authorization/*`, lo que permitiría al usuario otorgar y modificar permisos RBAC a otros usuarios.",
+        "`Owner` includes the `Microsoft.Authorization/*` action, which would allow the user to grant and modify RBAC permissions for other users.",
         null,
-        "`Reader` únicamente permite ver recursos existentes; no permite crearlos, configurarlos ni eliminarlos.",
-        "`User Access Administrator` está diseñado exclusivamente para gestionar asignaciones de roles y permisos RBAC, sin capacidad de administrar recursos de cómputo o almacenamiento."
+        "`Reader` only allows viewing existing resources; it does not allow creating, configuring, or deleting them.",
+        "`User Access Administrator` is designed exclusively to manage RBAC role assignments and permissions, with no ability to administer compute or storage resources."
       ],
       "az-003": [
-        "Asignar políticas suscripción por suscripción genera sobrecarga administrativa y riesgo de desalineación ante nuevas suscripciones.",
+        "Assigning policies subscription by subscription creates administrative overhead and a risk of misalignment when new subscriptions are added.",
         null,
-        "Aunque Blueprints puede empaquetar políticas, asignarlo suscripción por suscripción no aprovecha la herencia automática de gobernanza.",
-        "Los Resource Groups no pueden abarcar múltiples suscripciones ni heredan políticas hacia otras suscripciones."
+        "Although Blueprints can package policies, assigning it subscription by subscription does not take advantage of automatic governance inheritance.",
+        "Resource Groups cannot span multiple subscriptions or inherit policies to other subscriptions."
       ],
       "az-004": [
-        "Azure RBAC se basa en un modelo \"allow\" por defecto; las \"Deny assignments\" las gestiona Azure (p. ej. Blueprints) y no sirven para filtrar ubicaciones.",
+        "Azure RBAC is based on an \"allow\" model by default; \"Deny assignments\" are managed by Azure (e.g., Blueprints) and cannot be used to filter locations.",
         null,
-        "Los Resource Locks de tipo \"ReadOnly\" impiden cualquier modificación o creación, no permiten restringir selectivamente por región.",
-        "Azure Service Health es un servicio de notificación sobre incidentes y mantenimiento de la plataforma, no un motor de control o cumplimiento."
+        "\"ReadOnly\" Resource Locks prevent any modification or creation; they cannot selectively restrict by region.",
+        "Azure Service Health is a notification service for platform incidents and maintenance, not a control or compliance engine."
       ],
       "az-005": [
-        "Asignar el rol `Reader` impediría que los administradores gestionen o modifiquen los recursos en producción cuando sea necesario.",
-        "Una directiva de Azure Policy con efecto `Audit` solo reporta el estado de cumplimiento en un informe; no bloquea la acción de borrado.",
+        "Assigning the `Reader` role would prevent administrators from managing or modifying production resources when necessary.",
+        "An Azure Policy with the `Audit` effect only reports compliance status in a report; it does not block the delete action.",
         null,
-        "Los Resource Groups no tienen una propiedad nativa de `soft delete` para recuperar grupos enteros eliminados por error."
+        "Resource Groups do not have a native `soft delete` property to recover entire groups deleted by mistake."
       ],
       "az-006": [
-        "`MFA Server` es una solución heredada local (en desuso) que no ofrece directivas contextuales basadas en la nube.",
+        "`MFA Server` is a legacy on-premises (deprecated) solution that does not offer cloud-based contextual policies.",
         null,
-        "`Identity Protection` detecta riesgos de usuario y de inicio de sesión, pero las reglas condicionales de acceso por ubicación se configuran mediante Conditional Access.",
-        "`Privileged Identity Management (PIM)` gestiona la activación puntual y temporal de roles privilegiados, no el desafío de MFA según red de origen."
+        "`Identity Protection` detects user risk and sign-in risk, but conditional access rules by location are configured through Conditional Access.",
+        "`Privileged Identity Management (PIM)` manages just-in-time, temporary activation of privileged roles, not MFA challenges based on source network."
       ],
       "az-007": [
-        "Un bloqueo `ReadOnly` impide modificar o eliminar recursos en el plano de control, pero no oculta su visibilidad ni bloquea la lectura.",
-        "Las `Deny assignments` suelen bloquear acciones de modificación/despliegue creadas por Blueprints; la lectura básica de recursos rara vez se deniega.",
+        "A `ReadOnly` lock prevents modifying or deleting resources on the control plane, but it does not hide their visibility or block reading.",
+        "`Deny assignments` typically block modification/deployment actions created by Blueprints; basic reading of resources is rarely denied.",
         null,
-        "Azure Policy evalúa cumplimiento y audita o bloquea despliegues, pero no oculta recursos existentes en el portal ni en la API."
+        "Azure Policy evaluates compliance and audits or blocks deployments, but it does not hide existing resources in the portal or the API."
       ],
       "az-008": [
-        "La jerarquía en Azure fluye de arriba hacia abajo (de mayor a menor ámbito), no desde el recurso individual hacia los grupos de administración.",
+        "The hierarchy in Azure flows top-down (from larger to smaller scope), not from the individual resource up to the management groups.",
         null,
-        "Las suscripciones están contenidas dentro de Management Groups, por lo que el ámbito superior de herencia es Management Group, no Subscription.",
-        "Los recursos están contenidos dentro de un Resource Group; la herencia nunca fluye desde un hijo hacia el padre."
+        "Subscriptions are contained within Management Groups, so the top inheritance scope is Management Group, not Subscription.",
+        "Resources are contained within a Resource Group; inheritance never flows from a child to its parent."
       ],
       "az-009": [
-        "La rotación de contraseñas y SSPR son funciones de administración de contraseñas de Azure AD, no de PIM.",
+        "Password rotation and SSPR are Azure AD password management features, not PIM.",
         null,
-        "La sincronización de identidades y contraseñas híbridas la realiza Azure AD Connect (ahora Entra Connect), no PIM.",
-        "La detección de credenciales filtradas y riesgos de inicio de sesión es función de Azure AD Identity Protection."
+        "Hybrid identity and password synchronization is performed by Azure AD Connect (now Entra Connect), not PIM.",
+        "Detection of leaked credentials and sign-in risks is a function of Azure AD Identity Protection."
       ],
       "az-010": [
-        "`Deny` bloquea inmediatamente la creación o actualización del recurso no conforme, en lugar de corregirlo agregando el tag.",
-        "`Audit` únicamente registra una advertencia en el panel de cumplimiento; no agrega ni modifica ninguna propiedad en el recurso.",
-        "`Append` puede agregar campos a la solicitud durante la creación, pero para la gestión moderna de tags el efecto recomendado y específico es `Modify`.",
+        "`Deny` immediately blocks the creation or update of the non-compliant resource, instead of remediating it by adding the tag.",
+        "`Audit` only records a warning in the compliance dashboard; it does not add or modify any property on the resource.",
+        "`Append` can add fields to the request during creation, but for modern tag management the recommended, purpose-built effect is `Modify`.",
         null
       ],
       "az-011": [
-        "`Azure AD Free` solo incluye autenticación básica y Security Defaults fijos; no permite crear directivas personalizadas de Conditional Access.",
+        "`Azure AD Free` only includes basic authentication and fixed Security Defaults; it does not allow creating custom Conditional Access policies.",
         null,
-        "`Azure AD Premium P2` admite directivas basadas en riesgo (Identity Protection), pero la licencia mínima requerida para Conditional Access estándar es P1.",
-        "`Microsoft 365 Business Basic` incluye únicamente las funciones de Azure AD Free a menos que se adquiera un complemento o plan Premium."
+        "`Azure AD Premium P2` supports risk-based policies (Identity Protection), but the minimum license required for standard Conditional Access is P1.",
+        "`Microsoft 365 Business Basic` includes only the Azure AD Free features unless an add-on or Premium plan is purchased."
       ],
       "az-012": [
-        "Un bloqueo `ReadOnly` opera en el plano de control; no revoca claves de acceso existentes ni bloquea descargas de datos si ya se tiene autenticación.",
-        "El bloqueo `ReadOnly` no diferencia entre crear y borrar objetos a nivel de datos; bloquea cambios en el plano de gestión del recurso.",
+        "A `ReadOnly` lock operates on the control plane; it does not revoke existing access keys or block data downloads if authentication is already in place.",
+        "The `ReadOnly` lock does not distinguish between creating and deleting objects at the data level; it blocks changes on the resource's management plane.",
         null,
-        "Con un bloqueo `ReadOnly`, cualquier modificación en el plano de control (incluyendo actualizar tags) queda totalmente denegada."
+        "With a `ReadOnly` lock, any modification on the control plane (including updating tags) is completely denied."
       ],
       "az-013": [
-        "El efecto `Audit` no altera el estado de ejecución ni la conectividad de red de los recursos.",
+        "The `Audit` effect does not alter the running state or network connectivity of resources.",
         null,
-        "La remediación automática requiere el efecto `DeployIfNotExists` o `Modify` junto con una tarea de remediación, no el efecto `Audit`.",
-        "Azure Policy no mueve recursos de suscripción ni crea recursos de cuarentena."
+        "Automatic remediation requires the `DeployIfNotExists` or `Modify` effect together with a remediation task, not the `Audit` effect.",
+        "Azure Policy does not move resources between subscriptions or create quarantine resources."
       ],
       "az-014": [
-        "El ámbito `Management Group` otorgaría permisos sobre todas las suscripciones y recursos contenidos bajo ese grupo, violando el mínimo privilegio.",
-        "El ámbito `Subscription` otorgaría permisos sobre todos los grupos de recursos de la suscripción, no solo sobre el grupo especificado.",
+        "The `Management Group` scope would grant permissions over all subscriptions and resources contained under that group, violating least privilege.",
+        "The `Subscription` scope would grant permissions over all resource groups in the subscription, not just the specified group.",
         null,
-        "Asignar permisos a nivel de VMs individuales no permitiría al usuario crear nuevas máquinas virtuales dentro del grupo de recursos."
+        "Assigning permissions at the individual VM level would not allow the user to create new virtual machines within the resource group."
       ],
       "az-015": [
-        "La supervisión de incidentes y salud de la plataforma corresponde a Azure Monitor y Azure Service Health.",
+        "Monitoring of incidents and platform health is the role of Azure Monitor and Azure Service Health.",
         null,
-        "La orquestación de recuperación ante desastres y conmutación por error entre regiones es tarea de Azure Site Recovery.",
-        "El análisis de costos y la asignación presupuestaria son responsabilidad de Microsoft Cost Management."
+        "Orchestration of disaster recovery and failover across regions is the job of Azure Site Recovery.",
+        "Cost analysis and budget allocation are the responsibility of Microsoft Cost Management."
       ],
       "az-016": [
-        "`Azure Files` proporciona recursos compartidos SMB/NFS para sistemas de archivos montables, no un almacén masivo de objetos HTTP/HTTPS optimizado para web.",
-        "`Azure Table Storage` es una base de datos NoSQL de clave-valor para entidades estructuradas, no para archivos binarios masivos de imágenes.",
+        "`Azure Files` provides SMB/NFS file shares for mountable file systems, not a massive HTTP/HTTPS object store optimized for the web.",
+        "`Azure Table Storage` is a NoSQL key-value database for structured entities, not for massive binary image files.",
         null,
-        "`Azure Queue Storage` está diseñado para mensajería asíncrona entre servicios, no para almacenar archivos multimedia."
+        "`Azure Queue Storage` is designed for asynchronous messaging between services, not for storing media files."
       ],
       "az-017": [
-        "LRS no replica entre regiones pares; se limita a un único centro de datos. ZRS es el que distribuye entre tres zonas.",
+        "LRS does not replicate across paired regions; it is limited to a single datacenter. ZRS is the one that distributes across three zones.",
         null,
-        "LRS no tolera la caída de un centro de datos ni de una región completa; ZRS sí tolera la caída de un centro de datos al abarcar 3 zonas.",
-        "LRS no replica hacia otro continente (eso sería GRS/GZRS); y ZRS está disponible tanto en almacenamiento estándar como premium."
+        "LRS does not tolerate the loss of a datacenter or an entire region; ZRS does tolerate the loss of a datacenter because it spans 3 zones.",
+        "LRS does not replicate to another continent (that would be GRS/GZRS); and ZRS is available in both standard and premium storage."
       ],
       "az-018": [
-        "Las claves de acceso de la cuenta de almacenamiento no admiten fechas de expiración automáticas ni limitación temporal nativa.",
+        "Storage account access keys do not support automatic expiration dates or native time limits.",
         null,
-        "El rol `Contributor` en una VM no otorga permisos de subida a Blob Storage y una entidad de servicio requiere mayor configuración de permisos que un SAS temporal para terceros.",
-        "Las ACLs de Azure Data Lake Gen2 gestionan permisos de archivos y carpetas, pero no admiten expiración temporal de 48 horas sin credenciales."
+        "The `Contributor` role on a VM does not grant upload permissions to Blob Storage, and a service principal requires more permission configuration than a temporary SAS for third parties.",
+        "Azure Data Lake Gen2 ACLs manage file and folder permissions, but do not support a temporary 48-hour expiration without credentials."
       ],
       "az-019": [
-        "El nivel `Hot` tiene los costos de almacenamiento más altos, optimizado para datos en acceso frecuente.",
-        "El nivel `Cool` está optimizado para datos almacenados al menos 30 días con acceso infrecuente mensual, resultando más costoso por GB almacenado que Archive.",
-        "El nivel `Cold` requiere retención mínima de 90 días, pero su costo por GB almacenado es significativamente mayor que Archive para acceso anual.",
+        "The `Hot` tier has the highest storage costs, optimized for frequently accessed data.",
+        "The `Cool` tier is optimized for data stored for at least 30 days with infrequent monthly access, making it more expensive per GB stored than Archive.",
+        "The `Cold` tier requires a minimum retention of 90 days, but its cost per GB stored is significantly higher than Archive for annual access.",
         null
       ],
       "az-020": [
-        "Aunque Blob Storage admite NFS v3, no ofrece un recurso compartido de archivos SMB nativo para Windows Server al mismo tiempo.",
+        "Although Blob Storage supports NFS v3, it does not offer a native SMB file share for Windows Server at the same time.",
         null,
-        "Los Shared Disks de Azure Managed Disks proporcionan discos de bloque para clusters de conmutación por error (como WSFC o Pacemaker), no recursos compartidos de archivos multi-protocolo.",
-        "Azure Table Storage es un almacén de claves-atributos NoSQL no estructurado, no un sistema de archivos para montaje de SO."
+        "Azure Managed Disks Shared Disks provide block disks for failover clusters (such as WSFC or Pacemaker), not multi-protocol file shares.",
+        "Azure Table Storage is an unstructured NoSQL key-attribute store, not a file system for OS mounting."
       ],
       "az-021": [
-        "Soft delete retiene el blob durante el período configurado (14 días en este caso), no se purga a las 24 horas.",
+        "Soft delete retains the blob for the configured period (14 days in this case); it is not purged at 24 hours.",
         null,
-        "El blob eliminado pasa a estado soft-deleted en el mismo nivel de acceso; no se traslada al nivel Archive ni requiere rehidratación.",
-        "El blob se recupera ejecutando una operación `Undelete` directamente en el storage account, sin depender de copias en Recovery Services vault."
+        "The deleted blob moves to a soft-deleted state in the same access tier; it is not moved to the Archive tier and does not require rehydration.",
+        "The blob is recovered by running an `Undelete` operation directly on the storage account, without relying on copies in a Recovery Services vault."
       ],
       "az-022": [
-        "Las cuentas de tipo heredado `BlobStorage` no admiten la activación de espacio de nombres jerárquico (HNS).",
-        "Las cuentas GPv1 no admiten Azure Data Lake Storage Gen2 ni características avanzadas de espacio jerárquico.",
+        "Legacy `BlobStorage` account types do not support enabling hierarchical namespace (HNS).",
+        "GPv1 accounts do not support Azure Data Lake Storage Gen2 or advanced hierarchical namespace features.",
         null,
-        "FileStorage es una cuenta optimizada exclusivamente para Azure Files premium (SMB/NFS), no para ADLS Gen2."
+        "FileStorage is an account type optimized exclusively for premium Azure Files (SMB/NFS), not for ADLS Gen2."
       ],
       "az-023": [
-        "Transferir 200 TB a través de una conexión compartida de 100 Mbps tardaría más de 6 meses y saturaría el enlace corporativo.",
-        "Azure Data Factory con self-hosted IR sigue dependiendo del ancho de banda de red disponible, con los mismos tiempos inviables de transferencia.",
+        "Transferring 200 TB over a shared 100 Mbps connection would take more than 6 months and would saturate the corporate link.",
+        "Azure Data Factory with a self-hosted IR still depends on the available network bandwidth, with the same unworkable transfer times.",
         null,
-        "Storage Explorer también transmite los datos sobre la conexión a internet, sufriendo las mismas limitaciones de ancho de banda."
+        "Storage Explorer also transmits the data over the internet connection, suffering from the same bandwidth limitations."
       ],
       "az-024": [
-        "La replicación entre cuentas de almacenamiento se realiza con Object Replication, no mediante políticas de ciclo de vida.",
+        "Replication between storage accounts is done with Object Replication, not through lifecycle policies.",
         null,
-        "La monitorización de métricas y alertas de capacidad se configura a través de Azure Monitor y Métricas de almacenamiento.",
-        "La conmutación por error entre extremos primarios y secundarios la gestiona la redundancia geográfica (Customer-managed failover), no el ciclo de vida."
+        "Metric monitoring and capacity alerts are configured through Azure Monitor and storage Metrics.",
+        "Failover between primary and secondary endpoints is handled by geo-redundancy (customer-managed failover), not by lifecycle management."
       ],
       "az-025": [
-        "Asignar una IP pública a la VM para permitir acceso público viola el requerimiento de seguridad de mantener el acceso privado y restringido.",
-        "Abrir el puerto 445 en el NSG no soluciona el bloqueo del firewall del storage account a nivel de plano de red de Azure.",
+        "Assigning a public IP to the VM to allow public access violates the security requirement to keep access private and restricted.",
+        "Opening port 445 in the NSG does not resolve the storage account firewall block at the Azure network plane level.",
         null,
-        "No se requiere una Virtual Network Gateway para conectar una VM a un servicio PaaS en la misma red virtual; basta con Service Endpoints o Private Endpoints."
+        "A Virtual Network Gateway is not required to connect a VM to a PaaS service in the same virtual network; Service Endpoints or Private Endpoints are sufficient."
       ],
       "az-026": [
-        "ZRS distribuye datos entre tres zonas de disponibilidad dentro de la misma región, pero no protege ante la caída de la región completa.",
-        "GRS replica a una región secundaria par, pero en la región primaria solo utiliza replicación local (LRS), no entre zonas.",
+        "ZRS distributes data across three availability zones within the same region, but does not protect against the loss of the entire region.",
+        "GRS replicates to a paired secondary region, but in the primary region it only uses local replication (LRS), not zone-based replication.",
         null,
-        "LRS mantiene 3 copias dentro de un único centro de datos en una sola región, sin protección ante fallos de zona ni de región."
+        "LRS keeps 3 copies within a single datacenter in a single region, with no protection against zone or region failures."
       ],
       "az-027": [
-        "Abrir un ticket de soporte introduce demoras críticas mientras la clave filtrada continúa expuesta y utilizable por terceros.",
+        "Opening a support ticket introduces critical delays while the leaked key remains exposed and usable by third parties.",
         null,
-        "Bloquear el firewall puede mitigar accesos de red, pero no invalida la credencial comprometida; la rotación inmediata de la clave es indispensable.",
-        "Modificar el nivel de replicación no afecta los mecanismos de autenticación ni revoca las claves de acceso filtradas."
+        "Blocking the firewall may mitigate network access, but it does not invalidate the compromised credential; immediate key rotation is essential.",
+        "Changing the replication level does not affect authentication mechanisms or revoke leaked access keys."
       ],
       "az-028": [
         "AzCopy is a command-line utility optimized for Azure Storage transfers with support for parallel transfers, job journaling (resume), and SAS tokens.",
@@ -2052,130 +2051,130 @@
         "AzCopy is a command-line utility optimized for Azure Storage transfers with support for parallel transfers, job journaling (resume), and SAS tokens."
       ],
       "az-029": [
-        "Las `Availability Zones` separan VMs en centros de datos distintos dentro de una región, pero para distribuir dos VMs entre update domains en un único centro de datos se usa un Availability Set.",
+        "`Availability Zones` separate VMs into distinct datacenters within a region, but to distribute two VMs across update domains within a single datacenter you use an Availability Set.",
         null,
-        "`Azure Site Recovery` es una solución de replicación y conmutación por error ante desastres entre regiones, no un mecanismo de alta disponibilidad local durante mantenimiento.",
-        "`VM Scale Sets` despliegan y escalan grupos homogéneos de VMs; para dos VMs existentes individuales el mecanismo estándar es un Availability Set."
+        "`Azure Site Recovery` is a disaster replication and failover solution across regions, not a local high-availability mechanism during maintenance.",
+        "`VM Scale Sets` deploy and scale homogeneous groups of VMs; for two existing individual VMs, the standard mechanism is an Availability Set."
       ],
       "az-030": [
         null,
-        "Los Availability Sets no admiten escalado automático horizontal; solo distribuyen VMs preexistentes entre dominios de error y actualización.",
-        "Las instancias de un VMSS se basan en una plantilla común idéntica, mientras que en un Availability Set se pueden agrupar VMs con configuraciones y SO distintos.",
-        "Ni VMSS ni Availability Sets abarcan múltiples regiones de Azure de forma automática; ambos son construcciones regionales."
+        "Availability Sets do not support automatic horizontal scaling; they only distribute pre-existing VMs across fault and update domains.",
+        "VMSS instances are based on a common identical template, whereas in an Availability Set you can group VMs with different configurations and operating systems.",
+        "Neither VMSS nor Availability Sets automatically span multiple Azure regions; both are regional constructs."
       ],
       "az-031": [
-        "Ejecutar una VM completa para un trabajo por lotes efímero requiere aprovisionar y mantener la infraestructura del SO subyacente.",
-        "AKS requiere administrar un cluster y grupos de nodos, lo que introduce una sobrecarga operativa innecesaria para un job que corre una sola vez.",
+        "Running a full VM for an ephemeral batch job requires provisioning and maintaining the underlying OS infrastructure.",
+        "AKS requires managing a cluster and node pools, which introduces unnecessary operational overhead for a job that runs only once.",
         null,
-        "App Service requiere aprovisionar y mantener un App Service Plan activo, generando costos continuos de cómputo aunque el contenedor no esté ejecutándose."
+        "App Service requires provisioning and maintaining an active App Service Plan, generating ongoing compute costs even when the container is not running."
       ],
       "az-032": [
-        "`Azure Virtual Machines` es IaaS y requiere administrar parches del sistema operativo, escalado manual y balanceadores sin slots nativos.",
+        "`Azure Virtual Machines` is IaaS and requires managing OS patching, manual scaling, and load balancers without native slots.",
         null,
-        "`Azure Container Instances` ejecuta contenedores individuales sin estado, pero no incluye slots de implementación ni balanceo PaaS integrado para web.",
-        "`Azure VM Scale Sets` requiere configurar y administrar las imágenes y el mantenimiento de las instancias de máquinas virtuales."
+        "`Azure Container Instances` runs individual stateless containers, but does not include deployment slots or integrated PaaS load balancing for web.",
+        "`Azure VM Scale Sets` requires configuring and managing the images and maintenance of the virtual machine instances."
       ],
       "az-033": [
-        "Una `VPN Gateway` requiere configurar túneles, certificados o clientes VPN en cada puesto de trabajo, lo cual es más complejo que Bastion en el portal.",
+        "A `VPN Gateway` requires configuring tunnels, certificates, or VPN clients on each workstation, which is more complex than Bastion in the portal.",
         null,
-        "`JIT VM Access` abre el puerto 3389 temporalmente en la IP pública de la VM, por lo que el puerto sí queda expuesto durante la ventana activa.",
-        "Permitir el puerto 3389 desde una IP específica sigue exponiendo el protocolo RDP directamente a internet en la IP pública de la máquina."
+        "`JIT VM Access` temporarily opens port 3389 on the VM's public IP, so the port is exposed during the active window.",
+        "Allowing port 3389 from a specific IP still exposes the RDP protocol directly to the internet on the machine's public IP."
       ],
       "az-034": [
-        "Los `imagePullSecrets` almacenan credenciales dentro de secretos de Kubernetes, lo cual incumple el requisito explícito de no almacenar secretos.",
-        "Habilitar acceso anónimo expone el registro privado públicamente a internet sin autenticación, violando las políticas de seguridad corporativas.",
+        "`imagePullSecrets` store credentials inside Kubernetes secrets, which violates the explicit requirement not to store secrets.",
+        "Enabling anonymous access exposes the private registry publicly to the internet without authentication, violating corporate security policies.",
         null,
-        "Los ConfigMaps no están diseñados para almacenar credenciales confidenciales y los tokens de administrador quedarían expuestos en texto claro dentro del cluster."
+        "ConfigMaps are not designed to store sensitive credentials, and admin tokens would be exposed in clear text inside the cluster."
       ],
       "az-035": [
-        "La instalación del agente de Azure Monitor se gestiona mediante la Azure Monitor Agent VM Extension, no Custom Script Extension.",
+        "Installation of the Azure Monitor agent is handled through the Azure Monitor Agent VM Extension, not the Custom Script Extension.",
         null,
-        "Las instantáneas y copias de seguridad de discos administrados se gestionan mediante Azure Backup y directivas de instantáneas, no Custom Script Extension.",
-        "El cambio de tamaño de discos se realiza a nivel del recurso de disco en ARM o el portal, no mediante scripts del agente de extensión."
+        "Managed disk snapshots and backups are handled through Azure Backup and snapshot policies, not the Custom Script Extension.",
+        "Disk resizing is done at the disk resource level in ARM or the portal, not through extension agent scripts."
       ],
       "az-036": [
-        "`Standard HDD` utiliza medios magnéticos convencionales con la latencia más alta y el menor rendimiento de IOPS.",
-        "`Standard SSD` es adecuado para cargas de trabajo ligeras de desarrollo o servidores web con tráfico moderado, no para bases de datos críticas.",
-        "`Premium SSD` ofrece alto rendimiento basado en SSD, pero sus IOPS y latencia están por debajo de las capacidades de sub-milisegundo de Ultra Disk.",
+        "`Standard HDD` uses conventional magnetic media with the highest latency and the lowest IOPS performance.",
+        "`Standard SSD` is suitable for lightweight development workloads or web servers with moderate traffic, not for critical databases.",
+        "`Premium SSD` offers high SSD-based performance, but its IOPS and latency fall short of the sub-millisecond capabilities of Ultra Disk.",
         null
       ],
       "az-037": [
-        "Desasignar la máquina virtual mantiene el recurso de VM activo en la suscripción, en lugar de desmantelarlo (decommission).",
+        "Deallocating the virtual machine keeps the VM resource active in the subscription, rather than decommissioning it.",
         null,
-        "Eliminar el disco administrado tras tomar una instantánea destruye el disco existente; requeriría crear un disco nuevo desde el snapshot más adelante.",
-        "Mover la VM a otro grupo de recursos no desmantela la VM existente ni libera el objeto de cómputo."
+        "Deleting the managed disk after taking a snapshot destroys the existing disk; you would need to create a new disk from the snapshot later.",
+        "Moving the VM to another resource group does not decommission the existing VM or release the compute object."
       ],
       "az-038": [
-        "Distribuir máquinas virtuales entre regiones se gestiona con Azure Traffic Manager, Front Door o arquitecturas multi-región, lo opuesto a la proximidad física.",
+        "Distributing virtual machines across regions is handled with Azure Traffic Manager, Front Door, or multi-region architectures, the opposite of physical proximity.",
         null,
-        "La agrupación lógica de interfaces de red para reglas de filtrado se realiza con Application Security Groups (ASGs), no PPGs.",
-        "La distribución entre zonas de disponibilidad dispersa físicamente las VMs para tolerancia a fallos; un PPG busca cercanía física para reducir latencia."
+        "Logical grouping of network interfaces for filtering rules is done with Application Security Groups (ASGs), not PPGs.",
+        "Distribution across availability zones physically disperses VMs for fault tolerance; a PPG seeks physical proximity to reduce latency."
       ],
       "az-039": [
-        "Configurar manualmente cada VM en el portal es propenso a errores humanos, no es versionable ni escalable.",
+        "Manually configuring each VM in the portal is prone to human error and is neither versionable nor scalable.",
         null,
-        "`Azure Migrate` está orientado a la migración desde entornos locales hacia Azure, no al despliegue repetible de infraestructura como código.",
-        "`Azure Site Recovery` replica máquinas virtuales para recuperación ante desastres, no para aprovisionar plantillas idénticas en múltiples regiones."
+        "`Azure Migrate` is oriented toward migration from on-premises environments to Azure, not repeatable infrastructure-as-code deployment.",
+        "`Azure Site Recovery` replicates virtual machines for disaster recovery, not for provisioning identical templates across multiple regions."
       ],
       "az-040": [
         null,
-        "No es posible desasociar (detach) el disco del sistema operativo de una máquina virtual mientras la VM existe.",
-        "Clonar datos manualmente a un nuevo disco administrado no es el método oficial ni soportado para expandir el disco del sistema operativo.",
-        "Agregar discos de datos y configurar striping amplía el almacenamiento de datos secundarios, pero no resuelve la falta de espacio en la partición del sistema operativo."
+        "It is not possible to detach the operating system disk from a virtual machine while the VM exists.",
+        "Manually cloning data to a new managed disk is not the official or supported method for expanding the operating system disk.",
+        "Adding data disks and configuring striping expands secondary data storage, but does not resolve the lack of space on the operating system partition."
       ],
       "az-041": [
-        "Las Spot VMs no ofrecen SLA de disponibilidad y pueden ser desalojadas en cualquier momento con solo 30 segundos de aviso previo.",
+        "Spot VMs do not offer an availability SLA and can be evicted at any time with only 30 seconds' notice.",
         null,
-        "Las bases de datos relacionales críticas no toleran desalojos repentinos del hardware sin riesgo de indisponibilidad del servicio.",
-        "Los controladores de dominio requieren alta disponibilidad continua y disponibilidad determinista, inadecuados para instancias desalojables."
+        "Critical relational databases cannot tolerate sudden hardware evictions without the risk of service unavailability.",
+        "Domain controllers require continuous high availability and deterministic availability, which makes them unsuitable for evictable instances."
       ],
       "az-042": [
-        "Mantener el sistema operativo pausado corresponde al estado `Stopped` (desde dentro del SO), en el cual el hardware sigue asignado y Azure continúa facturando el cómputo.",
+        "Keeping the operating system paused corresponds to the `Stopped` state (from within the OS), in which the hardware remains allocated and Azure continues to bill for compute.",
         null,
-        "En estado `Deallocated` no hay descuento parcial de cómputo; el costo de cómputo (vCPU y RAM) es exactamente cero ($0), cobrándose únicamente discos e IPs públicas fijas.",
-        "El mantenimiento de la plataforma Azure no coloca las máquinas en estado desasignado facturable con descuento."
+        "In the `Deallocated` state there is no partial compute discount; the compute cost (vCPU and RAM) is exactly zero ($0), and only disks and static public IPs are billed.",
+        "Azure platform maintenance does not place machines in a billable deallocated state with a discount."
       ],
       "az-043": [
-        "Kubernetes auto-administrado sobre VMs requiere que el usuario instale, configure, parchee y mantenga manualmente los nodos de control plane y etcd.",
-        "`Azure Container Instances` es un entorno serverless para ejecutar contenedores individuales o grupos de contenedores, no un orquestador completo con control plane expuesto.",
+        "Self-managed Kubernetes on VMs requires the user to manually install, configure, patch, and maintain the control plane nodes and etcd.",
+        "`Azure Container Instances` is a serverless environment for running individual containers or container groups, not a full orchestrator with an exposed control plane.",
         null,
-        "`Azure Red Hat OpenShift` es una plataforma administrada conjuntamente con Red Hat, pero en el contexto estándar de certificación AZ-104 el orquestador nativo gestionado por Microsoft es AKS."
+        "`Azure Red Hat OpenShift` is a platform jointly managed with Red Hat, but in the standard AZ-104 certification context the native orchestrator managed by Microsoft is AKS."
       ],
       "az-044": [
-        "Una conexión `Site-to-Site VPN` entre VNets requiere dos Virtual Network Gateways, introduce costos por hora de gateway y limita el ancho de banda.",
+        "A `Site-to-Site VPN` connection between VNets requires two Virtual Network Gateways, introduces hourly gateway costs, and limits bandwidth.",
         null,
-        "`ExpressRoute` requiere conectividad a través de un proveedor de telecomunicaciones externo para conectar redes on-premises, no para dos VNets en Azure.",
-        "`Azure Relay` es un servicio de mensajería para comunicar servicios detrás de firewalls a nivel de aplicación, no un enlace de red entre VNets."
+        "`ExpressRoute` requires connectivity through an external telecommunications provider to connect on-premises networks, not for two VNets in Azure.",
+        "`Azure Relay` is a messaging service for connecting services behind firewalls at the application level, not a network link between VNets."
       ],
       "az-045": [
-        "Los números de prioridad más bajos tienen mayor precedencia (p. ej. la regla 100 se procesa antes que la 200), no de mayor a menor número.",
+        "Lower priority numbers have higher precedence (e.g., rule 100 is processed before rule 200), not from highest to lowest number.",
         null,
-        "El tipo de regla (Allow o Deny) no determina el orden de evaluación; el orden lo dicta estrictamente el número de prioridad.",
-        "Las reglas personalizadas (prioridades 100 a 4096) siempre se evalúan antes que las reglas por defecto (prioridades 65000 a 65500)."
+        "The rule type (Allow or Deny) does not determine the evaluation order; the order is dictated strictly by the priority number.",
+        "Custom rules (priorities 100 to 4096) are always evaluated before default rules (priorities 65000 to 65500)."
       ],
       "az-046": [
-        "El comportamiento por defecto de un NSG no es permitir todo el tráfico entrante, sino denegarlo excepto el tráfico interno de la VNet y el Azure Load Balancer.",
-        "Aunque existe una regla por defecto que permite la comunicación dentro de la VNet (AllowVNetInBound), la regla final de cierre por defecto que aplica al tráfico externo no emparejado es DenyAllInBound.",
+        "The default behavior of an NSG is not to allow all inbound traffic, but to deny it except for internal VNet traffic and the Azure Load Balancer.",
+        "Although there is a default rule that allows communication within the VNet (AllowVNetInBound), the final default catch-all rule that applies to unmatched external traffic is DenyAllInBound.",
         null,
-        "Azure Network Watcher no captura paquetes por defecto a menos que se configure explícitamente una sesión de Packet Capture."
+        "Azure Network Watcher does not capture packets by default unless a Packet Capture session is explicitly configured."
       ],
       "az-047": [
-        "El emparejamiento de redes virtuales (VNet peering) es no transitivo; el tráfico no puede saltar a través de una VNet intermedia de forma nativa.",
+        "Virtual network peering (VNet peering) is non-transitive; traffic cannot hop through an intermediate VNet natively.",
         null,
-        "`Allow Gateway Transit` permite a las VNets remotas utilizar una puerta de enlace VPN o ExpressRoute en la VNet hub, no habilita transitividad de enrutamiento general entre VNets.",
-        "La ubicación geográfica de las VNets no altera la regla fundamental de no transitividad del peering."
+        "`Allow Gateway Transit` allows remote VNets to use a VPN or ExpressRoute gateway in the hub VNet; it does not enable general routing transitivity between VNets.",
+        "The geographic location of the VNets does not alter the fundamental non-transitivity rule of peering."
       ],
       "az-048": [
-        "Los NSGs filtran paquetes por IP y puerto (permitir o denegar), pero no pueden cambiar la ruta de salto siguiente (next hop) del tráfico.",
+        "NSGs filter packets by IP and port (allow or deny), but cannot change the next hop of the traffic.",
         null,
-        "Las reglas de Azure Firewall filtran el tráfico una vez que llega al firewall, pero para redirigir el tráfico hacia el firewall o NVA es imprescindible una ruta UDR.",
-        "Los Service Endpoints desvían el tráfico hacia servicios PaaS de Microsoft a través del backbone, no enrutan hacia un NVA ni gestionan tráfico general de internet."
+        "Azure Firewall rules filter traffic once it reaches the firewall, but to redirect traffic to the firewall or NVA a UDR route is essential.",
+        "Service Endpoints divert traffic to Microsoft PaaS services over the backbone; they do not route to an NVA or manage general internet traffic."
       ],
       "az-049": [
-        "La propagación de rutas BGP se usa con puertas de enlace ExpressRoute o VPN, no es un requisito para que un NVA reenvíe tráfico local UDR.",
+        "BGP route propagation is used with ExpressRoute or VPN gateways; it is not a requirement for an NVA to forward UDR-routed traffic.",
         null,
-        "El NVA puede salir a internet mediante NAT Gateway, Azure Firewall o una IP pública secundaria; una IP pública estándar directa no es el fallo obligatorio que bloquea el reenvío interno.",
-        "Las reglas por defecto de NSG ya permiten todo el tráfico de salida (AllowInternetOutBound); lo que Azure bloquea por omisión en una NIC es recibir paquetes con una IP de destino ajena si falta `IP Forwarding`."
+        "The NVA can reach the internet through NAT Gateway, Azure Firewall, or a secondary public IP; a direct standard public IP is not the mandatory failure that blocks internal forwarding.",
+        "Default NSG rules already allow all outbound traffic (AllowInternetOutBound); what Azure blocks by default on a NIC is receiving packets with a foreign destination IP if `IP Forwarding` is missing."
       ],
       "az-050": [
         "Azure Application Gateway is an L7 load balancer supporting URL path-based routing, SSL termination, session affinity, and optionally WAF (Web Application Firewall).",
@@ -2184,334 +2183,334 @@
         "Azure Application Gateway is an L7 load balancer supporting URL path-based routing, SSL termination, session affinity, and optionally WAF (Web Application Firewall)."
       ],
       "az-051": [
-        "Standard Load Balancer opera en capa 4 y, aunque existe Cross-region Load Balancer, no utiliza el método de enrutamiento basado en latencia de DNS (Performance routing).",
-        "Application Gateway es un balanceador regional de capa 7; no distribuye tráfico DNS a nivel global basado en la latencia más baja de clientes dispersos.",
+        "Standard Load Balancer operates at Layer 4 and, although Cross-region Load Balancer exists, it does not use the DNS latency-based routing method (Performance routing).",
+        "Application Gateway is a regional Layer 7 load balancer; it does not distribute DNS traffic globally based on the lowest latency for dispersed clients.",
         null,
-        "El método ponderado (weighted) reparte tráfico por porcentajes predefinidos, no por la menor latencia geográfica del cliente como pide el escenario."
+        "The weighted method distributes traffic by predefined percentages, not by the client's lowest geographic latency as the scenario requires."
       ],
       "az-052": [
-        "Una VPN `Site-to-Site` cifra el tráfico mediante IPSec pero viaja a través del internet público, no sobre un circuito dedicado privado.",
-        "Una conexión `Point-to-Site` es para conectar clientes individuales remotos sobre internet mediante VPN cliente, no para un enlace dedicado corporativo.",
+        "A `Site-to-Site` VPN encrypts traffic using IPSec but travels over the public internet, not over a private dedicated circuit.",
+        "A `Point-to-Site` connection is for connecting individual remote clients over the internet using a client VPN, not for a dedicated corporate link.",
         null,
-        "El `VNet Peering` conecta redes virtuales dentro de Azure, no una red física local on-premises."
+        "`VNet Peering` connects virtual networks within Azure, not a physical on-premises network."
       ],
       "az-053": [
-        "Traffic Manager es un servicio de balanceo global basado en DNS público para endpoints externos, no para resolución interna de nombres en una VNet.",
+        "Traffic Manager is a global load-balancing service based on public DNS for external endpoints, not for internal name resolution within a VNet.",
         null,
-        "Las zonas públicas de DNS exigen exponer registros en servidores de nombres públicos de internet y no admiten autoregistro automático de VMs privadas.",
-        "Desplegar un reenviador DNS en una VM requiere gestionar la infraestructura, parches y disponibilidad del servidor, violando el requisito de no desplegar servidores DNS dedicados."
+        "Public DNS zones require exposing records on public internet name servers and do not support automatic registration of private VMs.",
+        "Deploying a DNS forwarder on a VM requires managing the infrastructure, patching, and availability of the server, violating the requirement not to deploy dedicated DNS servers."
       ],
       "az-054": [
-        "Es al revés: los NSGs operan únicamente en capas 3 y 4 (IP, puerto, protocolo), mientras que Azure Firewall inspecciona capa 7 (FQDN, URLs, reglas de aplicación).",
+        "It is the other way around: NSGs operate only at layers 3 and 4 (IP, port, protocol), while Azure Firewall inspects layer 7 (FQDNs, URLs, application rules).",
         null,
-        "Los NSGs no pueden descifrar ni inspeccionar el contenido de paquetes HTTPS a nivel de capa de aplicación; Azure Firewall Premium sí admite inspección TLS.",
-        "Azure Firewall es un firewall de red centralizado totalmente administrado como PaaS, no un firewall basado en host."
+        "NSGs cannot decrypt or inspect the content of HTTPS packets at the application layer; Azure Firewall Premium does support TLS inspection.",
+        "Azure Firewall is a fully managed, centralized network firewall delivered as PaaS, not a host-based firewall."
       ],
       "az-055": [
-        "Los `Diagnostic Settings` de las VMs recopilan registros del SO y métricas de rendimiento del host, no los flujos de paquetes IP del NSG.",
+        "VM `Diagnostic Settings` collect OS logs and host performance metrics, not the NSG's IP packet flows.",
         null,
-        "Los registros de `Azure Firewall` solo capturan el tráfico que atraviesa el firewall de Azure, no los paquetes que pasan por los NSGs de las subredes.",
-        "Los conectores de `Microsoft Sentinel` ingieren eventos de seguridad ya recopilados; para registrar los flujos de red del NSG primero se requiere activar NSG Flow Logs."
+        "`Azure Firewall` logs only capture traffic that traverses the Azure firewall, not packets passing through the subnet NSGs.",
+        "`Microsoft Sentinel` connectors ingest security events that have already been collected; to record NSG network flows you must first enable NSG Flow Logs."
       ],
       "az-056": [
-        "Asignar IPs públicas directamente a las NICs expone la VM a internet, lo contrario al propósito de un Service Endpoint que busca aislar el tráfico.",
+        "Assigning public IPs directly to NICs exposes the VM to the internet, the opposite of the purpose of a Service Endpoint, which aims to isolate traffic.",
         null,
-        "Los túneles VPN IPSec se establecen mediante Azure VPN Gateway, no a través de Service Endpoints.",
-        "La distribución de tráfico entrante entre instancias se realiza con Azure Load Balancer o Application Gateway."
+        "IPSec VPN tunnels are established through Azure VPN Gateway, not through Service Endpoints.",
+        "Distribution of incoming traffic across instances is done with Azure Load Balancer or Application Gateway."
       ],
       "az-057": [
-        "El cifrado en tránsito (TLS/HTTPS) lo implementa el propio servicio PaaS en ambos mecanismos; no es una exclusividad de Private Endpoint.",
+        "Encryption in transit (TLS/HTTPS) is implemented by the PaaS service itself in both mechanisms; it is not exclusive to Private Endpoint.",
         null,
-        "Private Endpoint no elimina los costos de transferencia de datos; de hecho, cobra por gigabyte procesado tanto en entrada como en salida.",
-        "La protección DDoS Network Protection es una funcionalidad de red a nivel de VNet, no una característica exclusiva que provea Private Endpoint frente a Service Endpoint."
+        "Private Endpoint does not eliminate data transfer costs; in fact, it charges per gigabyte processed for both inbound and outbound.",
+        "DDoS Network Protection is a network feature at the VNet level, not an exclusive capability that Private Endpoint provides over Service Endpoint."
       ],
       "az-058": [
-        "El Load Balancer solo monitoriza la salud de red para tomar decisiones de enrutamiento; no tiene permisos ni capacidad para reiniciar máquinas virtuales.",
+        "The Load Balancer only monitors network health to make routing decisions; it has no permissions or ability to restart virtual machines.",
         null,
-        "El Load Balancer no destruye ni aprovisiona máquinas virtuales de reemplazo; solo las marca como no saludables en su tabla de distribución.",
-        "El balanceador deja de enviar nuevo tráfico inmediatamente a la instancia no saludable; no continúa enviando tráfico como si estuviera sana."
+        "The Load Balancer does not destroy or provision replacement virtual machines; it only marks them as unhealthy in its distribution table.",
+        "The load balancer immediately stops sending new traffic to the unhealthy instance; it does not continue sending traffic as if it were healthy."
       ],
       "az-059": [
-        "Azure Policy evalúa el estado de cumplimiento y configuración de recursos en el plano de control, no genera alertas en tiempo real sobre métricas de rendimiento como la CPU.",
+        "Azure Policy evaluates the compliance and configuration state of resources on the control plane; it does not generate real-time alerts on performance metrics such as CPU.",
         null,
-        "Microsoft Defender for Cloud genera recomendaciones y alertas de seguridad ante amenazas, no alertas operativas de umbral de uso de CPU.",
-        "El porcentaje de CPU es una métrica de plataforma recopilada de forma continua por Azure Monitor; usar una consulta de log de eventos no es el mecanismo directo ni estándar."
+        "Microsoft Defender for Cloud generates security recommendations and alerts for threats, not operational alerts based on CPU usage thresholds.",
+        "CPU percentage is a platform metric collected continuously by Azure Monitor; using an event log query is not the direct or standard mechanism."
       ],
       "az-060": [
-        "El almacenamiento de snapshots y puntos de recuperación de copias de seguridad es responsabilidad de Azure Backup y Recovery Services vaults.",
+        "Storage of snapshots and backup recovery points is the responsibility of Azure Backup and Recovery Services vaults.",
         null,
-        "Los paneles de métricas en tiempo real utilizan Azure Monitor Metrics y Azure Dashboards, no requieren obligatoriamente Log Analytics ni son su función primaria.",
-        "El archivado frío a largo plazo de bajo costo se realiza en Azure Blob Storage (nivel Archive), no en un espacio de trabajo de Log Analytics."
+        "Real-time metrics dashboards use Azure Monitor Metrics and Azure Dashboards; they do not necessarily require Log Analytics, nor is that its primary function.",
+        "Low-cost, long-term cold archiving is done in Azure Blob Storage (Archive tier), not in a Log Analytics workspace."
       ],
       "az-061": [
-        "Es al revés: Site Recovery es el que orquesta la conmutación por error ante desastres entre regiones, mientras que Azure Backup gestiona copias puntuales.",
+        "It is the other way around: Site Recovery is what orchestrates disaster failover across regions, while Azure Backup manages point-in-time copies.",
         null,
-        "Azure Backup admite restauración granular de archivos y carpetas además de discos y VMs completas; Site Recovery está diseñado para replicación completa de máquinas y failover.",
-        "Azure Backup trabaja con copias de seguridad programadas periódicas; es Azure Site Recovery el que mantiene replicación continua asíncrona para RPO cercano a cero."
+        "Azure Backup supports granular file and folder restore in addition to full disks and VMs; Site Recovery is designed for full machine replication and failover.",
+        "Azure Backup works with periodic scheduled backups; it is Azure Site Recovery that maintains continuous asynchronous replication for a near-zero RPO."
       ],
       "az-062": [
-        "El período de retención por defecto no es de 7 días sino de 90 días, y Azure Policy no cambia el almacenamiento interno del Activity Log.",
-        "El período de retención por defecto no es de 30 días ni requiere adquirir un cluster dedicado de Log Analytics para extenderlo.",
+        "The default retention period is not 7 days but 90 days, and Azure Policy does not change the internal storage of the Activity Log.",
+        "The default retention period is not 30 days, nor does extending it require purchasing a dedicated Log Analytics cluster.",
         null,
-        "El Activity Log solo almacena 90 días en la plataforma por defecto; los registros más antiguos de 90 días se purgan a menos que se exporten."
+        "The Activity Log only stores 90 days on the platform by default; records older than 90 days are purged unless they are exported."
       ],
       "az-063": [
-        "`Azure Advisor` ofrece recomendaciones de costos, seguridad y confiabilidad, pero no gráficos de rendimiento en tiempo real ni mapas de dependencias.",
+        "`Azure Advisor` offers cost, security, and reliability recommendations, but not real-time performance charts or dependency maps.",
         null,
-        "`Application Insights` supervisa el código y rendimiento de aplicaciones web (APM), no la infraestructura y dependencias a nivel de VM del sistema operativo.",
-        "`Azure Service Health` informa sobre el estado de la plataforma global de Azure y mantenimientos programados, no sobre métricas internas de VMs."
+        "`Application Insights` monitors the code and performance of web applications (APM), not the infrastructure and dependencies at the VM operating system level.",
+        "`Azure Service Health` reports on the status of the global Azure platform and scheduled maintenance, not on internal VM metrics."
       ],
       "az-064": [
-        "La supervisión de métricas del sistema operativo invitado (CPU, memoria, disco) se realiza mediante Azure Monitor Metrics y VM Insights.",
+        "Monitoring of guest operating system metrics (CPU, memory, disk) is done through Azure Monitor Metrics and VM Insights.",
         null,
-        "La creación de reglas de alertas y remediaciones automatizadas se configura en Azure Monitor Alerts y Action Groups.",
-        "La asignación de permisos y control de acceso RBAC se administra mediante Azure RBAC en el plano de control, no a través de Service Health."
+        "Creation of alert rules and automated remediations is configured in Azure Monitor Alerts and Action Groups.",
+        "Permission assignment and RBAC access control are managed through Azure RBAC on the control plane, not through Service Health."
       ],
       "az-065": [
-        "La organización de recursos para asignación de políticas de gobernanza se realiza mediante Management Groups y Resource Groups, no Action Groups.",
+        "Organization of resources for governance policy assignment is done through Management Groups and Resource Groups, not Action Groups.",
         null,
-        "La agregación de métricas y visualización personalizada se realiza mediante Azure Workbooks y Azure Dashboards.",
-        "El control de acceso a los destinos de exportación de datos se gestiona mediante Azure RBAC y directivas de red, no con Action Groups."
+        "Metric aggregation and custom visualization are done through Azure Workbooks and Azure Dashboards.",
+        "Access control to data export destinations is managed through Azure RBAC and network policies, not with Action Groups."
       ],
       "az-066": [
-        "T-SQL se usa en Azure SQL Database; Log Analytics no acepta T-SQL sino KQL.",
-        "PromQL se usa contra un Azure Monitor workspace (managed Prometheus), no contra un Log Analytics workspace.",
+        "T-SQL is used in Azure SQL Database; Log Analytics does not accept T-SQL but KQL.",
+        "PromQL is used against an Azure Monitor workspace (managed Prometheus), not against a Log Analytics workspace.",
         null,
-        "OData `$filter` sirve para filtrar llamadas REST (p. ej. Activity Log API), no para consultar tablas de Log Analytics."
+        "OData `$filter` is used to filter REST calls (e.g., the Activity Log API), not to query Log Analytics tables."
       ],
       "az-067": [
-        "Snapshots programados con un runbook no dan consistencia de aplicación multi-disco ni gestión de retención; es una solución casera, no el servicio de backup.",
-        "Site Recovery es replicación para DR (failover), no backup; su retención de puntos de recuperación es de pocos días (máx. 15), no 30.",
+        "Snapshots scheduled with a runbook provide neither multi-disk application consistency nor retention management; it is a homegrown solution, not the backup service.",
+        "Site Recovery is replication for DR (failover), not backup; its recovery point retention is only a few days (max. 15), not 30.",
         null,
-        "GRS + soft delete protege blobs ante borrado o desastre regional, pero no genera puntos de restauración programados y consistentes de la VM."
+        "GRS + soft delete protects blobs against deletion or regional disaster, but does not generate scheduled, consistent restore points for the VM."
       ],
       "az-068": [
-        "VM insights muestra rendimiento y dependencias de las VMs, pero no genera recomendaciones de ahorro sobre VMs infrautilizadas o discos sin adjuntar.",
-        "Defender for Cloud da recomendaciones de seguridad (secure score), no de costo.",
+        "VM insights shows VM performance and dependencies, but does not generate savings recommendations for underutilized VMs or unattached disks.",
+        "Defender for Cloud gives security recommendations (secure score), not cost recommendations.",
         null,
-        "Los budgets de Cost Management alertan cuando el gasto supera un umbral, pero no identifican recursos infrautilizados."
+        "Cost Management budgets alert when spending exceeds a threshold, but do not identify underutilized resources."
       ],
       "az-069": [
-        "`Audit` únicamente registra una advertencia en los informes de cumplimiento de directivas; no despliega recursos ni agentes.",
-        "`Deny` bloquea la creación o actualización de recursos no conformes, pero no puede instalar ni desplegar componentes faltantes.",
-        "`Modify` permite agregar, actualizar o eliminar etiquetas y valores de recursos existentes, pero no ejecuta plantillas ARM para desplegar nuevos recursos o extensiones.",
+        "`Audit` only records a warning in policy compliance reports; it does not deploy resources or agents.",
+        "`Deny` blocks the creation or update of non-compliant resources, but cannot install or deploy missing components.",
+        "`Modify` allows adding, updating, or removing tags and values on existing resources, but does not run ARM templates to deploy new resources or extensions.",
         null
       ],
       "az-070": [
-        "Boot Diagnostics sirve para problemas de arranque del SO; no muestra el código de error del job de backup.",
-        "El Activity Log registra operaciones de control plane, pero no el detalle ni los códigos de error del job de backup.",
+        "Boot Diagnostics is for OS boot problems; it does not show the backup job's error code.",
+        "The Activity Log records control plane operations, but not the details or error codes of the backup job.",
         null,
-        "Esa tabla solo existe si antes configuraste diagnostic settings hacia Log Analytics; no es el primer lugar donde mirar."
+        "That table only exists if you previously configured diagnostic settings to Log Analytics; it is not the first place to look."
       ],
       "az-071": [
         null,
-        "Las directivas de User risk en Identity Protection responden a cuentas comprometidas, pero no orquestan la experiencia de registro previo obligatorio de métodos MFA.",
-        "El registro combinado es la interfaz moderna de autoservicio que unifica SSPR y MFA, pero la directiva que exige y obliga a pasar por ese flujo es Conditional Access.",
-        "Azure AD Password Protection valida la fortaleza de las contraseñas contra listas prohibidas globales y personalizadas, no gestiona métodos ni registros de MFA."
+        "User risk policies in Identity Protection respond to compromised accounts, but do not orchestrate the mandatory prior registration experience for MFA methods.",
+        "Combined registration is the modern self-service interface that unifies SSPR and MFA, but the policy that requires and enforces going through that flow is Conditional Access.",
+        "Azure AD Password Protection validates password strength against global and custom banned lists; it does not manage MFA methods or registrations."
       ],
       "az-072": [
-        "Conditional Access controla condiciones de inicio de sesión, pero no ofrece activación just-in-time de roles con aprobación y duración limitada.",
+        "Conditional Access controls sign-in conditions, but does not offer just-in-time role activation with approval and limited duration.",
         null,
-        "Las access reviews revisan periódicamente quién tiene acceso, pero no conceden el rol just-in-time con aprobación.",
-        "Las administrative units limitan el alcance de roles administrativos, pero la asignación sigue siendo permanente, no JIT."
+        "Access reviews periodically review who has access, but do not grant the role just-in-time with approval.",
+        "Administrative units limit the scope of administrative roles, but the assignment remains permanent, not JIT."
       ],
       "az-073": [
         null,
-        "Los registros de inicio de sesión de Azure AD muestran el fallo de autenticación en la nube, pero no revelan el estado ni los errores del motor de sincronización de contraseñas.",
-        "ADUC solo muestra el objeto local en el controlador de dominio, pero no proporciona visibilidad sobre la sincronización de hashes hacia Azure AD.",
-        "Los logs del proxy de Password Protection auditan validaciones de directivas de contraseñas locales, no el estado del agente de sincronización de Azure AD Connect."
+        "Azure AD sign-in logs show the authentication failure in the cloud, but do not reveal the state or errors of the password synchronization engine.",
+        "ADUC only shows the on-premises object on the domain controller, but provides no visibility into hash synchronization to Azure AD.",
+        "Password Protection proxy logs audit on-premises password policy validations, not the state of the Azure AD Connect sync agent."
       ],
       "az-074": [
-        "`DoNotEnforce` desactiva el efecto de la asignación en toda la suscripción, no solo en el resource group.",
-        "Cambiar el efecto a `Audit` deja de bloquear despliegues en todos los scopes de la asignación, no solo en un resource group.",
+        "`DoNotEnforce` disables the effect of the assignment across the entire subscription, not just in the resource group.",
+        "Changing the effect to `Audit` stops blocking deployments in all scopes of the assignment, not just in one resource group.",
         null,
-        "Un rol RBAC no exime de Azure Policy; la política sigue aplicando con cualquier permiso que tenga el usuario."
+        "An RBAC role does not exempt from Azure Policy; the policy still applies regardless of whatever permissions the user has."
       ],
       "az-075": [
-        "`Append` añade campos o propiedades específicas al manifiesto del recurso durante el despliegue, pero no crea un nuevo recurso hijo o relacionado.",
-        "`Audit` genera un registro de no cumplimiento en la consola de directivas, sin realizar ninguna acción de creación o corrección.",
+        "`Append` adds specific fields or properties to the resource manifest during deployment, but does not create a new child or related resource.",
+        "`Audit` generates a non-compliance record in the policy console, without performing any creation or remediation action.",
         null,
-        "`Modify` actualiza o reemplaza propiedades y etiquetas en el recurso evaluado, pero no ejecuta una plantilla ARM para crear un recurso independiente como Diagnostic Settings."
+        "`Modify` updates or replaces properties and tags on the evaluated resource, but does not run an ARM template to create a standalone resource such as Diagnostic Settings."
       ],
       "az-076": [
-        "`Privileged Identity Management (PIM)` gestiona la activación temporal y gobernanza de roles privilegiados de Azure AD y Azure, no revisiones periódicas de miembros invitados en grupos o canales.",
+        "`Privileged Identity Management (PIM)` manages temporary activation and governance of privileged Azure AD and Azure roles, not periodic reviews of guest members in groups or channels.",
         null,
-        "`Entitlement Management` organiza paquetes de acceso y flujos de solicitud de recursos, pero la funcionalidad periódica y recurrente de certificación de acceso continuo es Access Reviews.",
-        "`Conditional Access` impone controles de acceso en tiempo real durante el inicio de sesión (como MFA o dispositivos conformes), pero no realiza revisiones periódicas de membresías existentes."
+        "`Entitlement Management` organizes access packages and resource request workflows, but the periodic, recurring continuous access certification feature is Access Reviews.",
+        "`Conditional Access` enforces real-time access controls during sign-in (such as MFA or compliant devices), but does not perform periodic reviews of existing memberships."
       ],
       "az-077": [
-        "Una cuenta de usuario de Azure AD puede pertenecer a su directorio de origen y a su vez ser invitado en otros directorios externos; no está limitada a 1.",
-        "No existe un tope de 10 directorios; los usuarios pueden colaborar con múltiples organizaciones como miembros o invitados sin este límite.",
-        "Azure AD no impone un límite rígido de 500 directorios por identidad de usuario para pertenencia o acceso B2B.",
+        "An Azure AD user account can belong to its home directory and also be a guest in other external directories; it is not limited to 1.",
+        "There is no cap of 10 directories; users can collaborate with multiple organizations as members or guests without this limit.",
+        "Azure AD does not impose a hard limit of 500 directories per user identity for membership or B2B access.",
         null
       ],
       "az-078": [
-        "`Deny` bloquea la creación de recursos que no cumplan la condición, en lugar de agregar la etiqueta heredada automáticamente.",
-        "`Append` puede agregar campos a la petición durante la creación, pero para agregar o modificar etiquetas heredadas el efecto específico y recomendado es `Modify`.",
+        "`Deny` blocks the creation of resources that do not meet the condition, instead of automatically adding the inherited tag.",
+        "`Append` can add fields to the request during creation, but to add or modify inherited tags the specific, recommended effect is `Modify`.",
         null,
-        "`DeployIfNotExists` se utiliza para desplegar recursos dependientes o hijos completos mediante plantillas ARM, no para aplicar etiquetas en el propio recurso."
+        "`DeployIfNotExists` is used to deploy dependent or full child resources through ARM templates, not to apply tags on the resource itself."
       ],
       "az-079": [
-        "Funciona, pero requiere 10 asignaciones y no cubre suscripciones nuevas del departamento; no es lo más eficiente.",
-        "Asignar en el root obliga a mantener exclusiones para los otros 4 departamentos y arriesga afectar a todo el tenant.",
+        "It works, but requires 10 assignments and does not cover new subscriptions in the department; it is not the most efficient.",
+        "Assigning at the root forces you to maintain exclusions for the other 4 departments and risks affecting the entire tenant.",
         null,
-        "Un blueprint por suscripción sigue siendo una asignación por suscripción, además Blueprints está en deprecación; el management group lo resuelve con una sola asignación."
+        "One blueprint per subscription is still one assignment per subscription; in addition, Blueprints is being deprecated; the management group solves it with a single assignment."
       ],
       "az-080": [
-        "`Owner` otorga control total sobre todos los recursos, incluyendo la capacidad de iniciar, detener y asignar roles a otros usuarios.",
-        "`Contributor` permite realizar cualquier acción de administración sobre recursos (incluyendo encender y apagar VMs), sin restringir operaciones de cómputo.",
+        "`Owner` grants full control over all resources, including the ability to start, stop, and assign roles to other users.",
+        "`Contributor` allows performing any management action on resources (including powering VMs on and off), without restricting compute operations.",
         null,
-        "`Virtual Machine Contributor` otorga los permisos necesarios para iniciar, apagar y gestionar máquinas virtuales; si tuviera este rol sí podría detenerlas."
+        "`Virtual Machine Contributor` grants the permissions needed to start, shut down, and manage virtual machines; if they had this role, they could stop them."
       ],
       "az-081": [
-        "Un client secret en app settings sigue siendo una credencial almacenada que hay que proteger y rotar.",
+        "A client secret in app settings is still a stored credential that must be protected and rotated.",
         null,
-        "Un certificado de service principal sigue siendo una credencial que hay que cargar, renovar y rotar; la managed identity elimina esa gestión.",
-        "Un service endpoint solo controla el acceso de red; la app sigue necesitando autenticarse ante Key Vault con alguna identidad."
+        "A service principal certificate is still a credential that must be uploaded, renewed, and rotated; a managed identity eliminates that management.",
+        "A service endpoint only controls network access; the app still needs to authenticate to Key Vault with some identity."
       ],
       "az-082": [
-        "`Azure AD Free` no admite directivas personalizadas de Conditional Access; únicamente permite habilitar Security Defaults predefinidos.",
+        "`Azure AD Free` does not support custom Conditional Access policies; it only allows enabling predefined Security Defaults.",
         null,
-        "`Azure AD P2` incluye funciones adicionales de Identity Protection basadas en riesgo, pero la licencia mínima base para Conditional Access es Azure AD P1.",
-        "`Microsoft 365 E3` incluye la funcionalidad de Azure AD P1, pero el nivel de licencia de Azure AD requerido formalmente como estándar del servicio es Azure AD P1."
+        "`Azure AD P2` includes additional risk-based Identity Protection features, but the base minimum license for Conditional Access is Azure AD P1.",
+        "`Microsoft 365 E3` includes Azure AD P1 functionality, but the Azure AD license tier formally required as the service standard is Azure AD P1."
       ],
       "az-083": [
-        "Conditional Access y named locations controlan desde dónde inicia sesión el usuario, no en qué región se despliegan los recursos.",
+        "Conditional Access and named locations control where the user signs in from, not which region resources are deployed to.",
         null,
-        "RBAC no puede restringir la región de despliegue; un resource group en East US puede contener recursos de cualquier región.",
-        "Funciona, pero son 20 asignaciones; la pregunta pide la MEJOR acción única, que es asignar en el management group."
+        "RBAC cannot restrict the deployment region; a resource group in East US can contain resources from any region.",
+        "It works, but that is 20 assignments; the question asks for the BEST single action, which is to assign at the management group."
       ],
       "az-084": [
-        "Está invertido: B2B es colaboración con partners y B2C es identidad de clientes/consumidores.",
+        "It is inverted: B2B is collaboration with partners and B2C is customer/consumer identity.",
         null,
-        "B2B funciona con cualquier edición (facturación MAU) y B2C tiene su propio modelo de precios; no dependen de P1/P2 así.",
-        "Está invertido: B2C usa un tenant separado (Azure AD B2C tenant), mientras B2B agrega guests a tu tenant corporativo."
+        "B2B works with any edition (MAU billing) and B2C has its own pricing model; they do not depend on P1/P2 in that way.",
+        "It is inverted: B2C uses a separate tenant (Azure AD B2C tenant), while B2B adds guests to your corporate tenant."
       ],
       "az-085": [
-        "Los locks se evalúan por encima de RBAC; ningún rol, ni siquiera Owner, puede borrar mientras exista el lock.",
+        "Locks are evaluated above RBAC; no role, not even Owner, can delete while the lock exists.",
         null,
-        "Haber creado el lock no da ninguna excepción; cualquiera debe eliminar el lock primero (requiere `Microsoft.Authorization/locks/delete`).",
-        "Un lock en un resource group aplica al grupo y se hereda a todos sus recursos."
+        "Having created the lock grants no exception; anyone must remove the lock first (requires `Microsoft.Authorization/locks/delete`).",
+        "A lock on a resource group applies to the group and is inherited by all of its resources."
       ],
       "az-086": [
-        "El versionado de blobs guarda versiones históricas anteriores de un blob ante modificaciones o sobrescrituras, pero no mueve niveles ni programa eliminaciones por antigüedad.",
+        "Blob versioning keeps earlier historical versions of a blob upon modification or overwrite, but does not move tiers or schedule deletions by age.",
         null,
-        "La retención de `Azure Backup` protege puntos de recuperación de copias de seguridad de bóvedas, no administra el ciclo de vida de los datos de producción en el storage account.",
-        "Las directivas de inmutabilidad (WORM) bloquean la modificación y borrado de blobs durante un período legal o de cumplimiento, no gestionan transiciones entre niveles ni purgas periódicas de costos."
+        "`Azure Backup` retention protects backup recovery points in vaults; it does not manage the lifecycle of production data in the storage account.",
+        "Immutability policies (WORM) block modification and deletion of blobs during a legal or compliance period; they do not manage tier transitions or periodic cost-saving purges."
       ],
       "az-087": [
         null,
-        "GRS mantiene las 3 copias primarias en LRS (un solo datacenter); ante la caída de ese datacenter necesitas un geo-failover asíncrono con posible pérdida de datos.",
-        "Premium LRS cambia el rendimiento (SSD), pero sigue replicando dentro de un único datacenter.",
-        "RA-GRS añade lectura en la región secundaria, pero la región primaria sigue siendo LRS en un solo datacenter."
+        "GRS keeps the 3 primary copies in LRS (a single datacenter); if that datacenter goes down you need an asynchronous geo-failover with possible data loss.",
+        "Premium LRS changes the performance (SSD), but still replicates within a single datacenter.",
+        "RA-GRS adds read access in the secondary region, but the primary region is still LRS in a single datacenter."
       ],
       "az-088": [
-        "Permitir la IP pública de salida sigue enviando el tráfico por el endpoint público vía internet, no por la red troncal desde la subnet.",
+        "Allowing the outbound public IP still sends traffic through the public endpoint over the internet, not over the backbone from the subnet.",
         null,
-        "Una storage account no vive en una VNet propia con la que puedas hacer peering.",
-        "Microsoft peering de ExpressRoute es para tráfico desde on-premises, no para VMs que ya están en una VNet de Azure."
+        "A storage account does not live in its own VNet that you could peer with.",
+        "ExpressRoute Microsoft peering is for traffic from on-premises, not for VMs that are already in an Azure VNet."
       ],
       "az-089": [
-        "Una account SAS no admite stored access policies; para revocarla hay que regenerar la clave de la cuenta.",
+        "An account SAS does not support stored access policies; to revoke it you must regenerate the account key.",
         null,
-        "Una user delegation SAS no admite stored access policies reutilizables; solo se revoca revocando las user delegation keys.",
-        "Una SAS ad hoc lleva sus permisos embebidos en el token; no hay política reutilizable que modificar o borrar para revocarla."
+        "A user delegation SAS does not support reusable stored access policies; it can only be revoked by revoking the user delegation keys.",
+        "An ad hoc SAS carries its permissions embedded in the token; there is no reusable policy to modify or delete in order to revoke it."
       ],
       "az-090": [
-        "La política de espacio libre se refiere al volumen local del servidor, no a una reserva de capacidad en el file share de Azure.",
+        "The free space policy refers to the server's local volume, not to a capacity reservation in the Azure file share.",
         null,
-        "La política no fija un porcentaje de archivos en caché; garantiza un porcentaje de espacio libre en el volumen.",
-        "Está invertido: el tiering se activa cuando el espacio libre baja del 20%, no cuando el volumen está al 20% de uso."
+        "The policy does not set a percentage of cached files; it guarantees a percentage of free space on the volume.",
+        "It is inverted: tiering is triggered when free space drops below 20%, not when the volume is at 20% usage."
       ],
       "az-091": [
-        "Limitar el ancho de banda reduce el impacto instantáneo pero alarga la transferencia de 50 TB durante semanas por la red.",
-        "Data Factory con self-hosted integration runtime sigue moviendo los 50 TB por la red.",
+        "Limiting bandwidth reduces the instantaneous impact but stretches the 50 TB transfer over weeks across the network.",
+        "Data Factory with a self-hosted integration runtime still moves the 50 TB over the network.",
         null,
-        "File Sync sincroniza los archivos a Azure Files por la red, no a Blob Storage, y no evita el consumo de ancho de banda."
+        "File Sync syncs files to Azure Files over the network, not to Blob Storage, and does not avoid bandwidth consumption."
       ],
       "az-092": [
-        "Eso describe snapshots (o versioning), no soft delete.",
+        "That describes snapshots (or versioning), not soft delete.",
         null,
-        "La replicación a la región secundaria es GRS/RA-GRS; también replicaría el borrado.",
-        "Impedir borrado o sobreescritura durante un periodo es la inmutabilidad (WORM); soft delete permite borrar pero recuperar después."
+        "Replication to the secondary region is GRS/RA-GRS; it would also replicate the deletion.",
+        "Preventing deletion or overwrite for a period is immutability (WORM); soft delete allows deleting but recovering afterward."
       ],
       "az-093": [
-        "Los snapshots pueden ser eliminados por quien tenga permisos y no impiden modificar el blob base.",
-        "Azure Backup conserva copias, pero no impide que el blob original se modifique o borre.",
+        "Snapshots can be deleted by anyone with permissions and do not prevent modifying the base blob.",
+        "Azure Backup keeps copies, but does not prevent the original blob from being modified or deleted.",
         null,
-        "Soft delete tiene un máximo de 365 días y no impide borrar ni sobreescribir; solo permite recuperar."
+        "Soft delete has a maximum of 365 days and does not prevent deleting or overwriting; it only allows recovery."
       ],
       "az-094": [
-        "Con el acceso de red público deshabilitado, las reglas de IP del firewall no se aplican: todo acceso por el endpoint público queda bloqueado.",
+        "With public network access disabled, firewall IP rules do not apply: all access through the public endpoint is blocked.",
         null,
-        "Los service endpoints usan el endpoint público de la cuenta; si el acceso público está deshabilitado, las reglas de VNet no tienen efecto.",
-        "La excepción de servicios de confianza aplica a ciertos servicios de Azure (Backup, Event Grid, etc.), no a una aplicación propia."
+        "Service endpoints use the account's public endpoint; if public access is disabled, VNet rules have no effect.",
+        "The trusted services exception applies to certain Azure services (Backup, Event Grid, etc.), not to a custom application."
       ],
       "az-095": [
-        "`GRS` replica los datos a una región secundaria par, pero los datos en el extremo secundario no son legibles hasta que se produce una conmutación por error (failover).",
+        "`GRS` replicates data to a paired secondary region, but data at the secondary endpoint is not readable until a failover occurs.",
         null,
-        "`ZRS` replica entre tres zonas dentro de la región primaria, pero no mantiene ninguna copia en una región secundaria.",
-        "`GZRS` replica entre zonas locales y hacia una región secundaria, pero el acceso de lectura secundario continuo requiere activar la variante `RA-GZRS`."
+        "`ZRS` replicates across three zones within the primary region, but does not maintain any copy in a secondary region.",
+        "`GZRS` replicates across local zones and to a secondary region, but continuous secondary read access requires enabling the `RA-GZRS` variant."
       ],
       "az-096": [
-        "Invitar un guest implica crear una cuenta en tu directorio, justo lo que el requisito prohíbe.",
+        "Inviting a guest involves creating an account in your directory, which is exactly what the requirement prohibits.",
         null,
-        "El acceso anónimo expone el contenedor a cualquiera y no expira solo.",
-        "La clave de cuenta da control total (no solo lectura) sobre toda la storage account; depender de rotarla manualmente es riesgoso."
+        "Anonymous access exposes the container to anyone and does not expire on its own.",
+        "The account key gives full control (not just read) over the entire storage account; relying on rotating it manually is risky."
       ],
       "az-097": [
         null,
-        "Las cuentas Premium de archivos (`FileStorage` SSD) no admiten replicación geográfica (`GRS` ni `GZRS`); solo admiten redundancia local y zonal.",
-        "Azure Files Premium admite tanto `LRS` como `ZRS` (en regiones donde ZRS está disponible), por lo que no está limitado exclusivamente a LRS.",
-        "No se puede seleccionar cualquier opción; los niveles georredundantes estándar no están disponibles para recursos compartidos de archivos Premium."
+        "Premium file accounts (`FileStorage` SSD) do not support geo-replication (`GRS` or `GZRS`); they only support local and zonal redundancy.",
+        "Azure Files Premium supports both `LRS` and `ZRS` (in regions where ZRS is available), so it is not limited exclusively to LRS.",
+        "You cannot select any option; standard geo-redundant tiers are not available for Premium file shares."
       ],
       "az-098": [
         null,
-        "El orden es origen y luego destino: este comando sube la carpeta local al contenedor, no descarga.",
-        "Sin `--recursive`, AzCopy no copia el contenido de un contenedor/directorio como origen; `--overwrite` no cambia eso.",
-        "`download` no es un subcomando de AzCopy v10; las descargas se hacen con `azcopy copy`."
+        "The order is source and then destination: this command uploads the local folder to the container; it does not download.",
+        "Without `--recursive`, AzCopy does not copy the contents of a container/directory as a source; `--overwrite` does not change that.",
+        "`download` is not an AzCopy v10 subcommand; downloads are done with `azcopy copy`."
       ],
       "az-099": [
-        "Un Availability Set da tolerancia a fallos de hardware, pero no escala automáticamente según CPU.",
+        "An Availability Set provides hardware fault tolerance, but does not scale automatically based on CPU.",
         null,
-        "VMs zonales con load balancer dan alta disponibilidad, pero no autoescalado ni actualización orquestada por lotes.",
-        "El modo Automatic actualiza todas las instancias a la vez en orden aleatorio, lo que puede causar downtime."
+        "Zonal VMs with a load balancer provide high availability, but not autoscaling or batch-orchestrated updates.",
+        "Automatic mode updates all instances at once in random order, which can cause downtime."
       ],
       "az-100": [
-        "`Azure VPN Gateway` conecta redes enteras o dispositivos mediante túneles IPSec/P2S, requiriendo un cliente VPN en vez de acceso directo por navegador sin cliente.",
+        "`Azure VPN Gateway` connects entire networks or devices through IPSec/P2S tunnels, requiring a VPN client instead of direct clientless browser access.",
         null,
-        "Una regla DNAT en `Azure Firewall` traduce el tráfico entrante de una IP pública, por lo que el puerto de acceso sigue expuesto a internet a través del firewall.",
-        "`Just-in-time (JIT) VM access` abre dinámicamente puertos en el NSG y en la IP pública de la VM, requiriendo seguir exponiendo la IP y el puerto durante la sesión."
+        "A DNAT rule in `Azure Firewall` translates inbound traffic from a public IP, so the access port remains exposed to the internet through the firewall.",
+        "`Just-in-time (JIT) VM access` dynamically opens ports in the NSG and on the VM's public IP, which means the IP and port remain exposed during the session."
       ],
       "az-101": [
-        "AKS requiere gestionar el cluster y sus node pools, que no escalan a cero el plano de nodos del sistema.",
+        "AKS requires managing the cluster and its node pools, and the system node pool does not scale to zero.",
         null,
-        "Una VM con Docker requiere gestionar el SO y se factura mientras esté encendida.",
-        "App Service cobra por el App Service plan aunque no haya tráfico; no escala a cero."
+        "A VM with Docker requires managing the OS and is billed while it is powered on.",
+        "App Service charges for the App Service plan even when there is no traffic; it does not scale to zero."
       ],
       "az-102": [
-        "Una connection string en la configuración sigue almacenando la contraseña; solo cambia que no se intercambia en el swap.",
+        "A connection string in the configuration still stores the password; the only difference is that it is not exchanged in the swap.",
         null,
-        "El certificado del service principal sigue siendo una credencial almacenada que hay que proteger y rotar.",
-        "Cifrar la sección de `web.config` sigue guardando credenciales SQL en archivos de configuración."
+        "The service principal certificate is still a stored credential that must be protected and rotated.",
+        "Encrypting the `web.config` section still keeps SQL credentials in configuration files."
       ],
       "az-103": [
-        "`App Service Backup` realiza copias de seguridad periódicas del contenido del sitio y la base de datos, no proporciona entornos de preproducción para pruebas.",
+        "`App Service Backup` performs periodic backups of the site content and database; it does not provide pre-production environments for testing.",
         null,
-        "`Azure Traffic Manager` es un balanceador DNS que distribuye peticiones externas entre endpoints públicos, no una función nativa de pre-calentamiento y swap de App Service.",
-        "`Azure Front Door` gestiona enrutamiento global HTTP/HTTPS, pero no gestiona las configuraciones de swap en caliente ni el aislamiento de slots en el App Service Plan."
+        "`Azure Traffic Manager` is a DNS load balancer that distributes external requests across public endpoints, not a native App Service warm-up and swap feature.",
+        "`Azure Front Door` handles global HTTP/HTTPS routing, but does not manage hot swap configurations or slot isolation in the App Service Plan."
       ],
       "az-104": [
-        "Shared admite dominios personalizados, pero no SSL de dominio propio, autoescalado ni slots.",
-        "Basic permite escalar manualmente hasta 3 instancias y SSL, pero no autoescalado ni deployment slots.",
+        "Shared supports custom domains, but not custom-domain SSL, autoscaling, or slots.",
+        "Basic allows manual scaling up to 3 instances and SSL, but not autoscaling or deployment slots.",
         null,
-        "Isolated sí soporta todo, pero no es el único: Standard ya incluye autoescalado y slots."
+        "Isolated does support everything, but it is not the only one: Standard already includes autoscaling and slots."
       ],
       "az-105": [
-        "HPA crea más pods, que también quedarían en Pending porque falta capacidad de nodos.",
+        "HPA creates more pods, which would also remain Pending because node capacity is lacking.",
         null,
-        "El scheduler usa los requests, no los limits; subir limits no libera capacidad en los nodos.",
-        "VPA ajusta requests/limits de los pods, pero no añade nodos; los pods seguirían sin caber."
+        "The scheduler uses requests, not limits; raising limits does not free up capacity on the nodes.",
+        "VPA adjusts pod requests/limits, but does not add nodes; the pods would still not fit."
       ],
       "az-106": [
         "Azure Batch is purpose-built for large-scale parallel and HPC workloads — it provisions, manages, and scales pools of compute nodes, distributes tasks, and tears down automatically after completion.",
@@ -2520,22 +2519,22 @@
         "Azure Batch is purpose-built for large-scale parallel and HPC workloads — it provisions, manages, and scales pools of compute nodes, distributes tasks, and tears down automatically after completion."
       ],
       "az-107": [
-        "Repartir VMs en fault domains es lo que hace un Availability Set, con el objetivo opuesto (resiliencia, no cercanía).",
+        "Spreading VMs across fault domains is what an Availability Set does, with the opposite goal (resilience, not proximity).",
         null,
-        "Repartir entre zonas aumenta la distancia y la latencia; es lo contrario a un PPG.",
-        "Reservar capacidad es On-demand Capacity Reservation, no Proximity Placement Groups."
+        "Spreading across zones increases distance and latency; it is the opposite of a PPG.",
+        "Reserving capacity is On-demand Capacity Reservation, not Proximity Placement Groups."
       ],
       "az-108": [
-        "Las Spot VMs no se migran en vivo al ser desalojadas; se detienen (deallocate) o eliminan según la eviction policy.",
+        "Spot VMs are not live-migrated when evicted; they are stopped (deallocated) or deleted depending on the eviction policy.",
         null,
-        "Max price `-1` solo evita el desalojo por precio; Azure puede seguir desalojando por falta de capacidad.",
-        "Pertenecer a un Availability Set (o zona) no protege una Spot VM del desalojo."
+        "Max price `-1` only avoids price-based eviction; Azure can still evict due to lack of capacity.",
+        "Belonging to an Availability Set (or zone) does not protect a Spot VM from eviction."
       ],
       "az-109": [
-        "AMA con DCR recolecta logs y métricas, pero no evalúa ni instala parches.",
-        "Update Management de Automation dependía del agente MMA y fue retirado (agosto 2024); su reemplazo es Azure Update Manager.",
+        "AMA with DCR collects logs and metrics, but does not assess or install patches.",
+        "Automation Update Management depended on the MMA agent and was retired (August 2024); its replacement is Azure Update Manager.",
         null,
-        "State Configuration (DSC) gestiona configuración deseada, no evaluación ni instalación automática de parches."
+        "State Configuration (DSC) manages desired configuration, not automatic patch assessment or installation."
       ],
       "az-110": [
         "AKS provides full Kubernetes orchestration including persistent volumes, service discovery, ingress, horizontal pod autoscaling, and namespace isolation — the right choice for complex multi-container workloads.",
@@ -2544,111 +2543,111 @@
         "AKS provides full Kubernetes orchestration including persistent volumes, service discovery, ingress, horizontal pod autoscaling, and namespace isolation — the right choice for complex multi-container workloads."
       ],
       "az-111": [
-        "Bastion sigue usando RDP/SSH por la red hacia la VM; si la VM no responde a RDP, Bastion tampoco conectará.",
+        "Bastion still uses RDP/SSH over the network to the VM; if the VM does not respond to RDP, Bastion will not connect either.",
         null,
-        "Connection troubleshoot diagnostica conectividad, pero no muestra la pantalla de arranque ni da acceso a consola.",
-        "Run Command depende del VM agent en un SO funcionando y no muestra la pantalla de arranque."
+        "Connection troubleshoot diagnoses connectivity, but does not show the boot screen or provide console access.",
+        "Run Command depends on the VM agent in a working OS and does not show the boot screen."
       ],
       "az-112": [
-        "Las application rules de Azure Firewall Standard filtran por FQDN, pero no inspeccionan el payload HTTP en busca de SQL injection o XSS.",
-        "Un NSG filtra en capa 3-4 (IP/puerto) y no entiende el contenido HTTP.",
+        "Azure Firewall Standard application rules filter by FQDN, but do not inspect the HTTP payload for SQL injection or XSS.",
+        "An NSG filters at layer 3-4 (IP/port) and does not understand HTTP content.",
         null,
-        "DDoS Protection mitiga ataques volumétricos de red, no ataques de aplicación como SQL injection o XSS."
+        "DDoS Protection mitigates volumetric network attacks, not application attacks such as SQL injection or XSS."
       ],
       "az-113": [
-        "Ambos son servicios regionales; el balanceo global corresponde a Front Door, Traffic Manager o el cross-region Load Balancer.",
+        "Both are regional services; global load balancing is the domain of Front Door, Traffic Manager, or the cross-region Load Balancer.",
         null,
-        "Está invertido: Load Balancer no termina TLS (capa 4); Application Gateway sí hace TLS termination.",
-        "Está invertido: el WAF se integra con Application Gateway (y Front Door), no con Load Balancer."
+        "It is inverted: Load Balancer does not terminate TLS (layer 4); Application Gateway does perform TLS termination.",
+        "It is inverted: WAF integrates with Application Gateway (and Front Door), not with Load Balancer."
       ],
       "az-114": [
-        "Load Balancer Standard es regional (capa 4); no enruta usuarios entre continentes por latencia.",
-        "Application Gateway es un balanceador regional de capa 7; no hace enrutamiento global por latencia.",
+        "Standard Load Balancer is regional (layer 4); it does not route users across continents by latency.",
+        "Application Gateway is a regional layer 7 load balancer; it does not do global latency-based routing.",
         null,
-        "Los alias records de Azure DNS apuntan a recursos de Azure, pero no hacen enrutamiento por latencia ni health probes."
+        "Azure DNS alias records point to Azure resources, but do not do latency-based routing or health probes."
       ],
       "az-115": [
-        "En NSG no hay precedencia de deny sobre allow; manda el número de prioridad más bajo que coincida.",
-        "El procesamiento se detiene en la primera coincidencia (prioridad más baja); no gana la última.",
+        "In an NSG there is no deny-over-allow precedence; the lowest matching priority number wins.",
+        "Processing stops at the first match (lowest priority number); the last one does not win.",
         null,
-        "Las reglas por defecto (prioridad 65500) solo se evalúan si ninguna regla anterior coincide; aquí la regla 100 ya coincide."
+        "Default rules (priority 65500) are only evaluated if no earlier rule matches; here rule 100 already matches."
       ],
       "az-116": [
-        "Una conexión `VPN Gateway` requiere aprovisionar y pagar puertas de enlace de red virtual en ambas regiones, además de configurar túneles y tablas de rutas.",
-        "`ExpressRoute` requiere contratar un circuito dedicado privado con un proveedor de conectividad externo, con alta complejidad de aprovisionamiento.",
+        "A `VPN Gateway` connection requires provisioning and paying for virtual network gateways in both regions, as well as configuring tunnels and route tables.",
+        "`ExpressRoute` requires contracting a private dedicated circuit with an external connectivity provider, with high provisioning complexity.",
         null,
-        "`Azure Virtual WAN` es una arquitectura de conectividad a gran escala que requiere aprovisionar hubs virtuales, conexiones y gateways."
+        "`Azure Virtual WAN` is a large-scale connectivity architecture that requires provisioning virtual hubs, connections, and gateways."
       ],
       "az-117": [
-        "Los `Service Endpoints` mantienen la dirección IP pública del servicio PaaS como destino en el backbone, por lo que el recurso sigue teniendo un extremo público visible.",
+        "`Service Endpoints` keep the PaaS service's public IP address as the destination on the backbone, so the resource still has a visible public endpoint.",
         null,
-        "`VNet Integration` permite a una aplicación web de App Service emitir tráfico hacia una VNet, no asigna una IP privada de la VNet a un recurso PaaS receptor.",
-        "Los `Network Security Groups` son reglas de filtrado de paquetes de red de nivel 3/4; no proporcionan interfaces ni direcciones IP privadas para servicios PaaS."
+        "`VNet Integration` allows an App Service web app to send traffic into a VNet; it does not assign a private IP from the VNet to a receiving PaaS resource.",
+        "`Network Security Groups` are layer 3/4 network packet filtering rules; they do not provide interfaces or private IP addresses for PaaS services."
       ],
       "az-118": [
-        "Un NSG solo permite o bloquea; no redirige el tráfico hacia el firewall on-premises.",
-        "NAT Gateway da salida a internet desde Azure con IPs públicas propias, justo lo contrario a enviarla por on-premises.",
+        "An NSG only allows or blocks; it does not redirect traffic to the on-premises firewall.",
+        "NAT Gateway provides internet egress from Azure using its own public IPs, exactly the opposite of sending it through on-premises.",
         null,
-        "DNAT traduce tráfico entrante; no sirve para forzar la salida a internet a través de on-premises."
+        "DNAT translates inbound traffic; it is not useful for forcing internet egress through on-premises."
       ],
       "az-119": [
-        "El Map de VM insights muestra dependencias entre procesos, pero no registra flujos permitidos/denegados ni ofrece traffic analytics.",
-        "Los logs de Azure Firewall solo cubren el tráfico que pasa por el firewall, no todos los flujos de las VMs.",
+        "The VM insights Map shows dependencies between processes, but does not record allowed/denied flows or offer traffic analytics.",
+        "Azure Firewall logs only cover traffic that passes through the firewall, not all VM flows.",
         null,
-        "Packet capture captura paquetes de una VM bajo demanda, pero no ofrece análisis continuo de flujos ni Traffic Analytics."
+        "Packet capture captures packets from a VM on demand, but does not offer continuous flow analysis or Traffic Analytics."
       ],
       "az-120": [
-        "Las private DNS zones no pueden delegarse públicamente; exponerlas en DNS público rompe el propósito de la zona privada.",
-        "168.63.129.16 es una IP virtual solo alcanzable desde dentro de Azure; on-premises no puede reenviarle consultas directamente.",
+        "Private DNS zones cannot be publicly delegated; exposing them in public DNS defeats the purpose of the private zone.",
+        "168.63.129.16 is a virtual IP reachable only from within Azure; on-premises cannot forward queries to it directly.",
         null,
-        "Los route filters aplican a Microsoft peering para servicios públicos; no resuelven nombres de zonas privadas."
+        "Route filters apply to Microsoft peering for public services; they do not resolve private zone names."
       ],
       "az-121": [
-        "El NSG del NIC no se ignora; se evalúa después del de la subnet para el tráfico entrante.",
-        "El NSG de subnet también se aplica; no hay regla de 'más específico gana'.",
+        "The NIC's NSG is not ignored; it is evaluated after the subnet's for inbound traffic.",
+        "The subnet NSG is also applied; there is no 'most specific wins' rule.",
         null,
-        "Las reglas no se fusionan: cada NSG se evalúa por separado y el tráfico debe pasar ambos."
+        "Rules are not merged: each NSG is evaluated separately and the traffic must pass both."
       ],
       "az-122": [
-        "Una `VPN Gateway` estándar tiene un límite de túneles IPsec concurrentes (típicamente 30 o 100 según SKU) y no ofrece orquestación hub-spoke automática ni integración nativa con SD-WAN a gran escala.",
+        "A standard `VPN Gateway` has a limit on concurrent IPsec tunnels (typically 30 or 100 depending on SKU) and does not offer automatic hub-spoke orchestration or native large-scale SD-WAN integration.",
         null,
-        "Múltiples emparejamientos con un NVA requieren configurar y mantener manualmente enrutamiento UDR, appliances de terceros y peering no transitivo para 100 sucursales.",
-        "Desplegar 100 circuitos `ExpressRoute` individuales para sucursales resultaría económicamente prohibitivo y complejo de gestionar comparado con una solución hub SD-WAN."
+        "Multiple peerings with an NVA require manually configuring and maintaining UDR routing, third-party appliances, and non-transitive peering for 100 branches.",
+        "Deploying 100 individual `ExpressRoute` circuits for branches would be economically prohibitive and complex to manage compared with an SD-WAN hub solution."
       ],
       "az-123": [
-        "Un `Diagnostic Setting` define el destino hacia donde se envían los datos de supervisión (p. ej. Log Analytics o Storage), no evalúa condiciones ni emite alertas.",
-        "Las alertas del `Activity Log` reaccionan a operaciones del plano de control de Azure (como encender o borrar la VM), no a métricas de rendimiento interno del SO.",
+        "A `Diagnostic Setting` defines the destination where monitoring data is sent (e.g., Log Analytics or Storage); it does not evaluate conditions or issue alerts.",
+        "`Activity Log` alerts react to Azure control plane operations (such as powering on or deleting the VM), not to internal OS performance metrics.",
         null,
-        "Aunque es posible crear una alerta basada en consultas de logs sobre la tabla `Perf`, la forma más directa, nativa y de menor latencia para supervisar un umbral numérico de memoria es una regla de alerta métrica."
+        "Although it is possible to create a log query-based alert on the `Perf` table, the most direct, native, and lowest-latency way to monitor a numeric memory threshold is a metric alert rule."
       ],
       "az-124": [
-        "`Metrics Explorer` grafica métricas numéricas agregadas de rendimiento (uso de CPU, red, disco), no registra eventos de auditoría de plano de control ni identidades.",
-        "`Log Analytics Workspace` solo contendría esa información si previamente se configuró la exportación del registro de actividad hacia el espacio de trabajo.",
+        "`Metrics Explorer` charts aggregated numeric performance metrics (CPU usage, network, disk); it does not record control plane audit events or identities.",
+        "`Log Analytics Workspace` would only contain that information if exporting the activity log to the workspace was previously configured.",
         null,
-        "`Azure Advisor` analiza la configuración de los recursos activos para recomendar mejoras de costos, seguridad y rendimiento, no audita eventos pasados de eliminación."
+        "`Azure Advisor` analyzes the configuration of active resources to recommend cost, security, and performance improvements; it does not audit past deletion events."
       ],
       "az-125": [
-        "`Metrics Explorer` solo visualiza series temporales numéricas de rendimiento; no admite consultas KQL sobre tablas de registros de eventos.",
+        "`Metrics Explorer` only visualizes numeric performance time series; it does not support KQL queries on event log tables.",
         null,
-        "`Azure Security Center` (Microsoft Defender for Cloud) presenta alertas e incidentes de seguridad procesados, pero la consola principal donde se redactan y ejecutan consultas KQL ad-hoc sobre tablas de eventos de seguridad es Log Analytics.",
-        "`Azure Activity Log` almacena eventos del plano de control de la suscripción de Azure, no los registros de inicio de sesión internos del sistema operativo Windows o Linux."
+        "`Azure Security Center` (Microsoft Defender for Cloud) presents processed security alerts and incidents, but the main console for writing and running ad-hoc KQL queries on security event tables is Log Analytics.",
+        "`Azure Activity Log` stores Azure subscription control plane events, not the internal sign-in logs of the Windows or Linux operating system."
       ],
       "az-126": [
-        "No hay snapshots de disco independientes; el backup se gestiona desde el vault, que es donde se elige el punto de restauración.",
+        "There are no standalone disk snapshots; backup is managed from the vault, which is where you choose the restore point.",
         null,
-        "Una plantilla ARM recrea la infraestructura, pero no los datos de los discos de hace 3 días.",
-        "La VM está protegida con Azure Backup, no con Site Recovery; además ASR es para DR, no para volver a un estado de hace días."
+        "An ARM template recreates the infrastructure, but not the disk data from 3 days ago.",
+        "The VM is protected with Azure Backup, not Site Recovery; moreover, ASR is for DR, not for returning to a state from days ago."
       ],
       "az-127": [
-        "Está invertido: RPO es pérdida de datos tolerable y RTO es tiempo de inactividad tolerable.",
+        "It is inverted: RPO is tolerable data loss and RTO is tolerable downtime.",
         null,
-        "La frecuencia de backup ayuda a cumplir el RPO, pero no lo define; la retención no tiene relación con el RTO.",
-        "El RPO se expresa en tiempo (antigüedad máxima de los datos), no en volumen de datos."
+        "Backup frequency helps meet the RPO, but does not define it; retention has no relationship to the RTO.",
+        "RPO is expressed in time (maximum age of the data), not in data volume."
       ],
       "az-128": [
-        "ASR no hace failover automático; hay que iniciarlo manualmente o vía recovery plan automatizado.",
-        "La test failover no es requisito previo y el planned failover requiere que el sitio primario esté disponible para apagar la VM.",
-        "La VM está protegida con Site Recovery, no con Azure Backup; restaurar un backup daría peor RPO y RTO.",
+        "ASR does not perform automatic failover; it must be initiated manually or via an automated recovery plan.",
+        "Test failover is not a prerequisite, and planned failover requires the primary site to be available in order to shut down the VM.",
+        "The VM is protected with Site Recovery, not Azure Backup; restoring a backup would give a worse RPO and RTO.",
         null
       ],
       "az-129": [
@@ -2658,79 +2657,79 @@
         "Azure Monitor Workbooks are interactive documents that combine KQL queries, metrics visualizations, text, and parameter controls into shareable, parameterized reports — much richer than static dashboard tiles."
       ],
       "az-130": [
-        "Eso describe un lock ReadOnly; CanNotDelete solo bloquea operaciones de eliminación.",
+        "That describes a ReadOnly lock; CanNotDelete only blocks delete operations.",
         null,
-        "Con CanNotDelete cualquiera con permisos de escritura RBAC puede modificar; no se requiere Owner.",
-        "Actualizar tags es una operación de escritura (PATCH), no un borrado y recreación del recurso."
+        "With CanNotDelete anyone with RBAC write permissions can modify; Owner is not required.",
+        "Updating tags is a write operation (PATCH), not a deletion and recreation of the resource."
       ]
     },
-    glossary: [
-  {
-    "term": "Azure Policy",
-    "cat": "Governance",
-    "d": 1,
-    "def": "Servicio que evalúa recursos en Azure frente a reglas corporativas (Deny, Audit, Modify, Append, DeployIfNotExists)."
-  },
-  {
-    "term": "CanNotDelete Lock",
-    "cat": "Governance",
-    "d": 1,
-    "def": "Bloqueo de recurso que impide borrar un recurso o grupo de recursos incluso a usuarios con rol Owner, permitiendo su modificación."
-  },
-  {
-    "term": "Conditional Access",
-    "cat": "Identities",
-    "d": 1,
-    "def": "Motor de políticas de Entra ID (requiere P1+) que evalúa señales de usuario, ubicación y riesgo para exigir controles como MFA."
-  },
-  {
-    "term": "PIM (Privileged Identity Management)",
-    "cat": "Identities",
-    "d": 1,
-    "def": "Característica de Entra ID P2 que entrega acceso privilegiado Just-In-Time (por tiempo limitado y con aprobación)."
-  },
-  {
-    "term": "ZRS vs GRS",
-    "cat": "Storage",
-    "d": 2,
-    "def": "ZRS replica síncronamente en 3 zonas de una misma región; GRS replica asíncronamente a una segunda región emparejada."
-  },
-  {
-    "term": "Stored Access Policy (SAS)",
-    "cat": "Storage",
-    "d": 2,
-    "def": "Política en el contenedor o cola que permite cambiar permisos o revocar un Service SAS sin regenerar la clave de la cuenta."
-  },
-  {
-    "term": "Private Endpoint",
-    "cat": "Networking",
-    "d": 4,
-    "def": "Interfaz de red con IP privada de tu VNet que conecta de forma privada a un servicio PaaS (Storage, SQL, Key Vault) mediante Private Link."
-  },
-  {
-    "term": "Azure Bastion",
-    "cat": "Compute",
-    "d": 3,
-    "def": "Servicio PaaS gestionado que brinda conectividad RDP y SSH por TLS desde el portal sin exponer IPs públicas en las VMs."
-  },
-  {
-    "term": "Application Gateway",
-    "cat": "Networking",
-    "d": 4,
-    "def": "Balanceador de carga regional de capa 7 (HTTP/HTTPS) con terminación TLS, enrutamiento por rutas y WAF integrado."
-  },
-  {
-    "term": "Activity Log",
-    "cat": "Monitor",
-    "d": 5,
-    "def": "Registro de auditoría del plano de control de Azure que responde quién, qué y cuándo se crearon, actualizaron o eliminaron recursos."
-  },
-  {
-    "term": "Azure Site Recovery (ASR)",
-    "cat": "Backup & DR",
-    "d": 5,
-    "def": "Servicio de replicación continua y orquestación de failover para máquinas virtuales entre regiones de Azure o desde on-premises."
-  }
-]
+    "glossary": [
+      {
+        "term": "Azure Policy",
+        "cat": "Governance",
+        "d": 1,
+        "def": "Service that evaluates resources in Azure against corporate rules (Deny, Audit, Modify, Append, DeployIfNotExists)."
+      },
+      {
+        "term": "CanNotDelete Lock",
+        "cat": "Governance",
+        "d": 1,
+        "def": "Resource lock that prevents deleting a resource or resource group even for users with the Owner role, while still allowing modification."
+      },
+      {
+        "term": "Conditional Access",
+        "cat": "Identities",
+        "d": 1,
+        "def": "Entra ID policy engine (requires P1+) that evaluates user, location, and risk signals to enforce controls such as MFA."
+      },
+      {
+        "term": "PIM (Privileged Identity Management)",
+        "cat": "Identities",
+        "d": 1,
+        "def": "Entra ID P2 feature that delivers Just-In-Time privileged access (time-limited and with approval)."
+      },
+      {
+        "term": "ZRS vs GRS",
+        "cat": "Storage",
+        "d": 2,
+        "def": "ZRS replicates synchronously across 3 zones within a single region; GRS replicates asynchronously to a second paired region."
+      },
+      {
+        "term": "Stored Access Policy (SAS)",
+        "cat": "Storage",
+        "d": 2,
+        "def": "Policy on the container or queue that lets you change permissions or revoke a Service SAS without regenerating the account key."
+      },
+      {
+        "term": "Private Endpoint",
+        "cat": "Networking",
+        "d": 4,
+        "def": "Network interface with a private IP from your VNet that privately connects to a PaaS service (Storage, SQL, Key Vault) via Private Link."
+      },
+      {
+        "term": "Azure Bastion",
+        "cat": "Compute",
+        "d": 3,
+        "def": "Managed PaaS service that provides RDP and SSH connectivity over TLS from the portal without exposing public IPs on the VMs."
+      },
+      {
+        "term": "Application Gateway",
+        "cat": "Networking",
+        "d": 4,
+        "def": "Regional layer 7 (HTTP/HTTPS) load balancer with TLS termination, path-based routing, and integrated WAF."
+      },
+      {
+        "term": "Activity Log",
+        "cat": "Monitor",
+        "d": 5,
+        "def": "Azure control plane audit log that answers who, what, and when resources were created, updated, or deleted."
+      },
+      {
+        "term": "Azure Site Recovery (ASR)",
+        "cat": "Backup & DR",
+        "d": 5,
+        "def": "Continuous replication and failover orchestration service for virtual machines between Azure regions or from on-premises."
+      }
+    ]
   };
 })(window);

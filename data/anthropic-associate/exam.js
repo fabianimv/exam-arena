@@ -1,1353 +1,1351 @@
 /* =========================================================================
-   data/anthropic-associate/exam.js — Anthropic Claude Certified Associate (CCAO-F)
-   55 preguntas de juicio laboral y empresarial en los 7 dominios oficiales
-   Explicación por opción errónea (WHY), rúbricas, workflows y prompt chaining.
+   data/anthropic-associate/exam.js — Anthropic · Claude Certified Associate (CCAO-F) (English)
    ========================================================================= */
 (function (w) {
   w.EXAMS = w.EXAMS || {};
   w.EXAMS["claude-associate"] = {
-  "id": "claude-associate",
-  "appId": "claude-associate",
-  "provider": "Anthropic",
-  "badge": "Claude · Associate (CCAO-F)",
-  "icon": "✨",
-  "color": "#e07a5f",
-  "featured": true,
-  "title": "Anthropic · Claude Certified Associate (CCAO-F)",
-  "subtitle": "Evaluación de Salidas, Integración en Workflows, Gobernanza, Projects y Prompt Chaining",
-  "passingScore": 72,
-  "domains": {
-    "1": "Evaluación y Validación de Salidas (21 %)",
-    "2": "Integración en Workflows de Negocio (16 %)",
-    "3": "Gobernanza e IA Responsable (16 %)",
-    "4": "Prompting y Ejecución de Tareas (14 %)",
-    "5": "Selección de Producto y Superficies (12 %)",
-    "6": "Configuración y Troubleshooting (11 %)",
-    "7": "Estructuración Avanzada y Prompt Chaining (10 %)"
-  },
-  "shortDomains": {
-    "1": "Validación",
-    "2": "Workflows",
-    "3": "Gobernanza",
-    "4": "Prompting",
-    "5": "Claude Products",
-    "6": "Troubleshooting",
-    "7": "Prompt Chaining"
-  },
-  "topics": [
-    {
-      "id": "ccao-t-1",
-      "d": 1,
-      "title": "1.1 · Evaluación y Validación de Salidas (Rúbricas, Verificación Factual y Ground Truth)",
-      "html": "<table class=\"keytable\">\n<tr><th>Dimensión de Evaluación</th><th>Criterio de Validación en el Entorno Laboral</th><th>Riesgo de Omisión</th></tr>\n<tr><td><b>Exactitud Factual (Ground Truth)</b></td><td>Cotejo estricto de cifras, fechas, normas y citas contra las fuentes primarias de la empresa (balances, contratos, políticas).</td><td>Propagación de alucinaciones elocuentes y datos erróneos en documentos ejecutivos.</td></tr>\n<tr><td><b>Rúbricas Predefinidas</b></td><td>Definición previa de criterios objetivos de aceptación (escala 1-5 o binaria) antes de inspeccionar las salidas generadas.</td><td>Sesgo de confirmación y evaluación subjetiva basada en la mera fluidez del texto.</td></tr>\n<tr><td><b>Golden Datasets</b></td><td>Conjunto fijo y representativo de casos de prueba con respuestas humanas de referencia para comparar versiones de prompts.</td><td>Pruebas ad-hoc inconsistentes que impiden medir regresiones o mejoras reales.</td></tr>\n<tr><td><b>Consistencia de Formato</b></td><td>Verificación de tablas, campos requeridos, delimitadores y estructura de presentación solicitada en el prompt.</td><td>Salidas incompatibles con flujos operativos posteriores o reportes directivos.</td></tr>\n</table>\n<p class=\"mt-2\"><b>Regla de Oro:</b> La fluidez lingüística no equivale a veracidad. Un texto bien articulado y formal puede contener alucinaciones críticas; la validación humana contra fuentes primarias (ground truth) es obligatoria antes de emitir decisiones de negocio.</p>"
+    "id": "claude-associate",
+    "appId": "claude-associate",
+    "provider": "Anthropic",
+    "badge": "Claude · Associate (CCAO-F)",
+    "icon": "✨",
+    "color": "#e07a5f",
+    "featured": true,
+    "title": "Anthropic · Claude Certified Associate (CCAO-F)",
+    "subtitle": "Output Evaluation, Workflow Integration, Governance, Projects, and Prompt Chaining",
+    "passingScore": 72,
+    "domains": {
+      "1": "Output Evaluation and Validation (21%)",
+      "2": "Integration into Business Workflows (16%)",
+      "3": "Governance and Responsible AI (16%)",
+      "4": "Prompting and Task Execution (14%)",
+      "5": "Product and Surface Selection (12%)",
+      "6": "Configuration and Troubleshooting (11%)",
+      "7": "Advanced Structuring and Prompt Chaining (10%)"
     },
-    {
-      "id": "ccao-t-2",
-      "d": 2,
-      "title": "2.1 · Integración en Workflows de Negocio (Human-in-the-Loop, Handoffs y Triaje)",
-      "html": "<table class=\"keytable\">\n<tr><th>Patrón Operativo</th><th>Cuándo Aplicarlo con Claude</th><th>Responsabilidad Humana</th></tr>\n<tr><td><b>Human-in-the-Loop (HITL) Obligatorio</b></td><td>Decisiones de alto impacto: denegación de crédito, diagnósticos médicos, sanciones laborales, comunicados de crisis.</td><td>Revisión sustancial y firma autorizada; la IA nunca debe ser el decisor final automatizado.</td></tr>\n<tr><td><b>Handoff Operativo (Traspaso)</b></td><td>Triaje y redacción de borradores en soporte al cliente, ventas y operaciones comerciales.</td><td>Personalizar la comunicación con datos verificados del caso antes del envío formal al cliente.</td></tr>\n<tr><td><b>Extracción y Cotejo Asistido</b></td><td>Detección de discrepancias en contratos de compras frente a plantillas estándar de la organización.</td><td>Validación jurídica de las cláusulas observadas antes de proceder a la firma.</td></tr>\n<tr><td><b>Protocolos de Doble Firma</b></td><td>Propuestas comerciales y presupuestos de alto valor elaborados con asistencia de IA.</td><td>Certificación formal de que cada precio, margen y plazo ha sido verificado contra tarifas vigentes.</td></tr>\n</table>\n<p class=\"mt-2\"><b>Principio de Responsabilidad:</b> La IA acelera la síntesis y elaboración de borradores, pero la responsabilidad civil, legal y comercial ante terceros recae siempre en los profesionales de la organización.</p>"
+    "shortDomains": {
+      "1": "Validation",
+      "2": "Workflows",
+      "3": "Governance",
+      "4": "Prompting",
+      "5": "Claude Products",
+      "6": "Troubleshooting",
+      "7": "Prompt Chaining"
     },
-    {
-      "id": "ccao-t-3",
-      "d": 3,
-      "title": "3.1 · Gobernanza e IA Responsable (AUP de Anthropic, Privacidad y Redacción de PII)",
-      "html": "<table class=\"keytable\">\n<tr><th>Ámbito de Gobernanza</th><th>Directriz Clave de Cumplimiento</th><th>Mecanismo de Control</th></tr>\n<tr><td><b>Política de Uso Aceptable (AUP)</b></td><td>Prohibición taxativa de armas, ciberataques a infraestructura crítica, desinformación electoral y asesoramiento regulado sin supervisión.</td><td>Filtros de seguridad nativos de Anthropic y auditorías internas de casos de uso.</td></tr>\n<tr><td><b>Redacción de PII (Datos Sensibles)</b></td><td>Sustitución de nombres, DNI, tarjetas de crédito, salarios y domicilios por identificadores sintéticos antes del prompt.</td><td>Protocolos de anonimización previa y filtros perimetrales de prevención de fuga de datos (DLP).</td></tr>\n<tr><td><b>Claude for Work (Zero Training)</b></td><td>En planes Team y Enterprise, Anthropic garantiza que los datos, prompts y documentos no se usan para entrenar modelos.</td><td>Acuerdo corporativo formal y Data Processing Addendum (DPA) conforme a RGPD.</td></tr>\n<tr><td><b>Sobreconfianza (Over-reliance)</b></td><td>Tendencia de los empleados a asumir que las salidas son infalibles por sonar coherentes y persuasivas.</td><td>Capacitación continua, rúbricas obligatorias y verificación activa de fuentes.</td></tr>\n</table>\n<p class=\"mt-2\"><b>Aislamiento Corporativo:</b> Prohíbe subir secretos comerciales o código propietario a cuentas gratuitas o personales de consumo. Utiliza siempre entornos empresariales con SSO y políticas de retención controladas.</p>"
-    },
-    {
-      "id": "ccao-t-4",
-      "d": 4,
-      "title": "4.1 · Prompting Estratégico y Ejecución de Tareas (Estructura, Contexto y Delimitadores)",
-      "html": "<table class=\"keytable\">\n<tr><th>Componente del Prompt</th><th>Función Práctica</th><th>Ejemplo de Implementación</th></tr>\n<tr><td><b>Rol (System Prompt)</b></td><td>Enmarca la perspectiva, nivel de experiencia y tono profesional requerido.</td><td><i>\"Actúa como auditor financiero sénior especializado en riesgos de tesorería...\"</i></td></tr>\n<tr><td><b>Delimitadores XML</b></td><td>Separan nítidamente las instrucciones de negocio de los datos brutos a procesar.</td><td>Uso de etiquetas como <code>&lt;contexto&gt;</code>, <code>&lt;documento&gt;</code> e <code>&lt;instrucciones&gt;</code>.</td></tr>\n<tr><td><b>Few-Shot Prompting</b></td><td>Proporciona 2 o 3 ejemplos reales aprobados para fijar el tono y estructura sin ambigüedades.</td><td>Pares de entrada/salida representativos de la voz y formato institucional de la empresa.</td></tr>\n<tr><td><b>Restricciones Negativas</b></td><td>Fija límites explícitos para evitar divagaciones, suposiciones o adiciones inventadas.</td><td><i>\"No agregues compromisos no especificados en el texto; responde 'No consta' si falta el dato.\"</i></td></tr>\n<tr><td><b>Razonamiento Previo</b></td><td>Pide al modelo pensar paso a paso antes de emitir la conclusión final.</td><td><i>\"Analiza primero las cláusulas clave y luego emite la recomendación de riesgo.\"</i></td></tr>\n</table>"
-    },
-    {
-      "id": "ccao-t-5",
-      "d": 5,
-      "title": "5.1 · Selección de Producto y Superficies (Claude Projects, Artifacts y Planes)",
-      "html": "<table class=\"keytable\">\n<tr><th>Superficie / Característica</th><th>Cuándo es la Elección Correcta</th><th>Cuándo NO Usarla</th></tr>\n<tr><td><b>Claude Projects</b></td><td>Colaboración de equipo con memoria documental persistente (políticas, catálogos) e instrucciones compartidas.</td><td>Consultas puntuales, aisladas o ad-hoc que no requieren contexto histórico ni documentos comunes.</td></tr>\n<tr><td><b>Artifacts</b></td><td>Entregables sustanciales reutilizables: documentos extensos, diagramas SVG interactivos, tablas complejas y componentes de código.</td><td>Respuestas conversacionales breves, confirmaciones o intercambios de texto de menos de 10 líneas.</td></tr>\n<tr><td><b>Chat Estándar</b></td><td>Consultas rápidas, lluvia de ideas inicial y exploraciones efímeras sin persistencia documental.</td><td>Trabajo recurrente en equipo que exige cargar los mismos 10 manuales en cada turno de chat.</td></tr>\n<tr><td><b>Claude Team / Enterprise</b></td><td>Organizaciones que requieren SSO, consola administrativa, facturación central y garantía formal de no entrenamiento.</td><td>Uso puramente personal o recreativo sin datos de empresa ni requerimientos de privacidad.</td></tr>\n</table>"
-    },
-    {
-      "id": "ccao-t-6",
-      "d": 6,
-      "title": "6.1 · Configuración y Troubleshooting (Context Drift, Límites de Turno y Documentación)",
-      "html": "<table class=\"keytable\">\n<tr><th>Problema Operativo</th><th>Causa Subyacente</th><th>Solución Recomendada</th></tr>\n<tr><td><b>Deriva de Contexto (Context Drift)</b></td><td>Chats excesivamente largos (+30 turnos) donde el modelo pierde atención a directrices tempranas.</td><td>Abrir un nuevo chat enfocado resumiendo los acuerdos clave y cerrando hilos obsoletos.</td></tr>\n<tr><td><b>Alucinación Factual</b></td><td>Ausencia de contexto documental explícito o permiso implícito para que el modelo invente.</td><td>Anclar al documento con instrucción: <i>\"Básate solo en el texto adjunto; si no figura, indica 'No consta'.\"</i></td></tr>\n<tr><td><b>Salida Truncada</b></td><td>Se alcanzó el límite máximo de tokens de salida para un turno de conversación.</td><td>Enviar el comando <i>\"Continúa exactamente donde te quedaste\"</i> o pedir estructuración por secciones.</td></tr>\n<tr><td><b>Contradicciones en Projects</b></td><td>Archivos obsoletos o versiones en conflicto cargados en la base de conocimiento del proyecto.</td><td>Auditar y purgar los documentos del Project reteniendo únicamente la versión vigente aprobada.</td></tr>\n</table>"
-    },
-    {
-      "id": "ccao-t-7",
-      "d": 7,
-      "title": "7.1 · Estructuración Avanzada y Prompt Chaining (Descomposición Modular vs Mega-Prompt)",
-      "html": "<table class=\"keytable\">\n<tr><th>Fase de la Cadena</th><th>Objetivo Operativo</th><th>Punto de Control de Calidad</th></tr>\n<tr><td><b>Paso 1: Extracción</b></td><td>Aislar hechos, datos numéricos o cláusulas clave del documento extenso de origen.</td><td>Validar que no se omitieron filas de tablas ni se mezclaron unidades de medida.</td></tr>\n<tr><td><b>Paso 2: Análisis y Cruce</b></td><td>Comparar los datos extraídos contra políticas de riesgo, umbrales o directrices internas.</td><td>Verificar la lógica analítica antes de generar redacción persuasiva o conclusiones.</td></tr>\n<tr><td><b>Paso 3: Redacción Final</b></td><td>Sintetizar las conclusiones en el formato ejecutivo final (Artifact, tabla o memorando).</td><td>Revisión humana de estilo, tono y cumplimiento de restricciones del entregable final.</td></tr>\n<tr><td><b>Fallo del Mega-Prompt</b></td><td>Intentar que el modelo extraiga, analice, pondere y redacte 20 páginas en una sola instrucción.</td><td>El modelo omite detalles intermedios, diluye restricciones y satura el límite de generación.</td></tr>\n</table>\n<p class=\"mt-2\"><b>Mejor Práctica:</b> El encadenamiento de prompts (Prompt Chaining) permite inspeccionar y corregir salidas intermedias antes de propagar errores a fases posteriores, logrando resultados de calidad institucional.</p>"
-    }
-  ],
-  "questions": [
-    {
-      "id": "ccao-01",
-      "d": 1,
-      "t": "Rúbricas de Calidad y Criterios Previos",
-      "q": "Un equipo comercial utiliza Claude para redactar resúmenes ejecutivos destinados a clientes clave. Antes de revisar los primeros borradores generados por el modelo, ¿cuál es la mejor práctica metodológica recomendada para evaluar objetivamente la calidad del texto y evitar sesgos cognitivos?",
-      "o": [
-        "Definir una rúbrica formal con criterios objetivos (precisión factual, tono y límites de extensión) antes de leer los borradores.",
-        "Leer primero varios borradores de forma abierta para identificar intuitivamente cuál suena más elocuente y adoptar ese estilo.",
-        "Configurar la salida en un esquema JSON técnico para que un validador automatizado revise la sintaxis sin necesidad de intervención humana.",
-        "Pedirle a Claude en un segundo prompt que califique sus propias respuestas del 1 al 10 y aceptar únicamente aquellas con puntaje perfecto."
-      ],
-      "a": 0,
-      "e": "Definir una rúbrica objetiva de evaluación antes de interactuar con el modelo previene el sesgo de confirmación y evita confundir la mera fluidez del texto con calidad de negocio."
-    },
-    {
-      "id": "ccao-02",
-      "d": 1,
-      "t": "Verificación Factual contra Fuentes Primarias",
-      "q": "Al validar un informe financiero redactado por Claude a partir de un balance en formato PDF, un analista nota que dos cifras de la tabla resumen difieren de las del balance original. ¿Cuál es la conducta profesional y operativa adecuada en este escenario?",
-      "o": [
-        "Asumir que Claude aplicó un ajuste contable inteligente por inflación o estacionalidad no declarado en el documento original.",
-        "Cotejar directamente cada cifra contra los estados financieros oficiales de origen antes de aprobar y circular el informe.",
-        "Preguntarle a Claude en el mismo chat si sus cálculos son verdaderos y dar por buenas las cifras si contesta afirmativamente.",
-        "Modificar el balance original para alinearlo con las conclusiones más favorables y optimistas presentadas en la tabla de Claude."
-      ],
-      "a": 1,
-      "e": "La exactitud factual requiere contrastar siempre los datos generados con la fuente primaria (ground truth). Nunca debe asumirse que una discrepancia numérica es un ajuste contable válido."
-    },
-    {
-      "id": "ccao-03",
-      "d": 1,
-      "t": "Evaluación con Golden Datasets",
-      "q": "El área de operaciones desea comparar el rendimiento de tres versiones distintas de prompts para clasificar tickets de soporte técnico de clientes. ¿Qué herramienta o enfoque metodológico proporciona la evaluación comparativa más fiable y repetible?",
-      "o": [
-        "Probar cada versión del prompt con dos o tres casos hipotéticos inventados en el momento dentro de una sesión de chat efímera.",
-        "Seleccionar automáticamente la versión del prompt que genere las respuestas más largas y con mayor riqueza de términos técnicos.",
-        "Evaluar cada versión de prompt contra un conjunto de prueba fijo (`Golden Dataset`) con respuestas humanas validadas previamente.",
-        "Solicitar a un usuario novato que escoja de manera subjetiva cuál de las tres versiones de prompt redacta con un estilo más agradable."
-      ],
-      "a": 2,
-      "e": "Un `Golden Dataset` con ejemplos reales curados y respuestas humanas de referencia permite medir la precisión y comparar cambios de prompts de forma estandarizada y científica."
-    },
-    {
-      "id": "ccao-04",
-      "d": 1,
-      "t": "Anclaje Factual y Prevención de Excepciones",
-      "q": "Una tienda minorista en línea utiliza Claude para responder dudas sobre devoluciones de productos. ¿Qué instrucción en el prompt minimiza el riesgo de que el modelo invente excepciones comerciales favorables al cliente que no están contempladas en las políticas?",
-      "o": [
-        "Instruir a Claude a ser comprensivo y autorizar devoluciones extraordinarias siempre que el comprador exprese frustración evidente.",
-        "Permitir que el modelo complete lagunas de la política basándose en las prácticas habituales del comercio electrónico global.",
-        "Ampliar el límite de tokens de salida para que el asistente sugiera posibles acuerdos legales alternativos fuera del reglamento interno.",
-        "Adjuntar la política oficial e instruir a Claude a responder basándose solo en ella y declarar si una consulta excede sus límites."
-      ],
-      "a": 3,
-      "e": "El anclaje estricto en el texto adjunto junto con una instrucción explícita de declarar cuándo una consulta queda fuera de la política evita alucinaciones y concesiones no autorizadas."
-    },
-    {
-      "id": "ccao-05",
-      "d": 1,
-      "t": "Detección y Mitigación de Alucinaciones",
-      "q": "Al auditar un memorando jurídico redactado con Claude, un abogado descubre que el texto cita un artículo de ley inexistente con absoluta convicción retórica. ¿Cómo se tipifica técnicamente este fenómeno y cuál es la salvaguarda obligatoria en el flujo de trabajo?",
-      "o": [
-        "Alucinación factual; se mitiga exigiendo citas textuales verificables contra normas oficiales y revisión humana obligatoria.",
-        "Deriva de contexto; se corrige duplicando el número de documentos jurídicos subidos al hilo para que el modelo tenga más opciones.",
-        "Violación de derechos de autor; se soluciona solicitando a los tribunales una autorización para el uso comercial de textos legislativos.",
-        "Desfase de tokens; se resuelve eliminando los saltos de línea en el prompt para obligar al modelo a ceñirse al código penal vigente."
-      ],
-      "a": 0,
-      "e": "Una alucinación ocurre cuando el modelo genera información falsa con apariencia de certeza. En ámbitos regulados, exigir citas textuales y validación humana por expertos es imprescindible."
-    },
-    {
-      "id": "ccao-06",
-      "d": 1,
-      "t": "Criterios Esenciales en Rúbricas de Recursos Humanos",
-      "q": "Un comité de calidad diseña una rúbrica formal para evaluar las respuestas generadas por Claude en un portal interno de consultas laborales para colaboradores. ¿Cuáles DOS dimensiones deben ponderarse prioritariamente para asegurar rigor y cumplimiento? (Selecciona 2)",
-      "o": [
-        "Exactitud factual y anclaje verificable en los convenios colectivos y políticas laborales vigentes de la empresa.",
-        "Cumplimiento riguroso de directrices de tono corporativo profesional y respeto a las normas de privacidad del personal.",
-        "Extensión obligatoria de cada respuesta para asegurar que siempre supere un mínimo de cuatro párrafos detallados.",
-        "Uso predominante de terminología legal compleja para proyectar la máxima autoridad formal frente a los empleados."
-      ],
-      "a": [
-        0,
-        1
-      ],
-      "e": "La exactitud factual y el tono profesional respetuoso con la privacidad son los pilares fundamentales en consultas de recursos humanos; la longitud forzada y la jerga excesiva son contraproducentes."
-    },
-    {
-      "id": "ccao-07",
-      "d": 1,
-      "t": "Estandarización de Tono Mediante Few-Shot",
-      "q": "Un supervisor de atención al cliente nota que Claude responde con un estilo muy informal a clientes de banca minorista y con excesiva frialdad a clientes de banca privada. ¿Cuál es la forma más eficaz y duradera de estandarizar el tono comunicativo?",
-      "o": [
-        "Redactar advertencias en mayúsculas amenazando al modelo con penalizaciones de rendimiento si altera el estilo entre turnos.",
-        "Incorporar en el prompt base dos o tres ejemplos concretos (`Few-Shot`) del tono empático y formal esperado para cada segmento.",
-        "Instruir a los clientes para que adapten sus preguntas al modelo redactándolas con una estructura fija de cincuenta palabras.",
-        "Reescribir a mano cada respuesta de Claude antes de enviarla sin documentar ni modificar las directrices del prompt original."
-      ],
-      "a": 1,
-      "e": "El uso de ejemplos demostrativos (few-shot prompting) es la técnica más efectiva para fijar el tono, la formalidad y la estructura comunicativa en escenarios empresariales."
-    },
-    {
-      "id": "ccao-08",
-      "d": 1,
-      "t": "Riesgo de Fluidez Lingüística en Contratos",
-      "q": "Al auditar la calidad de los resúmenes de contratos comerciales generados por Claude, ¿por qué constituye una práctica negligente confiar exclusivamente en la fluidez de la redacción como indicador de exactitud?",
-      "o": [
-        "Un texto con estilo pulido y sintaxis perfecta demuestra que el modelo consultó registros públicos en tiempo real.",
-        "Los modelos lingüísticos generan prosa impecable únicamente cuando todas las premisas analizadas son 100 % correctas.",
-        "La fluidez y convicción gramatical pueden enmascarar la omisión accidental de cláusulas críticas de indemnización o plazos.",
-        "La excesiva fluidez estilística activa de inmediato cortafuegos de seguridad en Anthropic que cancelan la cuenta corporativa."
-      ],
-      "a": 2,
-      "e": "La coherencia sintáctica no garantiza la integridad factual. Un resumen bien escrito puede sonar impecable mientras omite penalizaciones o cláusulas de vencimiento críticas."
-    },
-    {
-      "id": "ccao-09",
-      "d": 1,
-      "t": "Rol del Revisor Humano en Propuestas Comerciales",
-      "q": "Un equipo de ventas utiliza Claude para acelerar la redacción de propuestas comerciales personalizadas para licitaciones públicas. ¿Cuál es el rol insustituible del revisor humano en este flujo de trabajo (`Human-in-the-Loop`)?",
-      "o": [
-        "Supervisar el ritmo de aparición de tokens en la pantalla para comprobar la latencia de la red durante la generación del texto.",
-        "Reemplazar sistemáticamente todos los sustantivos por sinónimos manuales para eliminar cualquier huella reconocible de la IA.",
-        "Desactivar los controles del cortafuegos corporativo para permitir que Claude descargue datos confidenciales del cliente de internet.",
-        "Validar los precios, plazos de entrega y compromisos contractuales antes de la presentación formal vinculante de la oferta."
-      ],
-      "a": 3,
-      "e": "En propuestas vinculantes, el revisor humano garantiza que los compromisos de precio, plazos y condiciones legales sean viables y cumplan con las capacidades de la empresa."
-    },
-    {
-      "id": "ccao-10",
-      "d": 1,
-      "t": "Métricas Objetivas de Clasificación de Quejas",
-      "q": "En un proyecto de automatización asistida para clasificar quejas de clientes por nivel de severidad (Baja, Media, Alta, Crítica), ¿qué métrica objetiva permite evaluar la calidad del modelo sin depender de impresiones personales?",
-      "o": [
-        "La tasa de concordancia exacta (exact match) frente a un lote de quejas previamente etiquetadas por especialistas del área.",
-        "La velocidad promedio a la que el revisor humano consigue leer y aprobar los resúmenes clasificados en la interfaz de usuario del sistema.",
-        "El número total de adjetivos positivos que el modelo añade en su análisis para suavizar el malestar del cliente.",
-        "La cantidad de caracteres y párrafos explicativos que Claude proporciona para defender cada clasificación de severidad."
-      ],
-      "a": 0,
-      "e": "La concordancia exacta contra una muestra etiquetada por expertos humanos (ground truth) es la métrica estándar para medir objetivamente la precisión de una tarea de clasificación."
-    },
-    {
-      "id": "ccao-11",
-      "d": 1,
-      "t": "Diagnóstico de Fallos en Tablas Complejas",
-      "q": "Al evaluar un prompt para extraer datos clave de facturas de proveedores, Claude extrae con precisión facturas sencillas, pero omite líneas enteras en facturas con tablas complejas de múltiples páginas. ¿Cuál es el procedimiento metodológico correcto?",
-      "o": [
-        "Exigir a todos los proveedores del mercado que abandonen las tablas y envíen únicamente documentos de texto plano lineal.",
-        "Examinar los casos fallidos, enriquecer el prompt con ejemplos estructurados de tablas complejas y revalidar con el dataset de prueba.",
-        "Aceptar un 30 % de omisiones en las tablas asumiendo que los modelos de lenguaje no están preparados para el mundo laboral.",
-        "Borrar el dataset de prueba original y evaluar el prompt únicamente con facturas sencillas para certificar una tasa de éxito del 100 %."
-      ],
-      "a": 1,
-      "e": "El ciclo iterativo de calidad en IA consiste en analizar los errores, proveer ejemplos de las estructuras complejas en el prompt (few-shot) y volver a medir contra el dataset de prueba."
-    },
-    {
-      "id": "ccao-12",
-      "d": 1,
-      "t": "Propósito Estratégico de las Rúbricas de Evaluación",
-      "q": "¿Cuál es la principal ventaja organizativa de diseñar y documentar una rúbrica de evaluación antes de desplegar un asistente basado en Claude en un área de negocio?",
-      "o": [
-        "Reducir automáticamente el consumo de tokens y asegurar un descuento en la tarifa mensual de suscripción a la plataforma.",
-        "Eliminar totalmente la necesidad de auditorías futuras al garantizar que el modelo responderá siempre sin fallos.",
-        "Establecer un estándar transparente y consensuado para determinar si las respuestas cumplen los requisitos de calidad esperados.",
-        "Forzar al modelo a responder con idéntica cantidad de palabras independientemente de la complejidad de la consulta planteada."
-      ],
-      "a": 2,
-      "e": "Una rúbrica previa alinea las expectativas de negocio, proporciona criterios medibles para auditorías y define con claridad qué constituye una respuesta aceptable para la empresa."
-    },
-    {
-      "id": "ccao-13",
-      "d": 2,
-      "t": "Triaje Asistido de Reclamaciones Médicas",
-      "q": "Una aseguradora de salud desea reducir el tiempo de tramitación de reclamaciones de reembolso médico. ¿Qué arquitectura de flujo de trabajo combina de forma óptima rapidez operativa y seguridad para los asegurados?",
-      "o": [
-        "Configurar a Claude para que liquide y ordene las transferencias bancarias de forma autónoma sin ninguna revisión humana.",
-        "Exigir que un médico transcriba manualmente cada recibo para que Claude únicamente redacte un correo electrónico de bienvenida genérico.",
-        "Delegar en Claude el rechazo definitivo de reclamaciones dudosas impidiendo que el asegurado pueda apelar la decisión con un operador.",
-        "Utilizar Claude para extraer datos y clasificar la reclamación, dejando la aprobación del reembolso a un liquidador humano calificado."
-      ],
-      "a": 3,
-      "e": "El patrón recomendado utiliza Claude para agilizar la extracción de datos y el triaje, reservando la autorización financiera y la decisión final a profesionales humanos."
-    },
-    {
-      "id": "ccao-14",
-      "d": 2,
-      "t": "Protocolo de Handoff en Soporte al Cliente",
-      "q": "Un representante de servicio al cliente utiliza Claude para redactar borradores de respuesta a quejas complejas de usuarios insatisfechos. ¿Qué acción garantiza un traspaso operativo (`handoff`) seguro y empático?",
-      "o": [
-        "El representante lee el borrador, valida los datos del caso, ajusta el mensaje con empatía genuina y asume la firma de la respuesta.",
-        "El representante programa un script que reenvía inmediatamente a los clientes el primer borrador generado por Claude sin lectura previa alguna.",
-        "El representante indica al cliente que ingrese directamente a la plataforma de Claude para debatir sus desacuerdos contractuales.",
-        "El representante elimina las referencias al problema del cliente para evitar que este responda solicitando aclaraciones adicionales."
-      ],
-      "a": 0,
-      "e": "Un handoff responsable exige que el agente humano valide los datos, ajuste el tono a las circunstancias particulares del cliente y se responsabilice formalmente del mensaje."
-    },
-    {
-      "id": "ccao-15",
-      "d": 2,
-      "t": "Revisión Asistida de Contratos con Proveedores",
-      "q": "El departamento de compras recibe borradores de contratos de diversos proveedores internacionales. ¿Cuál es la forma más productiva y segura de integrar a Claude en el flujo de revisión de estos documentos?",
-      "o": [
-        "Prescindir del equipo legal y firmar digitalmente los contratos siempre que Claude no emita ninguna alerta de peligro en el chat.",
-        "Usar a Claude para cotejar el contrato contra las políticas estándar de la empresa y generar una lista de discrepancias para los abogados.",
-        "Subir los contratos a redes sociales abiertas para que usuarios externos comprueben si las cláusulas son comunes en otros países.",
-        "Pedir a Claude que reescriba el contrato suprimiendo todas las cláusulas de arbitraje y límites de responsabilidad sin consultar al área jurídica."
-      ],
-      "a": 1,
-      "e": "Claude destaca como asistente de lectura crítica, identificando divergencias frente a las plantillas corporativas para que los abogados enfoquen su tiempo en los puntos de riesgo."
-    },
-    {
-      "id": "ccao-16",
-      "d": 2,
-      "t": "Integridad en Informes Financieros para Inversores",
-      "q": "Una firma de asesoría patrimonial elabora resúmenes trimestrales para inversores institucionales. ¿Cómo debe articularse el flujo de trabajo para garantizar la total veracidad de las proyecciones y análisis generados?",
-      "o": [
-        "Permitir que Claude formule predicciones macroeconómicas basándose en foros financieros no verificados de internet.",
-        "Omitir la sección de advertencias de riesgo en el documento final si Claude sugiere un horizonte de rendimiento extraordinariamente favorable.",
-        "Suministrar datos auditados al modelo, generar el análisis narrativo preliminar y validar cada ratio y afirmación con el equipo financiero.",
-        "Publicar los resúmenes inmediatamente en el portal de inversores antes de la revisión interna para ser los primeros del mercado en divulgar datos."
-      ],
-      "a": 2,
-      "e": "El rigor financiero exige aportar información validada como contexto, utilizar el modelo para redactar el análisis cualitativo y someter el resultado al control del equipo contable."
-    },
-    {
-      "id": "ccao-17",
-      "d": 2,
-      "t": "Gobernanza en Selección de Personal",
-      "q": "El equipo de atracción de talento utiliza Claude para resumir transcripciones de entrevistas laborales a candidatos. ¿Qué directriz de gobernanza debe cumplirse obligatoriamente en este proceso de selección?",
-      "o": [
-        "Configurar un filtro algorítmico que descarte automáticamente al candidato si su transcripción oral tiene una puntuación de sentimiento baja o negativa.",
-        "Emplear al modelo para inferir la edad, género u origen cultural del candidato y equilibrar las cuotas de contratación interna.",
-        "Compartir los audios completos de los candidatos con empresas competidoras para crear listas negras de postulantes en el sector.",
-        "Utilizar los resúmenes como material de apoyo informativo, reservando la decisión de avance en el proceso al juicio de los evaluadores humanos."
-      ],
-      "a": 3,
-      "e": "La IA en reclutamiento debe actuar solo como soporte documental. Las decisiones sobre selección, descarte o contratación deben ser tomadas por personas para prevenir discriminación y sesgos."
-    },
-    {
-      "id": "ccao-18",
-      "d": 2,
-      "t": "Puntos de Control Obligatorios Human-in-the-Loop",
-      "q": "¿En cuáles DOS de las siguientes situaciones laborales resulta estrictamente obligatorio aplicar un punto de control y aprobación humana (`Human-in-the-Loop`) antes de emitir la salida generada con Claude? (Selecciona 2)",
-      "o": [
-        "Emisión formal de una comunicación que notifica la denegación de una hipoteca o la cancelación de un contrato de seguro.",
-        "Publicación de un comunicado de prensa de emergencia ante un incidente de ciberseguridad con compromiso de datos confidenciales.",
-        "Corrección gramatical de un memorando interno informal sobre el cambio de sala para la reunión de sincronización de los martes.",
-        "Generación de una lista preliminar de nombres creativos para una campaña interna de voluntariado ambiental corporativo."
-      ],
-      "a": [
-        0,
-        1
-      ],
-      "e": "Las decisiones de impacto financiero o legal directo sobre personas (créditos) y las comunicaciones públicas de crisis exigen supervisión y aprobación humana obligatoria."
-    },
-    {
-      "id": "ccao-19",
-      "d": 2,
-      "t": "Consistencia de Contenidos con Claude Projects",
-      "q": "Un departamento de marketing con ocho redactores produce artículos corporativos para el blog de la empresa. Para lograr que todas las publicaciones mantengan una voz de marca coherente sin importar quién formule el prompt, ¿cuál es la mejor práctica?",
-      "o": [
-        "Centralizar la guía de estilo, el perfil de la audiencia y artículos aprobados en un `Claude Project` compartido por todo el equipo.",
-        "Pedir a cada redactor que use cuentas gratuitas individuales y que cada uno aplique libremente su propio criterio de estilo personal sin directrices comunes.",
-        "Instruir a los redactores para que no proporcionen contexto de la empresa con el fin de fomentar la máxima diversidad de opiniones.",
-        "Prohibir el uso de ejemplos en los prompts para evitar que el modelo repita giros lingüísticos previamente utilizados."
-      ],
-      "a": 0,
-      "e": "Un `Claude Project` permite compartir una base documental de referencia (Project Knowledge) e instrucciones conjuntas, asegurando consistencia de estilo y tono entre todos los redactores."
-    },
-    {
-      "id": "ccao-20",
-      "d": 2,
-      "t": "Prevención de Sobreconfianza en Cotizaciones",
-      "q": "El director comercial de una empresa industrial detecta que varios ejecutivos de cuenta copian cotizaciones generadas por Claude y las envían a clientes sin revisar los precios unitarios ni los descuentos. ¿Qué medida operativa debe implementarse para atajar este problema?",
-      "o": [
-        "Cerrar inmediatamente el acceso a cualquier herramienta de inteligencia artificial en toda la empresa y sancionar económicamente a todo el equipo de ventas.",
-        "Establecer un protocolo formal de verificación donde el vendedor deba marcar una casilla de control certificando la exactitud de cada cifra.",
-        "Instalar un bot que apruebe automáticamente todas las cotizaciones siempre que el total supere los diez mil euros.",
-        "Ocultar las tarifas oficiales a los vendedores para que dependan exclusivamente de la memoria intrínseca del modelo de IA."
-      ],
-      "a": 1,
-      "e": "Imponer un paso de verificación explícita con firma o confirmación responsable refuerza el rol de control humano e impide la copia automática de datos sin validar."
-    },
-    {
-      "id": "ccao-21",
-      "d": 2,
-      "t": "Valor del Triaje Asistido en Mesa de Ayuda",
-      "q": "En el centro de atención a usuarios de una corporación se implementa Claude para generar propuestas de solución a incidentes de software. ¿Qué ventaja esencial aporta este modelo frente a la resolución 100 % desatendida sin humanos?",
-      "o": [
-        "Permite prescindir por completo de técnicos especializados en nivel 1 y transferir toda la nómina de soporte a gastos operativos de cómputo en la nube corporativa.",
-        "Garantiza matemáticamente que los servidores principales no requerirán parches de seguridad ni mantenimientos programados.",
-        "Acelera la búsqueda de diagnósticos preliminares manteniendo el criterio del analista humano para validar la solución antes de aplicarla.",
-        "Hace posible reiniciar servidores centrales de producción de forma instantánea sin necesidad de validar credenciales de acceso."
-      ],
-      "a": 2,
-      "e": "El enfoque colaborativo aprovecha la rapidez de Claude para estructurar la solución y deja en manos del técnico la verificación antes de ejecutar cambios en sistemas."
-    },
-    {
-      "id": "ccao-22",
-      "d": 3,
-      "t": "Anonimización y Redacción de PII",
-      "q": "Un analista de recursos humanos desea usar Claude para resumir una planilla salarial que incluye nombres completos, números de documento de identidad y sueldos. Según los principios de privacidad corporativa y gobernanza de datos, ¿qué paso previo es indispensable?",
-      "o": [
-        "Subir el archivo original directamente en un chat privado asumiendo que las cuentas individuales no están sujetas a normas internas.",
-        "Pedirle a Claude en el prompt que mantenga en secreto la información salarial y que prometa borrarla de su memoria tras responder.",
-        "Compartir el enlace público del chat con otros analistas para que verifiquen si los datos personales resultan fácilmente reconocibles.",
-        "Anonimizar la planilla reemplazando nombres y documentos por códigos sintéticos (Empleado 1, Empleado 2) antes de cargar el texto."
-      ],
-      "a": 3,
-      "e": "Antes de transferir información a cualquier modelo de lenguaje, la información personal identificable (PII) debe anonimizarse o reemplazarse por datos sintéticos para cumplir las regulaciones de privacidad."
-    },
-    {
-      "id": "ccao-23",
-      "d": 3,
-      "t": "Política de Uso Aceptable (AUP) de Anthropic",
-      "q": "Un consultor de seguridad informática solicita a Claude instrucciones paso a paso para vulnerar un sistema de control industrial (SCADA) de una planta de tratamiento de agua potable. ¿Por qué el modelo rechaza responder a esta solicitud?",
-      "o": [
-        "Incurre en una violación directa de la Política de Uso Aceptable (`AUP`) de Anthropic, que prohíbe facilitar ciberataques a infraestructura crítica.",
-        "Claude carece de conceptos teóricos sobre redes SCADA y sistemas industriales debido a que solo fue entrenado con literatura clásica.",
-        "La consulta sobrepasa el límite estándar de tokens de contexto disponible para cuentas profesionales en el entorno de chat.",
-        "Se requiere una autorización notarial emitida por el ministerio de industria para desbloquear respuestas sobre redes de saneamiento."
-      ],
-      "a": 0,
-      "e": "La Política de Uso Aceptable (AUP) de Anthropic prohíbe taxativamente la provisión de instrucciones operativas para ciberataques y vulneración de infraestructuras críticas."
-    },
-    {
-      "id": "ccao-24",
-      "d": 3,
-      "t": "Privacidad y Entrenamiento en Planes Corporativos",
-      "q": "Al adoptar Claude for Work en planes empresariales (Team o Enterprise), ¿cuál es el compromiso formal de Anthropic respecto al entrenamiento de sus modelos de inteligencia artificial con los datos del cliente?",
-      "o": [
-        "Anthropic añade automáticamente todos los documentos corporativos subidos al corpus de entrenamiento de sus próximos modelos comerciales.",
-        "Anthropic garantiza que no entrena sus modelos fundamentales con los datos, documentos ni prompts cargados por clientes corporativos.",
-        "Los datos se ceden de forma anónima a universidades aliadas para investigaciones sociológicas sobre hábitos de redacción en oficinas.",
-        "Únicamente los documentos escritos en inglés quedan excluidos del entrenamiento, mientras que otros idiomas se aprovechan libremente."
-      ],
-      "a": 1,
-      "e": "En las ediciones de negocio (Team y Enterprise), Anthropic establece por contrato que no utiliza las entradas ni los documentos del cliente para entrenar o ajustar sus modelos."
-    },
-    {
-      "id": "ccao-25",
-      "d": 3,
-      "t": "Directrices en Asesoramiento Financiero",
-      "q": "Un banco comercial analiza la posibilidad de incorporar a Claude en su banca en línea para orientar a clientes sobre opciones de inversión y créditos hipotecarios. ¿Qué principio de IA responsable debe regir esta iniciativa?",
-      "o": [
-        "Promocionar al modelo públicamente como un asesor financiero certificado capaz de tomar decisiones de inversión autónomas y vinculantes en nombre del cliente minorista.",
-        "Garantizar contractualmente a los clientes que las proyecciones financieras calculadas por Claude cuentan con una rentabilidad 100 % asegurada.",
-        "Establecer claramente que las respuestas son meramente orientativas y que cualquier decisión formal exige la validación de un asesor humano habilitado.",
-        "Eliminar cualquier mención de riesgos macroeconómicos de las respuestas para incentivar la contratación inmediata de préstamos bancarios."
-      ],
-      "a": 2,
-      "e": "En sectores regulados como el financiero, la IA debe funcionar como asistente informativo orientativo, dejando en claro que las decisiones vinculantes exigen asesores certificados."
-    },
-    {
-      "id": "ccao-26",
-      "d": 3,
-      "t": "Usos Prohibidos según la Política de Uso Aceptable",
-      "q": "De acuerdo con la Política de Uso Aceptable (`Acceptable Use Policy`) de Anthropic, ¿cuáles DOS de las siguientes actividades están terminantemente prohibidas en la plataforma? (Selecciona 2)",
-      "o": [
-        "Diseño o facilitación de armas biológicas, químicas, radiológicas o material para ciberataques maliciosos.",
-        "Generación coordinada de contenidos para campañas encubiertas de desinformación electoral o manipulación de votos.",
-        "Elaboración de tablas comparativas de costes de software libre para apoyar decisiones de compras internas.",
-        "Traducción de manuales de prevención de riesgos laborales del español al inglés para personal de obras."
-      ],
-      "a": [
-        0,
-        1
-      ],
-      "e": "La AUP de Anthropic prohíbe estrictamente la proliferación de armamento y ciberataques, así como la interferencia electoral mediante desinformación coordinada."
-    },
-    {
-      "id": "ccao-27",
-      "d": 3,
-      "t": "Gobernanza Clínica en Salud",
-      "q": "Un centro hospitalario planea utilizar Claude para redactar borradores de guías explicativas sobre el autocuidado en pacientes diagnosticados con hipertensión. ¿Cuál es el requisito ético y operativo fundamental antes de distribuir el material?",
-      "o": [
-        "Permitir que los pacientes utilicen el modelo para ajustar sus dosis diarias de medicamentos sin necesidad de acudir a consulta médica.",
-        "Ocultar que los borradores contaron con asistencia de IA para evitar que el comité de bioética solicite una revisión del documento.",
-        "Distribuir inmediatamente las guías impresas siempre que el diseño tipográfico y los colores coincidan con el manual del hospital.",
-        "Someter todo el contenido clínico redactado a la revisión formal y aprobación expresa de especialistas médicos titulados."
-      ],
-      "a": 3,
-      "e": "Cualquier información médica destinada a pacientes debe ser validada rigurosamente por personal de la salud colegiado para prevenir errores y desinformación sanitaria."
-    },
-    {
-      "id": "ccao-28",
-      "d": 3,
-      "t": "Riesgo de Sobreconfianza (Over-reliance)",
-      "q": "¿Qué describe con mayor precisión el fenómeno de sobreconfianza (`over-reliance`) en el despliegue de modelos de inteligencia artificial en organizaciones empresariales?",
-      "o": [
-        "La tendencia psicológica de los empleados a aceptar como verdaderas las salidas del modelo sin someterlas a verificación crítica.",
-        "La sobrecarga técnica de las redes locales provocada por enviar demasiados archivos PDF pesados simultáneamente a través del navegador web corporativo.",
-        "La preferencia de los directores por contratar analistas de datos en lugar de capacitar al personal existente en ofimática.",
-        "El error técnico consistente en utilizar contraseñas de red idénticas para el acceso a la plataforma corporativa de IA."
-      ],
-      "a": 0,
-      "e": "La sobreconfianza (over-reliance) ocurre cuando los usuarios dejan de verificar las salidas porque la IA escribe de forma elocuente y persuasiva, provocando errores en el negocio."
-    },
-    {
-      "id": "ccao-29",
-      "d": 3,
-      "t": "Políticas de Uso de IA para Contratistas",
-      "q": "Una empresa de ingeniería contrata consultores externos para colaborar en el diseño de un nuevo motor. ¿Qué cláusula de seguridad debe estipularse obligatoriamente en la política de uso de herramientas de IA generativa para estos profesionales?",
-      "o": [
-        "Exigir que utilicen exclusivamente versiones de prueba gratuitas de consumo para evitar incurrir en gastos adicionales en la facturación del proyecto contratado.",
-        "Prohibir expresamente la introducción de planos, código fuente propietario o secretos industriales en cuentas personales no gestionadas.",
-        "Obligar a los contratistas a traducir todas las especificaciones al francés antes de realizar cualquier consulta conceptual a la IA.",
-        "Imponer el borrado diario del historial del navegador sin mantener ningún registro de los entregables que fueron asistidos por IA."
-      ],
-      "a": 1,
-      "e": "Para proteger la propiedad intelectual, los contratos deben prohibir subir activos propietarios a cuentas personales donde los datos no gocen de garantías empresariales de privacidad."
-    },
-    {
-      "id": "ccao-30",
-      "d": 3,
-      "t": "Cumplimiento Regulatorio y Acuerdos DPA",
-      "q": "Una corporación europea sujeta al Reglamento General de Protección de Datos (RGPD) evalúa el uso de Claude entre sus empleados para tareas de gestión comercial. ¿Qué medida jurídica y operativa respalda el tratamiento legal de los datos?",
-      "o": [
-        "Instalar una extensión no verificada en los navegadores que prometa bloquear la dirección IP de la empresa frente a Anthropic.",
-        "Indicar en el contrato laboral que los propios empleados son personalmente responsables ante los tribunales de cualquier tratamiento de datos que realicen con herramientas de IA.",
-        "Suscribir un Acuerdo de Procesamiento de Datos (`DPA`) y canalizar el uso a través de cuentas corporativas administradas con control de accesos.",
-        "Limitar las consultas a días festivos para que las autoridades de protección de datos no puedan inspeccionar el tráfico en días hábiles."
-      ],
-      "a": 2,
-      "e": "Bajo el RGPD, las organizaciones deben suscribir un Data Processing Addendum (DPA) con el proveedor y utilizar cuentas de empresa administradas para garantizar el tratamiento lícito."
-    },
-    {
-      "id": "ccao-31",
-      "d": 4,
-      "t": "Estructura de un Prompt Empresarial",
-      "q": "Un gestor de proyectos busca redactar un prompt integral para resumir las minutas de reuniones de dirección de forma consistente semana tras semana. ¿Cuál de las siguientes estructuras contiene todos los componentes metodológicos esenciales?",
-      "o": [
-        "Escribir una única frase solicitando un resumen agradable y conciso para que el modelo decida con total autonomía la extensión.",
-        "Pegar veinte páginas completas de transcripciones mezcladas con instrucciones informales sin emplear ningún tipo de delimitador, categoría ni encabezado funcional.",
-        "Redactar una lista desordenada de adjetivos en inglés solicitando excelencia analítica sin definir el formato final esperado.",
-        "Definir el rol (`System Prompt`), el contexto operativo, la tarea delimitada con etiquetas, ejemplos de formato y restricciones explícitas."
-      ],
-      "a": 3,
-      "e": "Un prompt robusto para tareas repetitivas de negocio combina rol, contexto, instrucciones claras delimitadas, ejemplos concretos (few-shot) y guardrails negativos."
-    },
-    {
-      "id": "ccao-32",
-      "d": 4,
-      "t": "Uso de Delimitadores XML en Prompts Extensos",
-      "q": "Al diseñar un prompt extenso que incluye normativas de la empresa, casos de ejemplo y el texto de un contrato que debe auditarse, ¿cuál es el beneficio técnico de emplear delimitadores tipo XML (como `<contexto>` o `<contrato>`)?",
-      "o": [
-        "Ayudan a Claude a diferenciar con claridad qué partes son directrices operativas y cuáles son datos de entrada que deben procesarse.",
-        "Compilan el prompt en código binario de máquina acelerando la velocidad de descarga del texto generado a través de conexiones de banda ancha lentas.",
-        "Son exigidos por el navegador web para poder mostrar el texto en modo de pantalla completa sin alterar la tipografía del sistema.",
-        "Convierten automáticamente el documento en una base de datos relacional dentro de los servidores centrales de Anthropic."
-      ],
-      "a": 0,
-      "e": "Las etiquetas XML estructuran visual y lógicamente el prompt para los modelos de la familia Claude, separando instrucciones de datos brutos y reduciendo ambigüedades."
-    },
-    {
-      "id": "ccao-33",
-      "d": 4,
-      "t": "Aplicación de Few-Shot Prompting",
-      "q": "El equipo editorial de una publicación corporativa necesita que Claude redacte comunicados de prensa siguiendo con rigor la sobriedad y estructura periodística de la empresa. ¿Qué técnica de prompting asegura el resultado más fiel al estilo?",
-      "o": [
-        "Escribir todo el prompt en letras mayúsculas enfatizando que la reputación de la empresa depende de este comunicado de prensa.",
-        "Incluir en el prompt dos comunicados de prensa reales aprobados anteriormente para ilustrar la estructura y el registro formal esperado.",
-        "Instruir al modelo para que sea lo más creativo posible y sorprenda a los lectores con metáforas poéticas inesperadas.",
-        "Solicitar a Claude que imite el estilo de novelistas del siglo XIX para otorgar un tono más distinguido y clásico a la nota."
-      ],
-      "a": 1,
-      "e": "Proveer ejemplos reales (few-shot prompting) ancla el estilo, el vocabulario y la disposición de la información de manera mucho más efectiva que meras descripciones abstractas."
-    },
-    {
-      "id": "ccao-34",
-      "d": 4,
-      "t": "Restricciones Negativas y Prevención de Supuestos",
-      "q": "Un analista de operaciones le pide a Claude que extraiga los plazos de entrega y responsables de un correo de seguimiento de proyecto. Al responder, Claude añade fechas supuestas que no constaban en el mensaje original. ¿Cómo debe corregirse el prompt?",
-      "o": [
-        "Pedirle que imagine e infiera plazos de entrega lógicos en caso de no figurar en el correo original para que el cronograma del proyecto no quede con fechas vacías.",
-        "Incrementar en diez mil el número de tokens permitidos para que el modelo justifique con mayor amplitud las fechas inventadas.",
-        "Incorporar una restricción explícita: 'Extrae solo fechas mencionadas en el texto; si un hito no tiene fecha, indica expresamente No especificada'.",
-        "Eliminar el correo original del prompt y solicitarle a Claude que elabore un cronograma generalista para cualquier tipo de empresa."
-      ],
-      "a": 2,
-      "e": "Las restricciones negativas explícitas indican al modelo exactamente qué hacer ante la ausencia de información (anotar 'No especificada'), previniendo conjeturas infundadas."
-    },
-    {
-      "id": "ccao-35",
-      "d": 4,
-      "t": "Elementos Clave para Reducir Ambigüedad",
-      "q": "¿Cuáles DOS prácticas de formulación de prompts son altamente recomendadas para evitar respuestas ambiguas o genéricas en tareas de análisis empresarial? (Selecciona 2)",
-      "o": [
-        "Definir el formato de salida con precisión (por ejemplo, tabla comparativa de tres columnas con métricas específicas).",
-        "Especificar la audiencia de destino y el nivel técnico requerido (por ejemplo, comité de auditoría no familiarizado con TI).",
-        "Evitar incluir restricciones de longitud para que el modelo redacte sin límites hasta donde estime necesario.",
-        "Pedirle al modelo que exprese sentimientos de entusiasmo y optimismo desmedido en cada conclusión técnica emitida."
-      ],
-      "a": [
-        0,
-        1
-      ],
-      "e": "Especificar con claridad el formato de entrega y el perfil del destinatario reduce drásticamente la ambigüedad y adapta el mensaje a las necesidades de negocio."
-    },
-    {
-      "id": "ccao-36",
-      "d": 4,
-      "t": "Razonamiento Previo para Auditoría Humana",
-      "q": "En el análisis de incidentes de seguridad de la información, se instruye a Claude con la directriz: 'Antes de emitir el veredicto final sobre la severidad, explica tu razonamiento paso a paso evaluando cada vector de ataque'. ¿Qué ventaja operativa aporta este enfoque?",
-      "o": [
-        "Permite a Claude conectarse de forma remota y en tiempo real con agencias de ciberdefensa gubernamentales para validar la veracidad de cada deducción técnica formulada.",
-        "Garantiza que la respuesta generada sea exactamente idéntica sin importar cuántas veces se formule la pregunta en el chat.",
-        "Es un atajo técnico documentado para duplicar la cuota mensual de almacenamiento disponible en la cuenta del usuario.",
-        "Favorece un análisis lógico más riguroso por parte del modelo y permite a los auditores humanos verificar la coherencia de las deducciones."
-      ],
-      "a": 3,
-      "e": "Solicitar que el modelo desglose su razonamiento (chain-of-thought) antes de la conclusión final mejora la solidez lógica de las deducciones y facilita la auditoría humana del resultado."
-    },
-    {
-      "id": "ccao-37",
-      "d": 4,
-      "t": "Estructuración y Ubicación de Restricciones",
-      "q": "Un redactor técnico observa que Claude olvida con frecuencia una instrucción negativa sobre no usar anglicismos cuando esta se ubica en el centro de un documento de referencia de tres mil palabras. ¿Cuál es el ajuste de estructuración más adecuado?",
-      "o": [
-        "Reubicar la restricción al final del prompt o agruparla en una sección destacada bajo una etiqueta clara de directrices.",
-        "Repetir la misma restricción cincuenta veces consecutivas en mayúsculas a lo largo de cada párrafo del documento.",
-        "Traducir la restricción al código binario o hexadecimal para que adquiera mayor relevancia en los mecanismos de atención del modelo.",
-        "Aceptar que los modelos de lenguaje son incapaces de recordar directrices negativas cuando se procesan textos de más de mil palabras."
-      ],
-      "a": 0,
-      "e": "Colocar las directrices clave al final del prompt o en una sección claramente delimitada explota el efecto de recencia en la atención del modelo, maximizando el cumplimiento de restricciones."
-    },
-    {
-      "id": "ccao-38",
-      "d": 4,
-      "t": "Calibración del Nivel de Complejidad",
-      "q": "Al solicitar a Claude la síntesis de un reporte de arquitectura en la nube destinado a directores financieros no técnicos, ¿qué indicación en el prompt orienta mejor el grado de profundidad requerido?",
-      "o": [
-        "Exigir que todo el informe se redacte utilizando únicamente vocabulario infantil muy básico y elemental para garantizar que ningún lector tenga la menor duda conceptual.",
-        "Instruir a Claude para que traduzca el impacto tecnológico a términos de costos, plazos y riesgos de negocio, definiendo la jerga indispensable.",
-        "Ordenar el uso exclusivo de siglas y diagramas de circuitos electrónicos para proyectar una imagen de vanguardia técnica.",
-        "Pedir que asuma que los directores financieros dominan la configuración de clústeres Kubernetes y omitir toda explicación de conceptos."
-      ],
-      "a": 1,
-      "e": "Dirigir un informe técnico a una audiencia de negocios exige vincular la tecnología con impactos financieros y riesgos, explicando la terminología técnica indispensable sin caer en un tono condescendiente."
-    },
-    {
-      "id": "ccao-39",
-      "d": 5,
-      "t": "Selección de Superficie: Claude Projects",
-      "q": "El equipo de soporte de una empresa de software comparte periódicamente manuales de producto, guías de errores y políticas de reembolso para resolver consultas de usuarios. ¿Qué entorno de Claude es el idóneo para organizar este flujo de trabajo?",
-      "o": [
-        "Utilizar un chat estándar individual donde cada agente de soporte deba volver a subir manualmente los quince manuales cada vez que comience una nueva consulta de clientes.",
-        "Desarrollar una aplicación personalizada desde cero consumiendo la API de Anthropic aunque el equipo no cuente con programadores.",
-        "Configurar un `Claude Project`, ya que permite almacenar documentación de referencia persistente e instrucciones conjuntas para el equipo.",
-        "Descargar los archivos del modelo en discos duros locales para operar sin acceso a internet en las oficinas comerciales."
-      ],
-      "a": 2,
-      "e": "`Claude Projects` está diseñado específicamente para equipos que necesitan compartir bases documentales permanentes (Project Knowledge) e instrucciones de trabajo en un entorno sin código."
-    },
-    {
-      "id": "ccao-40",
-      "d": 5,
-      "t": "Ventajas del Uso de Artifacts",
-      "q": "Un consultor de estrategia necesita que Claude redacte una propuesta de transformación digital de treinta páginas que requerirá múltiples rondas de edición y perfeccionamiento. ¿Por qué es muy conveniente que el resultado se genere en un `Artifact`?",
-      "o": [
-        "Los `Artifacts` impiden que otros miembros del departamento puedan editar o copiar el texto si no cuentan con una clave criptográfica de descifrado especial asignada.",
-        "El uso de `Artifacts` multiplica la velocidad de la conexión a internet del usuario mientras descarga el archivo a su equipo local.",
-        "Los `Artifacts` otorgan de manera automática validez jurídica vinculante al documento ante las autoridades regulatorias del país.",
-        "Permite aislar y visualizar el documento sustancial en un panel lateral dedicado, facilitando su lectura, versionado y edición iterativa."
-      ],
-      "a": 3,
-      "e": "Los `Artifacts` separan los contenidos sustanciales y extensos del flujo conversacional, ofreciendo un panel lateral para inspeccionar, copiar, iterar y versionar el documento con total comodidad."
-    },
-    {
-      "id": "ccao-41",
-      "d": 5,
-      "t": "Consultas Ad-hoc en Chat Estándar",
-      "q": "Un analista júnior necesita conocer rápidamente la definición y origen etimológico de un término financiero para comprender un artículo de prensa, sin involucrar datos de clientes ni políticas de la empresa. ¿Qué superficie de Claude es la más eficiente?",
-      "o": [
-        "Un chat estándar individual en Claude, por tratarse de una consulta puntual y efímera que no requiere contexto documental persistente.",
-        "Crear un nuevo `Claude Project` corporativo formal e invitar a los directores de diez áreas distintas para archivar y documentar la definición aislada del término.",
-        "Contratar una consultora externa para que desarrolle un conector de software con la API de Anthropic para resolver la duda léxica.",
-        "Configurar un servidor dedicado en la nube para procesar consultas de vocabulario mediante scripts en Python."
-      ],
-      "a": 0,
-      "e": "Para dudas ad-hoc, rápidas y no recurrentes, el chat estándar es la opción más directa y ligera, evitando la sobrecarga de crear proyectos o integraciones innecesarias."
-    },
-    {
-      "id": "ccao-42",
-      "d": 5,
-      "t": "Casos de Uso Idóneos para Artifacts",
-      "q": "¿En cuáles DOS de las siguientes situaciones laborales resulta altamente ventajoso que Claude genere su respuesta como un `Artifact` en la ventana lateral? (Selecciona 2)",
-      "o": [
-        "Desarrollo de un diagrama interactivo o código SVG que el equipo desea visualizar, probar y refinar iterativamente.",
-        "Creación de una guía operativa extensa y estructurada de varias páginas destinada a ser exportada y compartida con el equipo.",
-        "Respuesta corta de cortesía en el chat confirmando la recepción de un archivo con el texto: 'Entendido, gracias'.",
-        "Aclaración de una sola línea explicando el significado de una sigla corporativa muy común durante una conversación rápida."
-      ],
-      "a": [
-        0,
-        1
-      ],
-      "e": "Los `Artifacts` están concebidos para contenidos sustanciales, reutilizables o interactivos (código, diagramas SVG, documentos extensos); no para respuestas conversacionales breves."
-    },
-    {
-      "id": "ccao-43",
-      "d": 5,
-      "t": "Gobernanza y Planes Empresariales",
-      "q": "Una empresa de sesenta colaboradores necesita desplegar Claude asegurando autenticación centralizada (Single Sign-On o SSO), facturación única consolidada y controles de acceso por departamentos. ¿Qué modalidad de servicio satisface estos requerimientos?",
-      "o": [
-        "Solicitar a cada colaborador que cree una cuenta gratuita personal utilizando sus cuentas de correo electrónico particulares.",
-        "Suscribir planes corporativos como `Claude Team` o `Claude Enterprise`, equipados con consola administrativa y gobernanza centralizada.",
-        "Comprar sesenta suscripciones individuales de `Claude Pro` y reembolsar el coste mensual a través de liquidaciones de gastos de viaje.",
-        "Instalar extensiones de terceros en los navegadores para compartir una única contraseña de acceso entre todos los empleados."
-      ],
-      "a": 1,
-      "e": "Los planes `Claude Team` y `Claude Enterprise` están dotados de consola de administración, provisión de identidades vía SSO, facturación centralizada y garantías formales de privacidad."
-    },
-    {
-      "id": "ccao-44",
-      "d": 5,
-      "t": "Instrucciones de Proyecto vs Base de Conocimiento",
-      "q": "Dentro de un `Claude Project`, ¿cuál es la diferencia conceptual y operativa entre las 'Instrucciones del Proyecto' (`Project Instructions`) y los 'Archivos de Conocimiento' (`Project Knowledge`)?",
-      "o": [
-        "Las instrucciones solo pueden ser redactadas por Anthropic, mientras que los archivos son documentos públicos visibles en internet.",
-        "No existe ninguna distinción operativa; ambos módulos cumplen exactamente la misma función en el procesamiento del contexto.",
-        "Las instrucciones pautan el rol, tono y reglas permanentes de respuesta; los archivos proporcionan la información factual de consulta.",
-        "Los archivos fijan los precios de suscripción de los miembros y las instrucciones guardan las contraseñas de red de la empresa."
-      ],
-      "a": 2,
-      "e": "Las `Project Instructions` definen cómo debe comportarse Claude (rol, estilo, directrices), mientras que el `Project Knowledge` almacena la documentación sustantiva que nutre sus respuestas."
-    },
-    {
-      "id": "ccao-45",
-      "d": 6,
-      "t": "Deriva de Contexto en Hilos Extensos",
-      "q": "En una conversación de trabajo muy prolongada con más de cuarenta intercambios, un usuario nota que Claude empieza a desatender instrucciones dadas al inicio y confunde detalles de temas ya cerrados. ¿Qué fenómeno técnico ocurre y cuál es la solución operativa recomendada?",
-      "o": [
-        "Infección por virus en el equipo informático local; se soluciona formateando el disco duro y reinstalando el sistema operativo.",
-        "Bloqueo definitivo de la cuenta por actividad sospechosa; se resuelve esperando una semana completa sin realizar ninguna consulta.",
-        "Agotamiento irreversible del servidor principal; se remedia enviando el mismo mensaje diez veces consecutivas en mayúsculas.",
-        "Deriva de contexto (`Context Drift`); se resuelve abriendo un nuevo chat enfocado y resumiendo los acuerdos clave acumulados."
-      ],
-      "a": 3,
-      "e": "El `Context Drift` sucede cuando la acumulación de mensajes en un chat diluye la atención del modelo hacia las instrucciones iniciales; la solución es abrir un nuevo chat con un resumen limpio."
-    },
-    {
-      "id": "ccao-46",
-      "d": 6,
-      "t": "Contradicciones en la Base de Conocimiento",
-      "q": "Al consultar sobre el procedimiento de vacaciones en un `Claude Project`, el modelo ofrece respuestas contradictorias, citando a veces 20 días y otras veces 25 días para el mismo tipo de contrato. Tras revisar los archivos cargados, ¿cuál es la causa más probable y cómo debe subsanarse?",
-      "o": [
-        "Existen dos versiones del manual de beneficios cargadas (una antigua y otra actualizada); se debe eliminar el archivo obsoleto del Project.",
-        "Claude carece totalmente de capacidad técnica para procesar archivos binarios en formato PDF y confunde de forma sistemática los números al extraer el texto plano.",
-        "Es indispensable que todos los documentos del Project tengan exactamente la misma cantidad de páginas para evitar contradicciones.",
-        "Los colaboradores deben formular sus preguntas en verso o rima para que el modelo identifique cuál archivo tiene prioridad legal."
-      ],
-      "a": 0,
-      "e": "Tener versiones divergentes u obsoletas de una política en el `Project Knowledge` confunde al modelo; la buena práctica exige auditar y depurar los archivos manteniendo solo la versión vigente."
-    },
-    {
-      "id": "ccao-47",
-      "d": 6,
-      "t": "Gestión de Salidas Truncadas por Límite de Tokens",
-      "q": "Durante la generación de un análisis comparativo extenso sobre quince competidores, Claude se detiene de forma repentina en la mitad de un párrafo sin completar la tabla. ¿Cuál es el motivo técnico habitual de este comportamiento y cómo se reanuda la tarea?",
-      "o": [
-        "Anthropic canceló y suspendió el acceso del usuario a la plataforma por haber formulado una pregunta analítica excesivamente compleja para el procesador en la nube.",
-        "Se alcanzó el límite máximo de tokens de salida para un solo turno; basta con escribir 'continúa' para que el modelo prosiga el texto.",
-        "El modelo detectó una infracción de derechos de autor en el nombre de uno de los competidores y congeló la pantalla.",
-        "Se produjo un fallo irrecuperable en la red global de telecomunicaciones que destruyó todo el historial de la conversación previa."
-      ],
-      "a": 1,
-      "e": "Cada turno de respuesta tiene un límite prefijado de tokens de salida. Si la respuesta lo alcanza, la generación se corta limpiamente; enviar un mensaje pidiendo 'continúa' permite completar la tarea."
-    },
-    {
-      "id": "ccao-48",
-      "d": 6,
-      "t": "Prevención de Respuestas con Información Externa en Projects",
-      "q": "En un `Claude Project` creado para responder consultas sobre pólizas de seguro de vida, se detecta que el modelo en ocasiones responde con coberturas estándar de otros países que no forman parte de los contratos de la compañía. ¿Qué ajuste en las instrucciones del proyecto erradica este problema?",
-      "o": [
-        "Subir al proyecto enlaces a foros de seguros de internet para que el modelo verifique cuáles pólizas son más populares.",
-        "Prohibir que los empleados formulen preguntas que contengan números o porcentajes para evitar que el modelo busque datos externos.",
-        "Instruir expresamente: 'Responde exclusivamente con base en las pólizas cargadas en el proyecto; si un dato no figura en ellas, declara que no consta'.",
-        "Eliminar todas las pólizas del proyecto y solicitar al modelo que memorice los términos aseguradores mediante un prompt único."
-      ],
-      "a": 2,
-      "e": "Instruir explícitamente a Claude para que restrinja sus respuestas a los documentos del proyecto e indicar qué responder cuando falte información previene alucinaciones con datos externos."
-    },
-    {
-      "id": "ccao-49",
-      "d": 6,
-      "t": "Límites de Carga de Archivos en Sesiones Web",
-      "q": "Un analista intenta subir un archivo de video grabado de dos gigabytes a una sesión de chat en Claude para que transcriba la reunión y extraiga acuerdos. La plataforma rechaza la subida inmediatamente. ¿Cuál es el motivo operativo y la mejor alternativa de trabajo?",
-      "o": [
-        "La plataforma solo permite subir archivos a usuarios que cuenten con autorización expresa del comité ético de las Naciones Unidas.",
-        "El usuario debe cambiar la extensión del archivo de video a '.txt' para engañar a los sistemas de verificación de la interfaz.",
-        "Se debe fragmentar el video en cuatrocientos archivos de cinco megabytes e intentar subirlos todos juntos en el mismo mensaje.",
-        "El archivo excede los límites de tamaño y tipos admitidos; debe extraerse la transcripción en texto plano y cargarla en la sesión."
-      ],
-      "a": 3,
-      "e": "Claude está optimizado para procesar texto y documentos (PDF, texto, código, imágenes). Para reuniones grabadas, debe utilizarse una transcripción en texto plano, que es ligera y eficiente."
-    },
-    {
-      "id": "ccao-50",
-      "d": 6,
-      "t": "Jerarquía de Instrucciones Personalizadas vs Prompts de Tarea",
-      "q": "Un consultor tiene configuradas instrucciones personalizadas en su perfil global para que Claude siempre conteste con listas de viñetas breves. Sin embargo, para una tarea concreta necesita redactar una carta formal de disculpa en párrafos continuos. ¿Cuál es la forma más limpia de proceder?",
-      "o": [
-        "Indicar en el prompt de la tarea: 'Para esta tarea en particular, ignora el formato de viñetas habitual y redacta la carta en párrafos continuos y formales'.",
-        "Eliminar definitivamente la cuenta de usuario corporativa en el servidor y solicitar una nueva dirección de correo electrónico al departamento de infraestructura de TI.",
-        "Esperar a que transcurra el fin de semana para que las instrucciones personalizadas caduquen de manera automática en el servidor.",
-        "Desinstalar el navegador web y acceder desde una tableta portátil para que el sistema no reconozca las preferencias del usuario."
-      ],
-      "a": 0,
-      "e": "Las directrices explícitas dadas en el prompt de la tarea (`user prompt`) tienen prioridad operativa para sobreescribir temporalmente las preferencias generales del perfil sin necesidad de borrarlas."
-    },
-    {
-      "id": "ccao-51",
-      "d": 7,
-      "t": "Descomposición Modular vs Falla del Mega-Prompt",
-      "q": "Un equipo de consultoría debe elaborar un plan estratégico de cincuenta páginas analizando balances, encuestas y normativas. ¿Por qué enviar un único 'mega-prompt' solicitando redactar todo el informe en un solo turno produce resultados insatisfactorios?",
-      "o": [
-        "El modelo activa automáticamente un cobro extraordinario de penalización financiera cada vez que un prompt supera las quinientas palabras.",
-        "El modelo tiende a omitir detalles críticos, condensar en exceso las secciones y perder coherencia al intentar cumplir múltiples metas a la vez.",
-        "Los términos del servicio de Anthropic prohíben estrictamente analizar balances financieros y encuestas de mercado en una misma cuenta.",
-        "El navegador web del usuario se reinicia por falta de memoria RAM al intentar recibir más de dos párrafos de texto simultáneamente."
-      ],
-      "a": 1,
-      "e": "Los 'mega-prompts' saturan la capacidad de planificación del modelo, provocando resúmenes superficiales, omisiones de directrices secundarias y saturación del límite de tokens por turno."
-    },
-    {
-      "id": "ccao-52",
-      "d": 7,
-      "t": "Secuencia Lógica en Prompt Chaining de Contratos",
-      "q": "Al implementar una cadena de prompts (`Prompt Chaining`) para auditar un contrato de arrendamiento complejo y proponer modificaciones, ¿cuál es la secuencia metodológica más eficaz para garantizar calidad y control de riesgos?",
-      "o": [
-        "Paso 1: Redactar de inmediato las modificaciones finales -> Paso 2: Consultar al modelo qué opinaba en general del contrato -> Paso 3: Extraer las cláusulas originales.",
-        "Paso 1: Solicitar un poema alegórico sobre el inmueble -> Paso 2: Imprimir el documento -> Paso 3: Traducir las firmas a tres idiomas.",
-        "Paso 1: Extraer cláusulas de riesgo en una tabla -> Paso 2: Comparar con la política de la empresa -> Paso 3: Redactar contrapropuestas de redacción.",
-        "Paso 1: Firmar digitalmente el acuerdo -> Paso 2: Solicitar a Claude que busque errores graves -> Paso 3: Notificar la rescisión a la contraparte."
-      ],
-      "a": 2,
-      "e": "Una cadena efectiva progresa de lo concreto y analítico a la síntesis: primero extrae los datos objetivos, luego los evalúa contra las políticas internas y finalmente redacta las cláusulas alternativas."
-    },
-    {
-      "id": "ccao-53",
-      "d": 7,
-      "t": "Inspección Intermedia en Cadenas de Prompts",
-      "q": "En un flujo de trabajo que utiliza encadenamiento de prompts (`Prompt Chaining`), ¿qué beneficio operativo crucial aporta revisar y validar los resultados intermedios de cada fase antes de disparar el siguiente paso?",
-      "o": [
-        "Otorga un crédito de descuento del cincuenta por ciento en la factura mensual de servicios en la nube de la compañía.",
-        "Elimina la necesidad de que los usuarios conozcan la materia del negocio, volviendo al equipo de trabajo completamente infalible.",
-        "Permite que los pasos subsiguientes se ejecuten instantáneamente sin consumir tiempo de cómputo en los servidores de la plataforma.",
-        "Permite detectar y corregir errores o alucinaciones tempranamente, evitando que se propaguen y amplifiquen en las fases posteriores."
-      ],
-      "a": 3,
-      "e": "Validar las salidas intermedias en un flujo encadenado actúa como un punto de control de calidad (gatekeeper), impidiendo que un error en la extracción contamine el análisis y el informe final."
-    },
-    {
-      "id": "ccao-54",
-      "d": 7,
-      "t": "Tratamiento de Fallos en Fases Intermedias",
-      "q": "Un equipo diseña una cadena de tres prompts para generar casos de éxito: Paso 1: Extraer métricas de la entrevista con el cliente -> Paso 2: Estructurar el caso (Desafío, Solución, Resultado) -> Paso 3: Pulir la voz de marca. Si el Paso 2 produce una estructura deficiente y desordenada, ¿cuál es la acción correcta?",
-      "o": [
-        "Refinar el prompt del Paso 2 proporcionando una plantilla estructural clara y repetir esa fase antes de pasar al pulido de estilo del Paso 3.",
-        "Continuar directamente con el Paso 3 asumiendo erróneamente que la fase de pulido de estilo corregirá de forma automática los problemas estructurales previos.",
-        "Descartar todo el proyecto de casos de éxito y dictaminar que los modelos de lenguaje no sirven para tareas de comunicación comercial.",
-        "Repetir el Paso 1 cargando diez transcripciones de clientes adicionales que no guardan relación con el caso en cuestión."
-      ],
-      "a": 0,
-      "e": "Si una fase intermedia falla, debe corregirse el prompt de esa fase específica con pautas y plantillas claras antes de continuar. Avanzar con una base defectuosa solo amplifica los fallos de redacción."
-    },
-    {
-      "id": "ccao-55",
-      "d": 7,
-      "t": "Ventajas Competitivas de la Descomposición Modular",
-      "q": "¿Cuál es la principal ventaja de descomponer un análisis complejo en una cadena secuencial de prompts frente al intento de resolverlo en una única instrucción extensa?",
-      "o": [
-        "La instrucción única desbloquea módulos secretos de procesamiento cuántico en los servidores de Anthropic que no operan en cadenas.",
-        "La descomposición modular aísla cada subtarea, permitiendo mayor profundidad de análisis, trazabilidad de datos y control de calidad.",
-        "La cadena modular no requiere que los usuarios comprendan los pasos del problema, ya que el modelo deduce el plan de negocio automáticamente.",
-        "La instrucción única garantiza de forma matemática e irrefutable que no existirán alucinaciones factuales en ninguna de las secciones producidas."
-      ],
-      "a": 1,
-      "e": "La modularidad permite que el modelo concentre su capacidad de atención en una subtarea concreta a la vez (extracción, comparación, redacción), mejorando la calidad y facilitando el control humano."
-    }
-  ],
-  "why": {
-    "ccao-01": [
-      null,
-      "Evaluar de forma intuitiva sin criterios predefinidos induce a calificar positivamente la elocuencia superficial mientras se ignoran omisiones críticas de información.",
-      "Validar únicamente la sintaxis de un JSON verifica el formato del archivo pero no comprueba la exactitud factual, el tono ni la idoneidad comercial del contenido.",
-      "Los modelos lingüísticos tienden a sobrestimar la calidad de sus propias salidas al autoevaluarse sin una rúbrica externa vinculante y supervisión humana."
+    "topics": [
+      {
+        "id": "ccao-t-1",
+        "d": 1,
+        "title": "1.1 · Output Evaluation and Validation (Rubrics, Factual Verification, and Ground Truth)",
+        "html": "<table class=\"keytable\">\n<tr><th>Evaluation Dimension</th><th>Validation Criterion in the Workplace</th><th>Risk of Omission</th></tr>\n<tr><td><b>Factual Accuracy (Ground Truth)</b></td><td>Strict cross-checking of figures, dates, regulations, and citations against the company's primary sources (balance sheets, contracts, policies).</td><td>Propagation of eloquent hallucinations and erroneous data in executive documents.</td></tr>\n<tr><td><b>Predefined Rubrics</b></td><td>Prior definition of objective acceptance criteria (1-5 or binary scale) before inspecting the generated outputs.</td><td>Confirmation bias and subjective evaluation based on the mere fluency of the text.</td></tr>\n<tr><td><b>Golden Datasets</b></td><td>Fixed, representative set of test cases with human reference answers to compare prompt versions.</td><td>Inconsistent ad-hoc testing that makes it impossible to measure real regressions or improvements.</td></tr>\n<tr><td><b>Format Consistency</b></td><td>Verification of tables, required fields, delimiters, and the presentation structure requested in the prompt.</td><td>Outputs incompatible with downstream operational workflows or executive reports.</td></tr>\n</table>\n<p class=\"mt-2\"><b>Golden Rule:</b> Linguistic fluency does not equal truthfulness. A well-articulated, formal text can contain critical hallucinations; human validation against primary sources (ground truth) is mandatory before making business decisions.</p>"
+      },
+      {
+        "id": "ccao-t-2",
+        "d": 2,
+        "title": "2.1 · Integration into Business Workflows (Human-in-the-Loop, Handoffs, and Triage)",
+        "html": "<table class=\"keytable\">\n<tr><th>Operating Pattern</th><th>When to Apply It with Claude</th><th>Human Responsibility</th></tr>\n<tr><td><b>Mandatory Human-in-the-Loop (HITL)</b></td><td>High-impact decisions: credit denial, medical diagnoses, employment sanctions, crisis communications.</td><td>Substantive review and authorized sign-off; AI must never be the final automated decision-maker.</td></tr>\n<tr><td><b>Operational Handoff</b></td><td>Triage and drafting in customer support, sales, and commercial operations.</td><td>Personalize the communication with verified case data before formal delivery to the customer.</td></tr>\n<tr><td><b>Assisted Extraction and Cross-Checking</b></td><td>Detection of discrepancies in purchase contracts against the organization's standard templates.</td><td>Legal validation of the flagged clauses before proceeding to signature.</td></tr>\n<tr><td><b>Dual-Signature Protocols</b></td><td>High-value commercial proposals and quotes prepared with AI assistance.</td><td>Formal certification that every price, margin, and deadline has been verified against current rates.</td></tr>\n</table>\n<p class=\"mt-2\"><b>Principle of Accountability:</b> AI accelerates synthesis and drafting, but civil, legal, and commercial liability to third parties always rests with the organization's professionals.</p>"
+      },
+      {
+        "id": "ccao-t-3",
+        "d": 3,
+        "title": "3.1 · Governance and Responsible AI (Anthropic AUP, Privacy, and PII Redaction)",
+        "html": "<table class=\"keytable\">\n<tr><th>Governance Area</th><th>Key Compliance Guideline</th><th>Control Mechanism</th></tr>\n<tr><td><b>Acceptable Use Policy (AUP)</b></td><td>Strict prohibition of weapons, cyberattacks on critical infrastructure, election disinformation, and regulated advice without supervision.</td><td>Anthropic's native safety filters and internal audits of use cases.</td></tr>\n<tr><td><b>PII Redaction (Sensitive Data)</b></td><td>Replacement of names, national ID numbers, credit cards, salaries, and home addresses with synthetic identifiers before the prompt.</td><td>Prior anonymization protocols and perimeter data loss prevention (DLP) filters.</td></tr>\n<tr><td><b>Claude for Work (Zero Training)</b></td><td>On Team and Enterprise plans, Anthropic guarantees that data, prompts, and documents are not used to train models.</td><td>Formal corporate agreement and Data Processing Addendum (DPA) compliant with GDPR.</td></tr>\n<tr><td><b>Over-reliance</b></td><td>Tendency of employees to assume outputs are infallible because they sound coherent and persuasive.</td><td>Ongoing training, mandatory rubrics, and active source verification.</td></tr>\n</table>\n<p class=\"mt-2\"><b>Corporate Isolation:</b> Prohibit uploading trade secrets or proprietary code to free or personal consumer accounts. Always use enterprise environments with SSO and controlled retention policies.</p>"
+      },
+      {
+        "id": "ccao-t-4",
+        "d": 4,
+        "title": "4.1 · Strategic Prompting and Task Execution (Structure, Context, and Delimiters)",
+        "html": "<table class=\"keytable\">\n<tr><th>Prompt Component</th><th>Practical Function</th><th>Implementation Example</th></tr>\n<tr><td><b>Role (System Prompt)</b></td><td>Frames the perspective, level of expertise, and professional tone required.</td><td><i>\"Act as a senior financial auditor specialized in treasury risk...\"</i></td></tr>\n<tr><td><b>XML Delimiters</b></td><td>Clearly separate the business instructions from the raw data to be processed.</td><td>Use of tags such as <code>&lt;context&gt;</code>, <code>&lt;document&gt;</code>, and <code>&lt;instructions&gt;</code>.</td></tr>\n<tr><td><b>Few-Shot Prompting</b></td><td>Provides 2 or 3 approved real examples to fix the tone and structure without ambiguity.</td><td>Input/output pairs representative of the company's institutional voice and format.</td></tr>\n<tr><td><b>Negative Constraints</b></td><td>Sets explicit limits to avoid digressions, assumptions, or invented additions.</td><td><i>\"Do not add commitments not specified in the text; respond 'Not stated' if the data is missing.\"</i></td></tr>\n<tr><td><b>Prior Reasoning</b></td><td>Asks the model to think step by step before issuing the final conclusion.</td><td><i>\"First analyze the key clauses and then issue the risk recommendation.\"</i></td></tr>\n</table>"
+      },
+      {
+        "id": "ccao-t-5",
+        "d": 5,
+        "title": "5.1 · Product and Surface Selection (Claude Projects, Artifacts, and Plans)",
+        "html": "<table class=\"keytable\">\n<tr><th>Surface / Feature</th><th>When It Is the Right Choice</th><th>When NOT to Use It</th></tr>\n<tr><td><b>Claude Projects</b></td><td>Team collaboration with persistent document memory (policies, catalogs) and shared instructions.</td><td>One-off, isolated, or ad-hoc queries that do not require historical context or shared documents.</td></tr>\n<tr><td><b>Artifacts</b></td><td>Substantial reusable deliverables: lengthy documents, interactive SVG diagrams, complex tables, and code components.</td><td>Brief conversational replies, confirmations, or text exchanges of fewer than 10 lines.</td></tr>\n<tr><td><b>Standard Chat</b></td><td>Quick queries, initial brainstorming, and ephemeral explorations without document persistence.</td><td>Recurring team work that requires loading the same 10 manuals on every chat turn.</td></tr>\n<tr><td><b>Claude Team / Enterprise</b></td><td>Organizations that require SSO, an admin console, centralized billing, and a formal no-training guarantee.</td><td>Purely personal or recreational use with no company data or privacy requirements.</td></tr>\n</table>"
+      },
+      {
+        "id": "ccao-t-6",
+        "d": 6,
+        "title": "6.1 · Configuration and Troubleshooting (Context Drift, Turn Limits, and Documentation)",
+        "html": "<table class=\"keytable\">\n<tr><th>Operational Problem</th><th>Underlying Cause</th><th>Recommended Solution</th></tr>\n<tr><td><b>Context Drift</b></td><td>Excessively long chats (30+ turns) where the model loses attention to early guidelines.</td><td>Open a new focused chat summarizing the key agreements and closing obsolete threads.</td></tr>\n<tr><td><b>Factual Hallucination</b></td><td>Absence of explicit document context or implicit permission for the model to make things up.</td><td>Anchor to the document with the instruction: <i>\"Base your answer only on the attached text; if it is not included, state 'Not stated'.\"</i></td></tr>\n<tr><td><b>Truncated Output</b></td><td>The maximum output token limit for a conversation turn was reached.</td><td>Send the command <i>\"Continue exactly where you left off\"</i> or ask for structuring by sections.</td></tr>\n<tr><td><b>Contradictions in Projects</b></td><td>Obsolete files or conflicting versions loaded into the project's knowledge base.</td><td>Audit and purge the Project's documents, retaining only the current approved version.</td></tr>\n</table>"
+      },
+      {
+        "id": "ccao-t-7",
+        "d": 7,
+        "title": "7.1 · Advanced Structuring and Prompt Chaining (Modular Decomposition vs. Mega-Prompt)",
+        "html": "<table class=\"keytable\">\n<tr><th>Chain Stage</th><th>Operational Objective</th><th>Quality Checkpoint</th></tr>\n<tr><td><b>Step 1: Extraction</b></td><td>Isolate facts, numerical data, or key clauses from the lengthy source document.</td><td>Validate that no table rows were omitted and no units of measure were mixed up.</td></tr>\n<tr><td><b>Step 2: Analysis and Cross-Referencing</b></td><td>Compare the extracted data against risk policies, thresholds, or internal guidelines.</td><td>Verify the analytical logic before generating persuasive writing or conclusions.</td></tr>\n<tr><td><b>Step 3: Final Drafting</b></td><td>Synthesize the conclusions into the final executive format (Artifact, table, or memo).</td><td>Human review of style, tone, and compliance with the final deliverable's constraints.</td></tr>\n<tr><td><b>Mega-Prompt Failure</b></td><td>Trying to have the model extract, analyze, weigh, and write 20 pages in a single instruction.</td><td>The model omits intermediate details, dilutes constraints, and saturates the generation limit.</td></tr>\n</table>\n<p class=\"mt-2\"><b>Best Practice:</b> Prompt Chaining allows intermediate outputs to be inspected and corrected before errors propagate to later stages, achieving institutional-quality results.</p>"
+      }
     ],
-    "ccao-02": [
-      "Claude es un modelo de lenguaje y no realiza ajustes contables tácitos ni cálculos normativos independientes sin instrucciones explícitas.",
-      null,
-      "Pedir confirmación al modelo suele provocar que este justifique su respuesta previa con convicción aparente en lugar de detectar el error numérico de fondo.",
-      "Alterar los registros contables primarios para hacerlos coincidir con una salida errónea de IA constituye una grave infracción ética y regulatoria."
+    "questions": [
+      {
+        "id": "ccao-01",
+        "d": 1,
+        "t": "Quality Rubrics and Prior Criteria",
+        "q": "A sales team uses Claude to draft executive summaries intended for key clients. Before reviewing the first drafts generated by the model, what is the recommended methodological best practice for objectively evaluating the quality of the text and avoiding cognitive biases?",
+        "o": [
+          "Define a formal rubric with objective criteria (factual accuracy, tone, and length limits) before reading the drafts.",
+          "First read several drafts in an open-ended way to intuitively identify which sounds most eloquent and adopt that style.",
+          "Configure the output as a technical JSON schema so that an automated validator checks the syntax without the need for human intervention.",
+          "Ask Claude in a second prompt to rate its own responses from 1 to 10 and accept only those with a perfect score."
+        ],
+        "a": 0,
+        "e": "Defining an objective evaluation rubric before interacting with the model prevents confirmation bias and avoids confusing mere text fluency with business quality."
+      },
+      {
+        "id": "ccao-02",
+        "d": 1,
+        "t": "Factual Verification Against Primary Sources",
+        "q": "While validating a financial report drafted by Claude from a balance sheet in PDF format, an analyst notices that two figures in the summary table differ from those in the original balance sheet. What is the appropriate professional and operational conduct in this scenario?",
+        "o": [
+          "Assume that Claude applied a smart accounting adjustment for inflation or seasonality not stated in the original document.",
+          "Check each figure directly against the official source financial statements before approving and circulating the report.",
+          "Ask Claude in the same chat whether its calculations are true and accept the figures as correct if it answers yes.",
+          "Modify the original balance sheet to align it with the more favorable and optimistic conclusions presented in Claude's table."
+        ],
+        "a": 1,
+        "e": "Factual accuracy requires always checking generated data against the primary source (ground truth). A numerical discrepancy must never be assumed to be a valid accounting adjustment."
+      },
+      {
+        "id": "ccao-03",
+        "d": 1,
+        "t": "Evaluation with Golden Datasets",
+        "q": "The operations team wants to compare the performance of three different prompt versions for classifying customer technical support tickets. Which tool or methodological approach provides the most reliable and repeatable comparative evaluation?",
+        "o": [
+          "Test each prompt version with two or three hypothetical cases made up on the spot in an ephemeral chat session.",
+          "Automatically select the prompt version that produces the longest responses with the richest technical vocabulary.",
+          "Evaluate each prompt version against a fixed test set (`Golden Dataset`) with previously validated human answers.",
+          "Ask a novice user to subjectively choose which of the three prompt versions is written in the most pleasant style."
+        ],
+        "a": 2,
+        "e": "A `Golden Dataset` with curated real examples and human reference answers makes it possible to measure accuracy and compare prompt changes in a standardized, scientific way."
+      },
+      {
+        "id": "ccao-04",
+        "d": 1,
+        "t": "Factual Grounding and Exception Prevention",
+        "q": "An online retail store uses Claude to answer questions about product returns. Which prompt instruction minimizes the risk of the model inventing customer-favorable business exceptions that are not covered by the policies?",
+        "o": [
+          "Instruct Claude to be understanding and authorize extraordinary returns whenever the buyer expresses obvious frustration.",
+          "Allow the model to fill gaps in the policy based on common global e-commerce practices.",
+          "Increase the output token limit so the assistant can suggest possible alternative legal settlements outside the internal rules.",
+          "Attach the official policy and instruct Claude to answer based only on it and to state when a query exceeds its limits."
+        ],
+        "a": 3,
+        "e": "Strict grounding in the attached text, together with an explicit instruction to state when a query falls outside the policy, prevents hallucinations and unauthorized concessions."
+      },
+      {
+        "id": "ccao-05",
+        "d": 1,
+        "t": "Hallucination Detection and Mitigation",
+        "q": "While auditing a legal memorandum drafted with Claude, a lawyer discovers that the text cites a nonexistent statute article with complete rhetorical conviction. How is this phenomenon technically classified, and what is the mandatory safeguard in the workflow?",
+        "o": [
+          "Factual hallucination; it is mitigated by requiring verifiable verbatim citations checked against official legislation and mandatory human review.",
+          "Context drift; it is corrected by doubling the number of legal documents uploaded to the thread so the model has more options.",
+          "Copyright violation; it is resolved by asking the courts for authorization for the commercial use of legislative texts.",
+          "Token drift; it is resolved by removing line breaks from the prompt to force the model to stick to the current penal code."
+        ],
+        "a": 0,
+        "e": "A hallucination occurs when the model generates false information that appears certain. In regulated fields, requiring verbatim citations and human validation by experts is essential."
+      },
+      {
+        "id": "ccao-06",
+        "d": 1,
+        "t": "Essential Criteria in HR Rubrics",
+        "q": "A quality committee designs a formal rubric to evaluate the responses generated by Claude in an internal portal for employee labor inquiries. Which TWO dimensions should be weighted as a priority to ensure rigor and compliance? (Select 2)",
+        "o": [
+          "Factual accuracy and verifiable grounding in the company's current collective agreements and labor policies.",
+          "Strict adherence to professional corporate tone guidelines and respect for staff privacy rules.",
+          "Mandatory response length to ensure each answer always exceeds a minimum of four detailed paragraphs.",
+          "Predominant use of complex legal terminology to project maximum formal authority toward employees."
+        ],
+        "a": [
+          0,
+          1
+        ],
+        "e": "Factual accuracy and a professional tone that respects privacy are the fundamental pillars in human resources queries; forced length and excessive jargon are counterproductive."
+      },
+      {
+        "id": "ccao-07",
+        "d": 1,
+        "t": "Tone Standardization Through Few-Shot",
+        "q": "A customer service supervisor notices that Claude responds in a very informal style to retail banking customers and with excessive coldness to private banking customers. What is the most effective and lasting way to standardize the communication tone?",
+        "o": [
+          "Write warnings in capital letters threatening the model with performance penalties if it changes style between turns.",
+          "Include in the base prompt two or three concrete examples (`Few-Shot`) of the expected empathetic and formal tone for each segment.",
+          "Instruct customers to adapt their questions to the model by writing them in a fixed fifty-word structure.",
+          "Manually rewrite each Claude response before sending it, without documenting or changing the original prompt guidelines."
+        ],
+        "a": 1,
+        "e": "Using demonstrative examples (few-shot prompting) is the most effective technique for setting tone, formality, and communication structure in business scenarios."
+      },
+      {
+        "id": "ccao-08",
+        "d": 1,
+        "t": "Linguistic Fluency Risk in Contracts",
+        "q": "When auditing the quality of commercial contract summaries generated by Claude, why is it negligent to rely exclusively on the fluency of the writing as an indicator of accuracy?",
+        "o": [
+          "A polished style and perfect syntax show that the model consulted public records in real time.",
+          "Language models produce flawless prose only when all the premises analyzed are 100% correct.",
+          "Grammatical fluency and conviction can mask the accidental omission of critical indemnification clauses or deadlines.",
+          "Excessive stylistic fluency immediately triggers security firewalls at Anthropic that cancel the corporate account."
+        ],
+        "a": 2,
+        "e": "Syntactic coherence does not guarantee factual integrity. A well-written summary can sound flawless while omitting penalties or critical expiration clauses."
+      },
+      {
+        "id": "ccao-09",
+        "d": 1,
+        "t": "Role of the Human Reviewer in Commercial Proposals",
+        "q": "A sales team uses Claude to speed up the drafting of customized commercial proposals for public tenders. What is the irreplaceable role of the human reviewer in this workflow (`Human-in-the-Loop`)?",
+        "o": [
+          "Monitor the rate at which tokens appear on screen to check network latency during text generation.",
+          "Systematically replace all nouns with manual synonyms to eliminate any recognizable trace of AI.",
+          "Disable the corporate firewall controls to allow Claude to download confidential customer data from the internet.",
+          "Validate prices, delivery times, and contractual commitments before the formal, binding submission of the bid."
+        ],
+        "a": 3,
+        "e": "In binding proposals, the human reviewer ensures that the price, deadline, and legal-condition commitments are feasible and consistent with the company's capabilities."
+      },
+      {
+        "id": "ccao-10",
+        "d": 1,
+        "t": "Objective Metrics for Complaint Classification",
+        "q": "In an assisted automation project to classify customer complaints by severity level (Low, Medium, High, Critical), which objective metric makes it possible to evaluate the model's quality without relying on personal impressions?",
+        "o": [
+          "The exact match rate against a batch of complaints previously labeled by specialists in the area.",
+          "The average speed at which the human reviewer manages to read and approve the classified summaries in the system's user interface.",
+          "The total number of positive adjectives the model adds to its analysis to soften the customer's discontent.",
+          "The number of characters and explanatory paragraphs Claude provides to defend each severity classification."
+        ],
+        "a": 0,
+        "e": "Exact match against a sample labeled by human experts (ground truth) is the standard metric for objectively measuring the accuracy of a classification task."
+      },
+      {
+        "id": "ccao-11",
+        "d": 1,
+        "t": "Diagnosing Failures in Complex Tables",
+        "q": "While evaluating a prompt to extract key data from supplier invoices, Claude accurately extracts simple invoices but omits entire lines in invoices with complex multi-page tables. What is the correct methodological procedure?",
+        "o": [
+          "Require all suppliers in the market to abandon tables and submit only linear plain-text documents.",
+          "Examine the failed cases, enrich the prompt with structured examples of complex tables, and revalidate with the test dataset.",
+          "Accept a 30% omission rate in tables, assuming language models are not ready for the workplace.",
+          "Delete the original test dataset and evaluate the prompt only with simple invoices to certify a 100% success rate."
+        ],
+        "a": 1,
+        "e": "The iterative quality cycle in AI consists of analyzing errors, providing examples of the complex structures in the prompt (few-shot), and measuring again against the test dataset."
+      },
+      {
+        "id": "ccao-12",
+        "d": 1,
+        "t": "Strategic Purpose of Evaluation Rubrics",
+        "q": "What is the main organizational advantage of designing and documenting an evaluation rubric before deploying a Claude-based assistant in a business area?",
+        "o": [
+          "Automatically reduce token consumption and secure a discount on the platform's monthly subscription fee.",
+          "Completely eliminate the need for future audits by guaranteeing that the model will always respond without failures.",
+          "Establish a transparent, agreed-upon standard for determining whether responses meet the expected quality requirements.",
+          "Force the model to respond with the same number of words regardless of the complexity of the query."
+        ],
+        "a": 2,
+        "e": "A prior rubric aligns business expectations, provides measurable criteria for audits, and clearly defines what constitutes an acceptable response for the company."
+      },
+      {
+        "id": "ccao-13",
+        "d": 2,
+        "t": "Assisted Triage of Medical Claims",
+        "q": "A health insurer wants to reduce the processing time for medical reimbursement claims. Which workflow architecture optimally combines operational speed and safety for policyholders?",
+        "o": [
+          "Configure Claude to settle and order bank transfers autonomously without any human review.",
+          "Require a physician to manually transcribe each receipt so that Claude only drafts a generic welcome email.",
+          "Delegate to Claude the final rejection of doubtful claims, preventing the policyholder from appealing the decision with an operator.",
+          "Use Claude to extract data and classify the claim, leaving the reimbursement approval to a qualified human adjuster."
+        ],
+        "a": 3,
+        "e": "The recommended pattern uses Claude to speed up data extraction and triage, reserving financial authorization and the final decision for human professionals."
+      },
+      {
+        "id": "ccao-14",
+        "d": 2,
+        "t": "Handoff Protocol in Customer Support",
+        "q": "A customer service representative uses Claude to draft replies to complex complaints from dissatisfied users. Which action ensures a safe and empathetic handoff (`handoff`)?",
+        "o": [
+          "The representative reads the draft, validates the case data, adjusts the message with genuine empathy, and takes ownership of signing the response.",
+          "The representative sets up a script that immediately forwards the first draft generated by Claude to customers without any prior reading.",
+          "The representative tells the customer to go directly to the Claude platform to debate their contractual disagreements.",
+          "The representative removes references to the customer's problem to prevent the customer from replying with requests for further clarification."
+        ],
+        "a": 0,
+        "e": "A responsible handoff requires the human agent to validate the data, adjust the tone to the customer's particular circumstances, and take formal responsibility for the message."
+      },
+      {
+        "id": "ccao-15",
+        "d": 2,
+        "t": "Assisted Review of Supplier Contracts",
+        "q": "The procurement department receives draft contracts from various international suppliers. What is the most productive and safe way to integrate Claude into the review workflow for these documents?",
+        "o": [
+          "Dispense with the legal team and digitally sign contracts whenever Claude raises no warning in the chat.",
+          "Use Claude to compare the contract against the company's standard policies and generate a list of discrepancies for the lawyers.",
+          "Upload the contracts to open social networks so external users can check whether the clauses are common in other countries.",
+          "Ask Claude to rewrite the contract by removing all arbitration clauses and liability limits without consulting the legal department."
+        ],
+        "a": 1,
+        "e": "Claude excels as a critical reading assistant, identifying divergences from corporate templates so lawyers can focus their time on the risk points."
+      },
+      {
+        "id": "ccao-16",
+        "d": 2,
+        "t": "Integrity in Financial Reports for Investors",
+        "q": "A wealth advisory firm prepares quarterly summaries for institutional investors. How should the workflow be structured to guarantee the full accuracy of the projections and analyses generated?",
+        "o": [
+          "Allow Claude to make macroeconomic predictions based on unverified financial forums on the internet.",
+          "Omit the risk warnings section from the final document if Claude suggests an extraordinarily favorable return outlook.",
+          "Provide audited data to the model, generate the preliminary narrative analysis, and validate every ratio and claim with the finance team.",
+          "Publish the summaries immediately on the investor portal before internal review in order to be the first in the market to disclose data."
+        ],
+        "a": 2,
+        "e": "Financial rigor requires providing validated information as context, using the model to draft the qualitative analysis, and subjecting the result to review by the accounting team."
+      },
+      {
+        "id": "ccao-17",
+        "d": 2,
+        "t": "Governance in Personnel Selection",
+        "q": "The talent acquisition team uses Claude to summarize transcripts of job interviews with candidates. Which governance guideline must be followed in this selection process?",
+        "o": [
+          "Configure an algorithmic filter that automatically rejects a candidate if their spoken transcript has a low or negative sentiment score.",
+          "Use the model to infer the candidate's age, gender, or cultural origin and balance internal hiring quotas.",
+          "Share candidates' full audio recordings with competing companies to create blacklists of applicants in the sector.",
+          "Use the summaries as informational support material, reserving the decision to advance in the process to the judgment of human evaluators."
+        ],
+        "a": 3,
+        "e": "AI in recruiting should act only as documentary support. Decisions on selection, rejection, or hiring must be made by people to prevent discrimination and bias."
+      },
+      {
+        "id": "ccao-18",
+        "d": 2,
+        "t": "Mandatory Human-in-the-Loop Checkpoints",
+        "q": "In which TWO of the following workplace situations is it strictly mandatory to apply a human checkpoint and approval (`Human-in-the-Loop`) before releasing the output generated with Claude? (Select 2)",
+        "o": [
+          "Formal issuance of a communication notifying the denial of a mortgage or the cancellation of an insurance contract.",
+          "Publication of an emergency press release in response to a cybersecurity incident involving compromised confidential data.",
+          "Grammar correction of an informal internal memo about the room change for the Tuesday sync meeting.",
+          "Generation of a preliminary list of creative names for an internal corporate environmental volunteering campaign."
+        ],
+        "a": [
+          0,
+          1
+        ],
+        "e": "Decisions with direct financial or legal impact on people (credit) and public crisis communications require mandatory human oversight and approval."
+      },
+      {
+        "id": "ccao-19",
+        "d": 2,
+        "t": "Content Consistency with Claude Projects",
+        "q": "A marketing department with eight writers produces corporate articles for the company blog. To ensure that all posts maintain a consistent brand voice regardless of who writes the prompt, what is the best practice?",
+        "o": [
+          "Centralize the style guide, audience profile, and approved articles in a `Claude Project` shared by the whole team.",
+          "Ask each writer to use individual free accounts and freely apply their own personal style criteria without common guidelines.",
+          "Instruct the writers not to provide company context in order to encourage maximum diversity of opinions.",
+          "Prohibit the use of examples in prompts to prevent the model from repeating previously used phrasing."
+        ],
+        "a": 0,
+        "e": "A `Claude Project` lets you share a reference knowledge base (Project Knowledge) and joint instructions, ensuring consistency of style and tone across all writers."
+      },
+      {
+        "id": "ccao-20",
+        "d": 2,
+        "t": "Preventing Overreliance in Quotes",
+        "q": "The sales director of an industrial company notices that several account executives copy quotes generated by Claude and send them to customers without checking unit prices or discounts. What operational measure should be implemented to address this problem?",
+        "o": [
+          "Immediately shut down access to any artificial intelligence tool across the entire company and financially penalize the whole sales team.",
+          "Establish a formal verification protocol where the salesperson must tick a control box certifying the accuracy of each figure.",
+          "Install a bot that automatically approves all quotes whenever the total exceeds ten thousand euros.",
+          "Hide the official rates from salespeople so that they depend exclusively on the AI model's intrinsic memory."
+        ],
+        "a": 1,
+        "e": "Imposing an explicit verification step with a signature or responsible confirmation reinforces the human control role and prevents the automatic copying of unvalidated data."
+      },
+      {
+        "id": "ccao-21",
+        "d": 2,
+        "t": "Value of Assisted Triage in the Help Desk",
+        "q": "In a corporation's user support center, Claude is implemented to generate proposed solutions for software incidents. What essential advantage does this model provide compared to 100% unattended resolution without humans?",
+        "o": [
+          "It makes it possible to dispense entirely with specialized level 1 technicians and shift the entire support payroll to corporate cloud compute costs.",
+          "It mathematically guarantees that the main servers will not require security patches or scheduled maintenance.",
+          "It speeds up the search for preliminary diagnoses while keeping the human analyst's judgment to validate the solution before applying it.",
+          "It makes it possible to restart core production servers instantly without needing to validate access credentials."
+        ],
+        "a": 2,
+        "e": "The collaborative approach leverages Claude's speed to structure the solution and leaves verification to the technician before making changes to systems."
+      },
+      {
+        "id": "ccao-22",
+        "d": 3,
+        "t": "PII Anonymization and Redaction",
+        "q": "An HR analyst wants to use Claude to summarize a salary spreadsheet that includes full names, national ID numbers, and salaries. According to corporate privacy and data governance principles, which prior step is indispensable?",
+        "o": [
+          "Upload the original file directly in a private chat, assuming individual accounts are not subject to internal rules.",
+          "Ask Claude in the prompt to keep the salary information secret and to promise to erase it from its memory after responding.",
+          "Share the chat's public link with other analysts so they can check whether the personal data is easily recognizable.",
+          "Anonymize the spreadsheet by replacing names and ID numbers with synthetic codes (Employee 1, Employee 2) before loading the text."
+        ],
+        "a": 3,
+        "e": "Before transferring information to any language model, personally identifiable information (PII) must be anonymized or replaced with synthetic data to comply with privacy regulations."
+      },
+      {
+        "id": "ccao-23",
+        "d": 3,
+        "t": "Anthropic Acceptable Use Policy (AUP)",
+        "q": "An IT security consultant asks Claude for step-by-step instructions to compromise an industrial control system (SCADA) at a drinking water treatment plant. Why does the model refuse this request?",
+        "o": [
+          "It is a direct violation of Anthropic's Acceptable Use Policy (`AUP`), which prohibits facilitating cyberattacks on critical infrastructure.",
+          "Claude lacks theoretical concepts about SCADA networks and industrial systems because it was trained only on classical literature.",
+          "The query exceeds the standard context token limit available for professional accounts in the chat environment.",
+          "A notarized authorization issued by the ministry of industry is required to unlock answers about sanitation networks."
+        ],
+        "a": 0,
+        "e": "Anthropic's Acceptable Use Policy (AUP) expressly prohibits providing operational instructions for cyberattacks and for compromising critical infrastructure."
+      },
+      {
+        "id": "ccao-24",
+        "d": 3,
+        "t": "Privacy and Training in Business Plans",
+        "q": "When adopting Claude for Work on business plans (Team or Enterprise), what is Anthropic's formal commitment regarding training its artificial intelligence models on customer data?",
+        "o": [
+          "Anthropic automatically adds all uploaded corporate documents to the training corpus of its upcoming commercial models.",
+          "Anthropic guarantees that it does not train its foundation models on the data, documents, or prompts uploaded by corporate customers.",
+          "The data is anonymously handed over to partner universities for sociological research on office writing habits.",
+          "Only documents written in English are excluded from training, while other languages are used freely."
+        ],
+        "a": 1,
+        "e": "In the business editions (Team and Enterprise), Anthropic establishes by contract that it does not use the customer's inputs or documents to train or fine-tune its models."
+      },
+      {
+        "id": "ccao-25",
+        "d": 3,
+        "t": "Guidelines in Financial Advice",
+        "q": "A commercial bank is considering incorporating Claude into its online banking to guide customers on investment options and mortgage loans. Which responsible AI principle should govern this initiative?",
+        "o": [
+          "Publicly promote the model as a certified financial advisor capable of making autonomous, binding investment decisions on behalf of the retail customer.",
+          "Contractually guarantee customers that the financial projections calculated by Claude have a 100% assured return.",
+          "Clearly state that the responses are merely indicative and that any formal decision requires validation by a qualified human advisor.",
+          "Remove any mention of macroeconomic risks from the responses to encourage immediate uptake of bank loans."
+        ],
+        "a": 2,
+        "e": "In regulated sectors such as finance, AI must function as an indicative informational assistant, making clear that binding decisions require certified advisors."
+      },
+      {
+        "id": "ccao-26",
+        "d": 3,
+        "t": "Prohibited Uses under the Acceptable Use Policy",
+        "q": "According to Anthropic's Acceptable Use Policy (`Acceptable Use Policy`), which TWO of the following activities are strictly prohibited on the platform? (Select 2)",
+        "o": [
+          "Designing or facilitating biological, chemical, or radiological weapons or material for malicious cyberattacks.",
+          "Coordinated generation of content for covert election disinformation campaigns or vote manipulation.",
+          "Preparing comparison tables of open-source software costs to support internal purchasing decisions.",
+          "Translation of occupational risk prevention manuals from Spanish to English for construction site personnel."
+        ],
+        "a": [
+          0,
+          1
+        ],
+        "e": "Anthropic's AUP strictly prohibits weapons proliferation and cyberattacks, as well as election interference through coordinated disinformation."
+      },
+      {
+        "id": "ccao-27",
+        "d": 3,
+        "t": "Clinical Governance in Healthcare",
+        "q": "A hospital plans to use Claude to draft explanatory self-care guides for patients diagnosed with hypertension. What is the fundamental ethical and operational requirement before distributing the material?",
+        "o": [
+          "Allow patients to use the model to adjust their daily medication doses without needing to see a doctor.",
+          "Conceal that the drafts had AI assistance to prevent the bioethics committee from requesting a review of the document.",
+          "Distribute the printed guides immediately as long as the typographic design and colors match the hospital's manual.",
+          "Submit all drafted clinical content to formal review and express approval by licensed medical specialists."
+        ],
+        "a": 3,
+        "e": "Any medical information intended for patients must be rigorously validated by licensed health personnel to prevent errors and health misinformation."
+      },
+      {
+        "id": "ccao-28",
+        "d": 3,
+        "t": "Over-reliance Risk",
+        "q": "Which option most accurately describes the phenomenon of over-reliance (`over-reliance`) in the deployment of artificial intelligence models in business organizations?",
+        "o": [
+          "The psychological tendency of employees to accept the model's outputs as true without subjecting them to critical verification.",
+          "The technical overload of local networks caused by sending too many heavy PDF files simultaneously through the corporate web browser.",
+          "Managers' preference for hiring data analysts rather than training existing staff in office software.",
+          "The technical mistake of using identical network passwords for access to the corporate AI platform."
+        ],
+        "a": 0,
+        "e": "Over-reliance occurs when users stop verifying outputs because the AI writes eloquently and persuasively, causing business errors."
+      },
+      {
+        "id": "ccao-29",
+        "d": 3,
+        "t": "AI Usage Policies for Contractors",
+        "q": "An engineering company hires external consultants to collaborate on the design of a new engine. Which security clause must be stipulated in the generative AI tool usage policy for these professionals?",
+        "o": [
+          "Require them to use only free consumer trial versions to avoid incurring additional expenses in the billing of the contracted project.",
+          "Expressly prohibit entering blueprints, proprietary source code, or trade secrets into unmanaged personal accounts.",
+          "Require contractors to translate all specifications into French before making any conceptual query to the AI.",
+          "Impose daily deletion of browser history without keeping any record of the deliverables that were AI-assisted."
+        ],
+        "a": 1,
+        "e": "To protect intellectual property, contracts must prohibit uploading proprietary assets to personal accounts where the data does not have enterprise privacy guarantees."
+      },
+      {
+        "id": "ccao-30",
+        "d": 3,
+        "t": "Regulatory Compliance and DPA Agreements",
+        "q": "A European corporation subject to the General Data Protection Regulation (GDPR) is evaluating the use of Claude among its employees for business management tasks. Which legal and operational measure supports the lawful processing of the data?",
+        "o": [
+          "Install an unverified browser extension that promises to block the company's IP address from Anthropic.",
+          "State in the employment contract that employees themselves are personally liable before the courts for any data processing they perform with AI tools.",
+          "Sign a Data Processing Agreement (`DPA`) and channel usage through managed corporate accounts with access control.",
+          "Limit queries to public holidays so that data protection authorities cannot inspect traffic on business days."
+        ],
+        "a": 2,
+        "e": "Under the GDPR, organizations must sign a Data Processing Addendum (DPA) with the provider and use managed business accounts to ensure lawful processing."
+      },
+      {
+        "id": "ccao-31",
+        "d": 4,
+        "t": "Structure of an Enterprise Prompt",
+        "q": "A project manager wants to write a comprehensive prompt to summarize executive meeting minutes consistently week after week. Which of the following structures contains all the essential methodological components?",
+        "o": [
+          "Write a single sentence asking for a pleasant, concise summary so the model decides the length with complete autonomy.",
+          "Paste twenty full pages of transcripts mixed with informal instructions without using any kind of delimiter, category, or functional heading.",
+          "Write an unordered list of English adjectives requesting analytical excellence without defining the expected final format.",
+          "Define the role (`System Prompt`), the operational context, the task delimited with tags, format examples, and explicit constraints."
+        ],
+        "a": 3,
+        "e": "A robust prompt for repetitive business tasks combines role, context, clear delimited instructions, concrete examples (few-shot), and negative guardrails."
+      },
+      {
+        "id": "ccao-32",
+        "d": 4,
+        "t": "Using XML Delimiters in Long Prompts",
+        "q": "When designing a long prompt that includes company policies, example cases, and the text of a contract to be audited, what is the technical benefit of using XML-style delimiters (such as `<context>` or `<contract>`)?",
+        "o": [
+          "They help Claude clearly distinguish which parts are operational guidelines and which are input data to be processed.",
+          "They compile the prompt into binary machine code, speeding up the download of the generated text over slow broadband connections.",
+          "They are required by the web browser in order to display the text in full-screen mode without altering the system typography.",
+          "They automatically convert the document into a relational database on Anthropic's central servers."
+        ],
+        "a": 0,
+        "e": "XML tags structure the prompt visually and logically for Claude-family models, separating instructions from raw data and reducing ambiguity."
+      },
+      {
+        "id": "ccao-33",
+        "d": 4,
+        "t": "Applying Few-Shot Prompting",
+        "q": "The editorial team of a corporate publication needs Claude to write press releases that rigorously follow the company's journalistic sobriety and structure. Which prompting technique ensures the result most faithful to the style?",
+        "o": [
+          "Write the entire prompt in capital letters, emphasizing that the company's reputation depends on this press release.",
+          "Include in the prompt two previously approved real press releases to illustrate the expected structure and formal register.",
+          "Instruct the model to be as creative as possible and surprise readers with unexpected poetic metaphors.",
+          "Ask Claude to imitate the style of nineteenth-century novelists to give the release a more distinguished, classic tone."
+        ],
+        "a": 1,
+        "e": "Providing real examples (few-shot prompting) anchors the style, vocabulary, and arrangement of information much more effectively than mere abstract descriptions."
+      },
+      {
+        "id": "ccao-34",
+        "d": 4,
+        "t": "Negative Constraints and Preventing Assumptions",
+        "q": "An operations analyst asks Claude to extract the delivery deadlines and owners from a project follow-up email. In its response, Claude adds assumed dates that were not in the original message. How should the prompt be corrected?",
+        "o": [
+          "Ask it to imagine and infer logical delivery deadlines when they do not appear in the original email so the project schedule is not left with blank dates.",
+          "Increase the number of allowed tokens by ten thousand so the model can justify the invented dates more extensively.",
+          "Add an explicit constraint: 'Extract only dates mentioned in the text; if a milestone has no date, explicitly state Not specified'.",
+          "Remove the original email from the prompt and ask Claude to produce a generic schedule for any type of company."
+        ],
+        "a": 2,
+        "e": "Explicit negative constraints tell the model exactly what to do when information is absent (write 'Not specified'), preventing unfounded guesses."
+      },
+      {
+        "id": "ccao-35",
+        "d": 4,
+        "t": "Key Elements for Reducing Ambiguity",
+        "q": "Which TWO prompt-writing practices are highly recommended to avoid ambiguous or generic responses in business analysis tasks? (Select 2)",
+        "o": [
+          "Define the output format precisely (for example, a three-column comparison table with specific metrics).",
+          "Specify the target audience and the required technical level (for example, an audit committee unfamiliar with IT).",
+          "Avoid including length constraints so the model writes without limits as far as it deems necessary.",
+          "Ask the model to express feelings of enthusiasm and excessive optimism in every technical conclusion it issues."
+        ],
+        "a": [
+          0,
+          1
+        ],
+        "e": "Clearly specifying the delivery format and the recipient's profile drastically reduces ambiguity and tailors the message to business needs."
+      },
+      {
+        "id": "ccao-36",
+        "d": 4,
+        "t": "Prior Reasoning for Human Audit",
+        "q": "In information security incident analysis, Claude is instructed with the guideline: 'Before issuing the final verdict on severity, explain your reasoning step by step, evaluating each attack vector.' What operational advantage does this approach provide?",
+        "o": [
+          "It allows Claude to connect remotely and in real time with government cyberdefense agencies to validate the accuracy of each technical deduction made.",
+          "It guarantees that the generated response is exactly identical no matter how many times the question is asked in the chat.",
+          "It is a documented technical shortcut to double the monthly storage quota available in the user's account.",
+          "It promotes more rigorous logical analysis by the model and allows human auditors to verify the consistency of the deductions."
+        ],
+        "a": 3,
+        "e": "Asking the model to break down its reasoning (chain-of-thought) before the final conclusion improves the logical soundness of the deductions and facilitates human auditing of the result."
+      },
+      {
+        "id": "ccao-37",
+        "d": 4,
+        "t": "Structuring and Placement of Constraints",
+        "q": "A technical writer observes that Claude frequently forgets a negative instruction about not using anglicisms when it is placed in the middle of a three-thousand-word reference document. What is the most appropriate structuring adjustment?",
+        "o": [
+          "Move the constraint to the end of the prompt or group it in a prominent section under a clear guidelines tag.",
+          "Repeat the same constraint fifty times consecutively in capital letters throughout every paragraph of the document.",
+          "Translate the constraint into binary or hexadecimal code so it gains greater relevance in the model's attention mechanisms.",
+          "Accept that language models are incapable of remembering negative guidelines when processing texts of more than a thousand words."
+        ],
+        "a": 0,
+        "e": "Placing key guidelines at the end of the prompt or in a clearly delimited section exploits the recency effect in the model's attention, maximizing constraint compliance."
+      },
+      {
+        "id": "ccao-38",
+        "d": 4,
+        "t": "Calibrating the Complexity Level",
+        "q": "When asking Claude to summarize a cloud architecture report intended for non-technical financial directors, which prompt instruction best guides the required level of depth?",
+        "o": [
+          "Require the entire report to be written using only very basic, elementary childlike vocabulary so that no reader has the slightest conceptual doubt.",
+          "Instruct Claude to translate the technological impact into business terms of costs, timelines, and risks, defining the indispensable jargon.",
+          "Order the exclusive use of acronyms and electronic circuit diagrams to project an image of technical cutting-edge.",
+          "Ask it to assume that the financial directors have mastered Kubernetes cluster configuration and to omit all explanation of concepts."
+        ],
+        "a": 1,
+        "e": "Directing a technical report to a business audience requires linking the technology to financial impacts and risks, explaining the indispensable technical terminology without sounding condescending."
+      },
+      {
+        "id": "ccao-39",
+        "d": 5,
+        "t": "Surface Selection: Claude Projects",
+        "q": "A software company's support team regularly shares product manuals, error guides, and refund policies to resolve user inquiries. Which Claude environment is ideal for organizing this workflow?",
+        "o": [
+          "Use a standard individual chat where each support agent must manually re-upload the fifteen manuals every time a new customer inquiry begins.",
+          "Develop a custom application from scratch using the Anthropic API even though the team has no programmers.",
+          "Set up a `Claude Project`, since it allows storing persistent reference documentation and shared instructions for the team.",
+          "Download the model files to local hard drives to operate without internet access in the sales offices."
+        ],
+        "a": 2,
+        "e": "`Claude Projects` is designed specifically for teams that need to share permanent knowledge bases (Project Knowledge) and work instructions in a no-code environment."
+      },
+      {
+        "id": "ccao-40",
+        "d": 5,
+        "t": "Benefits of Using Artifacts",
+        "q": "A strategy consultant needs Claude to draft a thirty-page digital transformation proposal that will require multiple rounds of editing and refinement. Why is it very convenient for the output to be generated in an `Artifact`?",
+        "o": [
+          "`Artifacts` prevent other department members from editing or copying the text unless they have a special assigned cryptographic decryption key.",
+          "Using `Artifacts` multiplies the speed of the user's internet connection while downloading the file to their local machine.",
+          "`Artifacts` automatically grant binding legal validity to the document before the country's regulatory authorities.",
+          "It isolates and displays the substantial document in a dedicated side panel, making it easier to read, version, and edit iteratively."
+        ],
+        "a": 3,
+        "e": "`Artifacts` separate substantial, lengthy content from the conversational flow, offering a side panel to inspect, copy, iterate on, and version the document with complete ease."
+      },
+      {
+        "id": "ccao-41",
+        "d": 5,
+        "t": "Ad-hoc Queries in Standard Chat",
+        "q": "A junior analyst needs to quickly learn the definition and etymological origin of a financial term to understand a press article, without involving customer data or company policies. Which Claude surface is the most efficient?",
+        "o": [
+          "A standard individual chat in Claude, since it is a one-off, ephemeral query that does not require persistent document context.",
+          "Create a formal corporate `Claude Project` and invite the directors of ten different areas to archive and document the isolated definition of the term.",
+          "Hire an outside consulting firm to develop a software connector with the Anthropic API to resolve the vocabulary question.",
+          "Set up a dedicated cloud server to process vocabulary queries using Python scripts."
+        ],
+        "a": 0,
+        "e": "For quick, non-recurring ad-hoc questions, standard chat is the most direct and lightweight option, avoiding the overhead of creating unnecessary projects or integrations."
+      },
+      {
+        "id": "ccao-42",
+        "d": 5,
+        "t": "Ideal Use Cases for Artifacts",
+        "q": "In which TWO of the following workplace situations is it highly advantageous for Claude to generate its response as an `Artifact` in the side window? (Select 2)",
+        "o": [
+          "Development of an interactive diagram or SVG code that the team wants to view, test, and refine iteratively.",
+          "Creation of an extensive, structured multi-page operating guide intended to be exported and shared with the team.",
+          "A short courtesy reply in the chat confirming receipt of a file with the text: 'Understood, thanks'.",
+          "A one-line clarification explaining the meaning of a very common corporate acronym during a quick conversation."
+        ],
+        "a": [
+          0,
+          1
+        ],
+        "e": "`Artifacts` are designed for substantial, reusable, or interactive content (code, SVG diagrams, long documents), not for brief conversational replies."
+      },
+      {
+        "id": "ccao-43",
+        "d": 5,
+        "t": "Governance and Enterprise Plans",
+        "q": "A company of sixty employees needs to deploy Claude with centralized authentication (Single Sign-On or SSO), consolidated single billing, and department-level access controls. Which service tier meets these requirements?",
+        "o": [
+          "Ask each employee to create a personal free account using their private email accounts.",
+          "Subscribe to corporate plans such as `Claude Team` or `Claude Enterprise`, equipped with an administrative console and centralized governance.",
+          "Buy sixty individual `Claude Pro` subscriptions and reimburse the monthly cost through expense reports.",
+          "Install third-party browser extensions to share a single access password among all employees."
+        ],
+        "a": 1,
+        "e": "The `Claude Team` and `Claude Enterprise` plans provide an administration console, identity provisioning via SSO, centralized billing, and formal privacy guarantees."
+      },
+      {
+        "id": "ccao-44",
+        "d": 5,
+        "t": "Project Instructions vs Knowledge Base",
+        "q": "Within a `Claude Project`, what is the conceptual and operational difference between 'Project Instructions' (`Project Instructions`) and 'Knowledge Files' (`Project Knowledge`)?",
+        "o": [
+          "Instructions can only be written by Anthropic, while files are public documents visible on the internet.",
+          "There is no operational distinction; both modules serve exactly the same function in context processing.",
+          "Instructions set the role, tone, and permanent response rules; files provide the factual reference information.",
+          "Files set the members' subscription prices and instructions store the company's network passwords."
+        ],
+        "a": 2,
+        "e": "`Project Instructions` define how Claude should behave (role, style, guidelines), while `Project Knowledge` stores the substantive documentation that feeds its answers."
+      },
+      {
+        "id": "ccao-45",
+        "d": 6,
+        "t": "Context Drift in Long Threads",
+        "q": "In a very long work conversation with more than forty exchanges, a user notices that Claude starts neglecting instructions given at the beginning and confuses details of topics already closed. What technical phenomenon is occurring and what is the recommended operational solution?",
+        "o": [
+          "Virus infection on the local computer; solved by formatting the hard drive and reinstalling the operating system.",
+          "Permanent account lockout for suspicious activity; resolved by waiting a full week without making any queries.",
+          "Irreversible exhaustion of the main server; remedied by sending the same message ten times in a row in capital letters.",
+          "Context drift (`Context Drift`); resolved by opening a new, focused chat and summarizing the key agreements accumulated so far."
+        ],
+        "a": 3,
+        "e": "`Context Drift` occurs when the accumulation of messages in a chat dilutes the model's attention to the initial instructions; the solution is to open a new chat with a clean summary."
+      },
+      {
+        "id": "ccao-46",
+        "d": 6,
+        "t": "Contradictions in the Knowledge Base",
+        "q": "When asking about the vacation procedure in a `Claude Project`, the model gives contradictory answers, sometimes citing 20 days and other times 25 days for the same type of contract. After reviewing the uploaded files, what is the most likely cause and how should it be fixed?",
+        "o": [
+          "Two versions of the benefits manual are uploaded (an old one and an updated one); the obsolete file should be removed from the Project.",
+          "Claude totally lacks the technical ability to process binary PDF files and systematically confuses numbers when extracting plain text.",
+          "It is essential that all documents in the Project have exactly the same number of pages to avoid contradictions.",
+          "Employees must phrase their questions in verse or rhyme so the model identifies which file has legal priority."
+        ],
+        "a": 0,
+        "e": "Having divergent or outdated versions of a policy in `Project Knowledge` confuses the model; good practice requires auditing and cleaning up the files, keeping only the current version."
+      },
+      {
+        "id": "ccao-47",
+        "d": 6,
+        "t": "Handling Outputs Truncated by Token Limit",
+        "q": "During the generation of an extensive comparative analysis of fifteen competitors, Claude suddenly stops in the middle of a paragraph without completing the table. What is the usual technical reason for this behavior and how is the task resumed?",
+        "o": [
+          "Anthropic canceled and suspended the user's access to the platform for asking an analytical question that was excessively complex for the cloud processor.",
+          "The maximum output token limit for a single turn was reached; simply typing 'continue' lets the model carry on with the text.",
+          "The model detected a copyright infringement in the name of one of the competitors and froze the screen.",
+          "An unrecoverable failure occurred in the global telecommunications network that destroyed the entire previous conversation history."
+        ],
+        "a": 1,
+        "e": "Each response turn has a preset output token limit. If the response reaches it, generation is cut off cleanly; sending a message asking it to 'continue' allows the task to be completed."
+      },
+      {
+        "id": "ccao-48",
+        "d": 6,
+        "t": "Preventing Responses with External Information in Projects",
+        "q": "In a `Claude Project` created to answer questions about life insurance policies, it is noticed that the model sometimes answers with standard coverages from other countries that are not part of the company's contracts. Which adjustment to the project instructions eliminates this problem?",
+        "o": [
+          "Upload links to internet insurance forums to the project so the model can verify which policies are most popular.",
+          "Prohibit employees from asking questions containing numbers or percentages to prevent the model from searching for external data.",
+          "Instruct explicitly: 'Answer exclusively based on the policies loaded in the project; if a piece of data does not appear in them, state that it is not on record'.",
+          "Remove all policies from the project and ask the model to memorize the insurance terms through a single prompt."
+        ],
+        "a": 2,
+        "e": "Explicitly instructing Claude to restrict its answers to the project documents, and specifying what to answer when information is missing, prevents hallucinations with external data."
+      },
+      {
+        "id": "ccao-49",
+        "d": 6,
+        "t": "File Upload Limits in Web Sessions",
+        "q": "An analyst tries to upload a two-gigabyte recorded video file to a Claude chat session to have it transcribe the meeting and extract agreements. The platform immediately rejects the upload. What is the operational reason and the best working alternative?",
+        "o": [
+          "The platform only allows file uploads from users with express authorization from the United Nations ethics committee.",
+          "The user must change the video file extension to '.txt' to fool the interface's verification systems.",
+          "The video must be split into four hundred five-megabyte files and all of them uploaded together in the same message.",
+          "The file exceeds the supported size limits and file types; the plain-text transcript should be extracted and loaded into the session."
+        ],
+        "a": 3,
+        "e": "Claude is optimized to process text and documents (PDF, text, code, images). For recorded meetings, a plain-text transcript should be used, which is lightweight and efficient."
+      },
+      {
+        "id": "ccao-50",
+        "d": 6,
+        "t": "Custom Instructions Hierarchy vs Task Prompts",
+        "q": "A consultant has custom instructions configured in their global profile so that Claude always answers with short bullet lists. However, for a specific task they need to write a formal apology letter in continuous paragraphs. What is the cleanest way to proceed?",
+        "o": [
+          "State in the task prompt: 'For this particular task, ignore the usual bullet-point format and write the letter in continuous, formal paragraphs'.",
+          "Permanently delete the corporate user account on the server and request a new email address from the IT infrastructure department.",
+          "Wait for the weekend to pass so the custom instructions expire automatically on the server.",
+          "Uninstall the web browser and access from a portable tablet so the system does not recognize the user's preferences."
+        ],
+        "a": 0,
+        "e": "Explicit guidelines given in the task prompt (`user prompt`) take operational priority to temporarily override the general profile preferences without needing to delete them."
+      },
+      {
+        "id": "ccao-51",
+        "d": 7,
+        "t": "Modular Decomposition vs Mega-Prompt Failure",
+        "q": "A consulting team must produce a fifty-page strategic plan analyzing balance sheets, surveys, and regulations. Why does sending a single 'mega-prompt' asking for the entire report to be written in one turn produce unsatisfactory results?",
+        "o": [
+          "The model automatically triggers an extraordinary financial penalty charge every time a prompt exceeds five hundred words.",
+          "The model tends to omit critical details, over-condense sections, and lose coherence when trying to meet multiple goals at once.",
+          "Anthropic's terms of service strictly prohibit analyzing financial statements and market surveys in the same account.",
+          "The user's web browser restarts due to lack of RAM when trying to receive more than two paragraphs of text simultaneously."
+        ],
+        "a": 1,
+        "e": "'Mega-prompts' overload the model's planning capacity, causing superficial summaries, omission of secondary guidelines, and saturation of the per-turn token limit."
+      },
+      {
+        "id": "ccao-52",
+        "d": 7,
+        "t": "Logical Sequence in Contract Prompt Chaining",
+        "q": "When implementing a prompt chain (`Prompt Chaining`) to audit a complex lease agreement and propose modifications, what is the most effective methodological sequence to ensure quality and risk control?",
+        "o": [
+          "Step 1: Immediately draft the final modifications -> Step 2: Ask the model what it thought of the contract overall -> Step 3: Extract the original clauses.",
+          "Step 1: Request an allegorical poem about the property -> Step 2: Print the document -> Step 3: Translate the signatures into three languages.",
+          "Step 1: Extract risk clauses into a table -> Step 2: Compare against company policy -> Step 3: Draft counterproposals for the wording.",
+          "Step 1: Digitally sign the agreement -> Step 2: Ask Claude to look for serious errors -> Step 3: Notify the counterparty of termination."
+        ],
+        "a": 2,
+        "e": "An effective chain progresses from the concrete and analytical to synthesis: first it extracts the objective data, then evaluates it against internal policies, and finally drafts the alternative clauses."
+      },
+      {
+        "id": "ccao-53",
+        "d": 7,
+        "t": "Intermediate Inspection in Prompt Chains",
+        "q": "In a workflow that uses prompt chaining (`Prompt Chaining`), what crucial operational benefit does reviewing and validating the intermediate results of each phase before triggering the next step provide?",
+        "o": [
+          "It grants a fifty percent discount credit on the company's monthly cloud services bill.",
+          "It eliminates the need for users to know the business subject matter, making the work team completely infallible.",
+          "It allows subsequent steps to run instantly without consuming compute time on the platform's servers.",
+          "It allows errors or hallucinations to be detected and corrected early, preventing them from propagating and being amplified in later phases."
+        ],
+        "a": 3,
+        "e": "Validating intermediate outputs in a chained workflow acts as a quality checkpoint (gatekeeper), preventing an extraction error from contaminating the analysis and the final report."
+      },
+      {
+        "id": "ccao-54",
+        "d": 7,
+        "t": "Handling Failures in Intermediate Phases",
+        "q": "A team designs a chain of three prompts to generate case studies: Step 1: Extract metrics from the customer interview -> Step 2: Structure the case (Challenge, Solution, Result) -> Step 3: Polish the brand voice. If Step 2 produces a deficient, disorganized structure, what is the correct action?",
+        "o": [
+          "Refine the Step 2 prompt by providing a clear structural template and repeat that phase before moving on to the style polish of Step 3.",
+          "Proceed directly to Step 3, wrongly assuming that the style polishing phase will automatically fix the earlier structural problems.",
+          "Discard the entire case study project and rule that language models are not useful for business communication tasks.",
+          "Repeat Step 1 by loading ten additional customer transcripts unrelated to the case in question."
+        ],
+        "a": 0,
+        "e": "If an intermediate phase fails, the prompt for that specific phase must be corrected with clear guidelines and templates before continuing. Moving forward on a flawed foundation only amplifies writing failures."
+      },
+      {
+        "id": "ccao-55",
+        "d": 7,
+        "t": "Competitive Advantages of Modular Decomposition",
+        "q": "What is the main advantage of decomposing a complex analysis into a sequential chain of prompts compared to trying to solve it in a single long instruction?",
+        "o": [
+          "The single instruction unlocks secret quantum processing modules on Anthropic's servers that do not operate in chains.",
+          "Modular decomposition isolates each subtask, allowing greater depth of analysis, data traceability, and quality control.",
+          "The modular chain does not require users to understand the steps of the problem, since the model deduces the business plan automatically.",
+          "The single instruction mathematically and irrefutably guarantees that there will be no factual hallucinations in any of the sections produced."
+        ],
+        "a": 1,
+        "e": "Modularity lets the model concentrate its attention on one specific subtask at a time (extraction, comparison, drafting), improving quality and facilitating human control."
+      }
     ],
-    "ccao-03": [
-      "Probar dos o tres casos improvisados carece de representatividad estadística y no detecta casos borde ni regresiones en la clasificación.",
-      "La longitud y complejidad del texto no reflejan precisión operativa; de hecho, respuestas excesivamente extensas entorpecen la resolución rápida de tickets.",
-      null,
-      "El criterio estético subjetivo de un único usuario no mide la exactitud de la categorización técnica ni el cumplimiento de las políticas del servicio."
-    ],
-    "ccao-04": [
-      "Pedir que conceda excepciones comerciales por empatía faculta al modelo a asumir compromisos económicos que la empresa no está dispuesta a solventar.",
-      "Permitir que use conocimiento externo difuso para rellenar vacíos normativos provoca promesas falsas incompatibles con los términos del negocio.",
-      "Aumentar la longitud de salida sin acotar las fuentes de verdad multiplica el riesgo de que Claude divague y elabore compromisos regulatorios inválidos.",
-      null
-    ],
-    "ccao-05": [
-      null,
-      "La deriva de contexto es la pérdida de atención a instrucciones tempranas en hilos largos; agregar más documentos jurídicos satura la atención y empeora las alucinaciones.",
-      "Citar un artículo inexistente no es una infracción de copyright, sino un error de generación sintética que no involucra licencias judiciales.",
-      "Los saltos de línea mejoran la legibilidad del prompt; eliminarlos no tiene ningún impacto técnico positivo en la veracidad de las referencias legales."
-    ],
-    "ccao-06": [
-      null,
-      null,
-      "Exigir una longitud mínima arbitraria induce respuestas artificialmente densas que dificultan la comprensión rápida de las normas laborales por parte del empleado.",
-      "El exceso de jerga técnica entorpece la claridad comunicativa y puede generar confusión o desconfianza en asuntos delicados de relaciones laborales."
-    ],
-    "ccao-07": [
-      "Amenazar al modelo o escribir en mayúsculas no ofrece orientación estilística concreta y resulta ineficaz para modular el registro lingüístico.",
-      null,
-      "Exigir a los clientes que sigan un formato rígido traslada la fricción al usuario externo y arruina la experiencia de servicio al cliente.",
-      "Corregir manualmente sin actualizar el prompt perpetúa la ineficiencia operativa y no resuelve la causa raíz de la variabilidad del estilo."
-    ],
-    "ccao-08": [
-      "La fluidez es una propiedad del modelo de lenguaje y no constituye prueba alguna de consulta a registros externos o bases oficiales.",
-      "Los modelos avanzados pueden redactar textos falsos o incompletos con la misma elegancia gramatical que los textos verdaderos.",
-      null,
-      "Anthropic no penaliza la fluidez textual; es una característica intrínseca del modelo y no tiene relación con bloqueos de seguridad."
-    ],
-    "ccao-09": [
-      "Observar el flujo de tokens no aporta valor de negocio ni asegura que el contenido de la propuesta cumpla los requisitos de la licitación.",
-      "Reemplazar sustantivos de forma arbitraria consume tiempo innecesario y suele deteriorar la precisión técnica del documento comercial.",
-      "Desactivar cortafuegos vulnera la seguridad informática y además Claude no navega libremente por la red corporativa del cliente.",
-      null
-    ],
-    "ccao-10": [
-      null,
-      "La velocidad de lectura del revisor evalúa la agilidad del usuario humano, pero no demuestra si la severidad asignada por la IA fue correcta.",
-      "Incorporar adjetivos aduladores no mejora la clasificación técnica y distorsiona el análisis objetivo del problema reportado por el cliente.",
-      "Respuestas más largas y verbosas no implican mayor precisión diagnóstica; frecuentemente solo introducen ruido en la categorización."
-    ],
-    "ccao-11": [
-      "Obligar a terceros externos a cambiar su formato de facturación resulta inviable operativamente y traslada un problema interno a los proveedores.",
-      null,
-      "Aceptar altas tasas de omisión en facturación genera pérdidas contables graves y desaprovecha la capacidad de optimizar el prompt.",
-      "Evaluar solo casos fáciles falsea los indicadores de desempeño y oculta vulnerabilidades críticas antes del despliegue en producción."
-    ],
-    "ccao-12": [
-      "Las rúbricas son documentos organizativos humanos y no tienen relación técnica directa con el precio ni con la facturación de tokens.",
-      "Ninguna rúbrica exime del monitoreo periódico, ya que los procesos de negocio y las consultas evolucionan con el tiempo.",
-      null,
-      "Las rúbricas buscan calidad y exactitud conceptual, no limitar artificialmente la longitud natural que requiere explicar un tema."
-    ],
-    "ccao-13": [
-      "Emitir desembolsos de forma 100 % autónoma sin supervisión humana expone a la compañía a fraudes y pagos indebidos por alucinaciones.",
-      "Obligar a un médico a transcribir datos a mano desperdicia tiempo profesional de alto costo en tareas que la IA puede acelerar.",
-      "Automatizar rechazos sin posibilidad de revisión humana vulnera los derechos del consumidor y la normativa del sector asegurador.",
-      null
-    ],
-    "ccao-14": [
-      null,
-      "Enviar salidas de IA sin verificación humana previa puede transmitir compromisos erróneos o respuestas desatinadas en situaciones de conflicto.",
-      "Transferir al cliente directamente a un chatbot no resuelve el caso y degrada drásticamente la percepción del servicio al cliente.",
-      "Omitir deliberadamente los puntos de fricción genera frustración en el usuario y suele provocar la escalada de la queja a entes regulatorios."
-    ],
-    "ccao-15": [
-      "Sustituir a los abogados corporativos por un modelo de lenguaje compromete legalmente a la empresa ante cláusulas lesivas no detectadas.",
-      null,
-      "Publicar contratos comerciales en foros públicos constituye una grave violación de los acuerdos de confidencialidad y secretos de negocio.",
-      "Modificar unilateralmente cláusulas sustanciales sin asesoramiento legal genera vicios de consentimiento y riesgos procesales mayores."
-    ],
-    "ccao-16": [
-      "Basar informes de inversión en rumores de internet vulnera las leyes del mercado de valores y arruina la reputación fiduciaria de la firma.",
-      "Omitir factores de riesgo viola las obligaciones de divulgación legal y expone a la entidad a sanciones por parte de la comisión de valores.",
-      null,
-      "Priorizar la inmediatez sobre la verificación documental en informes fiduciarios genera riesgos regulatorios y de responsabilidad patrimonial."
-    ],
-    "ccao-17": [
-      "El análisis automatizado de sentimiento en entrevistas orales penaliza a postulantes tímidos o en idiomas secundarios, generando discriminación injusta.",
-      "Inferir categorías protegidas (edad, origen, género) para condicionar la selección laboral es ilegal y vulnera las normas laborales antidiscriminación.",
-      "Compartir datos de postulantes con competidores viola la legislación de protección de datos (RGPD) y las leyes de libre competencia.",
-      null
-    ],
-    "ccao-18": [
-      null,
-      null,
-      "Un correo operativo sobre un cambio de sala es una tarea de bajo riesgo que no genera consecuencias legales ni financieras graves si tiene un desliz menor.",
-      "Una lluvia de ideas interna sobre nombres de campañas es un ejercicio creativo inocuo donde no se comprometen derechos ni recursos críticos."
-    ],
-    "ccao-19": [
-      null,
-      "Tener cuentas aisladas sin directrices comunes genera dispersión en la imagen corporativa y dificulta el control de calidad de la marca.",
-      "Omitir el contexto corporativo provoca respuestas genéricas desalineadas con la identidad de marca y los objetivos comerciales de la empresa.",
-      "Prohibir ejemplos elimina una de las técnicas más potentes de alineación de estilo (few-shot) y aumenta la variabilidad indeseada."
-    ],
-    "ccao-20": [
-      "Prohibir la tecnología de forma reactiva elimina los beneficios de productividad en lugar de educar al equipo en un uso riguroso y responsable.",
-      null,
-      "Un bot con aprobación automática por umbral monetario amplifica el riesgo financiero en lugar de garantizar la exactitud de los precios unitarios.",
-      "Ocultar las listas de precios oficiales al personal de ventas impide el cotejo contra fuentes de verdad y propicia errores económicos graves."
-    ],
-    "ccao-21": [
-      "La asistencia de IA mejora la productividad de los analistas pero no reemplaza el conocimiento técnico necesario para resolver incidentes complejos.",
-      "Un modelo de lenguaje genera texto y sugerencias técnicas; no interviene en la estabilidad física de los servidores ni en el parchado del sistema operativo.",
-      null,
-      "Las acciones de remediación en producción requieren autorización y autenticación rigurosa para evitar caídas catastróficas del servicio."
-    ],
-    "ccao-22": [
-      "Las cuentas individuales en la nube siguen enviando datos a servidores externos; ignorar las políticas de privacidad constituye una infracción disciplinaria y legal.",
-      "Los modelos lingüísticos no poseen voluntad ética ni capacidad contractual de guardar secretos mediante una instrucción conversacional.",
-      "Compartir enlaces públicos con datos salariales amplifica la exposición de información confidencial y agrava la brecha de seguridad.",
-      null
-    ],
-    "ccao-23": [
-      null,
-      "Claude posee amplio conocimiento técnico sobre redes industriales; el rechazo obedece a salvaguardas éticas y de seguridad, no a ignorancia conceptual.",
-      "La extensión de la consulta es mínima y no tiene relación con el límite de tokens de la ventana de contexto.",
-      "Anthropic no comercializa ni autoriza excepciones para ataques a infraestructuras críticas mediante trámites notariales."
-    ],
-    "ccao-24": [
-      "Anthropic no utiliza datos de planes corporativos para entrenar modelos públicos; la privacidad y el aislamiento de datos están garantizados por contrato.",
-      null,
-      "Los acuerdos de procesamiento de datos corporativos prohíben la cesión no autorizada de información a instituciones académicas u otros terceros.",
-      "La política de no entrenamiento en cuentas empresariales aplica universalmente a todos los datos sin distinción del idioma utilizado."
-    ],
-    "ccao-25": [
-      "Presentar una IA como asesor legal o financiero certificado viola los marcos normativos bancarios y de protección al consumidor financiero.",
-      "Las inversiones conllevan riesgos de mercado y ninguna tecnología puede garantizar rentabilidades futuras sin incurrir en fraude.",
-      null,
-      "Ocultar los riesgos asociados a productos financieros vulnera las directrices de transparencia y los códigos de conducta del sector financiero."
-    ],
-    "ccao-26": [
-      null,
-      null,
-      "Comparar costes de software para una decisión de compras es una actividad empresarial perfectamente legítima y respaldada.",
-      "Traducir manuales de seguridad ocupacional apoya la prevención de riesgos y representa un caso de uso ordinario y positivo."
-    ],
-    "ccao-27": [
-      "Delegar el ajuste farmacológico en un modelo de lenguaje sin supervisión médica pone en riesgo la vida de los pacientes y viola la ley sanitaria.",
-      "Ocultar el uso de IA al comité ético quebranta las políticas de transparencia institucional y elude los controles indispensables de seguridad clínica.",
-      "La calidad visual y los colores corporativos no certifican la exactitud médica ni la idoneidad terapéutica de las recomendaciones para pacientes.",
-      null
-    ],
-    "ccao-28": [
-      null,
-      "La sobrecarga del ancho de banda es un problema de red de telecomunicaciones que no guarda relación con el sesgo cognitivo de sobreconfianza.",
-      "Las decisiones de contratación de personal forman parte de la gestión de talento y no definen el concepto de sobreconfianza en las respuestas del modelo.",
-      "La reutilización de contraseñas es una mala práctica de ciberseguridad, no un fenómeno de complacencia frente a las salidas de la IA."
-    ],
-    "ccao-29": [
-      "Fomentar el uso de cuentas gratuitas agrava el riesgo, ya que esas versiones de consumo no cuentan con las protecciones de datos de planes de empresa.",
-      null,
-      "Exigir una traducción previa a un idioma específico no aporta seguridad y entorpece innecesariamente los flujos técnicos del proyecto.",
-      "Eliminar historiales sin trazabilidad impide auditar la procedencia del trabajo y verificar el cumplimiento de las normas de propiedad intelectual."
-    ],
-    "ccao-30": [
-      "Las extensiones de navegador no oficiales representan un riesgo grave de seguridad y no suplen las garantías contractuales del RGPD.",
-      "Trasladar la responsabilidad legal exclusivamente a los trabajadores es nulo de pleno derecho bajo la normativa de protección de datos europea.",
-      null,
-      "La legislación de protección de datos opera de manera permanente las 24 horas del año, sin excepciones por días festivos o fines de semana."
-    ],
-    "ccao-31": [
-      "Una instrucción abierta de una sola frase genera salidas impredecibles con profundidad variable que rara vez satisfacen a un comité de dirección.",
-      "Mezclar datos e instrucciones sin estructura confunde la atención del modelo y propicia la omisión de acuerdos clave de la reunión.",
-      "Una lista de adjetivos abstractos no proporciona pautas operativas sobre qué secciones o decisiones deben extraerse de la minuta.",
-      null
-    ],
-    "ccao-32": [
-      null,
-      "Las etiquetas XML son texto plano que interpreta el modelo; no realizan compilación binaria ni alteran la tasa de transferencia de red.",
-      "El navegador no requiere etiquetas XML para cambiar al modo de pantalla completa; es un estándar de estructuración de prompts, no de CSS/HTML.",
-      "El modelo de lenguaje procesa texto en contexto y no crea bases de datos SQL relacionales a partir de marcas XML en el prompt."
-    ],
-    "ccao-33": [
-      "El uso de mayúsculas no aporta claridad técnica ni ejemplos concretos sobre cómo debe estructurarse el comunicado de prensa.",
-      null,
-      "Fomentar la creatividad abierta en comunicados corporativos genera textos extravagantes que chocan con la sobriedad exigida por la dirección.",
-      "Imitar estilos literarios decimonónicos introduce expresiones anacrónicas que perjudican la legibilidad y la profesionalidad del comunicado."
-    ],
-    "ccao-34": [
-      "Autorizar al modelo a inventar fechas cuando falten datos perpetúa el error y genera calendarios de trabajo irreales en el proyecto.",
-      "Aumentar el límite de tokens permite respuestas más largas pero no corrige la propensión a inventar datos no presentes en el correo.",
-      null,
-      "Eliminar el correo de origen suprime el contexto de trabajo y hace que el cronograma carezca de relación con el proyecto en curso."
-    ],
-    "ccao-35": [
-      null,
-      null,
-      "Omitir pautas de extensión suele dar lugar a respuestas farragosas y dispersas que consumen tiempo excesivo de lectura a los directivos.",
-      "Introducir emociones artificiosas resta rigor a los informes técnicos y desvirtúa la imparcialidad del análisis empresarial."
-    ],
-    "ccao-36": [
-      "Claude razona a partir del texto y sus pesos internos; no establece conexiones externas secretas con agencias gubernamentales de defensa.",
-      "Los modelos de lenguaje poseen naturaleza probabilística; pedir razonamiento paso a paso no elimina la variabilidad natural del texto.",
-      "La formulación del prompt no modifica las cuotas de almacenamiento de la suscripción, que están reguladas por el plan contratado.",
-      null
-    ],
-    "ccao-37": [
-      null,
-      "Repetir de forma obsesiva una frase degrada la coherencia del prompt y consume tokens de contexto de manera innecesaria e ineficiente.",
-      "El modelo procesa lenguaje natural; codificar instrucciones en binario o hexadecimal dificulta la interpretación y provoca errores.",
-      "Los modelos avanzados pueden procesar decenas de miles de palabras y respetar restricciones si estas se estructuran y ubican adecuadamente."
-    ],
-    "ccao-38": [
-      "Emplear un lenguaje infantil resulta irrespetuoso en un entorno corporativo y devalúa la seriedad del análisis financiero presentado.",
-      null,
-      "Saturar el informe de siglas crípticas impide que los directivos comprendan la viabilidad del proyecto y bloquea la toma de decisiones.",
-      "Asumir conocimientos de ingeniería en perfiles de finanzas provoca desinformación y evaluaciones erróneas sobre el presupuesto del proyecto."
-    ],
-    "ccao-39": [
-      "Subir manuales en cada chat individual genera pérdidas de tiempo, consumo redundante de tokens y riesgos de usar versiones obsoletas.",
-      "Crear una plataforma propia con la API requiere desarrollo de software y mantenimiento continuo, resultando desproporcionado e innecesario.",
-      null,
-      "Los modelos avanzados de Claude operan como servicios en la nube de Anthropic y no se descargan para ejecución local sin conexión."
-    ],
-    "ccao-40": [
-      "Los `Artifacts` no son mecanismos de cifrado restrictivo; su propósito es mejorar la visualización y edición en la interfaz de usuario.",
-      "La generación de un `Artifact` no altera el ancho de banda físico de la conexión de telecomunicaciones del usuario.",
-      "Un `Artifact` es una herramienta de visualización de software y no sustituye la firma legal ni los trámites notariales de una propuesta.",
-      null
-    ],
-    "ccao-41": [
-      null,
-      "Crear un proyecto e invitar a directivos para una duda de vocabulario puntual genera burocracia innecesaria y desordena el espacio de trabajo.",
-      "Contratar desarrolladores para consultar un término léxico es un gasto injustificado frente a la inmediatez de la interfaz web existente.",
-      "Aprovisionar infraestructura en la nube para una consulta lingüística puntual constituye un desperdicio de recursos técnicos y financieros."
-    ],
-    "ccao-42": [
-      null,
-      null,
-      "Un mensaje de confirmación de dos palabras debe mantenerse en el flujo conversacional habitual; crear un Artifact para ello resulta innecesario.",
-      "Una aclaración de una sola línea no requiere un panel lateral dedicado de visualización y encaja perfectamente en el cuerpo del chat."
-    ],
-    "ccao-43": [
-      "Las cuentas personales carecen de administración centralizada, impiden aplicar políticas de retención y comprometen la seguridad corporativa.",
-      null,
-      "Gestionar licencias individuales mediante reembolsos no ofrece consola unificada, ni SSO, ni garantías contractuales de protección de datos de equipo.",
-      "Compartir una única cuenta entre decenas de empleados vulnera los términos de servicio, anula la trazabilidad y debilita la seguridad de accesos."
-    ],
-    "ccao-44": [
-      "Las instrucciones son configuradas libremente por los administradores del proyecto de la empresa; no son un campo exclusivo de Anthropic.",
-      "Confundir ambos elementos desordena el proyecto: mezclar políticas de tono con manuales de producto perjudica la precisión del modelo.",
-      null,
-      "Ninguno de los dos módulos gestiona pagos ni claves; su propósito es estructurar el comportamiento y el conocimiento del asistente."
-    ],
-    "ccao-45": [
-      "El fenómeno de pérdida de foco en un chat es una propiedad de la atención del modelo en la nube y no guarda relación con virus locales.",
-      "No existe ningún bloqueo de cuenta; la sesión simplemente ha acumulado demasiada información previa dispersa en la ventana de contexto.",
-      "Reiterar el mensaje en el mismo hilo largo agrava la saturación de tokens y no ayuda al modelo a recuperar las directrices olvidadas.",
-      null
-    ],
-    "ccao-46": [
-      null,
-      "Claude procesa documentos en formato PDF con alta precisión; el error no es de formato, sino de contenido contradictorio en los archivos cargados.",
-      "El número de páginas por documento es irrelevante; lo que genera contradicciones es la discordancia en los datos normativos que contienen.",
-      "Redactar preguntas en verso no otorga jerarquía documental y entorpece la comunicación profesional en la plataforma."
-    ],
-    "ccao-47": [
-      "La plataforma no sanciona ni cancela cuentas por solicitar análisis detallados de múltiples competidores en el chat.",
-      null,
-      "Las menciones comerciales en análisis competitivos no activan congelamientos automáticos por infracción de copyright.",
-      "El corte abrupto es un límite ordinario de longitud de generación por turno y no implica pérdidas de datos ni caídas de red."
-    ],
-    "ccao-48": [
-      "Agregar enlaces a foros externos introduce más ruido e incrementa la probabilidad de que el modelo cite coberturas no vigentes.",
-      "Los números y porcentajes son consustanciales a las pólizas de seguros; prohibirlos imposibilita el trabajo operativo del equipo.",
-      null,
-      "Borrar los documentos priva a Claude de su base de conocimiento (ground truth), obligándolo a recurrir a conocimiento general y especular."
-    ],
-    "ccao-49": [
-      "Anthropic gestiona sus límites técnicos de archivo de forma directa en su plataforma sin intermediación de organismos internacionales.",
-      "Cambiar la extensión no convierte un video binario en texto legible; el archivo seguirá siendo incompatible y provocará error.",
-      "Subir cientos de fragmentos binarios bloquea la interfaz web y no permite al modelo procesar el contenido audiovisual eficientemente.",
-      null
-    ],
-    "ccao-50": [
-      null,
-      "Eliminar la cuenta destruye el historial, los proyectos y las configuraciones de la empresa de forma totalmente innecesaria.",
-      "Las instrucciones personalizadas de perfil son permanentes y no tienen fecha de caducidad automática los fines de semana.",
-      "Las instrucciones están asociadas al perfil en la nube del usuario, por lo que cambiar de dispositivo no elimina la configuración de formato."
-    ],
-    "ccao-51": [
-      "Anthropic no aplica multas financieras por longitud de prompts; la facturación se rige por el consumo de tokens según el plan contratado.",
-      null,
-      "Combinar fuentes de información diversas es una práctica habitual en tareas de análisis y no vulnera los términos de servicio.",
-      "Los navegadores modernos gestionan flujos de texto sin inconvenientes; el cuello de botella es la capacidad cognitiva del modelo en un solo turno."
-    ],
-    "ccao-52": [
-      "Redactar modificaciones antes de extraer y comprender las cláusulas de origen invierte la lógica analítica y propicia errores jurídicos.",
-      "Generar poemas o traducciones ornamentales desvía el flujo de trabajo y no aporta ningún valor al análisis de riesgos del contrato.",
-      null,
-      "Firmar el contrato antes de analizar los riesgos compromete legalmente a la empresa y hace inútil cualquier auditoría posterior."
-    ],
-    "ccao-53": [
-      "Revisar salidas intermedias es una buena práctica de ingeniería de prompts de los usuarios, no un programa de fidelización comercial con descuentos.",
-      "El conocimiento del dominio de negocio por parte del revisor sigue siendo indispensable para juzgar si la salida intermedia es correcta.",
-      "Cada paso de la cadena requiere procesamiento computacional independiente; las revisiones humanas no anulan el tiempo de inferencia del modelo.",
-      null
-    ],
-    "ccao-54": [
-      null,
-      "La fase de pulido de estilo mejora la redacción pero no repara una estructura de contenidos desordenada o carente de lógica narrativa.",
-      "Abandonar el proyecto ante una falla de estructura en una fase intermedia es prematuro; basta con ajustar las directrices del paso fallido.",
-      "Agregar transcripciones inconexas en el Paso 1 introduce ruido y no soluciona el problema de estructuración del Paso 2."
-    ],
-    "ccao-55": [
-      "Los modelos de Anthropic utilizan la misma infraestructura de procesamiento estándar sin módulos cuánticos secretos para prompts extensos.",
-      null,
-      "Diseñar una cadena eficaz exige comprender profundamente el flujo de negocio para definir qué entradas y salidas requiere cada etapa.",
-      "Ningún prompt único garantiza ausencia de alucinaciones; de hecho, concentrar múltiples metas en una sola instrucción eleva el riesgo de error."
+    "why": {
+      "ccao-01": [
+        null,
+        "Evaluating intuitively without predefined criteria leads to rating superficial eloquence positively while ignoring critical omissions of information.",
+        "Validating only the syntax of a JSON verifies the file format but does not check the factual accuracy, tone, or business suitability of the content.",
+        "Language models tend to overestimate the quality of their own outputs when self-evaluating without a binding external rubric and human oversight."
+      ],
+      "ccao-02": [
+        "Claude is a language model and does not make tacit accounting adjustments or independent regulatory calculations without explicit instructions.",
+        null,
+        "Asking the model for confirmation usually causes it to justify its previous answer with apparent conviction instead of detecting the underlying numerical error.",
+        "Altering primary accounting records to make them match an erroneous AI output is a serious ethical and regulatory violation."
+      ],
+      "ccao-03": [
+        "Testing two or three improvised cases lacks statistical representativeness and does not detect edge cases or regressions in classification.",
+        "The length and complexity of the text do not reflect operational accuracy; in fact, excessively long responses hinder quick ticket resolution.",
+        null,
+        "The subjective aesthetic judgment of a single user does not measure the accuracy of technical categorization or compliance with service policies."
+      ],
+      "ccao-04": [
+        "Asking it to grant business exceptions out of empathy empowers the model to make financial commitments that the company is not willing to honor.",
+        "Allowing it to use vague external knowledge to fill regulatory gaps produces false promises that are incompatible with the business terms.",
+        "Increasing output length without bounding the sources of truth multiplies the risk of Claude rambling and producing invalid regulatory commitments.",
+        null
+      ],
+      "ccao-05": [
+        null,
+        "Context drift is the loss of attention to early instructions in long threads; adding more legal documents saturates attention and worsens hallucinations.",
+        "Citing a nonexistent article is not a copyright infringement but a synthetic generation error that does not involve court licenses.",
+        "Line breaks improve prompt readability; removing them has no positive technical impact on the accuracy of legal references."
+      ],
+      "ccao-06": [
+        null,
+        null,
+        "Requiring an arbitrary minimum length induces artificially dense responses that make it harder for the employee to quickly understand labor rules.",
+        "Excess technical jargon hinders communicative clarity and can create confusion or distrust in sensitive labor-relations matters."
+      ],
+      "ccao-07": [
+        "Threatening the model or writing in capital letters offers no concrete stylistic guidance and is ineffective for modulating linguistic register.",
+        null,
+        "Requiring customers to follow a rigid format shifts the friction onto the external user and ruins the customer service experience.",
+        "Manually correcting without updating the prompt perpetuates operational inefficiency and does not resolve the root cause of style variability."
+      ],
+      "ccao-08": [
+        "Fluency is a property of the language model and is no proof of consulting external records or official databases.",
+        "Advanced models can write false or incomplete texts with the same grammatical elegance as true texts.",
+        null,
+        "Anthropic does not penalize textual fluency; it is an intrinsic characteristic of the model and has no relationship with security blocks."
+      ],
+      "ccao-09": [
+        "Watching the token stream provides no business value and does not ensure that the proposal content meets the tender requirements.",
+        "Arbitrarily replacing nouns wastes unnecessary time and tends to degrade the technical accuracy of the commercial document.",
+        "Disabling firewalls undermines IT security, and in addition Claude does not freely browse the customer's corporate network.",
+        null
+      ],
+      "ccao-10": [
+        null,
+        "The reviewer's reading speed measures the human user's agility, but it does not show whether the severity assigned by the AI was correct.",
+        "Adding flattering adjectives does not improve technical classification and distorts the objective analysis of the problem reported by the customer.",
+        "Longer, more verbose responses do not imply greater diagnostic accuracy; they often just introduce noise into the categorization."
+      ],
+      "ccao-11": [
+        "Forcing external third parties to change their invoicing format is operationally unfeasible and shifts an internal problem onto suppliers.",
+        null,
+        "Accepting high omission rates in invoicing causes serious accounting losses and wastes the opportunity to optimize the prompt.",
+        "Evaluating only easy cases falsifies performance indicators and hides critical vulnerabilities before production deployment."
+      ],
+      "ccao-12": [
+        "Rubrics are human organizational documents and have no direct technical relationship to pricing or token billing.",
+        "No rubric exempts you from periodic monitoring, since business processes and queries evolve over time.",
+        null,
+        "Rubrics seek quality and conceptual accuracy, not to artificially limit the natural length required to explain a topic."
+      ],
+      "ccao-13": [
+        "Issuing disbursements 100% autonomously without human oversight exposes the company to fraud and improper payments caused by hallucinations.",
+        "Forcing a physician to transcribe data by hand wastes high-cost professional time on tasks that AI can speed up.",
+        "Automating rejections without the possibility of human review violates consumer rights and insurance sector regulations.",
+        null
+      ],
+      "ccao-14": [
+        null,
+        "Sending AI outputs without prior human verification can convey erroneous commitments or inappropriate responses in conflict situations.",
+        "Transferring the customer directly to a chatbot does not resolve the case and drastically degrades the perception of customer service.",
+        "Deliberately omitting the friction points generates user frustration and often causes the complaint to escalate to regulatory bodies."
+      ],
+      "ccao-15": [
+        "Replacing corporate lawyers with a language model legally exposes the company to harmful clauses that go undetected.",
+        null,
+        "Publishing commercial contracts on public forums is a serious violation of confidentiality agreements and trade secrets.",
+        "Unilaterally modifying substantial clauses without legal advice creates defects in consent and greater procedural risks."
+      ],
+      "ccao-16": [
+        "Basing investment reports on internet rumors violates securities market laws and ruins the firm's fiduciary reputation.",
+        "Omitting risk factors violates legal disclosure obligations and exposes the entity to sanctions from the securities commission.",
+        null,
+        "Prioritizing immediacy over document verification in fiduciary reports creates regulatory and financial liability risks."
+      ],
+      "ccao-17": [
+        "Automated sentiment analysis of oral interviews penalizes shy applicants or those speaking in a second language, creating unfair discrimination.",
+        "Inferring protected categories (age, origin, gender) to influence hiring is illegal and violates anti-discrimination labor regulations.",
+        "Sharing applicant data with competitors violates data protection law (GDPR) and competition law.",
+        null
+      ],
+      "ccao-18": [
+        null,
+        null,
+        "An operational email about a room change is a low-risk task that creates no serious legal or financial consequences if it contains a minor slip.",
+        "An internal brainstorm of campaign names is a harmless creative exercise that does not put critical rights or resources at stake."
+      ],
+      "ccao-19": [
+        null,
+        "Having isolated accounts without common guidelines causes dispersion in corporate image and makes brand quality control harder.",
+        "Omitting the corporate context produces generic responses misaligned with the brand identity and the company's business objectives.",
+        "Prohibiting examples removes one of the most powerful style-alignment techniques (few-shot) and increases unwanted variability."
+      ],
+      "ccao-20": [
+        "Reactively banning the technology eliminates productivity benefits instead of educating the team in rigorous and responsible use.",
+        null,
+        "A bot with automatic approval based on a monetary threshold amplifies financial risk instead of guaranteeing the accuracy of unit prices.",
+        "Hiding official price lists from the sales staff prevents checking against sources of truth and fosters serious financial errors."
+      ],
+      "ccao-21": [
+        "AI assistance improves analysts' productivity but does not replace the technical knowledge needed to resolve complex incidents.",
+        "A language model generates text and technical suggestions; it does not affect the physical stability of servers or operating system patching.",
+        null,
+        "Remediation actions in production require rigorous authorization and authentication to avoid catastrophic service outages."
+      ],
+      "ccao-22": [
+        "Individual cloud accounts still send data to external servers; ignoring privacy policies constitutes a disciplinary and legal violation.",
+        "Language models have no ethical will or contractual capacity to keep secrets through a conversational instruction.",
+        "Sharing public links with salary data amplifies the exposure of confidential information and worsens the security breach.",
+        null
+      ],
+      "ccao-23": [
+        null,
+        "Claude has extensive technical knowledge about industrial networks; the refusal is due to ethical and security safeguards, not conceptual ignorance.",
+        "The length of the query is minimal and has no relation to the context window's token limit.",
+        "Anthropic does not sell or authorize exceptions for attacks on critical infrastructure through notarial procedures."
+      ],
+      "ccao-24": [
+        "Anthropic does not use data from business plans to train public models; data privacy and isolation are guaranteed by contract.",
+        null,
+        "Corporate data processing agreements prohibit the unauthorized transfer of information to academic institutions or other third parties.",
+        "The no-training policy on business accounts applies universally to all data regardless of the language used."
+      ],
+      "ccao-25": [
+        "Presenting an AI as a certified legal or financial advisor violates banking regulatory frameworks and financial consumer protection rules.",
+        "Investments carry market risks, and no technology can guarantee future returns without committing fraud.",
+        null,
+        "Concealing the risks associated with financial products violates transparency guidelines and the financial sector's codes of conduct."
+      ],
+      "ccao-26": [
+        null,
+        null,
+        "Comparing software costs for a purchasing decision is a perfectly legitimate and supported business activity.",
+        "Translating occupational safety manuals supports risk prevention and represents an ordinary, positive use case."
+      ],
+      "ccao-27": [
+        "Delegating pharmacological adjustment to a language model without medical supervision puts patients' lives at risk and violates health law.",
+        "Concealing the use of AI from the ethics committee breaches institutional transparency policies and bypasses essential clinical safety controls.",
+        "Visual quality and corporate colors do not certify the medical accuracy or therapeutic suitability of the recommendations for patients.",
+        null
+      ],
+      "ccao-28": [
+        null,
+        "Bandwidth overload is a telecommunications network problem unrelated to the cognitive bias of over-reliance.",
+        "Hiring decisions are part of talent management and do not define the concept of over-reliance on model responses.",
+        "Password reuse is a poor cybersecurity practice, not a phenomenon of complacency toward AI outputs."
+      ],
+      "ccao-29": [
+        "Encouraging the use of free accounts worsens the risk, since those consumer versions lack the data protections of business plans.",
+        null,
+        "Requiring prior translation into a specific language adds no security and needlessly hinders the project's technical workflows.",
+        "Deleting histories without traceability prevents auditing the provenance of the work and verifying compliance with intellectual property rules."
+      ],
+      "ccao-30": [
+        "Unofficial browser extensions pose a serious security risk and do not replace the contractual guarantees of the GDPR.",
+        "Shifting legal responsibility exclusively onto workers is null and void under European data protection regulations.",
+        null,
+        "Data protection legislation operates permanently, 24 hours a day all year, with no exceptions for holidays or weekends."
+      ],
+      "ccao-31": [
+        "An open-ended single-sentence instruction produces unpredictable outputs with variable depth that rarely satisfy an executive committee.",
+        "Mixing data and instructions without structure confuses the model's attention and leads to the omission of key meeting agreements.",
+        "A list of abstract adjectives provides no operational guidance on which sections or decisions should be extracted from the minutes.",
+        null
+      ],
+      "ccao-32": [
+        null,
+        "XML tags are plain text interpreted by the model; they do not perform binary compilation or alter the network transfer rate.",
+        "The browser does not require XML tags to switch to full-screen mode; they are a prompt-structuring standard, not CSS/HTML.",
+        "The language model processes text in context and does not create relational SQL databases from XML markup in the prompt."
+      ],
+      "ccao-33": [
+        "Using capital letters provides no technical clarity or concrete examples of how the press release should be structured.",
+        null,
+        "Encouraging open-ended creativity in corporate releases produces extravagant texts that clash with the sobriety required by management.",
+        "Imitating nineteenth-century literary styles introduces anachronistic expressions that harm the readability and professionalism of the release."
+      ],
+      "ccao-34": [
+        "Authorizing the model to invent dates when data is missing perpetuates the error and produces unrealistic work schedules for the project.",
+        "Increasing the token limit allows longer responses but does not correct the tendency to invent data not present in the email.",
+        null,
+        "Removing the source email eliminates the working context and leaves the schedule unrelated to the ongoing project."
+      ],
+      "ccao-35": [
+        null,
+        null,
+        "Omitting length guidelines tends to result in rambling, scattered responses that take executives excessive reading time.",
+        "Introducing contrived emotions detracts from the rigor of technical reports and distorts the impartiality of business analysis."
+      ],
+      "ccao-36": [
+        "Claude reasons from the text and its internal weights; it does not establish secret external connections with government defense agencies.",
+        "Language models are probabilistic in nature; asking for step-by-step reasoning does not eliminate the natural variability of the text.",
+        "Prompt wording does not change the subscription's storage quotas, which are governed by the plan purchased.",
+        null
+      ],
+      "ccao-37": [
+        null,
+        "Obsessively repeating a sentence degrades prompt coherence and needlessly and inefficiently consumes context tokens.",
+        "The model processes natural language; encoding instructions in binary or hexadecimal makes interpretation harder and causes errors.",
+        "Advanced models can process tens of thousands of words and respect constraints if these are properly structured and placed."
+      ],
+      "ccao-38": [
+        "Using childlike language is disrespectful in a corporate environment and devalues the seriousness of the financial analysis presented.",
+        null,
+        "Overloading the report with cryptic acronyms prevents executives from understanding the project's feasibility and blocks decision-making.",
+        "Assuming engineering knowledge in finance profiles causes misinformation and erroneous assessments of the project budget."
+      ],
+      "ccao-39": [
+        "Uploading manuals in each individual chat wastes time, causes redundant token consumption, and risks using outdated versions.",
+        "Building a custom platform with the API requires software development and ongoing maintenance, which is disproportionate and unnecessary.",
+        null,
+        "Claude's advanced models operate as cloud services from Anthropic and are not downloaded for offline local execution."
+      ],
+      "ccao-40": [
+        "`Artifacts` are not restrictive encryption mechanisms; their purpose is to improve viewing and editing in the user interface.",
+        "Generating an `Artifact` does not alter the physical bandwidth of the user's telecommunications connection.",
+        "An `Artifact` is a software display tool and does not replace the legal signature or the notarial formalities of a proposal.",
+        null
+      ],
+      "ccao-41": [
+        null,
+        "Creating a project and inviting executives over a one-off vocabulary question creates unnecessary bureaucracy and clutters the workspace.",
+        "Hiring developers to look up a lexical term is an unjustified expense compared to the immediacy of the existing web interface.",
+        "Provisioning cloud infrastructure for a one-off language query is a waste of technical and financial resources."
+      ],
+      "ccao-42": [
+        null,
+        null,
+        "A two-word confirmation message should stay in the usual conversational flow; creating an Artifact for it is unnecessary.",
+        "A one-line clarification does not need a dedicated side display panel and fits perfectly in the body of the chat."
+      ],
+      "ccao-43": [
+        "Personal accounts lack centralized administration, prevent the application of retention policies, and compromise corporate security.",
+        null,
+        "Managing individual licenses through reimbursements offers no unified console, no SSO, and no contractual team data protection guarantees.",
+        "Sharing a single account among dozens of employees violates the terms of service, voids traceability, and weakens access security."
+      ],
+      "ccao-44": [
+        "Instructions are freely configured by the company's project administrators; they are not an exclusive field of Anthropic.",
+        "Confusing the two elements clutters the project: mixing tone policies with product manuals harms the model's accuracy.",
+        null,
+        "Neither module handles payments or keys; their purpose is to structure the assistant's behavior and knowledge."
+      ],
+      "ccao-45": [
+        "The phenomenon of losing focus in a chat is a property of the cloud model's attention and has no relation to local viruses.",
+        "There is no account lockout; the session has simply accumulated too much scattered prior information in the context window.",
+        "Repeating the message in the same long thread worsens token saturation and does not help the model recover the forgotten guidelines.",
+        null
+      ],
+      "ccao-46": [
+        null,
+        "Claude processes PDF documents with high accuracy; the error is not one of format, but of contradictory content in the uploaded files.",
+        "The number of pages per document is irrelevant; what creates contradictions is the discrepancy in the policy data they contain.",
+        "Writing questions in verse confers no document hierarchy and hinders professional communication on the platform."
+      ],
+      "ccao-47": [
+        "The platform does not sanction or cancel accounts for requesting detailed analyses of multiple competitors in the chat.",
+        null,
+        "Commercial mentions in competitive analyses do not trigger automatic freezes for copyright infringement.",
+        "The abrupt cutoff is an ordinary per-turn generation length limit and does not imply data loss or network outages."
+      ],
+      "ccao-48": [
+        "Adding links to external forums introduces more noise and increases the likelihood that the model will cite coverages that are no longer in force.",
+        "Numbers and percentages are inherent to insurance policies; prohibiting them makes the team's operational work impossible.",
+        null,
+        "Deleting the documents deprives Claude of its knowledge base (ground truth), forcing it to resort to general knowledge and speculate."
+      ],
+      "ccao-49": [
+        "Anthropic manages its technical file limits directly on its platform without the intermediation of international bodies.",
+        "Changing the extension does not turn a binary video into readable text; the file will remain incompatible and cause an error.",
+        "Uploading hundreds of binary fragments blocks the web interface and does not allow the model to process the audiovisual content efficiently.",
+        null
+      ],
+      "ccao-50": [
+        null,
+        "Deleting the account destroys the company's history, projects, and settings in a completely unnecessary way.",
+        "Profile custom instructions are permanent and have no automatic expiration date on weekends.",
+        "Instructions are tied to the user's cloud profile, so switching devices does not remove the formatting configuration."
+      ],
+      "ccao-51": [
+        "Anthropic does not apply financial fines for prompt length; billing is based on token consumption according to the plan purchased.",
+        null,
+        "Combining diverse information sources is a common practice in analysis tasks and does not violate the terms of service.",
+        "Modern browsers handle text streams without problems; the bottleneck is the model's cognitive capacity in a single turn."
+      ],
+      "ccao-52": [
+        "Drafting modifications before extracting and understanding the original clauses reverses the analytical logic and leads to legal errors.",
+        "Generating poems or ornamental translations diverts the workflow and adds no value to the contract's risk analysis.",
+        null,
+        "Signing the contract before analyzing the risks legally commits the company and makes any later audit useless."
+      ],
+      "ccao-53": [
+        "Reviewing intermediate outputs is a good prompt engineering practice for users, not a commercial loyalty program with discounts.",
+        "The reviewer's business domain knowledge remains indispensable for judging whether the intermediate output is correct.",
+        "Each step in the chain requires independent computational processing; human reviews do not cancel out the model's inference time.",
+        null
+      ],
+      "ccao-54": [
+        null,
+        "The style polishing phase improves the writing but does not repair a disorganized content structure or one lacking narrative logic.",
+        "Abandoning the project over a structural failure in an intermediate phase is premature; it is enough to adjust the guidelines of the failed step.",
+        "Adding unrelated transcripts in Step 1 introduces noise and does not solve the structuring problem in Step 2."
+      ],
+      "ccao-55": [
+        "Anthropic's models use the same standard processing infrastructure with no secret quantum modules for long prompts.",
+        null,
+        "Designing an effective chain requires a deep understanding of the business workflow to define which inputs and outputs each stage requires.",
+        "No single prompt guarantees the absence of hallucinations; in fact, concentrating multiple goals into one instruction raises the risk of error."
+      ]
+    },
+    "glossary": [
+      {
+        "term": "Claude Projects",
+        "cat": "Claude Surfaces",
+        "d": 5,
+        "def": "Collaborative workspaces in Claude that allow storing up to hundreds of thousands of words of reference documentation (Project Knowledge) and custom instructions shared among team members."
+      },
+      {
+        "term": "Artifacts",
+        "cat": "Claude Surfaces",
+        "d": 5,
+        "def": "Interactive side window in the Claude interface where substantial, reusable content is generated and displayed, such as long text documents, SVG diagrams, web components, and code, facilitating iteration and versioning."
+      },
+      {
+        "term": "Acceptable Use Policy (AUP)",
+        "cat": "Governance",
+        "d": 3,
+        "def": "Formal Anthropic policy that prohibits the use of its models for harmful activities, including weapons development, election disinformation, cyberattacks on critical infrastructure, and binding legal or medical advice without qualified supervision."
+      },
+      {
+        "term": "Hallucination",
+        "cat": "Validation",
+        "d": 1,
+        "def": "Generation of false claims, facts, figures, or citations presented with high eloquence and apparent technical certainty by the language model, mitigable through grounding in documents and human validation."
+      },
+      {
+        "term": "Prompt Chaining",
+        "cat": "Prompt Chaining",
+        "d": 7,
+        "def": "Methodological pattern that decomposes a complex business task into a sequence of modular steps, where the validated output of one prompt serves as the contextual input of the next."
+      },
+      {
+        "term": "PII Redaction",
+        "cat": "Governance",
+        "d": 3,
+        "def": "Prior process of identifying and replacing personally identifiable data (names, ID numbers, addresses, banking data) with placeholders or synthetic data before sending it to the model."
+      },
+      {
+        "term": "Human-in-the-Loop (HITL)",
+        "cat": "Workflows",
+        "d": 2,
+        "def": "Operational design in which a trained human professional must actively review, validate, and authorize the outputs or recommendations generated by AI before their publication or execution in the business."
+      },
+      {
+        "term": "Context Drift",
+        "cat": "Troubleshooting",
+        "d": 6,
+        "def": "Degradation in adherence to initial instructions that occurs in prolonged chat sessions, caused by the accumulation of intermediate messages that dilute the model's attention."
+      },
+      {
+        "term": "Project Knowledge Base",
+        "cat": "Claude Surfaces",
+        "d": 5,
+        "def": "Repository of internal documents (PDFs, spreadsheets, text manuals) loaded into a `Claude Project` so the model answers grounded in the organization's specific corporate information."
+      },
+      {
+        "term": "Custom Instructions",
+        "cat": "Troubleshooting",
+        "d": 6,
+        "def": "Global or per-project guidelines that define the role, tone, writing style, and formatting preferences Claude should adopt by default in all its interactions."
+      },
+      {
+        "term": "Golden Evaluation Dataset",
+        "cat": "Validation",
+        "d": 1,
+        "def": "Curated, standardized set of real questions and cases with reference answers verified by human experts, used to objectively measure and compare the effectiveness of different prompt versions."
+      },
+      {
+        "term": "Rubric Evaluation",
+        "cat": "Validation",
+        "d": 1,
+        "def": "Structured framework of explicit criteria (factual accuracy, tone, constraint compliance, format) defined before testing to objectively rate the quality of generated responses."
+      },
+      {
+        "term": "Few-Shot Prompting",
+        "cat": "Prompting",
+        "d": 4,
+        "def": "Prompt engineering technique consisting of including two or more representative input-output example pairs within the prompt to guide the desired format, style, and depth with high precision."
+      },
+      {
+        "term": "Zero-Shot Prompting",
+        "cat": "Prompting",
+        "d": 4,
+        "def": "Direct request to the model without providing prior examples of the task, relying on explicit instructions and the model's intrinsic knowledge to produce the expected result."
+      },
+      {
+        "term": "Claude Team & Enterprise",
+        "cat": "Claude Surfaces",
+        "d": 5,
+        "def": "Anthropic business plans that offer a centralized administration console, single sign-on (SSO), consolidated billing, higher usage limits, and contractual guarantees of no training on customer data."
+      },
+      {
+        "term": "Claude Pro",
+        "cat": "Claude Surfaces",
+        "d": 5,
+        "def": "Paid individual subscription aimed at professional users that grants expanded usage limits compared to the free plan and priority access to the most advanced models in the Claude family."
+      },
+      {
+        "term": "Context Window",
+        "cat": "Troubleshooting",
+        "d": 6,
+        "def": "Maximum capacity in tokens that Claude can process simultaneously in an interaction (up to 200,000 tokens in Claude 3/3.5 models), covering conversation history, documents, and the current prompt."
+      },
+      {
+        "term": "Grounding",
+        "cat": "Validation",
+        "d": 1,
+        "def": "Practice of basing the model's responses strictly on supplied reference documents, instructing it to cite excerpts and to state explicitly when the information is not in the text."
+      },
+      {
+        "term": "XML Delimiters",
+        "cat": "Prompting",
+        "d": 4,
+        "def": "XML-style markup tags (such as `<context>`, `<instructions>`, `<example>`) used to structure the components of the prompt, making it easier for Claude to distinguish operational guidelines from raw data."
+      },
+      {
+        "term": "Output Guardrails",
+        "cat": "Governance",
+        "d": 3,
+        "def": "Negative rules and constraints programmed into the prompt (or verified in post-processing) designed to prevent the model from emitting harmful content, unauthorized advice, or protected data."
+      },
+      {
+        "term": "Over-reliance",
+        "cat": "Governance",
+        "d": 3,
+        "def": "Cognitive and operational risk in which a company's employees uncritically accept the AI's responses without checking their accuracy, dazzled by the fluency and coherence of the text."
+      },
+      {
+        "term": "Operational Handoff",
+        "cat": "Workflows",
+        "d": 2,
+        "def": "Structured transfer point in a workflow where the draft or triage generated by Claude passes to an employee for personalization, data verification, and final sign-off."
+      },
+      {
+        "term": "System Prompt",
+        "cat": "Prompting",
+        "d": 4,
+        "def": "Set of primary guidelines that configure the model's personality, professional role, ethical limits, and permanent rules of conduct throughout an entire session or project."
+      },
+      {
+        "term": "Data Retention Policy",
+        "cat": "Governance",
+        "d": 3,
+        "def": "Policy that stipulates the period of time during which AI providers store query logs before secure deletion, a critical aspect for GDPR and SOC 2 compliance."
+      },
+      {
+        "term": "Temperature & Determinism",
+        "cat": "Troubleshooting",
+        "d": 6,
+        "def": "Inherent stochastic nature of language models that creates natural variability between successive responses; in business tasks it is controlled through tightly bounded prompts and fixed rubrics."
+      }
     ]
-  },
-  "glossary": [
-    {
-      "term": "Claude Projects",
-      "cat": "Superficies Claude",
-      "d": 5,
-      "def": "Espacios colaborativos de trabajo en Claude que permiten almacenar hasta cientos de miles de palabras en documentación de referencia (Project Knowledge) e instrucciones personalizadas compartidas entre miembros del equipo."
-    },
-    {
-      "term": "Artifacts",
-      "cat": "Superficies Claude",
-      "d": 5,
-      "def": "Ventana lateral interactiva en la interfaz de Claude donde se generan y visualizan contenidos sustanciales y reutilizables, como documentos de texto extensos, diagramas SVG, componentes web y código, facilitando su iteración y versionado."
-    },
-    {
-      "term": "Acceptable Use Policy (AUP)",
-      "cat": "Gobernanza",
-      "d": 3,
-      "def": "Política formal de Anthropic que prohíbe el uso de sus modelos para actividades nocivas, incluyendo desarrollo de armas, desinformación electoral, ciberataques contra infraestructura crítica y asesoría legal o médica vinculante sin supervisión calificada."
-    },
-    {
-      "term": "Hallucination (Alucinación)",
-      "cat": "Validación",
-      "d": 1,
-      "def": "Generación de afirmaciones, hechos, cifras o citas falsas presentadas con alta elocuencia y aparente certeza técnica por parte del modelo lingüístico, mitigable mediante anclaje en documentos y validación humana."
-    },
-    {
-      "term": "Prompt Chaining",
-      "cat": "Prompt Chaining",
-      "d": 7,
-      "def": "Patrón metodológico que descompone una tarea empresarial compleja en una secuencia de pasos modulares, donde la salida validada de un prompt sirve como entrada contextual del siguiente."
-    },
-    {
-      "term": "PII Redaction (Anonimización de PII)",
-      "cat": "Gobernanza",
-      "d": 3,
-      "def": "Proceso previo de identificar y sustituir datos personales identificables (nombres, números de identificación, direcciones, datos bancarios) por marcadores de posición o datos sintéticos antes de enviarlos al modelo."
-    },
-    {
-      "term": "Human-in-the-Loop (HITL)",
-      "cat": "Workflows",
-      "d": 2,
-      "def": "Diseño operativo donde un profesional humano capacitado debe revisar, validar y autorizar activamente las salidas o recomendaciones generadas por la IA antes de su publicación o ejecución en el negocio."
-    },
-    {
-      "term": "Context Drift (Deriva de Contexto)",
-      "cat": "Troubleshooting",
-      "d": 6,
-      "def": "Degradación en la adherencia a instrucciones iniciales que ocurre en sesiones de chat prolongadas, provocada por la acumulación de mensajes intermedios que diluyen la atención del modelo."
-    },
-    {
-      "term": "Project Knowledge Base",
-      "cat": "Superficies Claude",
-      "d": 5,
-      "def": "Repositorio de documentos internos (PDFs, hojas de cálculo, manuales de texto) cargados en un `Claude Project` para que el modelo responda anclado en la información corporativa específica de la organización."
-    },
-    {
-      "term": "Custom Instructions",
-      "cat": "Troubleshooting",
-      "d": 6,
-      "def": "Directrices globales o por proyecto que definen el rol, tono, estilo de redacción y preferencias de formato que Claude debe adoptar de manera predeterminada en todas sus interacciones."
-    },
-    {
-      "term": "Golden Evaluation Dataset",
-      "cat": "Validación",
-      "d": 1,
-      "def": "Conjunto curado y estandarizado de preguntas y casos reales con respuestas de referencia verificadas por expertos humanos, utilizado para medir y comparar objetivamente la efectividad de distintas versiones de prompts."
-    },
-    {
-      "term": "Rubric Evaluation (Rúbricas de Evaluación)",
-      "cat": "Validación",
-      "d": 1,
-      "def": "Marco estructurado de criterios explícitos (exactitud factual, tono, cumplimiento de restricciones, formato) definido con anterioridad a las pruebas para calificar objetivamente la calidad de las respuestas generadas."
-    },
-    {
-      "term": "Few-Shot Prompting",
-      "cat": "Prompting",
-      "d": 4,
-      "def": "Técnica de ingeniería de prompts consistente en incluir dos o más ejemplos representativos de pares entrada-salida dentro del prompt para guiar con alta precisión el formato, estilo y profundidad deseados."
-    },
-    {
-      "term": "Zero-Shot Prompting",
-      "cat": "Prompting",
-      "d": 4,
-      "def": "Solicitud directa al modelo sin proporcionar ejemplos previos de la tarea, confiando en las instrucciones explícitas y el conocimiento intrínseco del modelo para producir el resultado esperado."
-    },
-    {
-      "term": "Claude Team & Enterprise",
-      "cat": "Superficies Claude",
-      "d": 5,
-      "def": "Planes empresariales de Anthropic que ofrecen consola de administración centralizada, autenticación única (SSO), facturación consolidada, mayores límites de uso y garantías contractuales de no entrenamiento sobre los datos del cliente."
-    },
-    {
-      "term": "Claude Pro",
-      "cat": "Superficies Claude",
-      "d": 5,
-      "def": "Suscripción individual de pago orientada a usuarios profesionales que otorga límites de uso ampliados frente al plan gratuito y acceso prioritario a los modelos más avanzados de la familia Claude."
-    },
-    {
-      "term": "Context Window (Ventana de Contexto)",
-      "cat": "Troubleshooting",
-      "d": 6,
-      "def": "Capacidad máxima en tokens que Claude puede procesar simultáneamente en una interacción (hasta 200.000 tokens en modelos Claude 3/3.5), abarcando historial de conversación, documentos y prompt actual."
-    },
-    {
-      "term": "Grounding (Anclaje Factual)",
-      "cat": "Validación",
-      "d": 1,
-      "def": "Práctica de fundamentar las respuestas del modelo estrictamente en documentos de referencia suministrados, instruyéndolo a citar extractos y a manifestar explícitamente cuándo la información no consta en el texto."
-    },
-    {
-      "term": "Delimitadores XML",
-      "cat": "Prompting",
-      "d": 4,
-      "def": "Etiquetas de marcado tipo XML (como `<contexto>`, `<instrucciones>`, `<ejemplo>`) empleadas para estructurar los componentes del prompt, facilitando que Claude distinga directrices operativas de datos brutos."
-    },
-    {
-      "term": "Guardrails de Salida",
-      "cat": "Gobernanza",
-      "d": 3,
-      "def": "Reglas y restricciones negativas programadas en el prompt (o verificadas en post-procesamiento) diseñadas para impedir que el modelo emita contenidos lesivos, consejos no autorizados o datos protegidos."
-    },
-    {
-      "term": "Over-reliance (Sobreconfianza)",
-      "cat": "Gobernanza",
-      "d": 3,
-      "def": "Riesgo cognitivo y operativo en el que los colaboradores de una empresa aceptan de forma acrítica las respuestas de la IA sin comprobar su veracidad, deslumbrados por la fluidez y coherencia del texto."
-    },
-    {
-      "term": "Handoff Operativo",
-      "cat": "Workflows",
-      "d": 2,
-      "def": "Punto de transferencia estructurado en un flujo de trabajo donde el borrador o triaje generado por Claude pasa a manos de un empleado para su personalización, verificación de datos y firma definitiva."
-    },
-    {
-      "term": "System Prompt",
-      "cat": "Prompting",
-      "d": 4,
-      "def": "Conjunto de directrices primarias que configuran la personalidad, rol profesional, límites éticos y reglas permanentes de conducta del modelo a lo largo de toda una sesión o proyecto."
-    },
-    {
-      "term": "Data Retention Policy",
-      "cat": "Gobernanza",
-      "d": 3,
-      "def": "Política que estipula el periodo de tiempo durante el cual los proveedores de IA almacenan registros de consultas antes de su eliminación segura, aspecto crítico para el cumplimiento del RGPD y estándares SOC 2."
-    },
-    {
-      "term": "Temperature & Determinism",
-      "cat": "Troubleshooting",
-      "d": 6,
-      "def": "Naturaleza estocástica inherente a los modelos de lenguaje que genera variabilidad natural entre respuestas sucesivas; en tareas de negocio se controla mediante prompts fuertemente acotados y rúbricas fijas."
-    }
-  ]
-};
+  };
 })(window);
