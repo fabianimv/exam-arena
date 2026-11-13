@@ -1,5 +1,5 @@
 /* =========================================================================
-   data/sre/exam.js — SRE · Simulación de Incidentes en Producción (English)
+   data/sre/exam.js — SRE · Production Incident Simulation (English)
    ========================================================================= */
 (function (w) {
   w.EXAMS = w.EXAMS || {};
