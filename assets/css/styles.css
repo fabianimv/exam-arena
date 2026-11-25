@@ -118,6 +118,20 @@ body[data-provider="nvidia-genl"],
   --accent-soft: rgba(118, 185, 0, 0.18);
   --accent-grad: linear-gradient(135deg, #76b900 0%, #4d7c0f 100%);
 }
+body[data-provider="k8s-cka"],
+.hub-card[data-provider="k8s-cka"] {
+  --blue: #2563eb;
+  --accent: #2563eb;
+  --accent-soft: rgba(37, 99, 235, 0.18);
+  --accent-grad: linear-gradient(135deg, #326ce5 0%, #1e3a8a 100%);
+}
+body[data-provider="prometheus-pca"],
+.hub-card[data-provider="prometheus-pca"] {
+  --blue: #e6522c;
+  --accent: #e6522c;
+  --accent-soft: rgba(230, 82, 44, 0.18);
+  --accent-grad: linear-gradient(135deg, #e6522c 0%, #b4361a 100%);
+}
 body[data-provider="k8s-kcna"],
 .hub-card[data-provider="k8s-kcna"] {
   --blue: #326ce5;
@@ -2314,3 +2328,184 @@ svg.cert-logo {
 }
 
 
+
+
+/* ---------- 14. Búsqueda en el hub, modo simulación, marcado y desglose de resultados ---------- */
+.hub-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 0 1rem;
+}
+.hub-search-wrap input[type=search] {
+  flex: 1;
+  margin: 0;
+}
+.hub-search-wrap .muted {
+  white-space: nowrap;
+}
+.hub-card[hidden] {
+  display: none !important;
+}
+
+.setup .mode-switch {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 0.6rem 0.75rem 0.75rem;
+  margin: 1rem 0 0.4rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.setup .mode-switch legend {
+  font-weight: 600;
+  font-size: 0.92rem;
+  padding: 0 0.35rem;
+  color: var(--txt);
+}
+.setup .mode-switch .mode-opt {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.88rem;
+  background: var(--card);
+  transition: border-color var(--transition), background var(--transition);
+}
+.setup .mode-switch .mode-opt:hover {
+  border-color: var(--blue);
+}
+.setup .mode-switch .mode-opt.active {
+  border-color: var(--blue);
+  background: var(--accent-soft);
+}
+.setup .mode-switch input {
+  accent-color: var(--blue);
+  margin: 0;
+}
+.setup .mode-help {
+  margin-top: 0.2rem;
+}
+
+.t-timer {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--txt);
+  padding: 0.15rem 0.6rem;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  font-variant-numeric: tabular-nums;
+}
+.t-timer.warn {
+  background: var(--tip);
+  color: var(--txt);
+}
+.t-timer.danger {
+  background: var(--bad-bg);
+  color: var(--bad);
+}
+
+.q-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.flag-btn {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--muted);
+  cursor: pointer;
+}
+.flag-btn:hover {
+  border-color: var(--tip-border);
+  color: var(--txt);
+}
+.flag-btn.on {
+  border-color: var(--tip-border);
+  background: var(--tip);
+  color: var(--txt);
+}
+
+.res-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.45rem;
+  margin: 0.25rem 0 1rem;
+}
+.res-chip {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.25rem 0.7rem;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  color: var(--txt);
+}
+.res-chip.warn {
+  background: var(--tip);
+}
+.res-chip.danger {
+  background: var(--bad-bg);
+  color: var(--bad);
+}
+.res-domains {
+  text-align: left;
+  margin: 0 auto 1.1rem;
+  max-width: 640px;
+}
+.res-dom-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.3rem 0;
+  font-size: 0.88rem;
+}
+.res-dom-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.res-dom-bar {
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.res-dom-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+.res-dom-bar span.good {
+  background: var(--ok);
+}
+.res-dom-bar span.bad {
+  background: var(--bad);
+}
+.res-dom-val {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .res-dom-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .res-dom-bar {
+    grid-column: 1 / -1;
+    order: 3;
+  }
+}

@@ -14,6 +14,8 @@
     'databricks-genai',
     'databricks-de',
     'nvidia-genl',
+    'k8s-cka',
+    'prometheus-pca',
     'k8s-kcna',
     'terraform-003',
     'sre-incidents',
@@ -260,6 +262,58 @@
     return (w.EXAMS || {})[currentExamId] || (w.EXAMS || {})[EXAM_ORDER[0]];
   }
 
+  /* ---------- Preguntas marcadas (persistidas por examen en localStorage) ---------- */
+  var FLAGS_KEY = 'exam-arena-flags-v1';
+  var flagsCache = null;
+
+  function loadFlags() {
+    if (flagsCache) return flagsCache;
+    flagsCache = {};
+    try {
+      var raw = w.localStorage && w.localStorage.getItem(FLAGS_KEY);
+      var parsed = raw ? JSON.parse(raw) : null;
+      if (parsed && typeof parsed === 'object') flagsCache = parsed;
+    } catch (e) {}
+    return flagsCache;
+  }
+
+  function saveFlags() {
+    try {
+      if (w.localStorage) w.localStorage.setItem(FLAGS_KEY, JSON.stringify(flagsCache || {}));
+    } catch (e) {}
+  }
+
+  function isFlagged(examId, qid) {
+    var list = loadFlags()[examId];
+    return !!(list && list.indexOf(qid) !== -1);
+  }
+
+  function toggleFlag(examId, qid) {
+    var all = loadFlags();
+    var list = all[examId] || [];
+    var at = list.indexOf(qid);
+    if (at === -1) list.push(qid); else list.splice(at, 1);
+    if (list.length) all[examId] = list; else delete all[examId];
+    saveFlags();
+    return at === -1;
+  }
+
+  function flaggedCount(ex) {
+    var list = loadFlags()[ex.id] || [];
+    var valid = {};
+    ex.questions.forEach(function (q) { valid[q.id] = true; });
+    return list.filter(function (id) { return valid[id]; }).length;
+  }
+
+  function fmtDuration(ms) {
+    var total = Math.max(0, Math.round(ms / 1000));
+    var h = Math.floor(total / 3600);
+    var m = Math.floor((total % 3600) / 60);
+    var s = total % 60;
+    var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+    return (h ? h + ':' + pad(m) : m) + ':' + pad(s);
+  }
+
   function shuffle(arr) {
     var a = arr.slice();
     for (var i = a.length - 1; i > 0; i--) {
@@ -370,7 +424,10 @@
   }
 
   /* ---------- Catálogo de Exámenes (Hub) ---------- */
+  var hubQuery = '';
+
   function showHub() {
+    var examCount = EXAM_ORDER.filter(function (id) { return w.EXAMS && w.EXAMS[id]; }).length;
     var totalQ = 0;
     var totalSeen = 0;
     var totalMastered = 0;
@@ -411,7 +468,11 @@
       var badgeLogo = certLogo(id, 15, 'badge-cert-logo') || ex.icon;
       var logoBoxHtml = cardLogo ? '<div class="hub-card-logo-box">' + cardLogo + '</div>' : '';
 
-      return '<div class="hub-card' + (isCurrent ? ' current' : '') + (ex.featured ? ' is-featured' : '') + '" data-provider="' + esc(id) + '">' +
+      var searchBlob = [ex.title, ex.provider, ex.badge, ex.subtitle, id].concat(
+        domainKeys(ex).map(function (k) { return ex.domains[k]; })
+      ).join(' ').toLowerCase();
+
+      return '<div class="hub-card' + (isCurrent ? ' current' : '') + (ex.featured ? ' is-featured' : '') + '" data-provider="' + esc(id) + '" data-search="' + esc(searchBlob) + '">' +
         '<div>' +
           '<div class="hub-card-top hub-card-head">' +
             logoBoxHtml +
@@ -444,13 +505,18 @@
         '<h1>' + t('hub_title', 'Simulador General de Exámenes Cloud & SRE') + '</h1>' +
         '<p class="muted">' + t('hub_desc', 'Elige un proveedor o certificación. Cada pregunta se corrige al instante explicando <b>por qué tu opción elegida es incorrecta</b> y <b>por qué la respuesta correcta es la adecuada</b>. Todo tu avance se guarda localmente en este navegador con <code>@fabianimv/study-tracker</code> y puede sincronizarse en la nube.') + '</p>' +
         '<div class="hub-kpis">' +
-          '<div class="kpi-card"><b>' + totalQ + '</b><span>' + t('kpi_total_q', 'Preguntas en 13 simuladores') + '</span></div>' +
+          '<div class="kpi-card"><b>' + totalQ + '</b><span>' + t('kpi_total_q', { n: examCount }, 'Preguntas en ' + examCount + ' simuladores') + '</span></div>' +
           '<div class="kpi-card"><b>' + totalSeen + ' / ' + totalQ + '</b><span>' + t('kpi_seen', 'Preguntas vistas') + '</span></div>' +
           '<div class="kpi-card"><b>' + globalMastery + '</b><span>' + t('kpi_mastery', 'Dominio global estimado') + '</span></div>' +
           '<div class="kpi-card"><b>' + totalSessions + '</b><span>' + t('kpi_sessions', 'Sesiones completadas') + '</span></div>' +
         '</div>' +
       '</div>' +
-      '<div class="hub-grid">' + cards + '</div>';
+      '<div class="hub-search-wrap">' +
+        '<input id="hub-search" type="search" autocomplete="off" placeholder="' + esc(t('hub_search', 'Buscar certificación, proveedor o tema…')) + '" value="' + esc(hubQuery) + '">' +
+        '<span id="hub-search-count" class="muted small" aria-live="polite"></span>' +
+      '</div>' +
+      '<div class="hub-grid">' + cards + '</div>' +
+      '<p id="hub-empty" class="muted" hidden>' + t('hub_search_empty', 'Ninguna certificación coincide con la búsqueda.') + '</p>';
 
     Array.prototype.forEach.call(view.querySelectorAll('[data-go]'), function (btn) {
       btn.onclick = function () {
@@ -458,6 +524,28 @@
         navigate(parts[0], parts[1]);
       };
     });
+
+    var searchInput = d.getElementById('hub-search');
+    function applyHubFilter() {
+      hubQuery = searchInput ? searchInput.value : '';
+      var terms = hubQuery.trim().toLowerCase().split(/\s+/).filter(Boolean);
+      var cardsEls = view.querySelectorAll('.hub-card');
+      var visible = 0;
+      Array.prototype.forEach.call(cardsEls, function (card) {
+        var blob = card.getAttribute('data-search') || '';
+        var match = terms.every(function (term) { return blob.indexOf(term) !== -1; });
+        card.hidden = !match;
+        if (match) visible++;
+      });
+      var countEl = d.getElementById('hub-search-count');
+      if (countEl) countEl.textContent = terms.length ? t('hub_search_count', { n: visible, total: cardsEls.length }, visible + ' de ' + cardsEls.length) : '';
+      var emptyEl = d.getElementById('hub-empty');
+      if (emptyEl) emptyEl.hidden = visible !== 0;
+    }
+    if (searchInput) {
+      searchInput.oninput = applyHubFilter;
+      applyHubFilter();
+    }
   }
 
   /* ---------- Temas ---------- */
@@ -566,33 +654,81 @@
   }
 
   /* ---------- Prueba ---------- */
-  var SIZES = [10, 20, 30, 55];
-  var T = { examId: null, domain: 0, size: 20, which: 'all', list: [], i: 0, ok: 0, results: [], session: null };
+  var SIZES = [10, 20, 30, 50, 65];
+  var SECONDS_PER_QUESTION = 90;
+  var T = {
+    examId: null, domain: 0, size: 20, which: 'all', mode: 'practice',
+    list: [], i: 0, ok: 0, results: [], session: null,
+    startedAt: 0, finishedAt: 0, deadline: 0, timer: null, timedOut: false
+  };
   var WHICH = {
     all: 'Todas las preguntas',
+    smart: 'Repaso inteligente (falladas → nuevas → resto)',
     'new': 'Solo las que nunca he respondido',
-    failed: 'Solo las que fallé la última vez'
+    failed: 'Solo las que fallé la última vez',
+    flagged: 'Solo las preguntas marcadas'
   };
 
   function getWhichLabel(key) {
     var map = {
       all: t('which_all', 'Todas las preguntas'),
+      smart: t('which_smart', WHICH.smart),
       'new': t('which_new', 'Solo las que nunca he respondido'),
-      failed: t('which_failed', 'Solo las que fallé la última vez')
+      failed: t('which_failed', 'Solo las que fallé la última vez'),
+      flagged: t('which_flagged', WHICH.flagged)
     };
     return map[key] || WHICH[key] || key;
+  }
+
+  function safeStats(tr) {
+    try { return (tr.questionStats && tr.questionStats()) || {}; } catch (e) { return {}; }
   }
 
   function setupPool() {
     var ex = exam();
     var tr = getTracker(ex.appId);
-    var qs = T.which === 'all' ? null : tr.questionStats();
+    var qs = (T.which === 'new' || T.which === 'failed') ? safeStats(tr) : null;
     return ex.questions.filter(function (q) {
       if (T.domain && q.d !== T.domain) return false;
       if (T.which === 'new') return !qs[q.id];
       if (T.which === 'failed') return qs[q.id] && qs[q.id].lastCorrect === false;
+      if (T.which === 'flagged') return isFlagged(ex.id, q.id);
       return true;
     });
+  }
+
+  /* Ordena el pool priorizando las falladas, luego las nunca vistas y al final las acertadas. */
+  function smartOrder(pool) {
+    var ex = exam();
+    var qs = safeStats(getTracker(ex.appId));
+    var failed = [], fresh = [], rest = [];
+    pool.forEach(function (q) {
+      var s = qs[q.id];
+      if (!s) fresh.push(q);
+      else if (s.lastCorrect === false) failed.push(q);
+      else rest.push(q);
+    });
+    return shuffle(failed).concat(shuffle(fresh), shuffle(rest));
+  }
+
+  function stopTimer() {
+    if (T.timer) { w.clearInterval(T.timer); T.timer = null; }
+  }
+
+  function tickTimer() {
+    var el = d.getElementById('ttimer');
+    if (!T.deadline) return;
+    var left = T.deadline - Date.now();
+    if (el) {
+      el.textContent = '⏱ ' + fmtDuration(left);
+      el.classList.toggle('warn', left <= 5 * 60 * 1000);
+      el.classList.toggle('danger', left <= 60 * 1000);
+    }
+    if (left <= 0) {
+      stopTimer();
+      T.timedOut = true;
+      if (currentTab === 'prueba' && T.session) showResults();
+    }
   }
 
   function showSetup() {
@@ -603,6 +739,11 @@
     }
     var pool = setupPool().length;
     var pass = ex.passingScore || 70;
+    var nFlagged = flaggedCount(ex);
+    var plannedN = T.size ? Math.min(T.size, pool) : pool;
+    var modeHelp = T.mode === 'exam'
+      ? t('mode_exam_help', { min: Math.ceil(plannedN * SECONDS_PER_QUESTION / 60) }, 'Sin feedback por pregunta. Tendrás <b>' + Math.ceil(plannedN * SECONDS_PER_QUESTION / 60) + ' min</b> (90 s por pregunta) y verás la corrección completa al final, como en el examen real.')
+      : t('mode_practice_help', 'Corrección inmediata después de cada respuesta, con el porqué de cada opción.');
 
     view.innerHTML =
       examBannerHtml(ex) +
@@ -614,38 +755,62 @@
         '<option value="0"' + (T.size === 0 ? ' selected' : '') + '>' + t('size_all', { n: pool }, 'Todas (' + pool + ')') + '</option>' +
       '</select></label>' +
       '<label>' + t('label_which', 'Qué preguntas') + '<br><select id="twhich">' +
-        Object.keys(WHICH).map(function (k) { return '<option value="' + k + '"' + (T.which === k ? ' selected' : '') + '>' + getWhichLabel(k) + '</option>'; }).join('') +
+        Object.keys(WHICH).map(function (k) {
+          var label = getWhichLabel(k) + (k === 'flagged' ? ' (' + nFlagged + ')' : '');
+          return '<option value="' + k + '"' + (T.which === k ? ' selected' : '') + '>' + esc(label) + '</option>';
+        }).join('') +
       '</select></label>' +
+      '<fieldset class="mode-switch"><legend>' + t('label_mode', 'Modo') + '</legend>' +
+        '<label class="mode-opt' + (T.mode === 'practice' ? ' active' : '') + '"><input type="radio" name="tmode" value="practice"' + (T.mode === 'practice' ? ' checked' : '') + '> 🎯 ' + t('mode_practice', 'Práctica guiada') + '</label>' +
+        '<label class="mode-opt' + (T.mode === 'exam' ? ' active' : '') + '"><input type="radio" name="tmode" value="exam"' + (T.mode === 'exam' ? ' checked' : '') + '> ⏱ ' + t('mode_exam', 'Simulación de examen') + '</label>' +
+      '</fieldset>' +
+      '<p class="muted small mode-help">' + modeHelp + '</p>' +
       '<p class="muted small">' + t('setup_meta', { pool: pool, pass: pass }, 'Hay <b>' + pool + '</b> preguntas disponibles en esta selección. Nota de aprobación de referencia: <b>' + pass + ' %</b>. Tus respuestas se guardan en tiempo real con <code>@fabianimv/study-tracker</code>.') + '</p>' +
       '<button class="primary" id="tstart"' + (pool ? '' : ' disabled') + '>' + t('btn_start', 'Comenzar prueba') + '</button></div>';
 
     var tdom = d.getElementById('tdomain');
     if (tdom) tdom.onchange = function () { T.domain = parseInt(this.value, 10); showSetup(); };
     var tsz = d.getElementById('tsize');
-    if (tsz) tsz.onchange = function () { T.size = parseInt(this.value, 10); };
+    if (tsz) tsz.onchange = function () { T.size = parseInt(this.value, 10); if (T.mode === 'exam') showSetup(); };
     var twh = d.getElementById('twhich');
     if (twh) twh.onchange = function () { T.which = this.value; showSetup(); };
+    Array.prototype.forEach.call(view.querySelectorAll('input[name="tmode"]'), function (r) {
+      r.onchange = function () { T.mode = this.value; showSetup(); };
+    });
     var tst = d.getElementById('tstart');
     if (tst) tst.onclick = function () {
-      var list = shuffle(setupPool());
-      startTest(T.size ? list.slice(0, T.size) : list, { domain: T.domain, which: T.which });
+      var list = T.which === 'smart' ? smartOrder(setupPool()) : shuffle(setupPool());
+      startTest(T.size ? list.slice(0, T.size) : list, { domain: T.domain, which: T.which, mode: T.mode });
     };
   }
 
   function startTest(list, meta) {
     var ex = exam();
     var tr = getTracker(ex.appId);
+    meta = meta || {};
+    stopTimer();
     T.examId = ex.id;
     T.list = shuffle(list);
     T.i = 0;
     T.ok = 0;
     T.results = [];
-    T.session = tr.startSession({ planned: T.list.length, meta: meta || {} });
+    T.activeMode = meta.mode === 'exam' ? 'exam' : 'practice';
+    T.startedAt = Date.now();
+    T.finishedAt = 0;
+    T.timedOut = false;
+    T.deadline = T.activeMode === 'exam' ? T.startedAt + T.list.length * SECONDS_PER_QUESTION * 1000 : 0;
+    T.session = tr.startSession({ planned: T.list.length, meta: meta });
     showQuestion();
+    if (T.deadline) {
+      T.timer = w.setInterval(tickTimer, 1000);
+      tickTimer();
+    }
   }
 
   function endTest() {
+    stopTimer();
     if (!T.session || !T.examId) return;
+    if (!T.finishedAt) T.finishedAt = Date.now();
     var ex = (w.EXAMS || {})[T.examId];
     if (ex) {
       var tr = getTracker(ex.appId);
@@ -678,9 +843,16 @@
     var domainName = (ex.shortDomains && ex.shortDomains[q.d]) || (ex.domains && ex.domains[q.d]) || '';
     var domainLabelText = t('domain_label', 'Dominio') + ' ' + q.d + (domainName ? ' · ' + esc(domainName) : '');
 
+    var examMode = T.activeMode === 'exam';
+    var flagged = isFlagged(ex.id, q.id);
+    var scoreHtml = examMode
+      ? '<span id="ttimer" class="t-timer">⏱ ' + fmtDuration(T.deadline - Date.now()) + '</span>'
+      : '<span>' + correctCountText + ' <b id="tok">' + T.ok + '</b></span>';
+    if (examMode) answerBtnText = (T.i + 1 < T.list.length) ? t('btn_answer_next', 'Responder y continuar →') : t('btn_answer_finish', 'Responder y finalizar');
+
     view.innerHTML =
       '<div class="testbar"><span>' + (certLogo(ex.id, 16, 'inline-cert-logo') || ex.icon) + ' <b>' + esc(ex.badge) + '</b> · ' + qOfText + '</span>' +
-      '<span>' + correctCountText + ' <b id="tok">' + T.ok + '</b></span>' +
+      scoreHtml +
       '<button id="tquit" class="link">' + quitText + '</button></div>' +
       '<div class="progress"><div style="width:' + pct + '%"></div></div>' +
       '<div class="card q-card">' +
@@ -689,7 +861,10 @@
           '<span class="q-domain-badge"><span class="q-domain-dot"></span>' + domainLabelText + '</span>' +
           '<span class="q-topic-badge" id="q-topic-text">📌 ' + fmt(q.t) + '</span>' +
         '</div>' +
-        '<span class="q-pick-badge">' + pickText + '</span>' +
+        '<div class="q-header-right">' +
+          '<button type="button" id="tflag" class="flag-btn' + (flagged ? ' on' : '') + '" aria-pressed="' + flagged + '" title="' + esc(t('flag_hint', 'Marcar para repasar (tecla M)')) + '">' + (flagged ? '★ ' + t('flag_on', 'Marcada') : '☆ ' + t('flag_off', 'Marcar')) + '</button>' +
+          '<span class="q-pick-badge">' + pickText + '</span>' +
+        '</div>' +
       '</div>' +
       '<div class="qtext">' + fmtQuestion(q.q) + '</div>' +
       visualAidHtml(ex, q, false) +
@@ -701,7 +876,19 @@
       '</div>';
 
     var tquit = d.getElementById('tquit');
-    if (tquit) tquit.onclick = showResults;
+    if (tquit) tquit.onclick = function () {
+      var pending = T.list.length - T.results.length;
+      if (pending > 0 && !w.confirm(t('confirm_quit', { n: pending }, '¿Terminar la prueba ahora? Quedan ' + pending + ' preguntas sin responder.'))) return;
+      showResults();
+    };
+
+    var flagBtn = d.getElementById('tflag');
+    if (flagBtn) flagBtn.onclick = function () {
+      var on = toggleFlag(ex.id, q.id);
+      flagBtn.classList.toggle('on', on);
+      flagBtn.setAttribute('aria-pressed', on);
+      flagBtn.textContent = on ? '★ ' + t('flag_on', 'Marcada') : '☆ ' + t('flag_off', 'Marcar');
+    };
 
     var answerBtn = d.getElementById('answer');
     Array.prototype.forEach.call(view.querySelectorAll('.opt'), function (b) {
@@ -756,6 +943,13 @@
     if (ok) T.ok++;
     T.results.push({ q: q, order: order, picked: picked, ok: ok });
     getTracker(ex.appId).recordAnswer(T.session, { question: q.id, topic: q.d, correct: ok, response: picked });
+
+    // Simulación de examen: sin feedback inmediato, se avanza directo a la siguiente.
+    if (T.activeMode === 'exam') {
+      T.i++;
+      if (T.i < T.list.length) { showQuestion(); w.scrollTo(0, 0); } else showResults();
+      return;
+    }
 
     var optsContainer = view.querySelector('.opts');
     if (optsContainer) optsContainer.classList.add('locked');
@@ -817,13 +1011,42 @@
     var ex = exam();
     endTest();
     var done = T.results.length;
-    var pct = done ? Math.round(T.ok / done * 100) : 0;
+    var examMode = T.activeMode === 'exam';
+    // En simulación, las no respondidas cuentan como incorrectas (igual que en el examen real).
+    var denom = examMode ? T.list.length : done;
+    var pct = denom ? Math.round(T.ok / denom * 100) : 0;
     var pass = ex.passingScore || 70;
     var wrong = T.results.filter(function (r) { return !r.ok; });
     var isEn = getLang() === 'en';
 
     var resTitle = t('res_title', { badge: esc(ex.badge) }, 'Resultado · ' + esc(ex.badge));
     var resSummary = t('res_summary', { ok: T.ok, done: done, pass: pass }, T.ok + ' correctas de ' + done + ' respondidas (umbral de referencia: ' + pass + ' %).');
+    var elapsed = (T.finishedAt || Date.now()) - (T.startedAt || Date.now());
+    var metaBits = [
+      '<span class="res-chip">' + (examMode ? '⏱ ' + t('mode_exam', 'Simulación de examen') : '🎯 ' + t('mode_practice', 'Práctica guiada')) + '</span>',
+      '<span class="res-chip">' + t('res_time', { time: fmtDuration(elapsed) }, 'Tiempo: ' + fmtDuration(elapsed)) + '</span>'
+    ];
+    if (done) metaBits.push('<span class="res-chip">' + t('res_avg', { s: Math.round(elapsed / done / 1000) }, Math.round(elapsed / done / 1000) + ' s por pregunta') + '</span>');
+    if (examMode && done < T.list.length) metaBits.push('<span class="res-chip warn">' + t('res_unanswered', { n: T.list.length - done }, (T.list.length - done) + ' sin responder (cuentan como incorrectas)') + '</span>');
+    if (T.timedOut) metaBits.push('<span class="res-chip danger">' + t('res_timeout', '⌛ Se acabó el tiempo') + '</span>');
+
+    var byDomain = {};
+    T.results.forEach(function (r) {
+      var b = byDomain[r.q.d] || (byDomain[r.q.d] = { ok: 0, n: 0 });
+      b.n++;
+      if (r.ok) b.ok++;
+    });
+    var domainRows = domainKeys(ex).filter(function (k) { return byDomain[k]; }).map(function (k) {
+      var b = byDomain[k];
+      var p = Math.round(b.ok / b.n * 100);
+      var name = (ex.shortDomains && ex.shortDomains[k]) || ex.domains[k];
+      return '<div class="res-dom-row">' +
+        '<span class="res-dom-name">D' + k + ' · ' + esc(name) + '</span>' +
+        '<span class="res-dom-bar"><span class="' + (p >= pass ? 'good' : 'bad') + '" style="width:' + p + '%"></span></span>' +
+        '<span class="res-dom-val">' + b.ok + '/' + b.n + ' · ' + p + ' %</span>' +
+      '</div>';
+    }).join('');
+    var domainHtml = domainRows ? '<div class="res-domains"><div class="fb-label">' + t('res_by_domain', 'Resultado por dominio') + '</div>' + domainRows + '</div>' : '';
     var retryText = t('btn_retry_wrong', { n: wrong.length }, 'Repetir las ' + wrong.length + ' falladas');
     var newTestText = t('btn_new_test', 'Nueva prueba');
     var resSavedText = t('res_saved', { appId: esc(ex.appId) }, 'Resultado guardado en <code>' + esc(ex.appId) + '</code>.');
@@ -835,6 +1058,8 @@
       '<div class="card result"><h2>' + resTitle + '</h2>' +
       '<div class="score ' + (pct >= pass ? 'good' : 'bad') + '">' + pct + ' %</div>' +
       '<p>' + resSummary + '</p>' +
+      '<div class="res-meta">' + metaBits.join('') + '</div>' +
+      domainHtml +
       (wrong.length ? '<button class="primary" id="retry">' + retryText + '</button> ' : '') +
       '<button id="newtest">' + newTestText + '</button>' +
       '<p class="muted small">' + resSavedText + ' <a href="#' + esc(ex.id) + '/progreso">' + resViewProgText + '</a></p></div>' +
@@ -893,6 +1118,12 @@
 
     var tag = d.activeElement ? d.activeElement.tagName.toLowerCase() : '';
     if (tag === 'input' || tag === 'select' || tag === 'textarea' || (d.activeElement && d.activeElement.isContentEditable)) {
+      return;
+    }
+
+    if ((e.key === 'm' || e.key === 'M') && d.getElementById('tflag')) {
+      e.preventDefault();
+      d.getElementById('tflag').click();
       return;
     }
 
