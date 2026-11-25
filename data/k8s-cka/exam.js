@@ -149,7 +149,7 @@
         "t": "Verifying Permissions",
         "q": "You just created RBAC rules for ServiceAccount `deployer` in namespace `ci`. Without obtaining its token, how do you confirm that it can list Pods in `prod` but cannot delete them?",
         "o": [
-          "`kubectl get pods -n prod --token=deployer` and `kubectl delete pod x -n prod --token=deployer`.",
+          "Run `kubectl get pods` and `kubectl delete pod x` in `prod`, passing the name `deployer` as the bearer token.",
           "`kubectl auth can-i list pods -n prod --as=system:serviceaccount:ci:deployer` and the same with `delete pods`.",
           "`kubectl describe sa deployer -n ci`, which lists the effective verbs granted on every resource.",
           "`kubectl auth whoami -n prod`, which prints the permissions of every ServiceAccount in the namespace."
@@ -674,7 +674,7 @@
         null
       ],
       "cka-05": [
-        "`--token` expects an actual bearer token, not a ServiceAccount name; and deleting real Pods to test is destructive.",
+        "A bearer token is a signed credential, not a ServiceAccount name; and deleting real Pods to test is destructive.",
         null,
         "`describe sa` shows tokens and secrets, not the RBAC permissions bound to it.",
         "`kubectl auth whoami` only shows your own identity, not the permissions of other accounts."
