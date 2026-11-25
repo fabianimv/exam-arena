@@ -170,6 +170,35 @@
       '<circle cx="16" cy="16" r="10.8" fill="none" stroke="#326CE5" stroke-width="2.2"/>' +
       K8S_HELM_INNER,
 
+    /* 7b. Kubernetes · CKA (Certified Kubernetes Administrator) */
+    'k8s-cka':
+      '<defs>' +
+        '<linearGradient id="clogo-cka-grad" x1="0%" y1="0%" x2="100%" y2="100%">' +
+          '<stop offset="0%" stop-color="#326CE5"/>' +
+          '<stop offset="100%" stop-color="#1E3A8A"/>' +
+        '</linearGradient>' +
+      '</defs>' +
+      '<path d="M16 1.8 L28.3 7.7 L31.3 21 L22.8 31.6 L9.2 31.6 L0.7 21 L3.7 7.7 Z" fill="url(#clogo-cka-grad)"/>' +
+      '<g transform="translate(16 16.6) scale(0.72) translate(-16 -16)">' +
+        '<circle cx="16" cy="16" r="4.6" fill="#FFFFFF"/>' +
+        '<circle cx="16" cy="16" r="2.3" fill="#326CE5"/>' +
+        '<circle cx="16" cy="16" r="10.8" fill="none" stroke="#FFFFFF" stroke-width="2.2"/>' +
+        K8S_HELM_INNER.replace(/#326CE5/g, '#FFFFFF').replace(/fill="#FFFFFF"\/>/g, 'fill="#326CE5"/>') +
+      '</g>',
+
+    /* 7c. Prometheus · Certified Associate (PCA) */
+    'prometheus-pca':
+      '<defs>' +
+        '<linearGradient id="clogo-prom-grad" x1="0%" y1="0%" x2="0%" y2="100%">' +
+          '<stop offset="0%" stop-color="#F26B3A"/>' +
+          '<stop offset="100%" stop-color="#C2410C"/>' +
+        '</linearGradient>' +
+      '</defs>' +
+      '<circle cx="16" cy="16" r="14.5" fill="url(#clogo-prom-grad)"/>' +
+      '<path d="M16 5.2 C16.6 8.4 20.6 10.2 20.6 14.6 C20.6 16.9 19.4 18.4 18.2 19.1 C18.6 17.6 18.1 16 16.9 15 C17 16.8 15.9 17.6 15 18.4 C14.1 19.1 13.6 19.9 13.8 21 C12.1 20.1 11.2 18.4 11.2 16.6 C11.2 12.3 15.2 10.6 16 5.2 Z" fill="#FFFFFF"/>' +
+      '<rect x="10.2" y="21.6" width="11.6" height="1.9" rx="0.6" fill="#FFFFFF"/>' +
+      '<rect x="11.4" y="24.6" width="9.2" height="1.9" rx="0.6" fill="#FFFFFF" opacity="0.9"/>',
+
     /* 8. HashiCorp · Terraform Associate (003) */
     'terraform-003':
       '<defs>' +
@@ -288,6 +317,9 @@
     'nvidia': 'nvidia-genl',
     'k8s': 'k8s-kcna',
     'kubernetes': 'k8s-kcna',
+    'cka': 'k8s-cka',
+    'prometheus': 'prometheus-pca',
+    'pca': 'prometheus-pca',
     'terraform': 'terraform-003',
     'hashicorp': 'terraform-003',
     'sre': 'sre-incidents',
@@ -338,6 +370,8 @@
     'databricks-genai',
     'databricks-de',
     'nvidia-genl',
+    'k8s-cka',
+    'prometheus-pca',
     'k8s-kcna',
     'terraform-003',
     'sre-incidents',

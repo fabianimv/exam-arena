@@ -20,6 +20,8 @@
     'databricks-genai',
     'databricks-de',
     'nvidia-genl',
+    'k8s-cka',
+    'prometheus-pca',
     'k8s-kcna',
     'terraform-003',
     'sre-incidents',

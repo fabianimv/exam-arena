@@ -1,15 +1,15 @@
 # ⚡ Cloud & SRE Exam Arena
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-2ea44f?style=flat-square&logo=github)](https://fabianimv.github.io/exam-arena/)
-[![Tracks](https://img.shields.io/badge/Tracks-14%20Tracks-6366f1?style=flat-square)](#included-exam-tracks)
-[![Questions](https://img.shields.io/badge/Questions-952%20Scenarios-orange?style=flat-square)](#included-exam-tracks)
+[![Tracks](https://img.shields.io/badge/Tracks-16%20Tracks-6366f1?style=flat-square)](#included-exam-tracks)
+[![Questions](https://img.shields.io/badge/Questions-1032%20Scenarios-orange?style=flat-square)](#included-exam-tracks)
 [![Visuals](https://img.shields.io/badge/SVG%20Visuals-647%20Unique-blue?style=flat-square)](#included-exam-tracks)
 [![i18n](https://img.shields.io/badge/i18n-EN%20%7C%20ES-purple?style=flat-square)](#english-first-bilingual-localization-en--es)
 [![Cloud Sync](https://img.shields.io/badge/Cloud%20Sync-Supabase-3ECF8E?style=flat-square&logo=supabase)](#cloud-sync-setup-supabase-free-tier)
 [![Powered by study-tracker](https://img.shields.io/badge/Tracking-%40fabianimv%2Fstudy--tracker-blueviolet?style=flat-square)](https://github.com/fabianimv/study-tracker)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 
-> **Unified Multi-Provider Cloud, AI Engineering & SRE Incident Simulator** featuring 14 certification tracks, 952 production scenarios, 647 unique ad-hoc SVG diagrams, deep per-option diagnostic feedback, English-first bilingual support (`EN` default / `ES` toggle), and zero-conflict cross-device cloud synchronization powered by Supabase and [`@fabianimv/study-tracker`](https://github.com/fabianimv/study-tracker).
+> **Unified Multi-Provider Cloud, AI Engineering & SRE Incident Simulator** featuring 16 certification tracks, 1032 production scenarios, 647 unique ad-hoc SVG diagrams, deep per-option diagnostic feedback, English-first bilingual support (`EN` default / `ES` toggle), and zero-conflict cross-device cloud synchronization powered by Supabase and [`@fabianimv/study-tracker`](https://github.com/fabianimv/study-tracker).
 
 ---
 
@@ -31,11 +31,13 @@
 ## 🌟 Key Features
 
 ### 🎯 Multi-Provider Exam & SRE Incident Simulator
-Unifies **14** AI, Agentic Harness Engineering, Data, Cloud Native, IaC, streaming, and SRE certification tracks into a single, high-performance, zero-build web application — ordered from newest/featured to traditional:
+Unifies **16** AI, Agentic Harness Engineering, Data, Cloud Native, IaC, streaming, and SRE certification tracks into a single, high-performance, zero-build web application — ordered from newest/featured to traditional:
 - **Anthropic Claude Certifications** (`CCAR-F` Architect, `CCDV-F` Developer, `CCAO-F` Associate)
 - **AI Agent Harness Engineering** (`harness-engineering` — Execution loops, context engineering, tool sandboxing, mechanical backpressure & evals)
 - **Databricks** (Generative AI Engineer Associate & Data Engineer Associate)
 - **NVIDIA** (Generative AI LLMs `NCA-GENL`)
+- **CNCF Kubernetes Administrator** (`CKA` — etcd backup/restore, kubeadm upgrades, RBAC, Gateway API, NetworkPolicy, storage & troubleshooting)
+- **CNCF Prometheus Certified Associate** (`PCA` — PromQL, relabeling, instrumentation, exporters, Alertmanager & SLO burn-rate alerts)
 - **CNCF & HashiCorp** (Kubernetes `KCNA` & Terraform Associate `003`)
 - **SRE & Production Engineering Incidents** (Real on-call outage response scenarios)
 - **Apache Kafka & Confluent Platform** (CCDAK / Administration: KRaft, EOS, Schema Registry, Connect & Kafka Streams)
@@ -47,7 +49,14 @@ Unifies **14** AI, Agentic Harness Engineering, Data, Cloud Native, IaC, streami
 Built around **active recall** and deliberate practice principles. Standard simulators only tell you which option is correct; Exam Arena explains:
 - **Why your chosen option is incorrect:** Pinpoints why a distractor exacerbates an outage, violates cloud limits, causes data corruption, or fails the technical constraint.
 - **Why the correct answer is the optimal choice:** Concrete architectural justification, command flags, or operational procedures.
-- **Selective retries:** Review missed scenarios immediately or launch targeted sessions filtering for **unanswered questions** or **previously missed questions**.
+- **Selective retries:** Review missed scenarios immediately or launch targeted sessions filtering for **unanswered questions**, **previously missed questions** or **flagged questions**.
+
+### ⏱ Timed Exam Simulation & Smart Review
+- **Two quiz modes:** *Guided practice* (instant per-option feedback) or *Exam simulation* (90 s per question countdown, no feedback until the end, unanswered questions count as wrong — just like the real exam).
+- **Smart review ordering:** prioritizes questions you missed last time, then questions you have never seen, then the rest.
+- **Flag for review:** mark any question with the ☆ button or the <kbd>M</kbd> key; flags persist per exam in `localStorage` (`exam-arena-flags-v1`) and can be drilled with the *Only flagged questions* filter.
+- **Richer results:** total time, seconds per question, timeout notice and a per-domain score breakdown highlighting weak domains against the passing threshold.
+- **Hub search:** filter all certification cards instantly by title, provider, badge or domain.
 
 ### 🌐 English-First Bilingual Localization (`EN` / `ES`)
 Seamless internationalization powered by [`assets/js/i18n.js`](assets/js/i18n.js):
@@ -56,7 +65,7 @@ Seamless internationalization powered by [`assets/js/i18n.js`](assets/js/i18n.js
 - **Cached EN→ES translation engine:** Dynamic UI strings and question scenarios feature on-the-fly cached EN→ES translation stored under `exam-arena-tr-es-v1` in `localStorage`, ensuring zero latency after first retrieval and graceful offline fallbacks.
 
 ### 🎨 Bespoke Inline SVG Certification Logos & Ad-Hoc Architecture Diagrams
-- **Custom SVG certification logos ([`assets/js/cert-logos.js`](assets/js/cert-logos.js)):** Crisp, theme-aware inline vector marks for all 14 certification tracks rendered across the hub cards, exam header, and progress trackers.
+- **Custom SVG certification logos ([`assets/js/cert-logos.js`](assets/js/cert-logos.js)):** Crisp, theme-aware inline vector marks for all 16 certification tracks rendered across the hub cards, exam header, and progress trackers.
 - **647 Unique SVG visual aids (`assets/js/visuals-*.js`):** Tailored architecture diagrams, state machines, sequence flows, and telemetry charts embedded directly inside study topics and quiz scenarios.
 
 ### 🔄 Idempotent Cross-Device Cloud Sync (Supabase + `@fabianimv/study-tracker`)
@@ -68,7 +77,7 @@ Study seamlessly across desktop, tablet, and mobile browsers:
 ### ⌨️ Modern UI & Keyboard-First UX
 - **Theme toggle:** Sleek dark and light themes with high-contrast typography (`Inter` & `JetBrains Mono`).
 - **Dynamic provider accents:** Fluid visual transitions matching provider brands (Indigo Harness Engineering, Anthropic coral, Databricks red, NVIDIA green, SRE red, GCP blue, Azure sky, AWS orange).
-- **Full keyboard navigation:** Select answers with <kbd>A</kbd>–<kbd>F</kbd> or <kbd>1</kbd>–<kbd>6</kbd>, confirm with <kbd>Enter</kbd>, and advance with <kbd>Enter</kbd> / <kbd>→</kbd>.
+- **Full keyboard navigation:** Select answers with <kbd>A</kbd>–<kbd>F</kbd> or <kbd>1</kbd>–<kbd>6</kbd>, confirm with <kbd>Enter</kbd>, advance with <kbd>Enter</kbd> / <kbd>→</kbd>, and flag with <kbd>M</kbd>.
 - **Study guides & interactive glossaries:** Domain summaries with expandable topic accordions and real-time category filtering.
 
 ---
@@ -84,6 +93,8 @@ Study seamlessly across desktop, tablet, and mobile browsers:
 | 🧱 **Databricks · GenAI Engineer** *(Featured)* | `databricks-genai` | **50** | **42** | Mosaic AI Vector Search, RAG, Model Serving, AI Gateway, MLflow Evaluation & Unity Catalog. |
 | 🧱 **Databricks · Data Engineer** *(Featured)* | `databricks-de` | **50** | **43** | Lakehouse, Medallion Architecture, Delta Lake, Auto Loader, DLT, Workflows & Unity Catalog. |
 | 🟩 **NVIDIA · GenAI LLMs (NCA-GENL)** *(Featured)* | `nvidia-genl` | **45** | **38** | Transformers, FlashAttention, LoRA/QLoRA, NeMo, NIM, TensorRT-LLM & PagedAttention. |
+| ☸️ **CNCF · Kubernetes Administrator (CKA)** *(New)* | `k8s-cka` | **40** | — | etcd snapshot/restore, kubeadm upgrades & certs, RBAC, Helm & CRDs, scheduling, Gateway API, NetworkPolicy, storage & troubleshooting. |
+| 🔥 **CNCF · Prometheus Certified Associate (PCA)** *(New)* | `prometheus-pca` | **40** | — | SLIs/SLOs, pull model, relabeling, PromQL, histograms, exporters, Pushgateway, Alertmanager & burn-rate alerts. |
 | ☸️ **CNCF · Kubernetes (KCNA)** | `k8s-kcna` | **50** | **42** | Control Plane, Pods, Services, NetworkPolicy, Gateway API, Observability & GitOps. |
 | 🟪 **HashiCorp · Terraform (003)** | `terraform-003` | **50** | **42** | IaC, HCL, State & Locking, `moved`/`import`, `for_each` vs `count`, Modules & HCP Terraform. |
 | 🚨 **SRE & Production Engineering** | `sre-incidents` | **60** | **49** | Incident Command, K8s traffic, Kafka, Prometheus/Thanos, DRP, DNS, TLS & GitOps drift. |
@@ -91,7 +102,7 @@ Study seamlessly across desktop, tablet, and mobile browsers:
 | ☁️ **Google Cloud GenAI Leader** | `gcp-genai-leader` | **200** | **94** | LLM fundamentals, Vertex AI, Gemini, Model Garden, fine-tuning, RAG & AI governance. |
 | 🔷 **Microsoft Azure (AZ-104)** | `az-104` | **130** | **55** | Entra ID, governance, storage redundancy, ARM/Bicep, compute, VNets & Azure Monitor. |
 | 🟧 **AWS Solutions Architect (SAA-C03)** | `aws-saa-c03` | **44** | **36** | Well-Architected Framework: secure, resilient, high-performing & cost-optimized architectures. |
-| **Total Arena Scenarios** | — | **952** | **647** | **14 certification tracks with ad-hoc SVG diagrams & per-option rationales** |
+| **Total Arena Scenarios** | — | **1032** | **647** | **16 certification tracks with ad-hoc SVG diagrams & per-option rationales** |
 
 ---
 
@@ -125,7 +136,7 @@ You can sync your study history across devices for free using Supabase in under 
 2. Open [Exam Arena](https://fabianimv.github.io/exam-arena/) in your browser.
 3. Click the **☁️ Sync** button in the header.
 4. Enter your email, paste your Supabase URL and Anon Key, and click **Save & Sync Now** (or **Guardar y sincronizar ahora**).
-5. All 14 exam tracks will immediately sync bidirectionally!
+5. All 16 exam tracks will immediately sync bidirectionally!
 
 > [!TIP]
 > If you are hosting your own fork on GitHub Pages, you can also hardcode your URL and anon key into `DEFAULT_SUPABASE_URL` and `DEFAULT_SUPABASE_ANON_KEY` inside [`assets/js/cloud-sync.js`](assets/js/cloud-sync.js) so users only need to type their email to sync.
@@ -148,7 +159,7 @@ exam-arena/
 │   ├── screenshots/                     # Showcase screenshots (hub.png, quiz-visual.png)
 │   └── js/
 │       ├── app.js                       # Core router, test engine, active recall UI, and state
-│       ├── cert-logos.js                # Custom inline SVG logos for all 14 certification tracks
+│       ├── cert-logos.js                # Custom inline SVG logos for all 16 certification tracks
 │       ├── i18n.js                      # English-first bilingual dictionary & EN→ES cache (exam-arena-tr-es-v1)
 │       ├── cloud-sync.js                # Supabase REST client, modal UI, and localStorage synchronization
 │       └── visuals-*.js                 # 14 per-exam visual aid packs (647 unique SVG diagrams)
@@ -160,6 +171,8 @@ exam-arena/
 │   ├── databricks-genai/exam.js         # Databricks GenAI Engineer Associate · 50 scenarios
 │   ├── databricks-de/exam.js            # Databricks Data Engineer Associate · 50 scenarios
 │   ├── nvidia-genl/exam.js              # NVIDIA GenAI LLMs (NCA-GENL) · 45 scenarios
+│   ├── k8s-cka/exam.js                  # CNCF Kubernetes Administrator (CKA) · 40 scenarios
+│   ├── prometheus-pca/exam.js           # CNCF Prometheus Certified Associate (PCA) · 40 scenarios
 │   ├── k8s-kcna/exam.js                 # CNCF Kubernetes (KCNA) · 50 scenarios
 │   ├── terraform-003/exam.js            # HashiCorp Terraform Associate (003) · 50 scenarios
 │   ├── sre/exam.js                      # SRE Incident Simulator · 60 scenarios
