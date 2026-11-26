@@ -199,6 +199,17 @@
       '<rect x="10.2" y="21.6" width="11.6" height="1.9" rx="0.6" fill="#FFFFFF"/>' +
       '<rect x="11.4" y="24.6" width="9.2" height="1.9" rx="0.6" fill="#FFFFFF" opacity="0.9"/>',
 
+    /* 7d. MongoDB · Associate Developer */
+    'mongodb-dev':
+      '<defs>' +
+        '<linearGradient id="clogo-mdb-grad" x1="0%" y1="0%" x2="0%" y2="100%">' +
+          '<stop offset="0%" stop-color="#00ED64"/>' +
+          '<stop offset="100%" stop-color="#00684A"/>' +
+        '</linearGradient>' +
+      '</defs>' +
+      '<path d="M16 2.2 C19.8 6.6 23.6 11.2 23.6 17.2 C23.6 22.4 20.3 25.6 16.9 26.9 L16.6 29.8 L15.4 29.8 L15.1 26.9 C11.7 25.6 8.4 22.4 8.4 17.2 C8.4 11.2 12.2 6.6 16 2.2 Z" fill="url(#clogo-mdb-grad)"/>' +
+      '<path d="M16 5.4 L16 27.4" stroke="#E3FCF7" stroke-width="1.1" stroke-linecap="round" opacity="0.85"/>',
+
     /* 8. HashiCorp · Terraform Associate (003) */
     'terraform-003':
       '<defs>' +
@@ -320,6 +331,8 @@
     'cka': 'k8s-cka',
     'prometheus': 'prometheus-pca',
     'pca': 'prometheus-pca',
+    'mongodb': 'mongodb-dev',
+    'mongo': 'mongodb-dev',
     'terraform': 'terraform-003',
     'hashicorp': 'terraform-003',
     'sre': 'sre-incidents',
@@ -372,6 +385,7 @@
     'nvidia-genl',
     'k8s-cka',
     'prometheus-pca',
+    'mongodb-dev',
     'k8s-kcna',
     'terraform-003',
     'sre-incidents',
