@@ -22,6 +22,7 @@
     'nvidia-genl',
     'k8s-cka',
     'prometheus-pca',
+    'mongodb-atlas-admin',
     'mongodb-dev',
     'k8s-kcna',
     'terraform-003',

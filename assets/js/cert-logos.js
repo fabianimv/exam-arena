@@ -210,6 +210,18 @@
       '<path d="M16 2.2 C19.8 6.6 23.6 11.2 23.6 17.2 C23.6 22.4 20.3 25.6 16.9 26.9 L16.6 29.8 L15.4 29.8 L15.1 26.9 C11.7 25.6 8.4 22.4 8.4 17.2 C8.4 11.2 12.2 6.6 16 2.2 Z" fill="url(#clogo-mdb-grad)"/>' +
       '<path d="M16 5.4 L16 27.4" stroke="#E3FCF7" stroke-width="1.1" stroke-linecap="round" opacity="0.85"/>',
 
+    /* 7e. MongoDB · Atlas Administrator (hoja sobre nube) */
+    'mongodb-atlas-admin':
+      '<defs>' +
+        '<linearGradient id="clogo-atl-grad" x1="0%" y1="0%" x2="0%" y2="100%">' +
+          '<stop offset="0%" stop-color="#00ED64"/>' +
+          '<stop offset="100%" stop-color="#00684A"/>' +
+        '</linearGradient>' +
+      '</defs>' +
+      '<path d="M8.6 25.5 C4.9 25.5 2.4 23 2.4 19.9 C2.4 17 4.6 14.7 7.4 14.4 C8.3 10.6 11.6 7.9 15.6 7.9 C19.3 7.9 22.4 10.2 23.5 13.5 C27 13.7 29.6 16.4 29.6 19.7 C29.6 23 27 25.5 23.6 25.5 Z" fill="#E3FCF7" opacity="0.9"/>' +
+      '<path d="M16 3.4 C18.7 6.5 21.3 9.7 21.3 13.9 C21.3 17.6 19 19.8 16.6 20.7 L16.4 23.4 L15.6 23.4 L15.4 20.7 C13 19.8 10.7 17.6 10.7 13.9 C10.7 9.7 13.3 6.5 16 3.4 Z" fill="url(#clogo-atl-grad)"/>' +
+      '<path d="M16 5.8 L16 21.6" stroke="#E3FCF7" stroke-width="0.9" stroke-linecap="round" opacity="0.85"/>',
+
     /* 8. HashiCorp · Terraform Associate (003) */
     'terraform-003':
       '<defs>' +
@@ -331,8 +343,9 @@
     'cka': 'k8s-cka',
     'prometheus': 'prometheus-pca',
     'pca': 'prometheus-pca',
-    'mongodb': 'mongodb-dev',
-    'mongo': 'mongodb-dev',
+    'mongodb': 'mongodb-atlas-admin',
+    'mongo': 'mongodb-atlas-admin',
+    'atlas': 'mongodb-atlas-admin',
     'terraform': 'terraform-003',
     'hashicorp': 'terraform-003',
     'sre': 'sre-incidents',
@@ -385,6 +398,7 @@
     'nvidia-genl',
     'k8s-cka',
     'prometheus-pca',
+    'mongodb-atlas-admin',
     'mongodb-dev',
     'k8s-kcna',
     'terraform-003',

@@ -1,15 +1,15 @@
 # ⚡ Cloud & SRE Exam Arena
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-2ea44f?style=flat-square&logo=github)](https://fabianimv.github.io/exam-arena/)
-[![Tracks](https://img.shields.io/badge/Tracks-17%20Tracks-6366f1?style=flat-square)](#included-exam-tracks)
-[![Questions](https://img.shields.io/badge/Questions-1072%20Scenarios-orange?style=flat-square)](#included-exam-tracks)
+[![Tracks](https://img.shields.io/badge/Tracks-18%20Tracks-6366f1?style=flat-square)](#included-exam-tracks)
+[![Questions](https://img.shields.io/badge/Questions-1122%20Scenarios-orange?style=flat-square)](#included-exam-tracks)
 [![Visuals](https://img.shields.io/badge/SVG%20Visuals-647%20Unique-blue?style=flat-square)](#included-exam-tracks)
 [![i18n](https://img.shields.io/badge/i18n-EN%20%7C%20ES-purple?style=flat-square)](#english-first-bilingual-localization-en--es)
 [![Cloud Sync](https://img.shields.io/badge/Cloud%20Sync-Supabase-3ECF8E?style=flat-square&logo=supabase)](#cloud-sync-setup-supabase-free-tier)
 [![Powered by study-tracker](https://img.shields.io/badge/Tracking-%40fabianimv%2Fstudy--tracker-blueviolet?style=flat-square)](https://github.com/fabianimv/study-tracker)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 
-> **Unified Multi-Provider Cloud, AI Engineering & SRE Incident Simulator** featuring 17 certification tracks, 1072 production scenarios, 647 unique ad-hoc SVG diagrams, deep per-option diagnostic feedback, English-first bilingual support (`EN` default / `ES` toggle), and zero-conflict cross-device cloud synchronization powered by Supabase and [`@fabianimv/study-tracker`](https://github.com/fabianimv/study-tracker).
+> **Unified Multi-Provider Cloud, AI Engineering & SRE Incident Simulator** featuring 18 certification tracks, 1122 production scenarios, 647 unique ad-hoc SVG diagrams, deep per-option diagnostic feedback, English-first bilingual support (`EN` default / `ES` toggle), and zero-conflict cross-device cloud synchronization powered by Supabase and [`@fabianimv/study-tracker`](https://github.com/fabianimv/study-tracker).
 
 ---
 
@@ -31,13 +31,14 @@
 ## 🌟 Key Features
 
 ### 🎯 Multi-Provider Exam & SRE Incident Simulator
-Unifies **17** AI, Agentic Harness Engineering, Data, Cloud Native, IaC, streaming, and SRE certification tracks into a single, high-performance, zero-build web application — ordered from newest/featured to traditional:
+Unifies **18** AI, Agentic Harness Engineering, Data, Cloud Native, IaC, streaming, and SRE certification tracks into a single, high-performance, zero-build web application — ordered from newest/featured to traditional:
 - **Anthropic Claude Certifications** (`CCAR-F` Architect, `CCDV-F` Developer, `CCAO-F` Associate)
 - **AI Agent Harness Engineering** (`harness-engineering` — Execution loops, context engineering, tool sandboxing, mechanical backpressure & evals)
 - **Databricks** (Generative AI Engineer Associate & Data Engineer Associate)
 - **NVIDIA** (Generative AI LLMs `NCA-GENL`)
 - **CNCF Kubernetes Administrator** (`CKA` — etcd backup/restore, kubeadm upgrades, RBAC, Gateway API, NetworkPolicy, storage & troubleshooting)
 - **CNCF Prometheus Certified Associate** (`PCA` — PromQL, relabeling, instrumentation, exporters, Alertmanager & SLO burn-rate alerts)
+- **MongoDB Atlas Administrator** (`mongodb-atlas-admin` — domains and weights from the official 2026 exam guide: core operations, cluster reliability & backups, indexing, sharding, performance monitoring, security & networking)
 - **MongoDB Associate Developer** (`mongodb-dev` — document model, CRUD & update operators, ESR indexing, schema patterns, aggregation, drivers & write concerns)
 - **CNCF & HashiCorp** (Kubernetes `KCNA` & Terraform Associate `003`)
 - **SRE & Production Engineering Incidents** (Real on-call outage response scenarios)
@@ -66,7 +67,7 @@ Seamless internationalization powered by [`assets/js/i18n.js`](assets/js/i18n.js
 - **Cached EN→ES translation engine:** Dynamic UI strings and question scenarios feature on-the-fly cached EN→ES translation stored under `exam-arena-tr-es-v1` in `localStorage`, ensuring zero latency after first retrieval and graceful offline fallbacks.
 
 ### 🎨 Bespoke Inline SVG Certification Logos & Ad-Hoc Architecture Diagrams
-- **Custom SVG certification logos ([`assets/js/cert-logos.js`](assets/js/cert-logos.js)):** Crisp, theme-aware inline vector marks for all 17 certification tracks rendered across the hub cards, exam header, and progress trackers.
+- **Custom SVG certification logos ([`assets/js/cert-logos.js`](assets/js/cert-logos.js)):** Crisp, theme-aware inline vector marks for all 18 certification tracks rendered across the hub cards, exam header, and progress trackers.
 - **647 Unique SVG visual aids (`assets/js/visuals-*.js`):** Tailored architecture diagrams, state machines, sequence flows, and telemetry charts embedded directly inside study topics and quiz scenarios.
 
 ### 🔄 Idempotent Cross-Device Cloud Sync (Supabase + `@fabianimv/study-tracker`)
@@ -96,6 +97,7 @@ Study seamlessly across desktop, tablet, and mobile browsers:
 | 🟩 **NVIDIA · GenAI LLMs (NCA-GENL)** *(Featured)* | `nvidia-genl` | **45** | **38** | Transformers, FlashAttention, LoRA/QLoRA, NeMo, NIM, TensorRT-LLM & PagedAttention. |
 | ☸️ **CNCF · Kubernetes Administrator (CKA)** *(New)* | `k8s-cka` | **40** | — | etcd snapshot/restore, kubeadm upgrades & certs, RBAC, Helm & CRDs, scheduling, Gateway API, NetworkPolicy, storage & troubleshooting. |
 | 🔥 **CNCF · Prometheus Certified Associate (PCA)** *(New)* | `prometheus-pca` | **40** | — | SLIs/SLOs, pull model, relabeling, PromQL, histograms, exporters, Pushgateway, Alertmanager & burn-rate alerts. |
+| 🍃 **MongoDB · Atlas Administrator** *(New)* | `mongodb-atlas-admin` | **50** | — | Official 2026 domains: replica sets & multi-region HA, PITR & Backup Compliance Policy, failover & replication lag, ESR indexing, shard keys, Performance Advisor & Query Profiler, alerts, IP Access List, Private Endpoints, KMS & RBAC. Includes multiple-response questions. |
 | 🍃 **MongoDB · Associate Developer** *(New)* | `mongodb-dev` | **40** | — | BSON & schema validation, CRUD & array updates, ESR compound indexes, TTL/partial indexes, subset & time series patterns, aggregation, transactions & write concern. |
 | ☸️ **CNCF · Kubernetes (KCNA)** | `k8s-kcna` | **50** | **42** | Control Plane, Pods, Services, NetworkPolicy, Gateway API, Observability & GitOps. |
 | 🟪 **HashiCorp · Terraform (003)** | `terraform-003` | **50** | **42** | IaC, HCL, State & Locking, `moved`/`import`, `for_each` vs `count`, Modules & HCP Terraform. |
@@ -104,7 +106,7 @@ Study seamlessly across desktop, tablet, and mobile browsers:
 | ☁️ **Google Cloud GenAI Leader** | `gcp-genai-leader` | **200** | **94** | LLM fundamentals, Vertex AI, Gemini, Model Garden, fine-tuning, RAG & AI governance. |
 | 🔷 **Microsoft Azure (AZ-104)** | `az-104` | **130** | **55** | Entra ID, governance, storage redundancy, ARM/Bicep, compute, VNets & Azure Monitor. |
 | 🟧 **AWS Solutions Architect (SAA-C03)** | `aws-saa-c03` | **44** | **36** | Well-Architected Framework: secure, resilient, high-performing & cost-optimized architectures. |
-| **Total Arena Scenarios** | — | **1072** | **647** | **17 certification tracks with ad-hoc SVG diagrams & per-option rationales** |
+| **Total Arena Scenarios** | — | **1122** | **647** | **18 certification tracks with ad-hoc SVG diagrams & per-option rationales** |
 
 ---
 
@@ -138,7 +140,7 @@ You can sync your study history across devices for free using Supabase in under 
 2. Open [Exam Arena](https://fabianimv.github.io/exam-arena/) in your browser.
 3. Click the **☁️ Sync** button in the header.
 4. Enter your email, paste your Supabase URL and Anon Key, and click **Save & Sync Now** (or **Guardar y sincronizar ahora**).
-5. All 17 exam tracks will immediately sync bidirectionally!
+5. All 18 exam tracks will immediately sync bidirectionally!
 
 > [!TIP]
 > If you are hosting your own fork on GitHub Pages, you can also hardcode your URL and anon key into `DEFAULT_SUPABASE_URL` and `DEFAULT_SUPABASE_ANON_KEY` inside [`assets/js/cloud-sync.js`](assets/js/cloud-sync.js) so users only need to type their email to sync.
@@ -161,7 +163,7 @@ exam-arena/
 │   ├── screenshots/                     # Showcase screenshots (hub.png, quiz-visual.png)
 │   └── js/
 │       ├── app.js                       # Core router, test engine, active recall UI, and state
-│       ├── cert-logos.js                # Custom inline SVG logos for all 17 certification tracks
+│       ├── cert-logos.js                # Custom inline SVG logos for all 18 certification tracks
 │       ├── i18n.js                      # English-first bilingual dictionary & EN→ES cache (exam-arena-tr-es-v1)
 │       ├── cloud-sync.js                # Supabase REST client, modal UI, and localStorage synchronization
 │       └── visuals-*.js                 # 14 per-exam visual aid packs (647 unique SVG diagrams)
@@ -175,6 +177,7 @@ exam-arena/
 │   ├── nvidia-genl/exam.js              # NVIDIA GenAI LLMs (NCA-GENL) · 45 scenarios
 │   ├── k8s-cka/exam.js                  # CNCF Kubernetes Administrator (CKA) · 40 scenarios
 │   ├── prometheus-pca/exam.js           # CNCF Prometheus Certified Associate (PCA) · 40 scenarios
+│   ├── mongodb-atlas-admin/exam.js      # MongoDB Atlas Administrator · 50 scenarios
 │   ├── mongodb-dev/exam.js              # MongoDB Associate Developer · 40 scenarios
 │   ├── k8s-kcna/exam.js                 # CNCF Kubernetes (KCNA) · 50 scenarios
 │   ├── terraform-003/exam.js            # HashiCorp Terraform Associate (003) · 50 scenarios

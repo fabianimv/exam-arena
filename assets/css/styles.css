@@ -133,21 +133,27 @@ body[data-provider="prometheus-pca"],
   --accent-grad: linear-gradient(135deg, #e6522c 0%, #b4361a 100%);
 }
 body[data-provider="mongodb-dev"],
-.hub-card[data-provider="mongodb-dev"] {
+.hub-card[data-provider="mongodb-dev"],
+body[data-provider="mongodb-atlas-admin"],
+.hub-card[data-provider="mongodb-atlas-admin"] {
   --blue: #00684a;
   --accent: #00684a;
   --accent-soft: rgba(0, 104, 74, 0.18);
   --accent-grad: linear-gradient(135deg, #00a35c 0%, #00684a 100%);
 }
 :root[data-theme="dark"] body[data-provider="mongodb-dev"],
-:root[data-theme="dark"] .hub-card[data-provider="mongodb-dev"] {
+:root[data-theme="dark"] .hub-card[data-provider="mongodb-dev"],
+:root[data-theme="dark"] body[data-provider="mongodb-atlas-admin"],
+:root[data-theme="dark"] .hub-card[data-provider="mongodb-atlas-admin"] {
   --blue: #00ed64;
   --accent: #00ed64;
   --accent-soft: rgba(0, 237, 100, 0.16);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) body[data-provider="mongodb-dev"],
-  :root:not([data-theme="light"]) .hub-card[data-provider="mongodb-dev"] {
+  :root:not([data-theme="light"]) .hub-card[data-provider="mongodb-dev"],
+  :root:not([data-theme="light"]) body[data-provider="mongodb-atlas-admin"],
+  :root:not([data-theme="light"]) .hub-card[data-provider="mongodb-atlas-admin"] {
     --blue: #00ed64;
     --accent: #00ed64;
     --accent-soft: rgba(0, 237, 100, 0.16);
@@ -1205,6 +1211,8 @@ input[type=search] {
   display: flex;
   gap: 0.85rem;
   align-items: flex-start;
+  /* La regla genérica de button centra el contenido; las opciones van a la izquierda. */
+  justify-content: flex-start;
   text-align: left;
   padding: 0.95rem 1.15rem;
   border-radius: 12px;
