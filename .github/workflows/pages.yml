@@ -15,10 +15,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  # Job 1: empaqueta el sitio estático y sube el artefacto "github-pages".
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,5 +27,17 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .
+
+  # Job 2: despliega el artefacto. Va en un job separado (patrón de la plantilla
+  # oficial) porque deploy-pages en el mismo job que la subida a veces consulta
+  # la API antes de que el artefacto sea visible y falla con
+  # "No artifacts named github-pages were found" (actions/deploy-pages#451).
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - id: deployment
         uses: actions/deploy-pages@v4
