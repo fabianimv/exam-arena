@@ -16,6 +16,7 @@
     'nvidia-genl',
     'k8s-cka',
     'prometheus-pca',
+    'mongodb-dev',
     'k8s-kcna',
     'terraform-003',
     'sre-incidents',
@@ -228,13 +229,6 @@
       toggleBtn.onclick = toggleTheme;
     }
   }
-
-  d.addEventListener('click', function (e) {
-    var btn = e.target && e.target.closest && e.target.closest('#theme-toggle');
-    if (btn) {
-      toggleTheme();
-    }
-  });
 
   // Instancias de StudyTracker cacheadas por appId
   var trackers = {};
@@ -1330,10 +1324,13 @@
   };
 
   function navigate(examId, tab) {
-    if (tab === 'examenes') {
-      location.hash = 'examenes';
+    var target = tab === 'examenes' ? 'examenes' : (examId || currentExamId) + '/' + (tab || 'prueba');
+    // Si el hash no cambia (p. ej. clic en «Prueba» desde la pantalla de resultados),
+    // no se dispara hashchange: re-renderizamos la vista manualmente.
+    if ((location.hash || '').replace(/^#/, '') === target) {
+      syncFromHash();
     } else {
-      location.hash = (examId || currentExamId) + '/' + (tab || 'prueba');
+      location.hash = target;
     }
   }
 
