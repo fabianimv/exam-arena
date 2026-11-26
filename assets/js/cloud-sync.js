@@ -22,6 +22,7 @@
     'nvidia-genl',
     'k8s-cka',
     'prometheus-pca',
+    'mongodb-dev',
     'k8s-kcna',
     'terraform-003',
     'sre-incidents',
